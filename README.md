@@ -32,8 +32,8 @@ Season <year-year> vX.Y.Z during season
 - `Z` (Patch): Bug fixes or small improvements
 
 **Example Commit:**
-Summer 2025 v1.2.0 - Added AprilTag-based autonomous navigation
-Season 25-26 v2.2.4 - Added Vision Detection and finalized autonomous
+Summer 2025 v1.2.0 - Add AprilTag-based autonomous navigation
+Season 25-26 v2.2.4 - Add Vision Detection and finalized autonomous
 
 ---
 
@@ -75,6 +75,6 @@ Season 25-26 v2.2.4 - Added Vision Detection and finalized autonomous
 
 ---
 
-Thank you for checking out our repository! We’re excited for an innovative and competitive 2025–2026 FTC season. ⚙️🔥
+Thank you for checking out our repository! We’re excited for an innovative and competitive 2025–26 FTC season. ⚙️🔥
 
 Feel free to fork or explore to learn more about how METAL MAGIC codes the future of robotics!
