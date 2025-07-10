@@ -18,19 +18,19 @@ public class LConstants {
         PinpointConstants.encoderResolution = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD;
         PinpointConstants.customEncoderResolution = 13.26291192;
         PinpointConstants.forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
-        PinpointConstants.strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        PinpointConstants.strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
-        DriveEncoderConstants.forwardTicksToInches = 1;
-        DriveEncoderConstants.strafeTicksToInches = 1;
-        DriveEncoderConstants.turnTicksToInches = 1;
+        DriveEncoderConstants.forwardTicksToInches = 2400;
+        DriveEncoderConstants.strafeTicksToInches = 1120;
+        DriveEncoderConstants.turnTicksToInches = 1000;
 
-        DriveEncoderConstants.robot_Width = 1;
-        DriveEncoderConstants.robot_Length = 1;
+        DriveEncoderConstants.robot_Width = 16.5;
+        DriveEncoderConstants.robot_Length = 14;
 
-        DriveEncoderConstants.leftFrontEncoderDirection = Encoder.REVERSE;
-        DriveEncoderConstants.rightFrontEncoderDirection = Encoder.FORWARD;
-        DriveEncoderConstants.leftRearEncoderDirection = Encoder.REVERSE;
-        DriveEncoderConstants.rightRearEncoderDirection = Encoder.FORWARD;
+        DriveEncoderConstants.leftFrontEncoderDirection = Encoder.FORWARD;
+        DriveEncoderConstants.rightFrontEncoderDirection = Encoder.REVERSE;
+        DriveEncoderConstants.leftRearEncoderDirection = Encoder.FORWARD;
+        DriveEncoderConstants.rightRearEncoderDirection = Encoder.REVERSE;
 
     }
 }
