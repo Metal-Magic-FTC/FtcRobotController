@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.metalmagic25summer.utility.vision;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -8,6 +10,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 //Thresholding is checking if the pixels in the camera frame are in a certain color range.
 //If not, they are colored black, and if they are, they are colored white.
+@Disabled
 public class BlueCV extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {

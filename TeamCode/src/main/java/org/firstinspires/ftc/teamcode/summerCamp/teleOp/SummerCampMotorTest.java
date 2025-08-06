@@ -22,6 +22,8 @@ public class SummerCampMotorTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
+
+
         initialize(); // initializing everything
 
         waitForStart(); // waiting until driver clicks play button

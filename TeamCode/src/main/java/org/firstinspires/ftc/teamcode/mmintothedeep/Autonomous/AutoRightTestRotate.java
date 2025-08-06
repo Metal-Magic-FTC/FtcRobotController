@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.mmintothedeep.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPin
 import java.util.Locale;
 
 @Autonomous(name="!Rotate Right V3", group="Pinpoint")
-//@Disabled
+@Disabled
 
 public class AutoRightTestRotate extends LinearOpMode {
 

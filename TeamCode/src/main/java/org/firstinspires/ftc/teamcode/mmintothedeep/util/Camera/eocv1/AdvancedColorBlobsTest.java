@@ -62,7 +62,7 @@ import java.util.List;
 
 // @Disabled
 @Autonomous
-//@Disabled
+@Disabled
 public class AdvancedColorBlobsTest extends LinearOpMode
 {
     @Override

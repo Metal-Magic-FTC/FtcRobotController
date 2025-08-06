@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.mmintothedeep.Autonomous;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -34,7 +35,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 @Autonomous(name="!!AutoLeftV5Density")
-//@Disabled
+@Disabled
 
 public class AutoLeftV5 extends LinearOpMode {
 

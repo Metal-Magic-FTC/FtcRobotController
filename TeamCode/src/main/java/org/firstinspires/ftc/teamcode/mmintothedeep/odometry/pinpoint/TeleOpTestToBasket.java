@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -32,6 +33,7 @@ import java.util.Locale;
  * Try to go to the basket in teleop using odo
  */
 
+@Disabled
 public class TeleOpTestToBasket extends LinearOpMode {
 
     DcMotor leftFrontDrive;

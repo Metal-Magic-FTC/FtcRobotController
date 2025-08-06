@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.metalmagic24summer.ComputerVision;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -51,6 +52,7 @@ import java.util.Date;
  */
 
 @TeleOp(name = "Telemetry Update")
+@Disabled
 public class TelemetryUpdate extends OpMode {
 
     public DcMotor motorFrontLeft = null;

@@ -22,6 +22,7 @@
 
 package org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.competition;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -61,7 +62,7 @@ For support, contact tech@gobilda.com
  */
 
 @TeleOp(name="!CompetitionOdoTeleOp", group="Pinpoint")
-//@Disabled
+@Disabled
 
 public class CompetitionOdoTeleOp extends LinearOpMode {
 

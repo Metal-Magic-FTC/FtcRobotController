@@ -67,6 +67,7 @@ import java.util.concurrent.TimeUnit;
 // @Disabled
 @Autonomous
 //@Disabled
+@Disabled
 public class WorldsCVTest extends LinearOpMode
 {
     private VisionPortal visionPortal = null;        // Used to manage the video source.

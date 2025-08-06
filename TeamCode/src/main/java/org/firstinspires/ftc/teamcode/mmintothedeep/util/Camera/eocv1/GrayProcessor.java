@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode.mmintothedeep.util.Camera.eocv1;
 
 import android.graphics.Canvas;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+@Disabled
 public class GrayProcessor implements VisionProcessor {
 
     @Override

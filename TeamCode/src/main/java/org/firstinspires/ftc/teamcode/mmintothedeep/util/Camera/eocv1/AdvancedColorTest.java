@@ -59,7 +59,7 @@ import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 // @Disabled
 @Autonomous
-//@Disabled
+@Disabled
 public class AdvancedColorTest extends LinearOpMode
 {
     @Override

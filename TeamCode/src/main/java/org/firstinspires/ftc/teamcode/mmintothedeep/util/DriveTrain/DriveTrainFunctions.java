@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.mmintothedeep.util.DriveTrain;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -7,6 +8,7 @@ import java.lang.Math;
 
 import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
+@Disabled
 public class DriveTrainFunctions {
     /* Declare all motors as null */
     private DcMotor leftFrontDrive = null;

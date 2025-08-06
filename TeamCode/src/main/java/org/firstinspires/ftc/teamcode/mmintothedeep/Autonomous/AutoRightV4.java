@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.mmintothedeep.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPin
 import java.util.Locale;
 
 @Autonomous(name="!!!STATES - AUTO RIGHT 44444444+0+PARK using claw")
-//@Disabled
+@Disabled
 
 public class AutoRightV4 extends LinearOpMode {
 

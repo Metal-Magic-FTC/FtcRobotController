@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.competition;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -44,6 +45,7 @@ import java.util.Date;
  */
 
 @TeleOp(name = "testingMotorDirections")
+@Disabled
 public class motorDirections extends OpMode {
 
     public DcMotor motorFrontLeft = null;
