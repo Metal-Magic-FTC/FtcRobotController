@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
-@TeleOp(name="Run this - This is your TeleOp Mode")
-public class SummerCampTeleOp extends LinearOpMode {
+@TeleOp(name="MotorTest")
+public class SummerCampMotorTest extends LinearOpMode {
 
     DcMotor leftFrontDrive = null;
     DcMotor rightFrontDrive = null;
@@ -28,48 +28,12 @@ public class SummerCampTeleOp extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            /*
-             * ===============
-             * YOUR CODE BELOW
-             * ===============
-             */
+            double moveCoefficient = gamepad1.right_trigger;
 
-            /*
-             * Hints:
-             * 1. set the x y and rx (rotation) based on the gamepad input
-             */
-
-            // you will need to change the 0s. they are placeholders.
-            double x = 0;
-            double y = 0; // hint, the y stick on the controller is reversed.
-            double rx = 0;
-
-            // Denominator is the largest motor power (abs value) or 1. It makes sure no more than 1 power is delivered.
-            // This makes sure that the ratio stays the same
-            // but only when at least one is out of range [-1, 1]
-            // the maximum (Math.max(value1, value2)) of either:
-            //      1. the sum of the absolute values (Math.abs(value)) of x, y, and rx
-            //      2. 1
-            // thix sets the denominator to the highest value if it is the sum or if it 1
-            double denominator = 0;
-            /*
-             * frontLeftPower should be the sum of y, x, and rx all divided by denominator
-             * backLeftPower should be y minus x plus rx all divided by denominator
-             * frontRightPower should be y minus x minus rx all divided by denominator
-             * backRightPower should be y plus x minus rx all divided by denominator
-             */
-            double frontLeftPower = 0;
-            double backLeftPower = 0;
-            double frontRightPower = 0;
-            double backRightPower = 0;
-
-            // set power to each of the motors now
-
-            /*
-             * ===============
-             * YOUR CODE ENDS
-             * ===============
-             */
+            rightFrontDrive.setPower(moveCoefficient);
+            leftFrontDrive.setPower(moveCoefficient);
+            rightBackDrive.setPower(moveCoefficient);
+            leftBackDrive.setPower(moveCoefficient);
 
         }
 
