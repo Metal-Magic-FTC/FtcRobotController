@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
-@Autonomous(name="TEAM 1 - Autonomous run this")
-public class SummerCampAutonomous extends LinearOpMode {
+@Autonomous(name="TEAM 2 - Autonomous run this")
+public class SummerCampAutonomous2 extends LinearOpMode {
 
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;

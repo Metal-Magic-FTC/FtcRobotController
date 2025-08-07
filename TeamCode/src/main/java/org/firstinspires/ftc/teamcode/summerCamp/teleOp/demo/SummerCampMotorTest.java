@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode.summerCamp.teleOp;
+package org.firstinspires.ftc.teamcode.summerCamp.teleOp.demo;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 

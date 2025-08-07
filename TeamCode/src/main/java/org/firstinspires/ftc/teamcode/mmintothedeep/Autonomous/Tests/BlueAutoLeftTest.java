@@ -91,8 +91,8 @@ public class BlueAutoLeftTest extends LinearOpMode {
         //sleep lines are to avoid two lines of codes running at the same time
 //        pivotServo.setPosition(0.6);
 //        gripperServo1.setPosition(0);
-//        moveStraightLine(12); //33
-//        strafe(20);
+        moveStraightLine(12); //33
+        strafe(20);
 //        linearSlideMovement(800, false);
 //        strafeDiagonalRight(30);
 //        moveStraightLine(2.5);
