@@ -31,17 +31,21 @@ public class ServoTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            double clawServoPosition = gamepad1.right_trigger;
+            if (gamepad1.a) {
+                clawServo.setPosition(clawServo.getPosition() + 0.05);
+            }
 
-            clawServo.setPosition(clawServoPosition);
+            if (gamepad1.b) {
+                clawServo.setPosition(clawServo.getPosition() - 0.05);
+            }
 
-            double pivotServoPosition = gamepad1.left_trigger;
+            if (gamepad1.dpad_up) {
+                pivotServo.setPosition(pivotServo.getPosition() + 0.05);
+            }
 
-            clawServo.setPosition(pivotServoPosition);
-
-            telemetry.addData("Claw", clawServo.getPosition());
-            telemetry.addData("Pivot", pivotServo.getPosition());
-            telemetry.update();
+            if (gamepad1.dpad_down) {
+                clawServo.setPosition(clawServo.getPosition() - 0.05);
+            }
 
         }
 

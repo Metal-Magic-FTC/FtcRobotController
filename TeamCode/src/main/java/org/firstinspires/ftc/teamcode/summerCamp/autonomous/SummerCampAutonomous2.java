@@ -42,9 +42,75 @@ public class SummerCampAutonomous2 extends LinearOpMode {
          */
 
         //drive code...
-        moveStraightLine(12.5);
-        strafe(-5);
-        rotate(90);
+        moveStraightLine(40);
+        clawOpen();
+        clawDown();
+        clawClose();
+        clawUp();
+        strafe(50);
+        clawDown();
+        clawOpen();
+        clawUp();
+        moveStraightLine(-40);
+        strafe(-50);
+
+
+        strafe(24);
+        moveStraightLine(38);
+        strafe(-24);
+        clawOpen();
+        clawDown();
+        clawClose();
+        clawUp();
+        strafe(50);
+        clawDown();
+        clawOpen();
+        clawUp();
+        rotate(45);
+        moveStraightLine(-57);
+        rotate(-45);
+
+
+        rotate(855);
+        moveStraightLine(10);
+        moveStraightLine(-5);
+        moveStraightLine(10);
+        moveStraightLine(-5);
+        moveStraightLine(10);
+        moveStraightLine(-5);
+        moveStraightLine(35);
+        clawOpen();
+        clawDown();
+        clawClose();
+        clawUp();
+        strafe(50);
+        clawDown();
+        clawOpen();
+        clawUp();
+        clawClose();
+        rotate(-45);
+        moveStraightLine(-48);
+        rotate(45);
+
+
+
+        moveStraightLine(50);
+        clawOpen();
+        clawDown();
+        clawClose();
+        clawUp();
+        strafe(50);
+        clawDown();
+        clawOpen();
+        clawUp();
+        rotate(360);
+        strafe(-50);
+        moveStraightLine(-50);
+        rotate(360);
+        clawOpen();
+        clawClose();
+        clawUp();
+        clawDown();
 
     }
 
@@ -75,7 +141,7 @@ public class SummerCampAutonomous2 extends LinearOpMode {
         int LFdrivetarget = (int) (leftFrontRevs * MOTOR_TICK_COUNTS) + leftFrontDrive.getCurrentPosition();
         int LBdrivetarget = (int) (leftBackRevs * MOTOR_TICK_COUNTS) + leftBackDrive.getCurrentPosition();
         int RFdrivetarget = (int) (rightFrontRevs * MOTOR_TICK_COUNTS) + rightFrontDrive.getCurrentPosition();
-        int RBdrivetarget = (int) (rightBackRevs * MOTOR_TICK_COUNTS) +  rightBackDrive.getCurrentPosition();
+        int RBdrivetarget = (int) (rightBackRevs * MOTOR_TICK_COUNTS) + rightBackDrive.getCurrentPosition();
 
         leftFrontDrive.setTargetPosition(LFdrivetarget);
         leftBackDrive.setTargetPosition(LBdrivetarget);
@@ -87,34 +153,31 @@ public class SummerCampAutonomous2 extends LinearOpMode {
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
         leftFrontDrive.setPower(speed);
         leftBackDrive.setPower(speed);
         rightFrontDrive.setPower(speed);
         rightBackDrive.setPower(speed);
+        //
+        // while (leftFrontDrive.isBusy() || leftBackDrive.isBusy() ||
+        // rightFrontDrive.isBusy() || rightBackDrive.isBusy()) {
+        //
+        // }
 
-        while (leftFrontDrive.isBusy() || leftBackDrive.isBusy() || rightFrontDrive.isBusy() || rightBackDrive.isBusy()) {
-            telemetry.addLine("Current Position of the Motors")
-                    .addData("Left Front  ", "%d", leftFrontDrive.getCurrentPosition())
-                    .addData("Left Back ", "%d", leftBackDrive.getCurrentPosition())
-                    .addData("Right Front ", "%d", rightFrontDrive.getCurrentPosition())
-                    .addData("Right Back ", "%df", rightBackDrive.getCurrentPosition());
+        while (tolerance(leftFrontDrive) || tolerance(leftBackDrive) || tolerance(rightFrontDrive)
+                || tolerance(rightBackDrive)) {
 
-            telemetry.addLine("Target Positions of the Motors")
-                    .addData("Left Front  ", "%d", LFdrivetarget)
-                    .addData("Left Back ", "%d", LBdrivetarget)
-                    .addData("Right Front ", "%d", RFdrivetarget)
-                    .addData("Right Back ", "%df", RBdrivetarget);
-
-            telemetry.update();
         }
+
         leftFrontDrive.setPower(0);
         leftBackDrive.setPower(0);
         rightFrontDrive.setPower(0);
         rightBackDrive.setPower(0);
 
+        sleep(20);
+    }
 
-        sleep(250);
+    public boolean tolerance(DcMotor motor) {
+        return Math.abs(motor.getCurrentPosition() - motor.getTargetPosition()) > 10;
     }
 
     private void moveStraightLine(double movementInInches) {
@@ -166,6 +229,22 @@ public class SummerCampAutonomous2 extends LinearOpMode {
                     1.0 * movementOfWheelsInRevs,
                     1.0 * movementOfWheelsInRevs);
         }
+    }
+    public void clawDown() {
+        pivotServo.setPosition(.63);
+        sleep(1000);
+    }
+    public void clawUp() {
+        pivotServo.setPosition(1);
+        sleep(1000);
+    }
+    public void clawOpen() {
+        clawServo.setPosition(1);
+        sleep(1000);
+    }
+    public void clawClose() {
+        clawServo.setPosition(.8);
+        sleep(1000);
     }
 
 }

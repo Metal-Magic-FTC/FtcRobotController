@@ -938,8 +938,7 @@ public class AutoLeftPark extends LinearOpMode {
         drive(speed, moveInRevs, moveInRevs, moveInRevs, moveInRevs);
     }
 
-    public void drive(double speed, double leftFrontRevs, double leftBackRevs, double rightFrontRevs,
-                      double rightBackRevs) {
+    public void drive(double speed, double leftFrontRevs, double leftBackRevs, double rightFrontRevs, double rightBackRevs) {
 
         int LFdrivetarget = (int) (leftFrontRevs * MOTOR_TICK_COUNTS) + leftFrontDrive.getCurrentPosition();
         int LBdrivetarget = (int) (leftBackRevs * MOTOR_TICK_COUNTS) + leftBackDrive.getCurrentPosition();

@@ -45,9 +45,9 @@ public class SummerCampTeleOp extends LinearOpMode {
              */
 
             // you will need to change the 0s. they are placeholders.
-            double x = 0;
-            double y = 0; // hint, the y stick on the controller is reversed.
-            double rx = 0;
+            double x = gamepad1.left_stick_x;
+            double y = -gamepad1.left_stick_y; // hint, the y stick on the controller is reversed.
+            double rx = gamepad1.right_stick_x;
 
             // Denominator is the largest motor power (abs value) or 1. It makes sure no more than 1 power is delivered.
             // This makes sure that the ratio stays the same
@@ -56,21 +56,43 @@ public class SummerCampTeleOp extends LinearOpMode {
             //      1. the sum of the absolute values (Math.abs(value)) of x, y, and rx
             //      2. 1
             // thix sets the denominator to the highest value if it is the sum or if it 1
-            double denominator = 0;
+            double denominator = Math.max(Math.abs(x)+Math.abs(y)+Math.abs(rx),1);
             /*
              * frontLeftPower should be the sum of y, x, and rx all divided by denominator
              * backLeftPower should be y minus x plus rx all divided by denominator
              * frontRightPower should be y minus x minus rx all divided by denominator
              * backRightPower should be y plus x minus rx all divided by denominator
              */
-            double frontLeftPower = 0;
-            double backLeftPower = 0;
-            double frontRightPower = 0;
-            double backRightPower = 0;
+            double frontLeftPower = (x+y+rx)/denominator;
+            double backLeftPower = (y-x+rx)/denominator;
+            double frontRightPower = (y-x-rx)/denominator;
+            double backRightPower = (y+x-rx)/denominator;
 
             // set power to each of the motors now
-            pivotServo.setPosition(0.34);
-            clawServo.setPosition(0.67);
+            leftFrontDrive.setPower(frontLeftPower*0.4);
+            leftBackDrive.setPower(backLeftPower*0.4);
+            rightFrontDrive.setPower(frontRightPower*0.4);
+            rightBackDrive.setPower(backRightPower*0.4);
+
+            if(gamepad1.a) {
+                pivotServo.setPosition(1);
+            }
+            if(gamepad1.b) {
+                pivotServo.setPosition(.63);
+            }
+            if(gamepad1.right_bumper) {
+                clawServo.setPosition(.8);
+            }
+            if(gamepad1.left_bumper) {
+                clawServo.setPosition(1);
+            }
+//            if(gamepad1.dpad_up) {
+//                pivotServo.setPosition(0);
+//            }
+//            if(gamepad1.dpad_down) {
+//                pivotServo.setPosition(1);
+//            }
+
 
             /*
              * ===============
