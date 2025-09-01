@@ -31,7 +31,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
  */
 @Config
 @Autonomous(name = "Forward Localizer Tuner", group = ".Localization")
-@Disabled
 public class ForwardTuner extends OpMode {
     private PoseUpdater poseUpdater;
     private DashboardPoseTracker dashboardPoseTracker;

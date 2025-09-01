@@ -49,7 +49,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
  */
 @Config
 @Autonomous(name = "Forward Velocity Tuner", group = "Automatic Tuners")
-@Disabled
 public class ForwardVelocityTuner extends OpMode {
     private ArrayList<Double> velocities = new ArrayList<>();
 
@@ -95,7 +94,7 @@ Constants.setConstants(FConstants.class, LConstants.class);
         }
 
         for (DcMotorEx motor : motors) {
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
         for (int i = 0; i < RECORD_NUMBER; i++) {

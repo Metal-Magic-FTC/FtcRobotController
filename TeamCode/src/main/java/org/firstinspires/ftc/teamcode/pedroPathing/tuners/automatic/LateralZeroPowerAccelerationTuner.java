@@ -50,7 +50,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
  */
 @Config
 @Autonomous(name = "Lateral Zero Power Acceleration Tuner", group = "Automatic Tuners")
-@Disabled
 public class LateralZeroPowerAccelerationTuner extends OpMode {
     private ArrayList<Double> accelerations = new ArrayList<>();
 

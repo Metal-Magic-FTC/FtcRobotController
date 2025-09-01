@@ -9,7 +9,7 @@ public class LConstants {
     static {
 
         PinpointConstants.forwardY = -1;
-        PinpointConstants.strafeX = 5;
+        PinpointConstants.strafeX = 0;
         PinpointConstants.distanceUnit = DistanceUnit.INCH;
         PinpointConstants.hardwareMapName = "odo";
         PinpointConstants.useYawScalar = false;
@@ -24,8 +24,8 @@ public class LConstants {
         DriveEncoderConstants.strafeTicksToInches = 1120;
         DriveEncoderConstants.turnTicksToInches = 1000;
 
-        DriveEncoderConstants.robot_Width = 16.5;
-        DriveEncoderConstants.robot_Length = 14;
+        DriveEncoderConstants.robot_Width = 17;
+        DriveEncoderConstants.robot_Length = 14.5;
 
         DriveEncoderConstants.leftFrontEncoderDirection = Encoder.FORWARD;
         DriveEncoderConstants.rightFrontEncoderDirection = Encoder.REVERSE;

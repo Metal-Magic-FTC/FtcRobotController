@@ -28,7 +28,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 
 @TeleOp(name = "Motor Directions", group = "Teleop Test")
-@Disabled
 public class MotorDirections extends OpMode {
     private Telemetry telemetryA;
 
