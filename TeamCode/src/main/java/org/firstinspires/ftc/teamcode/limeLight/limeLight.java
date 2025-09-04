@@ -39,6 +39,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
@@ -65,21 +66,28 @@ import java.util.List;
  *   the Limelight itself, which can be configured through the Limelight settings page via a web browser,
  *   and the ip address the Limelight device assigned the Control Hub and which is displayed in small text
  *   below the name of the Limelight on the top level configuration screen.
+ *
+ *   Pipeline key:
+ *   Blue: 0
+ *   Yellow: 1
+ *   Red: 2
  */
 @TeleOp(name = "Sensor: Limelight3A", group = "Sensor")
-@Disabled
 public class limeLight extends LinearOpMode {
 
     private Limelight3A limelight;
+  //  private Servo headLight;
 
     @Override
     public void runOpMode() throws InterruptedException
     {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+      //  headLight = hardwareMap.get()
 
         telemetry.setMsTransmissionInterval(11);
 
         limelight.pipelineSwitch(0);
+
 
         /*
          * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
@@ -98,7 +106,16 @@ public class limeLight extends LinearOpMode {
                     status.getTemp(), status.getCpu(),(int)status.getFps());
             telemetry.addData("Pipeline", "Index: %d, Type: %s",
                     status.getPipelineIndex(), status.getPipelineType());
-
+            if (gamepad1.x) {
+                //Blue pipeline
+                limelight.pipelineSwitch(0);
+            } else if (gamepad1.y) {
+                //Yellow pipeline
+                limelight.pipelineSwitch(1);
+            } else if (gamepad1.b) {
+                //Red pipeline
+                limelight.pipelineSwitch(2);
+            }
             LLResult result = limelight.getLatestResult();
             if (result.isValid()) {
                 // Access general information
@@ -106,14 +123,15 @@ public class limeLight extends LinearOpMode {
                 double captureLatency = result.getCaptureLatency();
                 double targetingLatency = result.getTargetingLatency();
                 double parseLatency = result.getParseLatency();
+
 //                telemetry.addData("LL Latency", captureLatency + targetingLatency);
 //                telemetry.addData("Parse Latency", parseLatency);
 //                telemetry.addData("PythonOutput", java.util.Arrays.toString(result.getPythonOutput()));
 //
-//                telemetry.addData("tx", result.getTx());
+                telemetry.addData("X offset: ", result.getTx());
 //                telemetry.addData("txnc", result.getTxNC());
-//                telemetry.addData("ty", result.getTy());
-//                telemetry.addData("tync", result.getTyNC());
+                telemetry.addData("Y offset: ", result.getTy());
+                telemetry.addData("Area: ", result.getTa());
 //
 //                telemetry.addData("Botpose", botpose.toString());
 
@@ -142,13 +160,13 @@ public class limeLight extends LinearOpMode {
 //                }
 
                 // Access color results
-                List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
-                for (LLResultTypes.ColorResult cr : colorResults) {
-                    telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
-                }
-            } else {
-                telemetry.addData("Limelight", "No data available");
-            }
+//                List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
+//                for (LLResultTypes.ColorResult cr : colorResults) {
+//                    telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
+//                }
+//            } else {
+//                telemetry.addData("Limelight", "No data available");
+//            }
 
             telemetry.update();
         }
