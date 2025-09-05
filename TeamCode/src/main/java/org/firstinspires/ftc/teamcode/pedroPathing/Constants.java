@@ -19,7 +19,8 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(8)
-            .forwardZeroPowerAcceleration(-31.839);
+            .forwardZeroPowerAcceleration(-31.839)
+            .lateralZeroPowerAcceleration(-58.5005);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName("leftFrontDrive")
