@@ -20,7 +20,10 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(8)
             .forwardZeroPowerAcceleration(-31.839)
-            .lateralZeroPowerAcceleration(-58.5005);
+            .lateralZeroPowerAcceleration(-58.5005)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.065, 0.001, 0.005, 0.0375))
+            .headingPIDFCoefficients(new PIDFCoefficients(1,0, 0, 0.1))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.008, 0.001, 0.000001, 0.6, 0.03));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName("leftFrontDrive")
