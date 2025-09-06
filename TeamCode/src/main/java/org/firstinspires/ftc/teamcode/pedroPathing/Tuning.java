@@ -69,7 +69,7 @@ public class Tuning extends SelectableOpMode {
             });
             s.folder("Tests", p -> {
                 p.add("Line", Line::new);
-                p.add("Triangle", Triangle::new);
+                p.add("Triangle", Triangle2::new);
                 p.add("Circle", Circle::new);
             });
         });
