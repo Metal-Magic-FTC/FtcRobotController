@@ -9,16 +9,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
-@TeleOp(name="TEAM 1 Run this - This is your TeleOp Mode")
+@TeleOp(name="CURIE KICKOFF")
 public class SummerCampTeleOp extends LinearOpMode {
 
     DcMotor leftFrontDrive = null;
     DcMotor rightFrontDrive = null;
     DcMotor leftBackDrive = null;
     DcMotor rightBackDrive = null;
-
-    Servo pivotServo = null;
-    Servo clawServo = null;
 
     /**
      * Main section of code -- like 'main' method
@@ -74,18 +71,6 @@ public class SummerCampTeleOp extends LinearOpMode {
             rightFrontDrive.setPower(frontRightPower*0.4);
             rightBackDrive.setPower(backRightPower*0.4);
 
-            if(gamepad1.a) {
-                pivotServo.setPosition(1);
-            }
-            if(gamepad1.b) {
-                pivotServo.setPosition(.63);
-            }
-            if(gamepad1.right_bumper) {
-                clawServo.setPosition(.8);
-            }
-            if(gamepad1.left_bumper) {
-                clawServo.setPosition(1);
-            }
 //            if(gamepad1.dpad_up) {
 //                pivotServo.setPosition(0);
 //            }
@@ -123,9 +108,6 @@ public class SummerCampTeleOp extends LinearOpMode {
         leftFrontDrive.setDirection(UtilityValues.compLeftFrontDirection);
         rightBackDrive.setDirection(UtilityValues.compRightBackDirection);
         rightFrontDrive.setDirection(UtilityValues.compRightFrontDirection);
-
-        pivotServo = hardwareMap.servo.get("pivotServo");
-        clawServo = hardwareMap.servo.get("clawServo");
 
     }
 
