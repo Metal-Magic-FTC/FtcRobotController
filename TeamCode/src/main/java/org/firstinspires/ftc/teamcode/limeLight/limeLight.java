@@ -77,7 +77,7 @@ public class limeLight extends LinearOpMode {
 
     private Limelight3A limelight;
   //  private Servo headLight;
-
+    private int pipeline = 0;
     @Override
     public void runOpMode() throws InterruptedException
     {
@@ -86,7 +86,7 @@ public class limeLight extends LinearOpMode {
 
         telemetry.setMsTransmissionInterval(11);
 
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(pipeline);
 
 
         /*
@@ -107,15 +107,16 @@ public class limeLight extends LinearOpMode {
             telemetry.addData("Pipeline", "Index: %d, Type: %s",
                     status.getPipelineIndex(), status.getPipelineType());
             if (gamepad1.x) {
-                //Blue pipeline
-                limelight.pipelineSwitch(0);
+                //Blue/purple pipeline
+                pipeline = 0;
             } else if (gamepad1.y) {
-                //Yellow pipeline
-                limelight.pipelineSwitch(1);
-            } else if (gamepad1.b) {
-                //Red pipeline
-                limelight.pipelineSwitch(2);
+                //Green pipeline
+                pipeline = 1;
+            } else if (gamepad1.a) {
+                //April Tag
+                pipeline = 3;
             }
+            limelight.pipelineSwitch(pipeline);
             LLResult result = limelight.getLatestResult();
             if (result.isValid()) {
                 // Access general information
@@ -128,10 +129,20 @@ public class limeLight extends LinearOpMode {
 //                telemetry.addData("Parse Latency", parseLatency);
 //                telemetry.addData("PythonOutput", java.util.Arrays.toString(result.getPythonOutput()));
 //
-                telemetry.addData("X offset: ", result.getTx());
+
+                if (pipeline == 3) {
+                    // Access fiducial results
+                    List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+                    telemetry.addLine("Pipe 3");
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    }
+                } else {
+                    telemetry.addData("X offset: ", result.getTx());
 //                telemetry.addData("txnc", result.getTxNC());
-                telemetry.addData("Y offset: ", result.getTy());
-                telemetry.addData("Area: ", result.getTa());
+                    telemetry.addData("Y offset: ", result.getTy());
+                    telemetry.addData("Area: ", result.getTa());
+                }
 //
 //                telemetry.addData("Botpose", botpose.toString());
 
@@ -153,11 +164,7 @@ public class limeLight extends LinearOpMode {
 //                    telemetry.addData("Detector", "Class: %s, Area: %.2f", dr.getClassName(), dr.getTargetArea());
 //                }
 //
-//                // Access fiducial results
-//                List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-//                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-//                    telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-//                }
+
 
                 // Access color results
 //                List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
