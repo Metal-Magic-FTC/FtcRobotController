@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.limeLight;
 import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
 import java.util.List;
 
@@ -14,9 +17,28 @@ public class limeLightV2 extends OpMode {
     double ty;
     double ta;
     int pipeline;
+    DcMotor leftFrontDrive;
+    DcMotor rightFrontDrive;
+    DcMotor leftBackDrive;
+    DcMotor rightBackDrive;
 
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "leftFrontDrive");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
+        leftBackDrive   = hardwareMap.get(DcMotor.class, "leftBackDrive");
+        rightBackDrive  = hardwareMap.get(DcMotor.class, "rightBackDrive");
+
+        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftBackDrive.setDirection(UtilityValues.compLeftBackDirection);
+        leftFrontDrive.setDirection(UtilityValues.compLeftFrontDirection);
+        rightBackDrive.setDirection(UtilityValues.compRightBackDirection);
+        rightFrontDrive.setDirection(UtilityValues.compRightFrontDirection);
         limelight.setPollRateHz(100);
         limelight.start();
         limelight.pipelineSwitch(0);
@@ -43,25 +65,27 @@ public class limeLightV2 extends OpMode {
             double tx = result.getTx();
             double ty = result.getTy();
             double ta = result.getTa();
-            double targetOffsetAngle_Vertical = ty;
+            double targetOffsetAngle_Vertical = Math.abs(ty);
 
             // how many degrees back is your limelight rotated from perfectly vertical?
             double limelightMountAngleDegrees = 0;
 
             // distance from the center of the Limelight lens to the floor
-            double limelightLensHeightInches = 3.25;
+            double limelightLensHeightInches = 4;
 
             // distance from the target to the floor
-            double goalHeightInches = 2.5;
+            double goalHeightInches = 1.17;
 
             double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
             double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
             //calculate distance
-            double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+            double distanceFromLimelightToGoalInches = (Math.abs(goalHeightInches - limelightLensHeightInches)) / Math.tan(angleToGoalRadians);
             telemetry.addData("X offset: ", tx);
             telemetry.addData("Y offset", ty);
             telemetry.addData("Distance from object", distanceFromLimelightToGoalInches);
+            telemetry.addData("Height: ", Math.abs(goalHeightInches - limelightLensHeightInches));
+            telemetry.addData("Angle: ",angleToGoalRadians);
             if (gamepad1.left_bumper) {
                 //centering limelight on the object
                 while (!((-1 < tx) && (tx < 1))) {
