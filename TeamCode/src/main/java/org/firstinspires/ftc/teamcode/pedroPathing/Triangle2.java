@@ -1,65 +1,79 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrent;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrentAndHistory;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.telemetryM;
-
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="TRIANGLE")
+@TeleOp(name = "Triangle2", group = "PedroPathing")
 public class Triangle2 extends OpMode {
 
-    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
-    private final Pose interPose = new Pose(24, -24, Math.toRadians(90));
-    private final Pose endPose = new Pose(24, 24, Math.toRadians(45));
+    /** Create a Follower instance from Constants */
+    private Follower follower;
 
-    private PathChain triangle;
+    /** Define the triangle vertices as Poses */
+    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));        // Start position
+    private final Pose secondPose = new Pose(24, -24, Math.toRadians(90));   // Move forward-right
+    private final Pose thirdPose = new Pose(24, 24, Math.toRadians(45));     // Move forward-left
 
-    /**
-     * This runs the OpMode, updating the Follower as well as printing out the debug statements to
-     * the Telemetry, as well as the Panels.
-     */
+    /** PathChain representing the entire triangle */
+    private PathChain trianglePath;
+
     @Override
-    public void loop() {
-        follower.update();
-        drawCurrentAndHistory();
+    public void init() {
+        // Initialize follower
+        follower = Constants.createFollower(hardwareMap);
 
-        if (follower.atParametricEnd()) {
-            follower.followPath(triangle, true);
-        }
+        telemetry.addLine("Triangle2 Initialized. Waiting for start...");
+        telemetry.update();
     }
-
-    @Override
-    public void init() {}
 
     @Override
     public void init_loop() {
-        telemetryM.debug("This will run in a roughly triangular shape, starting on the bottom-middle point.");
-        telemetryM.debug("So, make sure you have enough space to the left, front, and right to run the OpMode.");
-        telemetryM.update(telemetry);
+        // Keep updating follower before start to get current position
         follower.update();
-        drawCurrent();
+
+        telemetry.addLine("Triangle2 Ready");
+        telemetry.addLine("Ensure space to move in a triangular pattern.");
+        telemetry.update();
     }
 
-    /** Creates the PathChain for the "triangle".*/
     @Override
     public void start() {
+        // Set the robot's starting pose
         follower.setStartingPose(startPose);
 
-        triangle = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, interPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), interPose.getHeading())
-                .addPath(new BezierLine(interPose, endPose))
-                .setLinearHeadingInterpolation(interPose.getHeading(), endPose.getHeading())
-                .addPath(new BezierLine(endPose, startPose))
-                .setLinearHeadingInterpolation(endPose.getHeading(), startPose.getHeading())
+        // Build the triangle path
+        trianglePath = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, secondPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), secondPose.getHeading())
+                .addPath(new BezierLine(secondPose, thirdPose))
+                .setLinearHeadingInterpolation(secondPose.getHeading(), thirdPose.getHeading())
+                .addPath(new BezierLine(thirdPose, startPose))
+                .setLinearHeadingInterpolation(thirdPose.getHeading(), startPose.getHeading())
                 .build();
 
-        follower.followPath(triangle);
+        // Start following the path
+        follower.followPath(trianglePath);
+    }
+
+    @Override
+    public void loop() {
+        // Continuously update follower
+        follower.update();
+
+        // If finished, restart the triangle loop
+        if (follower.atParametricEnd()) {
+            follower.followPath(trianglePath, true);
+        }
+
+        // Telemetry for debugging
+        telemetry.addData("X", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading (deg)", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("Following Path", !follower.atParametricEnd());
+        telemetry.update();
     }
 }
