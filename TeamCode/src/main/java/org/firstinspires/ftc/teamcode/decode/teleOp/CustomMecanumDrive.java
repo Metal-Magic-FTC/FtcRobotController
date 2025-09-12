@@ -36,6 +36,7 @@ public class CustomMecanumDrive {
         double backLeftPower = y - x + turn;
         double backRightPower = y + x - turn;
 
+        
         // Normalize powers to keep them between -1.0 and 1.0
         double maxPower = Math.max(Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower)), Math.max(Math.abs(backLeftPower), Math.abs(backRightPower)));
 
