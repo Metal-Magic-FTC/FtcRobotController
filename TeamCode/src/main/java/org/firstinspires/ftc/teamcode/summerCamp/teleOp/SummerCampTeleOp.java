@@ -66,10 +66,13 @@ public class SummerCampTeleOp extends LinearOpMode {
             double backRightPower = (y+x-rx)/denominator;
 
             // set power to each of the motors now
-            leftFrontDrive.setPower(frontLeftPower*0.4);
-            leftBackDrive.setPower(backLeftPower*0.4);
-            rightFrontDrive.setPower(frontRightPower*0.4);
-            rightBackDrive.setPower(backRightPower*0.4);
+
+            double speed = 1.0;
+
+            leftFrontDrive.setPower(frontLeftPower*speed);
+            leftBackDrive.setPower(backLeftPower*speed);
+            rightFrontDrive.setPower(frontRightPower*speed);
+            rightBackDrive.setPower(backRightPower*speed);
 
 //            if(gamepad1.dpad_up) {
 //                pivotServo.setPosition(0);
