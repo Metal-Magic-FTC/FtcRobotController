@@ -25,10 +25,10 @@ public class limeLightV2 extends OpMode {
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "leftFrontDrive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
-        leftBackDrive   = hardwareMap.get(DcMotor.class, "leftBackDrive");
-        rightBackDrive  = hardwareMap.get(DcMotor.class, "rightBackDrive");
+//        leftFrontDrive  = hardwareMap.get(DcMotor.class, "leftFrontDrive");
+//        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
+//        leftBackDrive   = hardwareMap.get(DcMotor.class, "leftBackDrive");
+//        rightBackDrive  = hardwareMap.get(DcMotor.class, "rightBackDrive");
 
         leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
