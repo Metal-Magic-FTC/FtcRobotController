@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
 import java.util.List;
@@ -30,15 +31,15 @@ public class limeLightV2 extends OpMode {
 //        leftBackDrive   = hardwareMap.get(DcMotor.class, "leftBackDrive");
 //        rightBackDrive  = hardwareMap.get(DcMotor.class, "rightBackDrive");
 
-        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        leftBackDrive.setDirection(UtilityValues.compLeftBackDirection);
-        leftFrontDrive.setDirection(UtilityValues.compLeftFrontDirection);
-        rightBackDrive.setDirection(UtilityValues.compRightBackDirection);
-        rightFrontDrive.setDirection(UtilityValues.compRightFrontDirection);
+//        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//
+//        leftBackDrive.setDirection(UtilityValues.compLeftBackDirection);
+//        leftFrontDrive.setDirection(UtilityValues.compLeftFrontDirection);
+//        rightBackDrive.setDirection(UtilityValues.compRightBackDirection);
+//        rightFrontDrive.setDirection(UtilityValues.compRightFrontDirection);
         limelight.setPollRateHz(100);
         limelight.start();
         limelight.pipelineSwitch(0);
@@ -106,7 +107,13 @@ public class limeLightV2 extends OpMode {
         }
 
         if (gamepad1.a) {
-            //april tag id detection
+            // how many degrees back is your limelight rotated from perfectly vertical?
+            double limelightMountAngleDegrees = 0;
+
+            // distance from the center of the Limelight lens to the floor
+            double targetOffsetAngle_Vertical = Math.abs(ty);
+            double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+            //april tag id detection and localization
             limelight.pipelineSwitch(3);
             pipeline = 3;
             List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
@@ -118,11 +125,22 @@ public class limeLightV2 extends OpMode {
                 double x = fiducial.getTargetXDegrees();
                 double y = fiducial.getTargetYDegrees();
                 double StrafeDistance_3D = fiducial.getRobotPoseTargetSpace().getOrientation().getPitch();
-                if ((id == 21) || (id == 22) || (id == 23)) {
-                    telemetry.addData("Target X", tx);
-                    telemetry.addData("Target Y", ty);
-                    telemetry.addData("Target Area", ta);
-                    telemetry.addData("Fiducial " + id, "is " + fiducial.getRobotPoseTargetSpace().getPosition().z, " meters away");
+
+//                    telemetry.addData("Target X", tx);
+//                    telemetry.addData("Target Y", ty);
+//                    telemetry.addData("Target Area", ta);
+//                    telemetry.addData("Angle: ", angleToGoalDegrees);
+//                    telemetry.addData("Fiducial " + id, "is " + fiducial.getRobotPoseTargetSpace().getPosition().z, " meters away");
+                // First, tell Limelight which way your robot is facing
+                double robotYaw = 135; //imu yaw
+                limelight.updateRobotOrientation(robotYaw);
+                if (result != null && result.isValid()) {
+                    Pose3D botpose_mt2 = result.getBotpose_MT2();
+                    if (botpose_mt2 != null) {
+                        double x2 = botpose_mt2.getPosition().x;
+                        double y2 = botpose_mt2.getPosition().y;
+                        telemetry.addData("MT2 Location:", "(" + x2 + ", " + y2 + ")");
+                    }
                 }
             }
         }
