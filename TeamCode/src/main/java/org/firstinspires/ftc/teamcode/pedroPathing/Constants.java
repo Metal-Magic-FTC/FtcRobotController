@@ -26,10 +26,10 @@ public class Constants {
 //            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.008, 0.001, 0.000001, 0.6, 0.03));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .leftFrontMotorName("leftFrontDrive")
-            .leftRearMotorName("leftBackDrive")
-            .rightFrontMotorName("rightFrontDrive")
-            .rightRearMotorName("rightBackDrive")
+            .leftFrontMotorName("frontLeft")
+            .leftRearMotorName("backLeft")
+            .rightFrontMotorName("frontRight")
+            .rightRearMotorName("backRight")
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)

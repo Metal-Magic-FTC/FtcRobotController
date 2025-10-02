@@ -82,7 +82,7 @@ public class Test6k extends LinearOpMode {
         rightLaunch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         leftLaunch.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightLaunch.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightLaunch.setDirection(DcMotorSimple.Direction.FORWARD);
 
     }
 
