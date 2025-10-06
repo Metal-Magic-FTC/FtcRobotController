@@ -10,7 +10,7 @@ public class GeneratedPathsRedBack {
 
     private final Follower follower;
 
-    // ✅ Central definition of the starting pose
+    // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
             116.6988847583643,  // X
             128.83271375464685, // Y
@@ -42,7 +42,7 @@ public class GeneratedPathsRedBack {
     public PathChain intake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(101.353, 83.300), new Pose(121.900, 83.300))
+                        new BezierLine(new Pose(101.353, 83.300), new Pose(123, 83.300))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -69,7 +69,7 @@ public class GeneratedPathsRedBack {
     public PathChain intake2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(101.353, 59.400), new Pose(121.900, 59.400))
+                        new BezierLine(new Pose(101.353, 59.400), new Pose(123, 59.400))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
