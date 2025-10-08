@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.autonomous.redback;
+package org.firstinspires.ftc.teamcode.pedroPathing.autonomous.blueback;
 
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -11,11 +11,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RedBack Auto", group = "Auto")
-public class RedBack extends LinearOpMode {
+@Autonomous(name = "BlueBack Auto", group = "Auto")
+public class BlueBack extends LinearOpMode {
 
     private Follower follower;
-    private GeneratedPathsRedBack paths;
+    private GeneratedPathsBlueBack paths;
 
     DcMotor intakeMotor;
 
@@ -52,15 +52,15 @@ public class RedBack extends LinearOpMode {
         //intakeMotor.setPower(0);
 
         // End of auto
-        telemetry.addLine("RedBack Auto Finished");
+        telemetry.addLine("BlueBack Auto Finished");
         telemetry.update();
     }
 
     private void initialize() {
         follower = Constants.createFollower(hardwareMap);
 
-        // Apply the start pose from GeneratedPathsRedBack
-        follower.setPose(GeneratedPathsRedBack.START_POSE);
+        // Apply the start pose from GeneratedPathsBlueBack
+        follower.setPose(GeneratedPathsBlueBack.START_POSE);
 
         //follower = Constants.createFollower(hardwareMap);
 
@@ -71,13 +71,13 @@ public class RedBack extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Load paths
-        paths = new GeneratedPathsRedBack(follower);
+        paths = new GeneratedPathsBlueBack(follower);
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        telemetry.addLine("Ready to start RedBack Auto");
+        telemetry.addLine("Ready to start BlueBack Auto");
         telemetry.update();
     }
 
