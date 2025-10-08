@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp;
+package org.firstinspires.ftc.teamcode.limeLight;
 
 import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -103,7 +103,9 @@ public class LimeLocalization extends OpMode {
                     if (botpose_mt2 != null) {
                         double x2 = botpose_mt2.getPosition().x;
                         double y2 = botpose_mt2.getPosition().y;
+                        double yaw = botpose_mt2.getOrientation().getYaw();
                         telemetry.addData("MT2 Location:", "(" + x2 + ", " + y2 + ")");
+                        telemetry.addData("Yaw: ", + yaw);
                     }
                 }
             }
