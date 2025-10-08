@@ -2,7 +2,10 @@ package org.firstinspires.ftc.teamcode.decode.teleOp;
 
 import com.pedropathing.follower.Follower;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import com.pedropathing.geometry.BezierCurve;
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 import com.pedropathing.geometry.BezierLine;
@@ -14,7 +17,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 @TeleOp(name = "AutoV0", group = "PedroPathing")
+=======
+@TeleOp(name = "AutoV0", group = "decode")
+>>>>>>> Stashed changes
 =======
 @TeleOp(name = "AutoV0", group = "decode")
 >>>>>>> Stashed changes
@@ -26,6 +33,7 @@ public class AutoV0 extends OpMode {
     /** Define the triangle vertices as Poses */
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));        // Start position
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private final Pose secondPose = new Pose(24, -30, Math.toRadians(90));   // Move forward-right
     private final Pose thirdPose = new Pose(24, -20, Math.toRadians(90));     // Move forward-left
     private final Pose fourthPose = new Pose(0, -30, Math.toRadians(135));
@@ -33,11 +41,16 @@ public class AutoV0 extends OpMode {
     /** PathChain representing the entire triangle */
     private PathChain autoPath;
 =======
+=======
+>>>>>>> Stashed changes
     private final Pose secondPose = new Pose(24, 0, Math.toRadians(90));   // Move forward
     private final Pose thirdPose = new Pose(24, -24, Math.toRadians(45));     // Move forward-right
 
     /** PathChain representing the entire triangle */
     private PathChain lPath;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     /**
@@ -69,6 +82,7 @@ public class AutoV0 extends OpMode {
 
         // Build the triangle path
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         autoPath = follower.pathBuilder()
                 .addPath(new BezierCurve(startPose, secondPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), secondPose.getHeading())
@@ -87,6 +101,8 @@ public class AutoV0 extends OpMode {
         // Start following the path
         follower.followPath(autoPath);
 =======
+=======
+>>>>>>> Stashed changes
         lPath = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, secondPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), secondPose.getHeading())
@@ -101,6 +117,9 @@ public class AutoV0 extends OpMode {
 
         // Start following the path
         follower.followPath(lPath);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     }
 
@@ -112,7 +131,11 @@ public class AutoV0 extends OpMode {
         // If finished, restart the triangle loop
         if (follower.atParametricEnd()) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 //            follower.followPath(autoPath, true);
+=======
+            follower.followPath(lPath, true);
+>>>>>>> Stashed changes
 =======
             follower.followPath(lPath, true);
 >>>>>>> Stashed changes
