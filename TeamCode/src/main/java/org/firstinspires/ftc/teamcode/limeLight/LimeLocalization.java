@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
 import java.util.List;
 
-@TeleOp(name = "Localization")
+@TeleOp(name = "!Localization")
 public class LimeLocalization extends OpMode {
 
     Limelight3A limelight;
@@ -26,10 +26,10 @@ public class LimeLocalization extends OpMode {
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "leftFrontDrive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
-        leftBackDrive   = hardwareMap.get(DcMotor.class, "leftBackDrive");
-        rightBackDrive  = hardwareMap.get(DcMotor.class, "rightBackDrive");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontLeft");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontRight");
+        leftBackDrive   = hardwareMap.get(DcMotor.class, "backLeft");
+        rightBackDrive  = hardwareMap.get(DcMotor.class, "backRight");
 
         leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
