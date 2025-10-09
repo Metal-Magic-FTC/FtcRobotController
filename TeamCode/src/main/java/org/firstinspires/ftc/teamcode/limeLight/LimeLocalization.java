@@ -70,7 +70,7 @@ public class LimeLocalization extends OpMode {
             double distanceFromLimelightToGoalInches = (Math.abs(goalHeightInches - limelightLensHeightInches)) / Math.tan(angleToGoalRadians);
         }
 
-        if (gamepad1.a) {
+        //if (gamepad1.a) {
             // how many degrees back is your limelight rotated from perfectly vertical?
             double limelightMountAngleDegrees = 0;
 
@@ -109,7 +109,7 @@ public class LimeLocalization extends OpMode {
                     }
                 }
             }
-        }
+       // }
 
         telemetry.update();
     }

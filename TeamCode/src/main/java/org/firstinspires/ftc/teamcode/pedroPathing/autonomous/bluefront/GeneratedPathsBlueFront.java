@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.autonomous.redfront;
+package org.firstinspires.ftc.teamcode.pedroPathing.autonomous.bluefront;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -6,18 +6,18 @@ import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.follower.Follower;
 
-public class GeneratedPathsRedFront {
+public class GeneratedPathsBlueFront {
 
     private final Follower follower;
 
     // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
-            79.85046728971962,  // X
+            64.1495327103,  // X
             9.196261682242984, // Y
             Math.toRadians(90) // Heading
     );
 
-    public GeneratedPathsRedFront(Follower follower) {
+    public GeneratedPathsBlueFront(Follower follower) {
         this.follower = follower;
     }
 
