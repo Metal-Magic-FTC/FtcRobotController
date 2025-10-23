@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
+@TeleOp(name="!servoTest")
 public class ServoTest extends LinearOpMode {
 
     Servo testServo;
@@ -26,12 +28,20 @@ public class ServoTest extends LinearOpMode {
             }
 
             if (gamepad1.right_bumper) {
-                testServo.setPosition(Math.min(testServo.getPosition() + 0.00000001, 1));
+                testServo.setPosition(Math.min(testServo.getPosition() + 0.01, 1));
             }
 
             if (gamepad1.left_bumper) {
-                testServo.setPosition(Math.max(testServo.getPosition() - 0.00000001, 0));
+                testServo.setPosition(Math.max(testServo.getPosition() - 0.01, 0));
             }
+
+            if (gamepad1.x) {
+                testServo.setPosition(0.78);
+            } else {
+                testServo.setPosition(1);
+            }
+            telemetry.addData("Servo pos:", testServo.getPosition());
+            telemetry.update();
 
         }
 

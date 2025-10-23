@@ -93,20 +93,21 @@ public class ThirtyHours extends LinearOpMode {
 
     public void initialize() {
 
-        leftLaunch = hardwareMap.get(DcMotor.class, "leftLaunch");
-        rightLaunch = hardwareMap.get(DcMotor.class, "rightLaunch");
+//        leftLaunch = hardwareMap.get(DcMotor.class, "leftLaunch");
+
+//        rightLaunch = hardwareMap.get(DcMotor.class, "rightLaunch");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
 
-        leftLaunch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightLaunch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        leftLaunch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rightLaunch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        leftLaunch.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightLaunch.setDirection(DcMotorSimple.Direction.REVERSE);
+//        leftLaunch.setDirection(DcMotorSimple.Direction.FORWARD);
+//        rightLaunch.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        launchGate = hardwareMap.servo.get("leftGate");
-        launchGate.setPosition(1);
+//        launchGate = hardwareMap.servo.get("leftGate");
+//        launchGate.setPosition(1);
 
         // fl - 0, fr - 1, bl - 2, br - 3
         drivetrain = new CustomMecanumDrive(hardwareMap);
