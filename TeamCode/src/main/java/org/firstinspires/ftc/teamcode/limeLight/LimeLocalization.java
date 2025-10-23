@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
 import java.util.List;
 
-@TeleOp(name = "!Localization")
+@TeleOp(name = "!limeLocalization")
 public class LimeLocalization extends OpMode {
 
     Limelight3A limelight;

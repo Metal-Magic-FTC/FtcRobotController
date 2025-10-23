@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.actual;
 
-import com.qualcomm.ftccommon.configuration.EditLynxUsbDeviceActivity;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
-import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
 @TeleOp(name = "!v0 gang gang gang gang")
 public class TeleV0 extends LinearOpMode {
@@ -23,6 +21,8 @@ public class TeleV0 extends LinearOpMode {
     Servo leftFlickServo = null;
 
     Servo middleFlickServo = null;
+
+    Servo rightFlickServo = null;
 
     //DcMotor pivotMotor = null;
 
@@ -62,7 +62,8 @@ public class TeleV0 extends LinearOpMode {
 
             boolean leftFlickControl = gamepad1.b;
             boolean middleFlickControl = gamepad1.a;
-            servoMovements(leftFlickControl, middleFlickControl);
+            boolean rightFlickControl = gamepad1.x;
+            servoMovements(leftFlickControl, middleFlickControl, rightFlickControl);
 
             telemetry.addLine(degrees + "");
             telemetry.update();
@@ -71,7 +72,7 @@ public class TeleV0 extends LinearOpMode {
 
     }
 
-    public void servoMovements(boolean leftFlickControl, boolean middleFlickControl) {
+    public void servoMovements(boolean leftFlickControl, boolean middleFlickControl, boolean rightFlickControl) {
 
         if (leftFlickControl) {
             leftFlickServo.setPosition(0.4);
@@ -83,6 +84,12 @@ public class TeleV0 extends LinearOpMode {
             middleFlickServo.setPosition(0.75);
         } else {
             middleFlickServo.setPosition(1);
+        }
+
+        if (rightFlickControl) {
+            rightFlickServo.setPosition(0.4);
+        } else {
+            rightFlickServo.setPosition(1);
         }
 
     }
@@ -123,7 +130,7 @@ public class TeleV0 extends LinearOpMode {
 
         leftFlickServo = hardwareMap.servo.get("leftFlickServo");
         middleFlickServo = hardwareMap.servo.get("middleFlickServo");
-
+        rightFlickServo = hardwareMap.servo.get("rightFlickServo");
     }
 
     public void initIntake() {
