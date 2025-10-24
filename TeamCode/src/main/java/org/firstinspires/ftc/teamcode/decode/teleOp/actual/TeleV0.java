@@ -19,10 +19,13 @@ public class TeleV0 extends LinearOpMode {
     DcMotor intakeMotor = null;
 
     Servo leftFlickServo = null;
+    Servo rightFlickServo = null;
 
     Servo middleFlickServo = null;
 
-    Servo rightFlickServo = null;
+    Servo leftGate = null;
+    Servo rightGate = null;
+
 
     //DcMotor pivotMotor = null;
 
@@ -47,12 +50,12 @@ public class TeleV0 extends LinearOpMode {
 
             drivetrain.driveMecanum(strafe, drive, turn); // creates mecanum drivetrain
 
-            boolean intakeControl = gamepad1.left_bumper;
-            boolean reverseIntakeControl = gamepad1.right_bumper;
+            boolean intakeLeftControl = gamepad1.left_bumper;
+            boolean intakeRightControl = gamepad1.right_bumper;
             double launchControl = gamepad1.right_trigger;
             double reverseLaunchControl = gamepad1.left_trigger;
 
-            intakeControl(intakeControl, reverseIntakeControl);
+            intakeControl(intakeLeftControl, intakeRightControl);
             launchControl(launchControl, reverseLaunchControl);
 
             //degrees = pivotMotor.getCurrentPosition() * (90.0/135);
@@ -60,10 +63,15 @@ public class TeleV0 extends LinearOpMode {
             //telemetry.addData("position", pivotMotor.getCurrentPosition());
             //telemetry.addData("target", pivotMotor.getTargetPosition());
 
-            boolean leftFlickControl = gamepad1.b;
+            boolean leftFlickControl = gamepad1.x;
+            boolean leftLaunch = gamepad1.dpad_left;
             boolean middleFlickControl = gamepad1.a;
-            boolean rightFlickControl = gamepad1.x;
-            servoMovements(leftFlickControl, middleFlickControl, rightFlickControl);
+
+            boolean rightFlickControl = gamepad1.b;
+            boolean rightLaunch = gamepad1.dpad_right;
+            boolean gatesClosedControl = gamepad1.dpad_up;
+
+            servoMovements(leftFlickControl, leftLaunch, rightFlickControl, rightLaunch, middleFlickControl, gatesClosedControl, intakeRightControl, intakeLeftControl);
 
             telemetry.addLine(degrees + "");
             telemetry.update();
@@ -71,13 +79,38 @@ public class TeleV0 extends LinearOpMode {
         }
 
     }
-
-    public void servoMovements(boolean leftFlickControl, boolean middleFlickControl, boolean rightFlickControl) {
+    public void servoMovements(boolean leftFlickControl, boolean leftLaunch, boolean rightFlickControl, boolean rightLaunch, boolean middleFlickControl, boolean gatesClosedControl, boolean intakeRightControl, boolean intakeLeftControl) {
 
         if (leftFlickControl) {
-            leftFlickServo.setPosition(0.4);
-        } else {
-            leftFlickServo.setPosition(1);
+            leftGate.setPosition(1); // close
+            leftFlickServo.setPosition(1); // open
+        }
+
+        if (leftLaunch) {
+            leftGate.setPosition(0.7); // open
+            leftFlickServo.setPosition(0.4); // launch
+            rightGate.setPosition(0); // close
+        }
+
+        if (rightFlickControl) {
+            rightGate.setPosition(0); // close
+            rightFlickServo.setPosition(1); // open
+        }
+
+        if (rightLaunch) {
+            rightGate.setPosition(0.3); // open
+            rightFlickServo.setPosition(0.5); // launch
+            leftGate.setPosition(1); // close
+        }
+
+        if (intakeRightControl) {
+            leftGate.setPosition(1); // close
+            rightGate.setPosition(0.3); // open
+        }
+
+        if (intakeLeftControl) {
+            leftGate.setPosition(0.7); // open
+            rightGate.setPosition(0); // close
         }
 
         if (middleFlickControl) {
@@ -96,10 +129,8 @@ public class TeleV0 extends LinearOpMode {
 
     public void intakeControl(boolean intakeControl, boolean reverseIntakeControl) {
 
-        if (intakeControl) {
+        if (intakeControl || reverseIntakeControl) {
             intakeMotor.setPower(1);
-        } else if (reverseIntakeControl) {
-            intakeMotor.setPower(-1);
         } else {
             intakeMotor.setPower(0);
         }
@@ -131,6 +162,8 @@ public class TeleV0 extends LinearOpMode {
         leftFlickServo = hardwareMap.servo.get("leftFlickServo");
         middleFlickServo = hardwareMap.servo.get("middleFlickServo");
         rightFlickServo = hardwareMap.servo.get("rightFlickServo");
+        leftGate = hardwareMap.servo.get("leftGate");
+        rightGate = hardwareMap.servo.get("rightGate");
     }
 
     public void initIntake() {
