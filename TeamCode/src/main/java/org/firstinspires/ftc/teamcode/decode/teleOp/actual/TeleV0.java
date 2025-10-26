@@ -52,10 +52,6 @@ public class TeleV0 extends LinearOpMode {
 
             boolean intakeLeftControl = gamepad1.left_bumper;
             boolean intakeRightControl = gamepad1.right_bumper;
-//            double launchControl = gamepad1.right_trigger;
-//            double reverseLaunchControl = gamepad1.left_trigger;
-
-            intakeControl(intakeLeftControl, intakeRightControl);
 //            launchControl(launchControl, reverseLaunchControl);
 
             //degrees = pivotMotor.getCurrentPosition() * (90.0/135);
@@ -70,9 +66,12 @@ public class TeleV0 extends LinearOpMode {
             boolean rightFlickControl = gamepad1.b;
             boolean rightLaunch = gamepad1.dpad_right;
             boolean gatesClosedControl = gamepad1.dpad_up;
+            double intakeGatesClosedControl = gamepad1.right_trigger;
 
             // controls "ball movement" servos
-            servoMovements(leftFlickControl, leftLaunch, rightFlickControl, rightLaunch, middleFlickControl, gatesClosedControl, intakeRightControl, intakeLeftControl);
+            servoMovements(leftFlickControl, leftLaunch, rightFlickControl, rightLaunch, middleFlickControl, gatesClosedControl, intakeRightControl, intakeLeftControl, intakeGatesClosedControl);
+
+            intakeControl(intakeLeftControl || intakeRightControl || intakeGatesClosedControl >= 0.1);
 
             telemetry.addLine(degrees + "");
             telemetry.update();
@@ -80,8 +79,16 @@ public class TeleV0 extends LinearOpMode {
         }
 
     }
-    public void servoMovements(boolean leftFlickControl, boolean leftLaunch, boolean rightFlickControl, boolean rightLaunch, boolean middleFlickControl, boolean gatesClosedControl, boolean intakeRightControl, boolean intakeLeftControl) {
+    public void servoMovements(boolean leftFlickControl, boolean leftLaunch, boolean rightFlickControl, boolean rightLaunch, boolean middleFlickControl, boolean gatesClosedControl, boolean intakeRightControl, boolean intakeLeftControl, double intakeGatesClosedControl) {
 
+        if (middleFlickControl) { // 4
+            middleFlickServo.setPosition(0.75); // open
+            rightFlickControl = true; // also resets right ball storage
+            leftFlickControl = true; // also resets left ball storage
+        } else {
+            middleFlickServo.setPosition(1); // close
+        }
+        
         if (leftFlickControl) { // 2l
             leftGate.setPosition(1); // close
             leftFlickServo.setPosition(1); // open
@@ -114,25 +121,28 @@ public class TeleV0 extends LinearOpMode {
             rightGate.setPosition(0); // close
         }
 
-        if (middleFlickControl) { // 4
-            middleFlickServo.setPosition(0.75); // open
-            rightFlickControl = true; // also resets right ball storage
-            leftFlickControl = true; // also resets left ball storage
-        } else {
-            middleFlickServo.setPosition(1); // close
-        }
 
-        if (rightFlickControl) { // 2r
-            rightFlickServo.setPosition(0.4);
-        } else {
-            rightFlickServo.setPosition(1);
+
+//        if (rightFlickControl) { // 2r
+//            rightFlickServo.setPosition(0.4);
+//        } else {
+//            rightFlickServo.setPosition(1);
+//        }
+        
+        if (gatesClosedControl || intakeGatesClosedControl >= 0.1) { // closes all gates
+
+            leftGate.setPosition(1); // close
+            leftFlickServo.setPosition(1); // open
+            rightGate.setPosition(0); // close
+            rightFlickServo.setPosition(1); // open
+
         }
 
     }
 
-    public void intakeControl(boolean intakeControl, boolean reverseIntakeControl) {
+    public void intakeControl(boolean intakeControl) {
 
-        if (intakeControl || reverseIntakeControl) {
+        if (intakeControl) {
             intakeMotor.setPower(1);
         } else {
             intakeMotor.setPower(0);
