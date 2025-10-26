@@ -55,9 +55,8 @@ For support, contact tech@gobilda.com
 
 -Ethan Doak
  */
-@Disabled 
-@TeleOp(name="goBILDA® PinPoint Odometry Example", group="Linear OpMode")
 //@Disabled
+@TeleOp(name="goBILDA® PinPoint Odometry Example", group="Linear OpMode")
 
 public class SensorGoBildaPinpointExample extends LinearOpMode {
 
