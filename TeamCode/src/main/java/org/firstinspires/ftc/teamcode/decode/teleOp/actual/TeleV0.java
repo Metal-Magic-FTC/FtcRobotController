@@ -52,11 +52,11 @@ public class TeleV0 extends LinearOpMode {
 
             boolean intakeLeftControl = gamepad1.left_bumper;
             boolean intakeRightControl = gamepad1.right_bumper;
-            double launchControl = gamepad1.right_trigger;
-            double reverseLaunchControl = gamepad1.left_trigger;
+//            double launchControl = gamepad1.right_trigger;
+//            double reverseLaunchControl = gamepad1.left_trigger;
 
             intakeControl(intakeLeftControl, intakeRightControl);
-            launchControl(launchControl, reverseLaunchControl);
+//            launchControl(launchControl, reverseLaunchControl);
 
             //degrees = pivotMotor.getCurrentPosition() * (90.0/135);
 
@@ -71,6 +71,7 @@ public class TeleV0 extends LinearOpMode {
             boolean rightLaunch = gamepad1.dpad_right;
             boolean gatesClosedControl = gamepad1.dpad_up;
 
+            // controls "ball movement" servos
             servoMovements(leftFlickControl, leftLaunch, rightFlickControl, rightLaunch, middleFlickControl, gatesClosedControl, intakeRightControl, intakeLeftControl);
 
             telemetry.addLine(degrees + "");
@@ -81,45 +82,47 @@ public class TeleV0 extends LinearOpMode {
     }
     public void servoMovements(boolean leftFlickControl, boolean leftLaunch, boolean rightFlickControl, boolean rightLaunch, boolean middleFlickControl, boolean gatesClosedControl, boolean intakeRightControl, boolean intakeLeftControl) {
 
-        if (leftFlickControl) {
+        if (leftFlickControl) { // 2l
             leftGate.setPosition(1); // close
             leftFlickServo.setPosition(1); // open
         }
 
-        if (leftLaunch) {
+        if (leftLaunch) { // 3l
             leftGate.setPosition(0.7); // open
             leftFlickServo.setPosition(0.4); // launch
             rightGate.setPosition(0); // close
         }
 
-        if (rightFlickControl) {
+        if (rightFlickControl) { // 2r
             rightGate.setPosition(0); // close
             rightFlickServo.setPosition(1); // open
         }
 
-        if (rightLaunch) {
+        if (rightLaunch) { // 3r
             rightGate.setPosition(0.3); // open
             rightFlickServo.setPosition(0.5); // launch
             leftGate.setPosition(1); // close
         }
 
-        if (intakeRightControl) {
+        if (intakeRightControl) { // 1r
             leftGate.setPosition(1); // close
             rightGate.setPosition(0.3); // open
         }
 
-        if (intakeLeftControl) {
+        if (intakeLeftControl) { // 1l
             leftGate.setPosition(0.7); // open
             rightGate.setPosition(0); // close
         }
 
-        if (middleFlickControl) {
-            middleFlickServo.setPosition(0.75);
+        if (middleFlickControl) { // 4
+            middleFlickServo.setPosition(0.75); // open
+            rightFlickControl = true; // also resets right ball storage
+            leftFlickControl = true; // also resets left ball storage
         } else {
-            middleFlickServo.setPosition(1);
+            middleFlickServo.setPosition(1); // close
         }
 
-        if (rightFlickControl) {
+        if (rightFlickControl) { // 2r
             rightFlickServo.setPosition(0.4);
         } else {
             rightFlickServo.setPosition(1);
