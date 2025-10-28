@@ -44,9 +44,12 @@ public class limeLightDistance extends OpMode {
     public void loop() {
         //YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         limelight.updateRobotOrientation(odo.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("Orientation", odo.getHeading(AngleUnit.DEGREES));
         LLResult llResult = limelight.getLatestResult();
+        telemetry.addData("Pipeline: ", llResult.getPipelineIndex());
         if (llResult != null && llResult.isValid()) {
             Pose3D botpose = llResult.getBotpose_MT2();
+            distance = 9315/llResult.getTa();
             telemetry.addData("Calculated Distance: ", distance);
             telemetry.addData("Target X: ", llResult.getTx());
             telemetry.addData("Target Area: ", llResult.getTa());
