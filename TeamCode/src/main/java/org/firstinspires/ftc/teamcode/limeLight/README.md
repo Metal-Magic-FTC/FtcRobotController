@@ -101,6 +101,23 @@ Features:
 
 **Use this FIRST if you're having coordinate issues!**
 
+### 6. **NavigateToFieldCenter.java** 🤖
+**Complete autonomous navigation example** using vision + odometry fusion.
+
+Features:
+- Navigates from any position to field center (0, 0, 0°)
+- PID control for smooth, accurate movement
+- Mecanum drive field-centric control
+- Vision corrections eliminate odometry drift
+- Comprehensive telemetry and diagnostics
+
+Configuration:
+- Pinpoint odometry at robot center (X=0, Y=0)
+- Swingarm odometry pods
+- Limelight orientation set via web interface
+
+**See NAVIGATION_GUIDE.md for complete tuning and usage instructions**
+
 ## Quick Start
 
 ### Basic Usage (With IMU - REQUIRED!)
@@ -172,6 +189,40 @@ if (visionPose.getConfidence() >= 0.5) {
 }
 ```
 
+### Autonomous Navigation to Field Center
+
+```java
+// See NavigateToFieldCenter.java for complete autonomous example
+
+@Autonomous(name = "Navigate to Center")
+public class MyAuto extends LinearOpMode {
+    private LimelightLocalizer localizer;
+    private GoBildaPinpointDriver odometry;
+
+    @Override
+    public void runOpMode() {
+        // Initialize hardware
+        localizer = new LimelightLocalizer(hardwareMap, "limelight");
+        odometry = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
+
+        // Configure odometry
+        odometry.setOffsets(0.0, 0.0, DistanceUnit.MM); // Center of robot
+        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+        odometry.resetPosAndIMU();
+
+        localizer.start();
+
+        waitForStart();
+
+        // Navigate to field center (0, 0, 0°)
+        // Uses PID control with vision + odometry fusion
+        // See NavigateToFieldCenter.java for full implementation
+    }
+}
+```
+
+**For complete autonomous navigation guide, see [NAVIGATION_GUIDE.md](NAVIGATION_GUIDE.md)**
+
 ## Configuration
 
 ### Limelight Setup
@@ -213,14 +264,23 @@ LimelightLocalizer localizer = new LimelightLocalizer(
 ### Odometry Configuration (GoBilda Pinpoint)
 
 ```java
-// Configure for your specific robot setup
-odometry.setOffsets(-84.0, -168.0, DistanceUnit.MM);
-odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+// Example configuration - adjust for your robot
+// This example: Pinpoint at center of robot with swingarm pods
+odometry.setOffsets(0.0, 0.0, DistanceUnit.MM); // X and Y offsets from robot center
+odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
 odometry.setEncoderDirections(
     GoBildaPinpointDriver.EncoderDirection.FORWARD,
     GoBildaPinpointDriver.EncoderDirection.FORWARD
 );
 ```
+
+### Limelight Orientation Configuration
+
+**Important:** Limelight orientation (mounting angle, position on robot) is configured through the Limelight web interface, NOT in code:
+1. Connect to http://limelight.local:5801
+2. Go to Settings
+3. Set "Robot Orientation" parameters (mounting angle, height, etc.)
+4. This allows the Limelight to correctly transform coordinates
 
 ## Coordinate System
 

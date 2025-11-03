@@ -53,9 +53,9 @@ public class LimelightOdometryFusion extends OpMode {
         // Initialize GoBilda Pinpoint Odometry
         odometry = hardwareMap.get(GoBildaPinpointDriver.class, ODOMETRY_NAME);
 
-        // Configure odometry - ADJUST THESE VALUES FOR YOUR ROBOT
-        odometry.setOffsets(-84.0, -168.0, DistanceUnit.MM);
-        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        // Configure odometry - Pinpoint at center of robot with swingarm pods
+        odometry.setOffsets(0.0, 0.0, DistanceUnit.MM); // X=0, Y=0 (center of robot)
+        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
         odometry.setEncoderDirections(
                 GoBildaPinpointDriver.EncoderDirection.FORWARD,
                 GoBildaPinpointDriver.EncoderDirection.FORWARD
