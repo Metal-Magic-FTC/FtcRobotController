@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.limeLight.pedroPathing;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -7,19 +7,19 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "lShape", group = "PedroPathing")
-public class LShapePath extends OpMode {
+@TeleOp(name = "Triangle2", group = "PedroPathing")
+public class Triangle2 extends OpMode {
 
     /** Create a Follower instance from Constants */
     private Follower follower;
 
     /** Define the triangle vertices as Poses */
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));        // Start position
-    private final Pose secondPose = new Pose(24, 0, Math.toRadians(90));   // Move forward
-    private final Pose thirdPose = new Pose(24, -24, Math.toRadians(45));     // Move forward-right
+    private final Pose secondPose = new Pose(24, -24, Math.toRadians(90));   // Move forward-right
+    private final Pose thirdPose = new Pose(24, 24, Math.toRadians(45));     // Move forward-left
 
     /** PathChain representing the entire triangle */
-    private PathChain lPath;
+    private PathChain trianglePath;
 
     /**
      * This runs the OpMode, updating the Follower as well as printing out the debug statements to
@@ -49,20 +49,21 @@ public class LShapePath extends OpMode {
         follower.setStartingPose(startPose);
 
         // Build the triangle path
-        lPath = follower.pathBuilder()
+        trianglePath = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, secondPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), secondPose.getHeading())
                 .addPath(new BezierLine(secondPose, thirdPose))
                 .setLinearHeadingInterpolation(secondPose.getHeading(), thirdPose.getHeading())
-                .addPath(new BezierLine(thirdPose, secondPose))
-                .setLinearHeadingInterpolation(thirdPose.getHeading(), secondPose.getHeading())
-                .addPath(new BezierLine(secondPose, startPose))
-                .setLinearHeadingInterpolation(secondPose.getHeading(), startPose.getHeading())
+                .addPath(new BezierLine(thirdPose, startPose))
+                .setLinearHeadingInterpolation(thirdPose.getHeading(), startPose.getHeading())
                 .build();
 
 
+
+        follower.followPath(trianglePath);
+
         // Start following the path
-        follower.followPath(lPath);
+        follower.followPath(trianglePath);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class LShapePath extends OpMode {
 
         // If finished, restart the triangle loop
         if (follower.atParametricEnd()) {
-            follower.followPath(lPath, true);
+            follower.followPath(trianglePath, true);
         }
 
         // Telemetry for debugging

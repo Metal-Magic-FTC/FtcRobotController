@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.autonomous.redfront;
+package org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.redfront;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.limeLight.pedroPathing.Constants;
 
 @Autonomous(name = "RedFront Auto", group = "Auto")
 public class RedFront extends LinearOpMode {

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.autonomous.bluemiddle;
+package org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.blueback;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -6,18 +6,18 @@ import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.follower.Follower;
 
-public class GeneratedPathsBlueMiddle {
+public class GeneratedPathsBlueBack {
 
     private final Follower follower;
 
     // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
-            56,  // X
-            136, // Y
-            Math.toRadians(270) // Heading
+            25.562130177514792,  // X
+            128.83271375464685, // Y
+            Math.toRadians(315) // Heading
     );
 
-    public GeneratedPathsBlueMiddle(Follower follower) {
+    public GeneratedPathsBlueBack(Follower follower) {
         this.follower = follower;
     }
 

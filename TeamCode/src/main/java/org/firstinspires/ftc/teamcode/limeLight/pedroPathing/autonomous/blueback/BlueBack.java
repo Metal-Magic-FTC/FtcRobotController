@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.autonomous.redback;
+package org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.blueback;
 
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -6,17 +6,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.limeLight.pedroPathing.Constants;
 
-@Autonomous(name = "RedBack Auto", group = "Auto")
-public class RedBack extends LinearOpMode {
+@Autonomous(name = "BlueBack Auto", group = "Auto")
+public class BlueBack extends LinearOpMode {
 
     private Follower follower;
-    private GeneratedPathsRedBack paths;
+    private GeneratedPathsBlueBack paths;
 
     DcMotor intakeMotor;
     Servo leftFlickServo = null;
@@ -64,15 +63,15 @@ public class RedBack extends LinearOpMode {
         //intakeMotor.setPower(0);
 
         // End of auto
-        telemetry.addLine("RedBack Auto Finished");
+        telemetry.addLine("BlueBack Auto Finished");
         telemetry.update();
     }
 
     private void initialize() {
         follower = Constants.createFollower(hardwareMap);
 
-        // Apply the start pose from GeneratedPathsRedBack
-        follower.setPose(GeneratedPathsRedBack.START_POSE);
+        // Apply the start pose from GeneratedPathsBlueBack
+        follower.setPose(GeneratedPathsBlueBack.START_POSE);
 
         //follower = Constants.createFollower(hardwareMap);
 
@@ -83,7 +82,7 @@ public class RedBack extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Load paths
-        paths = new GeneratedPathsRedBack(follower);
+        paths = new GeneratedPathsBlueBack(follower);
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -97,7 +96,7 @@ public class RedBack extends LinearOpMode {
 
         gatesClosed();
 
-        telemetry.addLine("Ready to start RedBack Auto");
+        telemetry.addLine("Ready to start BlueBack Auto");
         telemetry.update();
     }
 
@@ -117,9 +116,6 @@ public class RedBack extends LinearOpMode {
     public void shoot(int order) {
 
         if (order == 0) {
-
-            gatesClosed();
-
             // shoot the middle one
             middleFlickServo.setPosition(0.75); // open
             sleep(400);
@@ -133,30 +129,29 @@ public class RedBack extends LinearOpMode {
             leftGate.setPosition(1); // close
 
             sleep(500);
+            gatesClosed();
 
             // shoot middle
             middleFlickServo.setPosition(0.75); // open
             sleep(400);
             middleFlickServo.setPosition(1);
-            sleep(300);
 
-            gatesClosed();
+            sleep(300);
 
             // move left to middle
             leftGate.setPosition(0.7); // open
             leftFlickServo.setPosition(0.4); // launch
-            rightGate.setPosition(0); // close
+            rightGate.setPosition(1); // close
 
-            sleep(300);
+            sleep(500);
+            gatesClosed();
 
             // shoot middle
             middleFlickServo.setPosition(0.75); // open
             sleep(400);
             middleFlickServo.setPosition(1);
 
-            sleep(300);
-            gatesClosed();
-            sleep(300);
+            sleep(100);
 
 
         }
@@ -188,7 +183,6 @@ public class RedBack extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setPower(0);
 
         if (stopDelayMs > 0) sleep(stopDelayMs);
-
     }
 
     private void runIntakePath(PathChain path, int stopDelayMs, double speed) {
@@ -217,6 +211,5 @@ public class RedBack extends LinearOpMode {
 
         if (stopDelayMs > 0) sleep(stopDelayMs);
     }
-
 
 }
