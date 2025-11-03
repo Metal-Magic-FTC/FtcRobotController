@@ -1,0 +1,117 @@
+package org.firstinspires.ftc.teamcode.pedroPathing;
+
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+
+import java.util.List;
+
+@TeleOp(name = "Rotate To Tag HEHEHHEHEHA", group = "PedroPathing")
+public class RotateToTag extends OpMode {
+
+    private Follower follower;
+    private Limelight3A limelight;
+
+    private boolean rotatingToTag = false;
+    private double targetHeading = 0;
+
+    private static final double HEADING_TOLERANCE = Math.toRadians(2);
+    private static final double ROTATE_SPEED = 0.3;
+
+    @Override
+    public void init() {
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(0, 0, 0));
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(3); // AprilTag pipeline
+
+        telemetry.addLine("Rear Limelight + PedroPathing TeleOp Initialized");
+        telemetry.update();
+    }
+
+    @Override
+    public void start() {
+        limelight.start();
+    }
+
+    @Override
+    public void loop() {
+        follower.update();
+
+        // ========== Normal Drive ==========
+        if (!rotatingToTag) {
+            double y = -gamepad1.left_stick_y;  // forward
+            double x = gamepad1.left_stick_x;   // strafe
+            double rx = gamepad1.right_stick_x; // rotate
+
+            follower.setTeleOpDrive(x, y, rx, false);
+
+            // ========== Press A to face tag ==========
+            if (gamepad1.a) {
+                LLResult llResult = limelight.getLatestResult();
+
+                if (llResult != null && llResult.isValid()) {
+                    List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
+                    if (!fiducials.isEmpty()) {
+                        // Pick the first detected tag
+                        LLResultTypes.FiducialResult tag = fiducials.get(0);
+
+                        // Pose of the tag relative to the robot
+                        Pose3D robotToTag = tag.getRobotPoseTargetSpace();
+
+                        // Yaw from Limelight (tag relative to robot)
+                        double yawToTag = robotToTag.getOrientation().getYaw();
+
+                        // Because Limelight is mounted facing backwards, flip the direction
+                        // and add 180° so the robot front faces the tag.
+                        yawToTag = -yawToTag + Math.PI;
+
+                        double currentHeading = follower.getPose().getHeading();
+                        targetHeading = normalizeAngle(currentHeading + yawToTag);
+
+                        rotatingToTag = true;
+                        telemetry.addLine("Rear Limelight: rotating to face tag...");
+                    } else {
+                        telemetry.addLine("No AprilTags detected.");
+                    }
+                } else {
+                    telemetry.addLine("No valid Limelight result.");
+                }
+            }
+        }
+
+        // ========== Rotate until facing tag ==========
+        else {
+            double currentHeading = follower.getPose().getHeading();
+            double error = normalizeAngle(targetHeading - currentHeading);
+            double rotPower = Math.copySign(ROTATE_SPEED, error);
+
+            if (Math.abs(error) < HEADING_TOLERANCE) {
+                rotPower = 0;
+                rotatingToTag = false;
+                telemetry.addLine("Rotation complete.");
+            }
+
+            follower.setTeleOpDrive(0, 0, rotPower, false);
+        }
+
+        // ========== Telemetry ==========
+        telemetry.addData("Heading (deg)", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("Target Heading (deg)", Math.toDegrees(targetHeading));
+        telemetry.addData("RotatingToTag", rotatingToTag);
+        telemetry.update();
+    }
+
+    /** Normalize angle to [-π, π] */
+    private double normalizeAngle(double angle) {
+        while (angle > Math.PI) angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
+    }
+}
