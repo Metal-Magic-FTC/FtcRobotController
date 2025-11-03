@@ -121,10 +121,24 @@ public class LimelightLocalizationDemo extends OpMode {
         } else {
             telemetry.addData("Status", "NO POSITION AVAILABLE");
             telemetry.addData("", "Check AprilTag visibility");
+
+            // Check if orientation is being updated
+            if (!localizer.isOrientationUpdated()) {
+                telemetry.addLine();
+                telemetry.addData("⚠ WARNING", "Orientation not updated!");
+                telemetry.addData("", "Call updateRobotOrientation()");
+            }
         }
 
         telemetry.addLine();
         telemetry.addLine("=== LOCALIZATION INFO ===");
+
+        // Show orientation update status
+        if (localizer.isOrientationUpdated() && localizer.getLastOrientation() != null) {
+            telemetry.addData("Orientation Updated", "✓ %.1f°", localizer.getLastOrientation());
+        } else {
+            telemetry.addData("Orientation Updated", "✗ NOT SET - REQUIRED!");
+        }
 
         // Localization mode
         LimelightLocalizer.LocalizationMode mode = localizer.getCurrentMode();

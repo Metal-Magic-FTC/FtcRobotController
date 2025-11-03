@@ -2,6 +2,39 @@
 
 This package provides a complete robot localization system using Limelight 3A camera and AprilTags for FIRST Tech Challenge (FTC).
 
+## ⚠️ CRITICAL: Field-Centric Coordinates Requirement
+
+**If your Limelight is returning incorrect coordinates (e.g., x decreasing as you approach an AprilTag), you MUST:**
+
+### 1. Call `updateRobotOrientation()` BEFORE Getting Pose
+
+```java
+// WRONG - Will give wrong coordinates!
+RobotPose pose = localizer.update();
+
+// CORRECT - Update orientation first!
+localizer.updateRobotOrientation(imu.getYaw());  // or odometry heading
+RobotPose pose = localizer.update();
+```
+
+**Why?** The Limelight NEEDS your robot's current heading to calculate field-centric coordinates. Without it, you'll get tag-relative coordinates instead, which will appear backwards or incorrect.
+
+### 2. Configure AprilTag Field Layout in Limelight
+
+1. Connect to your Limelight's web interface (http://limelight.local:5801)
+2. Go to the AprilTag pipeline settings
+3. Load the FTC field layout for your game year
+4. Verify tags are at correct positions
+
+**Why?** The Limelight must know where AprilTags are on the field to calculate your robot's field position.
+
+### 3. Use the Diagnostic Tool
+
+Run the **"Limelight Coordinate Diagnostic"** OpMode to verify your setup:
+- It shows ALL coordinate frames (MegaTag2, Botpose, individual tags)
+- Helps identify if you're getting tag-relative vs field-centric data
+- Tests with/without IMU orientation updates
+
 ## Overview
 
 The pipeline determines the robot's position (x, y) and orientation (heading) on the FTC field by detecting AprilTags with the Limelight camera. It uses advanced algorithms to provide accurate, real-time localization.
@@ -56,15 +89,29 @@ Advanced example that fuses Limelight vision with GoBilda Pinpoint Odometry.
 
 This is the **recommended approach** for competitive robots - combines the best of both sensors!
 
+### 5. **LimelightCoordinateDiagnostic.java** 🔍
+**Essential diagnostic tool** for debugging coordinate system issues.
+
+Features:
+- Displays ALL coordinate frames (MegaTag2, Botpose, tag-relative)
+- Toggle between IMU and manual heading
+- See real-time which data is field-centric vs tag-relative
+- Verify updateRobotOrientation() is working
+- Check if field layout is configured
+
+**Use this FIRST if you're having coordinate issues!**
+
 ## Quick Start
 
-### Basic Usage (No Odometry)
+### Basic Usage (With IMU - REQUIRED!)
 
 ```java
 // In your OpMode
 
 // 1. Initialize
 LimelightLocalizer localizer = new LimelightLocalizer(hardwareMap, "limelight");
+IMU imu = hardwareMap.get(IMU.class, "imu");
+// ... configure IMU ...
 
 // 2. Start in your start() method
 @Override
@@ -72,9 +119,14 @@ public void start() {
     localizer.start();
 }
 
-// 3. Update in loop
+// 3. Update in loop - MUST call updateRobotOrientation() FIRST!
 @Override
 public void loop() {
+    // CRITICAL: Update robot heading BEFORE getting pose!
+    double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+    localizer.updateRobotOrientation(heading);
+
+    // Now get the pose
     RobotPose pose = localizer.update();
 
     if (pose != null) {
@@ -90,16 +142,12 @@ public void loop() {
 }
 ```
 
-### With IMU Integration
+### Testing Without IMU (For Debugging Only)
 
 ```java
-// Add IMU to initialization
-IMU imu = hardwareMap.get(IMU.class, "imu");
-// ... configure IMU ...
-
-// In loop, update heading before getting pose
-double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-localizer.updateRobotOrientation(heading);
+// You can test with a fixed heading for debugging
+// WARNING: This only works if robot never rotates!
+localizer.updateRobotOrientation(0.0);  // Assume robot faces 0°
 RobotPose pose = localizer.update();
 ```
 
@@ -189,6 +237,29 @@ odometry.setEncoderDirections(
 - **180° or -180°**: Robot facing backward
 
 ## Troubleshooting
+
+### ⚠️ WRONG COORDINATES - X Decreases When Approaching Tag
+
+**This is the most common issue!** Your coordinates are in **tag-relative** space instead of **field-centric** space.
+
+**Solutions:**
+1. **Call `updateRobotOrientation()` before `update()`**:
+   ```java
+   localizer.updateRobotOrientation(imu.getYaw());  // MUST DO THIS!
+   RobotPose pose = localizer.update();
+   ```
+
+2. **Configure field layout in Limelight web interface**:
+   - Go to http://limelight.local:5801
+   - Load FTC field layout for your game year
+   - Verify AprilTag positions match field setup
+
+3. **Run the Diagnostic OpMode**: "Limelight Coordinate Diagnostic"
+   - Shows ALL coordinate frames side-by-side
+   - Verify which data is field-centric
+   - Test with/without orientation updates
+
+**How to identify:** If robot moves forward toward tag and X value decreases (instead of staying constant or changing based on field position), you're getting tag-relative coordinates.
 
 ### No Position Available
 - **Check AprilTag visibility**: At least one tag must be visible
