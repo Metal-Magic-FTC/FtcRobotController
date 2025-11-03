@@ -62,6 +62,13 @@ public class AprilTagLimelightTest extends OpMode {
                 telemetry.addData("targetRobot", targetRobot.toString());
             }
 
+            Pose3D botpose = llResult.getBotpose();
+            if (botpose != null) {
+                double x = botpose.getPosition().x;
+                double y = botpose.getPosition().y;
+                telemetry.addData("MT1 Location", "(" + x + ", " + y + ")");
+            }
+
 
 //            Pose3D botPose = llResult.getBotpose_MT2();
 //
