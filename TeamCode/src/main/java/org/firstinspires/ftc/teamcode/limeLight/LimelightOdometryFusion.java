@@ -54,10 +54,10 @@ public class LimelightOdometryFusion extends OpMode {
         odometry = hardwareMap.get(GoBildaPinpointDriver.class, ODOMETRY_NAME);
 
         // Configure odometry - ADJUST THESE VALUES FOR YOUR ROBOT
-        odometry.setOffsets(-84.0, -168.0);
-        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odometry.setOffsets(0, 0);
+        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
         odometry.setEncoderDirections(
-                GoBildaPinpointDriver.EncoderDirection.FORWARD,
+                GoBildaPinpointDriver.EncoderDirection.REVERSED,
                 GoBildaPinpointDriver.EncoderDirection.FORWARD
         );
         odometry.resetPosAndIMU();
@@ -81,7 +81,7 @@ public class LimelightOdometryFusion extends OpMode {
         Pose2D odoPose = odometry.getPosition();
 
         // Update Limelight with current heading for better accuracy
-        double currentHeading = odometry.getHeading();
+        double currentHeading = Math.toDegrees(odometry.getHeading());
         limelightLocalizer.updateRobotOrientation(currentHeading);
 
         // Get latest vision pose
