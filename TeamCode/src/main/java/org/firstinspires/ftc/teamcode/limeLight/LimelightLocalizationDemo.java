@@ -191,7 +191,7 @@ public class LimelightLocalizationDemo extends OpMode {
             telemetry.addData("TY", "%.2f°", result.getTy());
             telemetry.addData("TA", "%.2f%%", result.getTa());
             telemetry.addData("Pipeline", result.getPipelineIndex());
-            telemetry.addData("Latency", "%.1f ms", result.getLatency());
+//            telemetry.addData("Latency", "%.1f ms", result.getLatency());
         }
 
         if (imu != null) {
