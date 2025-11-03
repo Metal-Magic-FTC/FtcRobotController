@@ -41,6 +41,8 @@ public class LimelightLocalizer {
     private RobotPose lastValidPose;
     private LLResult lastResult;
     private LocalizationMode currentMode;
+    private boolean orientationUpdated;
+    private Double lastOrientation;
 
     // Statistics
     private int totalUpdates;
@@ -91,6 +93,8 @@ public class LimelightLocalizer {
         this.lastValidPose = null;
         this.lastResult = null;
         this.currentMode = LocalizationMode.NONE;
+        this.orientationUpdated = false;
+        this.lastOrientation = null;
 
         // Initialize statistics
         this.totalUpdates = 0;
@@ -119,12 +123,18 @@ public class LimelightLocalizer {
 
     /**
      * Updates the robot's orientation in the Limelight.
-     * This improves localization accuracy by providing the current heading from IMU/odometry.
+     * This is REQUIRED for field-centric localization!
      *
-     * @param headingDegrees Current robot heading in degrees
+     * IMPORTANT: You MUST call this method with the current robot heading from your IMU or
+     * odometry system BEFORE calling update(). Without this, the Limelight cannot calculate
+     * field-centric coordinates and will return incorrect values.
+     *
+     * @param headingDegrees Current robot heading in degrees (from IMU or odometry)
      */
     public void updateRobotOrientation(double headingDegrees) {
         limelight.updateRobotOrientation(headingDegrees);
+        orientationUpdated = true;
+        lastOrientation = headingDegrees;
     }
 
     /**
@@ -191,38 +201,30 @@ public class LimelightLocalizer {
     }
 
     /**
-     * Gets the best single-tag pose from all visible AprilTags.
-     * Uses the tag with the highest confidence.
+     * Gets the pose from standard botpose (single-tag localization fallback).
+     * This uses getBotpose() which works for single tags when MegaTag2 is not available.
      */
     private RobotPose getBestSingleTagPose() {
         if (lastResult == null) return null;
 
+        // Use standard botpose for single-tag localization
+        Pose3D botpose = lastResult.getBotpose();
+        if (botpose == null) return null;
+
         List<LLResultTypes.FiducialResult> fiducials = lastResult.getFiducialResults();
         if (fiducials == null || fiducials.isEmpty()) return null;
 
-        RobotPose bestPose = null;
-        double bestConfidence = 0.0;
+        // Extract position (in meters)
+        double x = botpose.getPosition().x;
+        double y = botpose.getPosition().y;
 
-        for (LLResultTypes.FiducialResult fiducial : fiducials) {
-            Pose3D robotPoseFieldSpace = fiducial.getRobotPoseFieldSpace();
-            if (robotPoseFieldSpace == null) continue;
+        // Extract orientation (yaw in degrees)
+        double heading = botpose.getOrientation().getYaw();
 
-            // Extract position and orientation
-            double x = robotPoseFieldSpace.getPosition().x;
-            double y = robotPoseFieldSpace.getPosition().y;
-            double heading = robotPoseFieldSpace.getOrientation().getYaw();
+        // Calculate confidence for single-tag localization
+        double confidence = calculateSingleTagConfidence(fiducials.get(0));
 
-            // Calculate confidence for this tag
-            double confidence = calculateSingleTagConfidence(fiducial);
-
-            // Keep the pose with highest confidence
-            if (confidence > bestConfidence) {
-                bestConfidence = confidence;
-                bestPose = new RobotPose(x, y, heading, confidence);
-            }
-        }
-
-        return bestPose;
+        return new RobotPose(x, y, heading, confidence);
     }
 
     /**
@@ -353,5 +355,52 @@ public class LimelightLocalizer {
         validPoseCount = 0;
         mt2PoseCount = 0;
         singleTagPoseCount = 0;
+    }
+
+    /**
+     * Checks if robot orientation has been updated via updateRobotOrientation().
+     * If this returns false, field-centric localization will NOT work correctly!
+     *
+     * @return true if orientation has been set, false otherwise
+     */
+    public boolean isOrientationUpdated() {
+        return orientationUpdated;
+    }
+
+    /**
+     * Gets the last robot orientation that was provided via updateRobotOrientation().
+     *
+     * @return Last orientation in degrees, or null if never set
+     */
+    public Double getLastOrientation() {
+        return lastOrientation;
+    }
+
+    /**
+     * Gets a diagnostic string explaining the current localization status.
+     * Useful for debugging configuration issues.
+     *
+     * @return Multi-line diagnostic string
+     */
+    public String getDiagnosticString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("LimelightLocalizer Diagnostics:\n");
+        sb.append("  Orientation Updated: ").append(orientationUpdated ? "YES" : "NO - REQUIRED FOR FIELD-CENTRIC!");
+        sb.append("\n");
+        if (lastOrientation != null) {
+            sb.append("  Last Orientation: ").append(String.format("%.1f°", lastOrientation)).append("\n");
+        }
+        sb.append("  Current Mode: ").append(currentMode).append("\n");
+        sb.append("  Visible Tags: ").append(getVisibleTagCount()).append("\n");
+        sb.append("  Success Rate: ").append(String.format("%.1f%%", getSuccessRate() * 100)).append("\n");
+        sb.append("  Valid Poses: ").append(validPoseCount).append(" / ").append(totalUpdates).append("\n");
+
+        if (!orientationUpdated) {
+            sb.append("\n");
+            sb.append("⚠ WARNING: Call updateRobotOrientation() before update()!\n");
+            sb.append("Without robot heading, field-centric coordinates will be wrong!\n");
+        }
+
+        return sb.toString();
     }
 }
