@@ -118,6 +118,29 @@ Configuration:
 
 **See NAVIGATION_GUIDE.md for complete tuning and usage instructions**
 
+### 7. **NavigateToFieldCenterPedro.java** 🎯 (RECOMMENDED)
+**Autonomous navigation using PedroPathing's pre-tuned controllers.**
+
+Features:
+- No PID tuning required - works out of the box!
+- Uses PedroPathing from `Constants.java` (already configured)
+- Limelight provides vision corrections
+- Smooth path following with acceleration limits
+- Simpler code (~200 lines vs 450 lines)
+
+**This is the easiest way to get started with autonomous!**
+
+### 8. **PedroLimelightLocalizer.java** 🔧
+**Utility class for easy PedroPathing + Limelight integration.**
+
+Features:
+- Simple API: `updateFollowerWithVision()` - that's it!
+- Automatic coordinate conversion (meters ↔ inches)
+- Configurable confidence threshold and update interval
+- Statistics tracking
+
+**See PEDROPATHING_GUIDE.md for complete integration guide**
+
 ## Quick Start
 
 ### Basic Usage (With IMU - REQUIRED!)
@@ -222,6 +245,62 @@ public class MyAuto extends LinearOpMode {
 ```
 
 **For complete autonomous navigation guide, see [NAVIGATION_GUIDE.md](NAVIGATION_GUIDE.md)**
+
+### With PedroPathing (RECOMMENDED - No Tuning Required!)
+
+```java
+// See NavigateToFieldCenterPedro.java for complete example
+
+@Autonomous(name = "Navigate with PedroPathing")
+public class MyPedroAuto extends LinearOpMode {
+    private Follower follower;
+    private PedroLimelightLocalizer localizer;
+
+    @Override
+    public void runOpMode() {
+        // Initialize PedroPathing (pre-tuned from Constants.java)
+        follower = Constants.createFollower(hardwareMap);
+
+        // Initialize Limelight localizer
+        localizer = new PedroLimelightLocalizer(hardwareMap, follower);
+        localizer.start();
+
+        // Set initial pose from vision
+        Pose initialPose = localizer.getVisionPose();
+        if (initialPose != null) {
+            follower.setPose(initialPose);
+        }
+
+        waitForStart();
+
+        // Create path to field center
+        Pose target = new Pose(0, 0, 0); // (x, y, heading) in inches/radians
+        PathChain path = follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), target))
+                .setConstantHeadingInterpolation(0)
+                .build();
+
+        follower.followPath(path);
+
+        // Follow path with automatic vision corrections
+        while (opModeIsActive() && !follower.atParametricEnd()) {
+            follower.update();
+            localizer.updateFollowerWithVision(); // Automatic vision correction!
+
+            telemetry.addData("Pose", follower.getPose());
+            telemetry.update();
+        }
+    }
+}
+```
+
+**Advantages:**
+- ✅ No PID tuning required (already tuned in Constants.java)
+- ✅ Smooth path following with acceleration limits
+- ✅ Vision corrections with one line of code
+- ✅ Simpler than custom PID (~100 lines vs 450 lines)
+
+**For complete PedroPathing integration guide, see [PEDROPATHING_GUIDE.md](PEDROPATHING_GUIDE.md)**
 
 ## Configuration
 
