@@ -317,6 +317,7 @@ public class LimelightCoordinateDiagnostic extends OpMode {
             telemetry.addData("  X", "%.3f m (forward)", robotTarget.getPosition().x);
             telemetry.addData("  Y", "%.3f m (left)", robotTarget.getPosition().y);
             telemetry.addData("  Z", "%.3f m (distance)", robotTarget.getPosition().z);
+            telemetry.addData("Y angle: ", tag.getTargetYDegrees());
 
             // Check if this is being used incorrectly as field coordinates
             if (robotTarget.getPosition().z < 3.0) {
