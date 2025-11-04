@@ -5,11 +5,11 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPinpointDriver;
 
 import java.util.List;
 
@@ -27,8 +27,13 @@ import java.util.List;
  * 3. See which coordinate frames give correct field-centric data
  * 4. Debug why positions might be in wrong reference frame
  *
+ * Configuration:
+ * - Uses GoBilda Pinpoint odometry for IMU data
+ * - Pinpoint at center of robot (X=0, Y=0)
+ * - Swingarm odometry pods
+ *
  * Controls:
- * - Press A to toggle IMU usage (for updateRobotOrientation)
+ * - Press A to toggle Pinpoint IMU usage (for updateRobotOrientation)
  * - Press B to manually set robot heading to 0°
  * - Press X to manually set robot heading to 90°
  * - Press Y to manually set robot heading to 180°
@@ -37,9 +42,9 @@ import java.util.List;
 public class LimelightCoordinateDiagnostic extends OpMode {
 
     private Limelight3A limelight;
-    private IMU imu;
+    private GoBildaPinpointDriver odometry;
 
-    private boolean useIMU = false;
+    private boolean usePinpointIMU = false;
     private double manualHeading = 0.0;
 
     private boolean lastAPress = false;
@@ -56,20 +61,24 @@ public class LimelightCoordinateDiagnostic extends OpMode {
         limelight.pipelineSwitch(3); // AprilTag pipeline
         limelight.setPollRateHz(100);
 
-        // Try to initialize IMU
+        // Try to initialize GoBilda Pinpoint Odometry
         try {
-            imu = hardwareMap.get(IMU.class, "imu");
-            IMU.Parameters parameters = new IMU.Parameters(
-                    new RevHubOrientationOnRobot(
-                            RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                    )
+            odometry = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
+
+            // Configure odometry - Pinpoint at center of robot with swingarm pods
+            odometry.setOffsets(0.0, 0.0, DistanceUnit.MM); // Center of robot
+            odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+            odometry.setEncoderDirections(
+                    GoBildaPinpointDriver.EncoderDirection.FORWARD,
+                    GoBildaPinpointDriver.EncoderDirection.FORWARD
             );
-            imu.initialize(parameters);
-            telemetry.addData("IMU", "Available (press A to enable)");
+            odometry.resetPosAndIMU();
+
+            telemetry.addData("Pinpoint IMU", "Available (press A to enable)");
+            telemetry.addData("Odometry Config", "Center mount, swingarm pods");
         } catch (Exception e) {
-            imu = null;
-            telemetry.addData("IMU", "Not available");
+            odometry = null;
+            telemetry.addData("Pinpoint IMU", "Not available");
         }
 
         telemetry.addData("Status", "Initialized");
@@ -84,6 +93,11 @@ public class LimelightCoordinateDiagnostic extends OpMode {
 
     @Override
     public void loop() {
+        // Update odometry if available
+        if (odometry != null) {
+            odometry.update();
+        }
+
         handleGamepadInput();
 
         // Get current heading
@@ -104,42 +118,42 @@ public class LimelightCoordinateDiagnostic extends OpMode {
     }
 
     private void handleGamepadInput() {
-        // Toggle IMU usage
-        if (gamepad1.a && !lastAPress && imu != null) {
-            useIMU = !useIMU;
+        // Toggle Pinpoint IMU usage
+        if (gamepad1.a && !lastAPress && odometry != null) {
+            usePinpointIMU = !usePinpointIMU;
         }
         lastAPress = gamepad1.a;
 
         // Set manual headings
         if (gamepad1.b && !lastBPress) {
             manualHeading = 0.0;
-            useIMU = false;
+            usePinpointIMU = false;
         }
         lastBPress = gamepad1.b;
 
         if (gamepad1.x && !lastXPress) {
             manualHeading = 90.0;
-            useIMU = false;
+            usePinpointIMU = false;
         }
         lastXPress = gamepad1.x;
 
         if (gamepad1.y && !lastYPress) {
             manualHeading = 180.0;
-            useIMU = false;
+            usePinpointIMU = false;
         }
         lastYPress = gamepad1.y;
     }
 
     private double getCurrentHeading() {
-        if (useIMU && imu != null) {
-            return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        if (usePinpointIMU && odometry != null) {
+            return odometry.getHeading(AngleUnit.DEGREES);
         }
         return manualHeading;
     }
 
     private void displayNoData(double currentHeading) {
         telemetry.addLine("═══ ROBOT HEADING ═══");
-        telemetry.addData("Source", useIMU ? "IMU" : "Manual");
+        telemetry.addData("Source", usePinpointIMU ? "Pinpoint IMU" : "Manual");
         telemetry.addData("Heading", "%.1f°", currentHeading);
         telemetry.addLine();
         telemetry.addData("STATUS", "❌ NO APRILTAG DETECTED");
@@ -152,8 +166,14 @@ public class LimelightCoordinateDiagnostic extends OpMode {
 
     private void displayDiagnostics(LLResult result, double currentHeading) {
         telemetry.addLine("═══ ROBOT HEADING ═══");
-        telemetry.addData("Source", useIMU ? "IMU" : "Manual");
+        telemetry.addData("Source", usePinpointIMU ? "Pinpoint IMU" : "Manual");
         telemetry.addData("Heading", "%.1f°", currentHeading);
+
+        // Show odometry position if available
+        if (odometry != null) {
+            telemetry.addData("Odo X", "%.1f mm", odometry.getPosition().getX(DistanceUnit.MM));
+            telemetry.addData("Odo Y", "%.1f mm", odometry.getPosition().getY(DistanceUnit.MM));
+        }
 
         telemetry.addLine();
         telemetry.addLine("═══ MEGATAG2 (FIELD-CENTRIC) ═══");
@@ -257,8 +277,8 @@ public class LimelightCoordinateDiagnostic extends OpMode {
 
     private void displayControls() {
         telemetry.addLine("─── CONTROLS ───");
-        if (imu != null) {
-            telemetry.addData("A", useIMU ? "Using IMU ✓" : "Use IMU");
+        if (odometry != null) {
+            telemetry.addData("A", usePinpointIMU ? "Using Pinpoint IMU ✓" : "Use Pinpoint IMU");
         }
         telemetry.addData("B", "Set heading = 0°");
         telemetry.addData("X", "Set heading = 90°");
