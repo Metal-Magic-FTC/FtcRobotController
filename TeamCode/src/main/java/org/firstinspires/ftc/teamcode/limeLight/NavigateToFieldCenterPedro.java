@@ -65,9 +65,6 @@ public class NavigateToFieldCenterPedro extends LinearOpMode {
     private static final double POSITION_TOLERANCE = 2.0;  // inches
     private static final double HEADING_TOLERANCE = Math.toRadians(3.0); // radians
     private static final double NAVIGATION_TIMEOUT_SEC = 20.0;
-
-    // Path following settings
-    private static final boolean USE_CONSTANT_HEADING = true; // Keep heading toward target
     private static final double PATH_TIMEOUT_SEC = 15.0;
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -220,9 +217,14 @@ public class NavigateToFieldCenterPedro extends LinearOpMode {
 
     /**
      * Checks if robot has reached the target position.
+     *
+     * @return true if within tolerance, false otherwise
      */
     private boolean isTargetReached() {
         Pose currentPose = follower.getPose();
+        if (currentPose == null) {
+            return false;
+        }
 
         double dx = currentPose.getX() - TARGET_X;
         double dy = currentPose.getY() - TARGET_Y;
@@ -237,16 +239,13 @@ public class NavigateToFieldCenterPedro extends LinearOpMode {
 
     /**
      * Gets current pose from Limelight vision.
+     * Returns null if no vision data available.
+     *
+     * @return Pose in PedroPathing format (inches, radians), or null
      */
     private Pose getVisionPose() {
-        // Update Limelight with current heading from odometry
-        Pose currentPose = follower.getPose();
-        limelightLocalizer.updateRobotOrientation(
-            Math.toDegrees(currentPose.getHeading())
-        );
-
-        // Get vision pose
-        RobotPose visionPose = limelightLocalizer.update();
+        // Get vision RobotPose first
+        RobotPose visionPose = getVisionRobotPose();
 
         if (visionPose == null) {
             return null;
@@ -261,6 +260,27 @@ public class NavigateToFieldCenterPedro extends LinearOpMode {
     }
 
     /**
+     * Gets RobotPose from Limelight vision.
+     * Returns null if no vision data available.
+     *
+     * @return RobotPose with confidence, or null
+     */
+    private RobotPose getVisionRobotPose() {
+        // Update Limelight with current heading from odometry
+        Pose currentPose = follower.getPose();
+        if (currentPose == null) {
+            return null;
+        }
+
+        limelightLocalizer.updateRobotOrientation(
+            Math.toDegrees(currentPose.getHeading())
+        );
+
+        // Get vision pose
+        return limelightLocalizer.update();
+    }
+
+    /**
      * Applies vision correction to PedroPathing pose if available and reliable.
      */
     private void applyVisionCorrection() {
@@ -272,21 +292,30 @@ public class NavigateToFieldCenterPedro extends LinearOpMode {
             return;
         }
 
-        // Get vision pose
-        Pose visionPose = getVisionPose();
+        // Get vision RobotPose (with confidence)
+        RobotPose robotPose = getVisionRobotPose();
 
-        if (visionPose == null) {
+        if (robotPose == null) {
             return;
         }
 
-        // Get vision confidence
-        RobotPose robotPose = limelightLocalizer.update();
-        if (robotPose == null || robotPose.getConfidence() < VISION_CONFIDENCE_THRESHOLD) {
+        // Check confidence threshold
+        if (robotPose.getConfidence() < VISION_CONFIDENCE_THRESHOLD) {
             return;
         }
+
+        // Convert to PedroPathing Pose format
+        double xInches = robotPose.getX() * 39.3701;
+        double yInches = robotPose.getY() * 39.3701;
+        double headingRad = Math.toRadians(robotPose.getHeading());
+        Pose visionPose = new Pose(xInches, yInches, headingRad);
 
         // Calculate correction magnitude
         Pose currentPose = follower.getPose();
+        if (currentPose == null) {
+            return;
+        }
+
         double correctionDistance = Math.hypot(
             visionPose.getX() - currentPose.getX(),
             visionPose.getY() - currentPose.getY()
@@ -306,6 +335,13 @@ public class NavigateToFieldCenterPedro extends LinearOpMode {
      * Displays comprehensive navigation telemetry.
      */
     private void displayNavigationTelemetry(Pose currentPose) {
+        // Safety check
+        if (currentPose == null) {
+            telemetry.addData("Status", "Error: No pose data");
+            telemetry.update();
+            return;
+        }
+
         telemetry.addLine("=== NAVIGATION STATUS ===");
         telemetry.addData("Time", "%.1f / %.0f sec", runtime.seconds(), NAVIGATION_TIMEOUT_SEC);
 
