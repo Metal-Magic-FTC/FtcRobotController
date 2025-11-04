@@ -28,12 +28,50 @@ RobotPose pose = localizer.update();
 
 **Why?** The Limelight must know where AprilTags are on the field to calculate your robot's field position.
 
-### 3. Use the Diagnostic Tool
+### 3. Initialize Pinpoint Odometry with Absolute Heading
+
+**IMPORTANT: Pinpoint Odometry Resets to 0° at Program Start!**
+
+This is a **critical issue** that will cause MegaTag2 to calculate wrong positions if not addressed:
+
+**The Problem:**
+- Pinpoint odometry resets its heading to 0° every time you run a program
+- If your robot is actually facing 90° on the field, but Pinpoint thinks it's at 0°...
+- When you call `updateRobotOrientation(pinpoint.getHeading())`, you're telling Limelight the wrong heading
+- MegaTag2 will then calculate the WRONG field position!
+
+**The Solution:**
+All OpModes in this package now **automatically initialize Pinpoint heading from MegaTag2**:
+
+```java
+// At program startup:
+// 1. Get absolute heading from MegaTag2 (without calling updateRobotOrientation)
+RobotPose absolutePose = limelightLocalizer.update(); // MT2 knows absolute heading!
+
+// 2. Set Pinpoint heading to match the absolute field heading
+odometry.setPosition(new Pose2D(
+    DistanceUnit.MM, x_mm, y_mm,
+    AngleUnit.RADIANS, absoluteHeadingRadians
+));
+
+// 3. Now Pinpoint and MegaTag2 are synchronized!
+```
+
+**Key Points:**
+- ✅ MegaTag2 can determine absolute heading WITHOUT being told the robot orientation
+- ✅ We use this at startup to initialize Pinpoint with the correct heading
+- ✅ After initialization, use Pinpoint heading for `updateRobotOrientation()` calls
+- ⚠️ Robot must be able to see multiple AprilTags at startup for this to work
+- ⚠️ If initialization fails, the OpMode will warn you
+
+### 4. Use the Diagnostic Tool
 
 Run the **"Limelight Coordinate Diagnostic"** OpMode to verify your setup:
 - It shows ALL coordinate frames (MegaTag2, Botpose, individual tags)
 - Helps identify if you're getting tag-relative vs field-centric data
 - Tests with/without IMU orientation updates
+- **NEW:** Press DPAD_UP to test initializing Pinpoint from MegaTag2
+- **NEW:** Press DPAD_DOWN to see absolute MT2 heading (without updateRobotOrientation)
 
 ## Overview
 

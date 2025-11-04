@@ -100,11 +100,23 @@ public class NavigateToFieldCenter extends LinearOpMode {
 
     /**
      * Initialize all hardware components.
+     *
+     * CRITICAL: This method initializes Pinpoint odometry with ABSOLUTE field heading
+     * from Limelight MegaTag2, solving the "odometry reset" issue where Pinpoint
+     * starts at 0° regardless of actual robot orientation.
      */
     private void initializeHardware() {
+        telemetry.addLine("=== INITIALIZATION ===");
+        telemetry.addData("Step 1", "Starting Limelight...");
+        telemetry.update();
+
         // Initialize Limelight Localizer
         limelightLocalizer = new LimelightLocalizer(hardwareMap, "limelight");
         limelightLocalizer.start();
+        sleep(500); // Give Limelight time to capture frames
+
+        telemetry.addData("Step 2", "Configuring Pinpoint odometry...");
+        telemetry.update();
 
         // Initialize GoBilda Pinpoint Odometry
         odometry = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
@@ -115,6 +127,38 @@ public class NavigateToFieldCenter extends LinearOpMode {
                 GoBildaPinpointDriver.EncoderDirection.FORWARD
         );
         odometry.resetPosAndIMU();
+
+        telemetry.addData("Step 3", "Getting absolute heading from MegaTag2...");
+        telemetry.update();
+
+        // Get initial ABSOLUTE heading from Limelight MegaTag2
+        RobotPose initialVisionPose = getInitialAbsolutePose();
+
+        if (initialVisionPose != null && initialVisionPose.getConfidence() > 0.5) {
+            telemetry.addData("✓ Vision Heading", "%.1f°", initialVisionPose.getHeading());
+            telemetry.addData("  Confidence", "%.2f", initialVisionPose.getConfidence());
+
+            // Initialize Pinpoint with absolute heading from vision
+            double xMM = initialVisionPose.getX() * 1000.0; // meters to mm
+            double yMM = initialVisionPose.getY() * 1000.0;
+            double headingRad = Math.toRadians(initialVisionPose.getHeading());
+
+            odometry.setPosition(new org.firstinspires.ftc.robotcore.external.navigation.Pose2D(
+                DistanceUnit.MM, xMM, yMM,
+                AngleUnit.RADIANS, headingRad
+            ));
+            odometry.update();
+
+            telemetry.addData("✓ Pinpoint Set", "X: %.0fmm, Y: %.0fmm, H: %.1f°",
+                xMM, yMM, initialVisionPose.getHeading());
+        } else {
+            telemetry.addData("⚠ Warning", "No MegaTag2 data available");
+            telemetry.addData("", "Ensure multiple AprilTags are visible");
+            telemetry.addData("", "Pinpoint will start at 0° (may cause errors)");
+            sleep(3000);
+        }
+
+        telemetry.update();
 
         // Initialize drive motors
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
@@ -133,6 +177,36 @@ public class NavigateToFieldCenter extends LinearOpMode {
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        telemetry.addLine("=== READY ===");
+        telemetry.addData("Limelight", "✓ Initialized");
+        telemetry.addData("Odometry", "✓ Pinpoint (absolute heading)");
+        telemetry.addData("Motors", "✓ Configured");
+    }
+
+    /**
+     * Gets initial absolute pose from Limelight MegaTag2 WITHOUT providing robot orientation.
+     * This is crucial because Pinpoint resets to 0° at startup, but we need TRUE field heading.
+     *
+     * @return RobotPose with absolute field coordinates, or null if not available
+     */
+    private RobotPose getInitialAbsolutePose() {
+        // Try multiple times to get good MegaTag2 data
+        for (int attempt = 0; attempt < 10; attempt++) {
+            // DO NOT call updateRobotOrientation() - we need absolute heading!
+            RobotPose pose = limelightLocalizer.update();
+
+            if (pose != null && pose.getConfidence() > 0.5) {
+                // Verify this is MegaTag2 (not single-tag)
+                if (limelightLocalizer.getCurrentMode() == LimelightLocalizer.LocalizationMode.MEGATAG2) {
+                    return pose;
+                }
+            }
+
+            sleep(100); // Wait for next frame
+        }
+
+        return null; // No MegaTag2 data available
     }
 
     /**

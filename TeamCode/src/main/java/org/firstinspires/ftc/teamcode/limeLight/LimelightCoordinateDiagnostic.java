@@ -37,6 +37,11 @@ import java.util.List;
  * - Press B to manually set robot heading to 0°
  * - Press X to manually set robot heading to 90°
  * - Press Y to manually set robot heading to 180°
+ * - Press DPAD_UP to initialize Pinpoint with MegaTag2 absolute heading
+ * - Press DPAD_DOWN to show MegaTag2 heading WITHOUT updateRobotOrientation
+ *
+ * IMPORTANT: This diagnostic helps verify the "odometry reset" fix where we
+ * initialize Pinpoint heading using absolute heading from MegaTag2.
  */
 @TeleOp(name = "Limelight Coordinate Diagnostic", group = "Diagnostic")
 public class LimelightCoordinateDiagnostic extends OpMode {
@@ -46,11 +51,14 @@ public class LimelightCoordinateDiagnostic extends OpMode {
 
     private boolean usePinpointIMU = false;
     private double manualHeading = 0.0;
+    private boolean showAbsoluteHeading = false; // Show MT2 heading without updateRobotOrientation
 
     private boolean lastAPress = false;
     private boolean lastBPress = false;
     private boolean lastXPress = false;
     private boolean lastYPress = false;
+    private boolean lastDpadUpPress = false;
+    private boolean lastDpadDownPress = false;
 
     @Override
     public void init() {
@@ -103,11 +111,18 @@ public class LimelightCoordinateDiagnostic extends OpMode {
         // Get current heading
         double currentHeading = getCurrentHeading();
 
-        // CRITICAL: Update robot orientation BEFORE getting results
-        limelight.updateRobotOrientation(currentHeading);
-
         // Get latest result
-        LLResult result = limelight.getLatestResult();
+        LLResult result;
+
+        if (showAbsoluteHeading) {
+            // Special mode: Get MegaTag2 WITHOUT calling updateRobotOrientation
+            // This shows the ABSOLUTE field heading that MegaTag2 detects
+            result = limelight.getLatestResult();
+        } else {
+            // Normal mode: Update robot orientation BEFORE getting results
+            limelight.updateRobotOrientation(currentHeading);
+            result = limelight.getLatestResult();
+        }
 
         if (result == null || !result.isValid()) {
             displayNoData(currentHeading);
@@ -142,6 +157,18 @@ public class LimelightCoordinateDiagnostic extends OpMode {
             usePinpointIMU = false;
         }
         lastYPress = gamepad1.y;
+
+        // Initialize Pinpoint with MegaTag2 absolute heading
+        if (gamepad1.dpad_up && !lastDpadUpPress && odometry != null) {
+            initializePinpointFromMegaTag2();
+        }
+        lastDpadUpPress = gamepad1.dpad_up;
+
+        // Toggle showing absolute MT2 heading (without updateRobotOrientation)
+        if (gamepad1.dpad_down && !lastDpadDownPress) {
+            showAbsoluteHeading = !showAbsoluteHeading;
+        }
+        lastDpadDownPress = gamepad1.dpad_down;
     }
 
     private double getCurrentHeading() {
@@ -169,6 +196,13 @@ public class LimelightCoordinateDiagnostic extends OpMode {
         telemetry.addData("Source", usePinpointIMU ? "Pinpoint IMU" : "Manual");
         telemetry.addData("Heading", "%.1f°", currentHeading);
 
+        // Show absolute heading mode status
+        if (showAbsoluteHeading) {
+            telemetry.addData("⚠ MODE", "Absolute MT2 (no updateRobotOrientation)");
+        } else {
+            telemetry.addData("MODE", "Normal (with updateRobotOrientation)");
+        }
+
         // Show odometry position if available
         if (odometry != null) {
             telemetry.addData("Odo X", "%.1f mm", odometry.getPosition().getX(DistanceUnit.MM));
@@ -177,7 +211,7 @@ public class LimelightCoordinateDiagnostic extends OpMode {
 
         telemetry.addLine();
         telemetry.addLine("═══ MEGATAG2 (FIELD-CENTRIC) ═══");
-        displayMegaTag2(result);
+        displayMegaTag2(result, currentHeading);
 
         telemetry.addLine();
         telemetry.addLine("═══ STANDARD BOTPOSE (FIELD-CENTRIC) ═══");
@@ -193,7 +227,7 @@ public class LimelightCoordinateDiagnostic extends OpMode {
         telemetry.update();
     }
 
-    private void displayMegaTag2(LLResult result) {
+    private void displayMegaTag2(LLResult result, double currentHeading) {
         Pose3D mt2 = result.getBotpose_MT2();
         if (mt2 != null) {
             double x = mt2.getPosition().x;
@@ -204,7 +238,24 @@ public class LimelightCoordinateDiagnostic extends OpMode {
             telemetry.addData("X (meters)", "%.3f", x);
             telemetry.addData("Y (meters)", "%.3f", y);
             telemetry.addData("Z (meters)", "%.3f", z);
-            telemetry.addData("Yaw (degrees)", "%.1f°", yaw);
+            telemetry.addData("MT2 Yaw", "%.1f°", yaw);
+
+            // Show heading comparison
+            if (showAbsoluteHeading) {
+                telemetry.addData("⚠ NOTE", "This is ABSOLUTE heading (no updateRobotOrientation)");
+            } else {
+                double headingDiff = Math.abs(yaw - currentHeading);
+                if (headingDiff > 180) headingDiff = 360 - headingDiff;
+
+                telemetry.addData("Robot Heading", "%.1f°", currentHeading);
+                telemetry.addData("Heading Diff", "%.1f°", headingDiff);
+
+                if (headingDiff > 5.0) {
+                    telemetry.addData("⚠ WARNING", "Large heading difference!");
+                    telemetry.addData("", "Odometry may not be initialized correctly");
+                }
+            }
+
             telemetry.addData("Status", "✅ AVAILABLE");
 
             // Check if values look reasonable
@@ -275,11 +326,57 @@ public class LimelightCoordinateDiagnostic extends OpMode {
         }
     }
 
+    /**
+     * Initialize Pinpoint odometry with absolute heading from MegaTag2.
+     * This demonstrates the fix for the "odometry reset" issue.
+     */
+    private void initializePinpointFromMegaTag2() {
+        if (odometry == null) return;
+
+        // Get MegaTag2 data WITHOUT calling updateRobotOrientation
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) {
+            telemetry.addData("Error", "No vision data available");
+            telemetry.update();
+            return;
+        }
+
+        org.firstinspires.ftc.robotcore.external.navigation.Pose2D visionPose2D;
+        Pose3D mt2 = result.getBotpose_MT2();
+        if (mt2 != null) {
+            double xMM = mt2.getPosition().x * 1000.0; // meters to mm
+            double yMM = mt2.getPosition().y * 1000.0;
+            double headingDeg = mt2.getOrientation().getYaw();
+            double headingRad = Math.toRadians(headingDeg);
+
+            // Set Pinpoint position and heading
+            odometry.setPosition(new org.firstinspires.ftc.robotcore.external.navigation.Pose2D(
+                DistanceUnit.MM, xMM, yMM,
+                AngleUnit.RADIANS, headingRad
+            ));
+            odometry.update();
+
+            telemetry.addData("✓ Pinpoint Initialized", "From MegaTag2");
+            telemetry.addData("  Position", "X: %.0fmm, Y: %.0fmm", xMM, yMM);
+            telemetry.addData("  Heading", "%.1f°", headingDeg);
+            telemetry.update();
+
+            // Enable Pinpoint IMU mode
+            usePinpointIMU = true;
+        } else {
+            telemetry.addData("Error", "MegaTag2 not available");
+            telemetry.addData("", "Need multiple AprilTags visible");
+            telemetry.update();
+        }
+    }
+
     private void displayControls() {
         telemetry.addLine("─── CONTROLS ───");
         if (odometry != null) {
             telemetry.addData("A", usePinpointIMU ? "Using Pinpoint IMU ✓" : "Use Pinpoint IMU");
+            telemetry.addData("DPAD ↑", "Init Pinpoint from MT2");
         }
+        telemetry.addData("DPAD ↓", showAbsoluteHeading ? "Show Absolute MT2 ✓" : "Show Absolute MT2");
         telemetry.addData("B", "Set heading = 0°");
         telemetry.addData("X", "Set heading = 90°");
         telemetry.addData("Y", "Set heading = 180°");

@@ -21,6 +21,12 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPin
  * - Limelight provides periodic absolute position corrections
  * - Together they eliminate odometry drift and provide accurate real-time pose
  *
+ * IMPORTANT - Heading Initialization:
+ * Since Pinpoint odometry resets to 0° at program start, this OpMode uses
+ * Limelight MegaTag2 to determine the robot's ABSOLUTE field heading at startup,
+ * then initializes Pinpoint with that heading. This ensures accurate localization
+ * regardless of robot orientation at start.
+ *
  * This is the recommended approach for competitive FTC robots.
  */
 @TeleOp(name = "Limelight + Odometry Fusion", group = "Limelight")
@@ -71,6 +77,45 @@ public class LimelightOdometryFusion extends OpMode {
     @Override
     public void start() {
         limelightLocalizer.start();
+
+        // Initialize Pinpoint heading with absolute heading from MegaTag2
+        telemetry.addLine("Initializing with MegaTag2...");
+        telemetry.update();
+
+        // Try to get initial absolute heading from vision
+        for (int attempt = 0; attempt < 10; attempt++) {
+            // DO NOT call updateRobotOrientation() - we need absolute heading!
+            RobotPose visionPose = limelightLocalizer.update();
+
+            if (visionPose != null && visionPose.getConfidence() > 0.5) {
+                // Verify this is MegaTag2 (not single-tag)
+                if (limelightLocalizer.getCurrentMode() == LimelightLocalizer.LocalizationMode.MEGATAG2) {
+                    // Initialize Pinpoint with absolute heading
+                    double xMM = visionPose.getX() * 1000.0; // meters to mm
+                    double yMM = visionPose.getY() * 1000.0;
+                    double headingRad = Math.toRadians(visionPose.getHeading());
+
+                    odometry.setPosition(new Pose2D(
+                        DistanceUnit.MM, xMM, yMM,
+                        AngleUnit.RADIANS, headingRad
+                    ));
+                    odometry.update();
+
+                    telemetry.addLine("✓ Initialized from MegaTag2");
+                    telemetry.addData("  Position", "X: %.0fmm, Y: %.0fmm", xMM, yMM);
+                    telemetry.addData("  Heading", "%.1f°", visionPose.getHeading());
+                    telemetry.update();
+                    break;
+                }
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
         lastVisionUpdateTime = System.currentTimeMillis();
     }
 
