@@ -9,16 +9,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
-@TeleOp(name="TEAM 2 Run this - This is your TeleOp Mode")
+@TeleOp(name="CURIE KICKOFF ANSWER KEY")
 public class SummerCampTeleOp2 extends LinearOpMode {
 
     DcMotor leftFrontDrive = null;
     DcMotor rightFrontDrive = null;
     DcMotor leftBackDrive = null;
     DcMotor rightBackDrive = null;
-
-    Servo pivotServo = null;
-    Servo clawServo = null;
 
     /**
      * Main section of code -- like 'main' method
@@ -45,9 +42,9 @@ public class SummerCampTeleOp2 extends LinearOpMode {
              */
 
             // you will need to change the 0s. they are placeholders.
-            double x = 0;
-            double y = 0; // hint, the y stick on the controller is reversed.
-            double rx = 0;
+            double x = gamepad1.left_stick_x;
+            double y = -gamepad1.left_stick_y; // hint, the y stick on the controller is reversed.
+            double rx = gamepad1.right_stick_x;
 
             // Denominator is the largest motor power (abs value) or 1. It makes sure no more than 1 power is delivered.
             // This makes sure that the ratio stays the same
@@ -56,7 +53,7 @@ public class SummerCampTeleOp2 extends LinearOpMode {
             //      1. the sum of the absolute values (Math.abs(value)) of x, y, and rx
             //      2. 1
             // thix sets the denominator to the highest value if it is the sum or if it 1
-            double denominator = 0;
+            double denominator = Math.max(Math.abs(x)+Math.abs(y)+Math.abs(rx),1);
             /*
              * frontLeftPower should be the sum of y, x, and rx all divided by denominator
              * backLeftPower should be y minus x plus rx all divided by denominator
@@ -64,11 +61,26 @@ public class SummerCampTeleOp2 extends LinearOpMode {
              * backRightPower should be y plus x minus rx all divided by denominator
              */
             double frontLeftPower = 0;
-            double backLeftPower = 0;
-            double frontRightPower = 0;
-            double backRightPower = 0;
+            double backLeftPower = (y-x+rx)/denominator;
+            double frontRightPower = (y-x-rx)/denominator;
+            double backRightPower = (y+x-rx)/denominator;
 
             // set power to each of the motors now
+
+            double speed = 1.0;
+
+            leftFrontDrive.setPower(frontLeftPower*speed);
+            leftBackDrive.setPower(backLeftPower*speed);
+            rightFrontDrive.setPower(frontRightPower*speed);
+            rightBackDrive.setPower(backRightPower*speed);
+
+//            if(gamepad1.dpad_up) {
+//                pivotServo.setPosition(0);
+//            }
+//            if(gamepad1.dpad_down) {
+//                pivotServo.setPosition(1);
+//            }
+
 
             /*
              * ===============
@@ -99,9 +111,6 @@ public class SummerCampTeleOp2 extends LinearOpMode {
         leftFrontDrive.setDirection(UtilityValues.compLeftFrontDirection);
         rightBackDrive.setDirection(UtilityValues.compRightBackDirection);
         rightFrontDrive.setDirection(UtilityValues.compRightFrontDirection);
-
-        pivotServo = hardwareMap.servo.get("pivotServo");
-        clawServo = hardwareMap.servo.get("clawServo");
 
     }
 

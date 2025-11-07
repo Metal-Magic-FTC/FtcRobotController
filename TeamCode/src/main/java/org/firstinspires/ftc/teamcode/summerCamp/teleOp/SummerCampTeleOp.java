@@ -42,9 +42,9 @@ public class SummerCampTeleOp extends LinearOpMode {
              */
 
             // you will need to change the 0s. they are placeholders.
-            double x = gamepad1.left_stick_x;
-            double y = -gamepad1.left_stick_y; // hint, the y stick on the controller is reversed.
-            double rx = gamepad1.right_stick_x;
+            double x = 0;
+            double y = 0; // hint, the y stick on the controller is reversed.
+            double rx = 0;
 
             // Denominator is the largest motor power (abs value) or 1. It makes sure no more than 1 power is delivered.
             // This makes sure that the ratio stays the same
@@ -53,34 +53,21 @@ public class SummerCampTeleOp extends LinearOpMode {
             //      1. the sum of the absolute values (Math.abs(value)) of x, y, and rx
             //      2. 1
             // thix sets the denominator to the highest value if it is the sum or if it 1
-            double denominator = Math.max(Math.abs(x)+Math.abs(y)+Math.abs(rx),1);
+            double denominator = 0;
             /*
              * frontLeftPower should be the sum of y, x, and rx all divided by denominator
              * backLeftPower should be y minus x plus rx all divided by denominator
              * frontRightPower should be y minus x minus rx all divided by denominator
              * backRightPower should be y plus x minus rx all divided by denominator
              */
-            double frontLeftPower = (x+y+rx)/denominator;
-            double backLeftPower = (y-x+rx)/denominator;
-            double frontRightPower = (y-x-rx)/denominator;
-            double backRightPower = (y+x-rx)/denominator;
+            double frontLeftPower = 0;
+            double backLeftPower = 0;
+            double frontRightPower = 0;
+            double backRightPower = 0;
 
             // set power to each of the motors now
 
-            double speed = 1.0;
-
-            leftFrontDrive.setPower(frontLeftPower*speed);
-            leftBackDrive.setPower(backLeftPower*speed);
-            rightFrontDrive.setPower(frontRightPower*speed);
-            rightBackDrive.setPower(backRightPower*speed);
-
-//            if(gamepad1.dpad_up) {
-//                pivotServo.setPosition(0);
-//            }
-//            if(gamepad1.dpad_down) {
-//                pivotServo.setPosition(1);
-//            }
-
+            
 
             /*
              * ===============
