@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
-@TeleOp(name = "!v0 gang gang gang gang")
+@TeleOp
 public class TeleV0 extends LinearOpMode {
 
     private CustomMecanumDrive drivetrain;

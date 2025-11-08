@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name="!Thirty dirty hours")
+@TeleOp
 public class ThirtyHours extends LinearOpMode {
 
     DcMotor leftLaunch = null;
