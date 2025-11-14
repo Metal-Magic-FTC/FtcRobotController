@@ -11,7 +11,7 @@ public class SpindexterTest extends LinearOpMode {
     DcMotor spinDexter = null;
     int currentPosition = 0;
     double spinRadians = ((2 * Math.PI) / 3);
-\
+
 
     public void initialize() {
 
@@ -29,7 +29,7 @@ public class SpindexterTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         initialize(); // initializing everything
-        // waitForStart(); // waiting until driver clicks play button
+        waitForStart(); // waiting until driver clicks play button
 
         boolean aWasPressed = true;
         boolean aIsPressed;
