@@ -13,9 +13,15 @@ public class ServoTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         testServo = hardwareMap.servo.get("pivotServo");
-        testServo.setPosition(0);
-
         waitForStart();
+
+        boolean bWasPressed = false;
+        boolean bIsPressed = false;
+
+        boolean leftWas = false;
+        boolean leftIs = false;
+        boolean rightWas = false;
+        boolean rightIs = false;
 
         while (opModeIsActive()) {
 
@@ -27,19 +33,20 @@ public class ServoTest extends LinearOpMode {
                 testServo.setPosition(1);
             }
 
-            if (gamepad1.right_bumper) {
+            leftIs = gamepad1.left_bumper;
+            rightIs = gamepad1.right_bumper;
+
+            if (!rightWas && rightIs) {
                 testServo.setPosition(Math.min(testServo.getPosition() + 0.01, 1));
             }
 
-            if (gamepad1.left_bumper) {
+            if (!leftWas && leftIs) {
                 testServo.setPosition(Math.max(testServo.getPosition() - 0.01, 0));
             }
 
-            if (gamepad1.x) {
-                testServo.setPosition(0.78);
-            } else {
-                testServo.setPosition(1);
-            }
+            leftWas = gamepad1.left_bumper;
+            rightWas = gamepad1.right_bumper;
+
             telemetry.addData("Servo pos:", testServo.getPosition());
             telemetry.update();
 

@@ -67,7 +67,7 @@ public class SummerCampTeleOp extends LinearOpMode {
 
             // set power to each of the motors now
 
-            
+
 
             /*
              * ===============
