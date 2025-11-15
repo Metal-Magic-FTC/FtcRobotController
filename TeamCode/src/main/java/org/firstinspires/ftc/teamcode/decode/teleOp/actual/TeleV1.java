@@ -19,7 +19,19 @@ public class TeleV1 extends LinearOpMode {
 
     Servo pivotServo = null;
 
+    Servo flickServo = null;
+
     int spinPosition;
+
+    boolean leftWas = false;
+    boolean leftIs = false;
+    boolean rightWas = false;
+    boolean rightIs = false;
+
+    // 3 positions
+    int[] POSITIONS = {0, 250, 500};
+    int index = 0;
+    int currentTarget = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -33,8 +45,9 @@ public class TeleV1 extends LinearOpMode {
         boolean spinControlIs = false;
         boolean spinControlWas = false;
 
-        while (opModeIsActive()) { // duration of opMode
+        //pivotServo.setPosition(0.77);
 
+        while (opModeIsActive()) { // duration of opMode
 
             double drive = -gamepad1.left_stick_y;
             double strafe = gamepad1.left_stick_x;
@@ -46,23 +59,20 @@ public class TeleV1 extends LinearOpMode {
             boolean launchControl = gamepad1.left_trigger >= 0.3;
             boolean launchControlReversed = gamepad1.right_trigger >= 0.3;
 
+            boolean flickControl = gamepad1.a;
+
             intakeMotor(intakeMotorControl);
-            launch(0.34, launchControl, launchControlReversed, 1);
+            launch(0.34, launchControl, launchControlReversed, 1, flickControl);
 
-            spinControlIs = gamepad1.dpad_up;
+            spinControlIs = gamepad1.dpad_right;
 
-            if (spinControlIs && !spinControlWas) {
-                spinPosition ++;
-                spinPosition %= 3;
-                spinMotor.setPower(0);
-            }
+            spindexer(spinControlIs, spinControlWas);
 
-            spinMotor(spinPosition);
-
-            spinControlWas = gamepad1.dpad_up;
+            spinControlWas = gamepad1.dpad_right;
 
             telemetry.update();
 
+            telemetry.addData("Servo pos:", pivotServo.getPosition());
             telemetry.addData("spindexer button position", spinPosition);
             telemetry.addData("spindexer encoder", spinMotor.getCurrentPosition());
 
@@ -70,9 +80,58 @@ public class TeleV1 extends LinearOpMode {
 
     }
 
-    public void launch(double servoPosition, boolean launchControl, boolean launchControlReversed, double speed) {
+    // Target index and position stored globally
+    // int index = 0;
+    // int[] POSITIONS = {0, 250, 500};
+    // int currentTarget = 0;
 
-        pivotServo.setPosition(servoPosition);
+    public void spindexer(boolean spinControlIs, boolean spinControlWas) {
+
+        // Step 1: detect new press
+        if (spinControlIs && !spinControlWas) {
+            index = (index + 1) % POSITIONS.length;
+            currentTarget = POSITIONS[index];
+
+            spinMotor.setTargetPosition(currentTarget);
+            spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            spinMotor.setPower(0.7);  // must be > 0
+        }
+
+        // Step 2: stop automatically once reached
+        if (!spinMotor.isBusy()) {
+            spinMotor.setPower(0);
+            spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        telemetry.addData("Spindexer Target", currentTarget);
+        telemetry.addData("Spindexer Pos", spinMotor.getCurrentPosition());
+        telemetry.addData("Busy?", spinMotor.isBusy());
+    }
+
+    public void launch(double servoPosition, boolean launchControl, boolean launchControlReversed, double speed, boolean flickControl) {
+
+        //pivotServo.setPosition(servoPosition);
+
+        if (flickControl) {
+            flickServo.setPosition(0.6);
+        } else {
+            flickServo.setPosition(1);
+        }
+
+        leftIs = gamepad1.dpad_up;
+        rightIs = gamepad1.dpad_down;
+
+        if (!rightWas && rightIs) {
+            //pivotServo.setPosition(Math.min(pivotServo.getPosition() + 0.01, 1));
+        }
+
+        if (!leftWas && leftIs) {
+            //pivotServo.setPosition(Math.max(pivotServo.getPosition() - 0.01, 0));
+        }
+
+        leftWas = gamepad1.dpad_up;
+        rightWas = gamepad1.dpad_down;
+
         if (launchControl) {
             launchMotor.setPower(speed);
         } else if (launchControlReversed) {
@@ -93,14 +152,10 @@ public class TeleV1 extends LinearOpMode {
 
     }
 
-    public void spinMotor(int position) {
-        runToPosition(spinMotor, position * 250, 0.2);
-    }
-
     public void runToPosition(DcMotor motor, int targetTicks, double power) {
         motor.setTargetPosition(targetTicks);
-        motor.setPower(power); // always positive power for RUN_TO_POSITION
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(power);
     }
 
     public void initLauncher() {
@@ -109,6 +164,8 @@ public class TeleV1 extends LinearOpMode {
 
         launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
 
+        flickServo = hardwareMap.servo.get("flickServo");
+
     }
 
     public void initIntake() {
@@ -116,16 +173,15 @@ public class TeleV1 extends LinearOpMode {
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
-        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        spinMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        // Encoder setup
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        spinMotor.setTargetPosition(0);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Set direction (flip if needed)
+        spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
     }
 
@@ -133,8 +189,6 @@ public class TeleV1 extends LinearOpMode {
 
         initLauncher();
         initIntake();
-
-
 
         // fl - 0, fr - 1, bl - 2, br - 3
         drivetrain = new CustomMecanumDrive(hardwareMap);

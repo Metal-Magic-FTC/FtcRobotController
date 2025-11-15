@@ -4,15 +4,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name="!servoTest")
-public class ServoTest extends LinearOpMode {
+@TeleOp(name="!FLICK HER servoTest")
+public class FlickServoTest extends LinearOpMode {
 
     Servo testServo;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        testServo = hardwareMap.servo.get("pivotServo");
+        testServo = hardwareMap.servo.get("flickServo");
 
         waitForStart();
 
