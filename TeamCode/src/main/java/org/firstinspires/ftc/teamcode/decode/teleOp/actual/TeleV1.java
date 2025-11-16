@@ -53,7 +53,7 @@ public class TeleV1 extends LinearOpMode {
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
 
-            drivetrain.driveMecanum(strafe, drive, turn); // creates mecanum drivetrain
+            //drivetrain.driveMecanum(strafe, drive, turn); // creates mecanum drivetrain
 
             boolean intakeMotorControl = gamepad1.right_bumper;
             boolean launchControl = gamepad1.left_trigger >= 0.3;
