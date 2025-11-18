@@ -30,13 +30,28 @@ public class TeleV1 extends LinearOpMode {
 
     // 3 positions
     int[] POSITIONS = {0, 250, 500};
+    int[] INTAKE_POSITIONS = {125, 375, 625};
+
+    ballColors[] balls;
+
     int index = 0;
     int currentTarget = 0;
+
+    public enum ballColors {
+        PURPLE,
+        GREEN,
+        EMPTY
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         initialize(); // initializing everything
+
+        balls = new ballColors[3];
+        balls[0] = ballColors.EMPTY;
+        balls[1] = ballColors.EMPTY;
+        balls[2] = ballColors.EMPTY;
 
         waitForStart(); // waiting until driver clicks play button
 
@@ -61,6 +76,35 @@ public class TeleV1 extends LinearOpMode {
 
             boolean flickControl = gamepad1.a;
 
+            // just for testing
+            if (gamepad2.a) {
+                balls[0] = ballColors.PURPLE;
+                balls[1] = ballColors.GREEN;
+                balls[2] = ballColors.PURPLE;
+            }
+
+            // Go to closest PURPLE
+            if (gamepad2.b) {
+                int targetIndex = findClosestColor(ballColors.PURPLE, index);
+                index = targetIndex;
+                currentTarget = POSITIONS[index];
+
+                spinMotor.setTargetPosition(currentTarget);
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.7);
+            }
+
+            // Go to closest GREEN
+            if (gamepad2.x) {
+                int targetIndex = findClosestColor(ballColors.GREEN, index);
+                index = targetIndex;
+                currentTarget = POSITIONS[index];
+
+                spinMotor.setTargetPosition(currentTarget);
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.7);
+            }
+
             intakeMotor(intakeMotorControl);
             launch(0.34, launchControl, launchControlReversed, 1, flickControl);
 
@@ -84,6 +128,20 @@ public class TeleV1 extends LinearOpMode {
     // int index = 0;
     // int[] POSITIONS = {0, 250, 500};
     // int currentTarget = 0;
+
+    public int findClosestColor(ballColors targetColor, int currentIndex) {
+        int n = balls.length;
+
+        for (int offset = 0; offset < n; offset++) {
+            int right = (currentIndex + offset) % n;
+            int left  = (currentIndex - offset + n) % n;
+
+            if (balls[right] == targetColor) return right;
+            if (balls[left] == targetColor) return left;
+        }
+
+        return currentIndex; // no target color found
+    }
 
     public void spindexer(boolean spinControlIs, boolean spinControlWas) {
 
