@@ -29,15 +29,16 @@ public class FlickServoTest extends LinearOpMode {
         testServo.setPosition(0.6);
 
         while (opModeIsActive()) {
-            //front
+            //front distance (close to basket) - position: 0.75 and power: 0.7
+            //back distance (peak of the large pyramid) - position 0.75 power: 0.9
             if (gamepad1.x) {
                 launchMotor.setPower(0.7);
             }
             if (gamepad1.a) {
-                launchMotor.setPower(0.8);
+                launchMotor.setPower(0.9);
             }
             if (gamepad1.y) {
-                launchMotor.setPower(0.9);
+                launchMotor.setPower(1);
             }
             if (gamepad1.b) {
                 launchMotor.setPower(0);
