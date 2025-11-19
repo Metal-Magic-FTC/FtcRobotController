@@ -30,7 +30,7 @@ public class TeleV1 extends LinearOpMode {
 
     // 3 positions
     int[] POSITIONS = {0, 250, 500};
-    int[] INTAKE_POSITIONS = {125, 375, 625};
+    int[] INTAKE_POSITIONS = {352, -200, 100};
 
     ballColors[] balls;
 
@@ -105,6 +105,48 @@ public class TeleV1 extends LinearOpMode {
                 spinMotor.setPower(0.7);
             }
 
+            // Launch the ball at the current index when Y is pressed
+            if (gamepad2.y) {
+
+                // Only launch if ball is not EMPTY
+                if (balls[index] != ballColors.EMPTY) {
+
+                    // Flick the servo to shoot
+                    flickServo.setPosition(0.6);
+                    sleep(200);
+                    flickServo.setPosition(1);
+
+                    // Spin the launcher motor briefly
+                    launchMotor.setPower(1);
+                    sleep(300);
+                    launchMotor.setPower(0);
+
+                    // After launching, mark the slot empty
+                    balls[index] = ballColors.EMPTY;
+                }
+
+            }
+
+            // Move to closest EMPTY position for intake
+            if (gamepad2.dpad_up) {
+                int targetIndex = findClosestEmpty(index);
+                index = targetIndex;
+                currentTarget = INTAKE_POSITIONS[index];
+
+                spinMotor.setTargetPosition(currentTarget);
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.7);
+            }
+
+            // TESTING: Set color at current index
+            if (gamepad2.dpad_right) {
+                balls[index] = ballColors.PURPLE;
+            }
+
+            if (gamepad2.dpad_left) {
+                balls[index] = ballColors.GREEN;
+            }
+
             intakeMotor(intakeMotorControl);
             launch(0.34, launchControl, launchControlReversed, 1, flickControl);
 
@@ -120,9 +162,29 @@ public class TeleV1 extends LinearOpMode {
             telemetry.addData("spindexer button position", spinPosition);
             telemetry.addData("spindexer encoder", spinMotor.getCurrentPosition());
 
+            telemetry.addData("Index", index);
+            telemetry.addData("Ball at Index", balls[index]);
+            telemetry.update();
+
+
         }
 
     }
+
+    public int findClosestEmpty(int currentIndex) {
+        int n = balls.length;
+
+        for (int offset = 0; offset < n; offset++) {
+            int right = (currentIndex + offset) % n;
+            int left  = (currentIndex - offset + n) % n;
+
+            if (balls[right] == ballColors.EMPTY) return right;
+            if (balls[left] == ballColors.EMPTY) return left;
+        }
+
+        return currentIndex; // no empty spot found
+    }
+
 
     // Target index and position stored globally
     // int index = 0;
@@ -203,7 +265,7 @@ public class TeleV1 extends LinearOpMode {
     public void intakeMotor(boolean intakeMotorControl) {
 
         if (intakeMotorControl) {
-            intakeMotor.setPower(1);
+            intakeMotor.setPower(0.67);
         } else {
             intakeMotor.setPower(0);
         }
