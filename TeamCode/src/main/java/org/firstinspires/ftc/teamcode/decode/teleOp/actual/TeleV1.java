@@ -207,18 +207,19 @@ public class TeleV1 extends LinearOpMode {
 
     public void spindexer(boolean spinControlIs, boolean spinControlWas) {
 
-        // Step 1: detect new press
+        // Detect new button press (edge detection)
         if (spinControlIs && !spinControlWas) {
+
             index = (index + 1) % POSITIONS.length;
             currentTarget = POSITIONS[index];
 
             spinMotor.setTargetPosition(currentTarget);
             spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            spinMotor.setPower(0.7);  // must be > 0
+            spinMotor.setPower(0.7);
         }
 
-        // Step 2: stop automatically once reached
-        if (!spinMotor.isBusy()) {
+        // Once position is reached, stop & return to normal mode
+        if (spinMotor.getMode() == DcMotor.RunMode.RUN_TO_POSITION && !spinMotor.isBusy()) {
             spinMotor.setPower(0);
             spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
