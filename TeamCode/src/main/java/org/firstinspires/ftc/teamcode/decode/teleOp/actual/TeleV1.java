@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.actual;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
@@ -29,18 +34,26 @@ public class TeleV1 extends LinearOpMode {
     boolean rightIs = false;
 
     // 3 positions
-    int[] POSITIONS = {0, 250, 500};
-    int[] INTAKE_POSITIONS = {352, -200, 100};
+    int[] POSITIONS = {0, 257, 515};
+    int[] INTAKE_POSITIONS = {352, -115, 142};
 
     ballColors[] balls;
 
     int index = 0;
     int currentTarget = 0;
 
+    NormalizedColorSensor backColor;
+    NormalizedColorSensor leftColor;
+    NormalizedColorSensor rightColor;
+
+    float gain = 20;   // Adjust if needed
+    final float[] hsvValues = new float[3];
+
     public enum ballColors {
         PURPLE,
         GREEN,
-        EMPTY
+        EMPTY,
+        UNKNOWN
     }
 
     @Override
@@ -76,6 +89,28 @@ public class TeleV1 extends LinearOpMode {
 
             boolean flickControl = gamepad1.a;
 
+            ballColors sensed = detectBallColor();
+            telemetry.addData("Sensor Detects", sensed);
+
+            // Gp2 Left Trigger → move spindexer to position 0
+            if (gamepad2.left_trigger > 0.3) {
+                index = 0;
+                currentTarget = POSITIONS[0];
+                spinMotor.setTargetPosition(POSITIONS[0]);
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.4);
+            }
+
+            // Gp2 D-Pad Down → mark the current slot as UNKNOWN
+            if (gamepad2.dpad_down) {
+                balls[index] = ballColors.UNKNOWN;
+            }
+
+            // Gp2 Left Bumper → scan all balls
+            if (gamepad2.left_bumper) {
+                scanAllBalls();
+            }
+
             // just for testing
             if (gamepad2.a) {
                 balls[0] = ballColors.PURPLE;
@@ -91,7 +126,7 @@ public class TeleV1 extends LinearOpMode {
 
                 spinMotor.setTargetPosition(currentTarget);
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                spinMotor.setPower(0.7);
+                spinMotor.setPower(0.4);
             }
 
             // Go to closest GREEN
@@ -102,7 +137,7 @@ public class TeleV1 extends LinearOpMode {
 
                 spinMotor.setTargetPosition(currentTarget);
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                spinMotor.setPower(0.7);
+                spinMotor.setPower(0.4);
             }
 
             // Launch the ball at the current index when Y is pressed
@@ -135,7 +170,7 @@ public class TeleV1 extends LinearOpMode {
 
                 spinMotor.setTargetPosition(currentTarget);
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                spinMotor.setPower(0.7);
+                spinMotor.setPower(0.4);
             }
 
             // TESTING: Set color at current index
@@ -215,13 +250,13 @@ public class TeleV1 extends LinearOpMode {
 
             spinMotor.setTargetPosition(currentTarget);
             spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            spinMotor.setPower(0.7);
+            spinMotor.setPower(0.4);
         }
 
         // Once position is reached, stop & return to normal mode
         if (spinMotor.getMode() == DcMotor.RunMode.RUN_TO_POSITION && !spinMotor.isBusy()) {
-            spinMotor.setPower(0);
-            spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //spinMotor.setPower(0);
+            //spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
 
         telemetry.addData("Spindexer Target", currentTarget);
@@ -273,6 +308,65 @@ public class TeleV1 extends LinearOpMode {
 
     }
 
+    public ballColors detectBallColor() {
+
+        NormalizedRGBA colors = backColor.getNormalizedColors();
+        Color.colorToHSV(colors.toColor(), hsvValues);
+
+        float red = colors.red;
+        float green = colors.green;
+        float blue = colors.blue;
+
+        // Tolerance: how much stronger one color must be to be considered dominant
+        float tolerance = 0.20f;  // 20% stronger required
+
+        // PURPLE detection: blue must dominate red & green
+        if (blue > red * (1 + tolerance) && blue > green * (1 + tolerance)) {
+            return ballColors.PURPLE;
+        }
+
+        // GREEN detection: green must dominate red & blue
+        if (green > red * (1 + tolerance) && green > blue * (1 + tolerance)) {
+            return ballColors.GREEN;
+        }
+
+        // If no strong dominance → EMPTY / white
+        return ballColors.EMPTY;
+    }
+
+    public void scanAllBalls() {
+        balls[0] = detectBallColorFromSensor(backColor);
+        balls[1] = detectBallColorFromSensor(rightColor);
+        balls[2] = detectBallColorFromSensor(leftColor);
+    }
+
+    public ballColors detectBallColorFromSensor(NormalizedColorSensor sensor) {
+
+        NormalizedRGBA colors = sensor.getNormalizedColors();
+        Color.colorToHSV(colors.toColor(), hsvValues);
+
+        float red = colors.red;
+        float green = colors.green;
+        float blue = colors.blue;
+
+        float tolerance = 0.20f; // 20% stronger than others
+
+        if (blue > red * (1 + tolerance) && blue > green * (1 + tolerance)) {
+            return ballColors.PURPLE;
+        }
+
+        if (green > red * (1 + tolerance) && green > blue * (1 + tolerance)) {
+            return ballColors.GREEN;
+        }
+
+        // If nothing is dominant but something IS sensed → UNKNOWN
+        if (red > 0.01 || green > 0.01 || blue > 0.01) {
+            return ballColors.UNKNOWN;
+        }
+
+        return ballColors.EMPTY;
+    }
+
     public void runToPosition(DcMotor motor, int targetTicks, double power) {
         motor.setTargetPosition(targetTicks);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -310,6 +404,25 @@ public class TeleV1 extends LinearOpMode {
 
         initLauncher();
         initIntake();
+
+        backColor = hardwareMap.get(NormalizedColorSensor.class, "backColor");
+        leftColor = hardwareMap.get(NormalizedColorSensor.class, "leftColor");
+        rightColor = hardwareMap.get(NormalizedColorSensor.class, "rightColor");
+
+        // Optional: turn on LED if supported
+        if (backColor instanceof SwitchableLight) {
+            ((SwitchableLight) backColor).enableLight(true);
+        }
+        if (leftColor instanceof SwitchableLight) {
+            ((SwitchableLight) leftColor).enableLight(true);
+        }
+        if (rightColor instanceof SwitchableLight) {
+            ((SwitchableLight) rightColor).enableLight(true);
+        }
+
+        backColor.setGain(gain);
+        leftColor.setGain(gain);
+        rightColor.setGain(gain);
 
         // fl - 0, fr - 1, bl - 2, br - 3
         drivetrain = new CustomMecanumDrive(hardwareMap);
