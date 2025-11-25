@@ -9,12 +9,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class FlickServoTest extends LinearOpMode {
 
     Servo testServo;
+    Servo flickServo;
     DcMotor launchMotor;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        testServo = hardwareMap.servo.get("flickServo");
+        testServo = hardwareMap.servo.get("launchServo");
+        flickServo = hardwareMap.servo.get("flickServo");
         launchMotor = hardwareMap.dcMotor.get("launchMotor");
         waitForStart();
 
@@ -26,7 +28,8 @@ public class FlickServoTest extends LinearOpMode {
         boolean rightWas = false;
         boolean rightIs = false;
         double power = 1;
-        testServo.setPosition(0.6);
+        testServo.setPosition(0.70);
+        flickServo.setPosition(1);
 
         while (opModeIsActive()) {
             //front distance (close to basket) - position: 0.75 and power: 0.7
@@ -55,12 +58,19 @@ public class FlickServoTest extends LinearOpMode {
             if (gamepad1.left_bumper) {
                 testServo.setPosition((testServo.getPosition() - 0.001));
             }
+            if (gamepad1.right_trigger>=0.4f) {
+                flickServo.setPosition(0.6);
+
+            } else {
+                flickServo.setPosition(1);
+            }
 
             leftWas = gamepad1.left_bumper;
             rightWas = gamepad1.right_bumper;
 
             telemetry.addData("Servo pos:", testServo.getPosition());
             telemetry.addData("Motor power:", power);
+            telemetry.addData("Flick pos:", flickServo.getPosition());
 
             telemetry.update();
 
