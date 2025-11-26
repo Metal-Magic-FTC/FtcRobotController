@@ -28,7 +28,7 @@ public class RedBack extends LinearOpMode {
 
         // Sequence of autonomous (each with a stop + 250ms pause)
         runPath(paths.shoot(), 250, 0.75);
-
+        launchmotor.set
         runPath(paths.toIntake1(), 250, 0.75);
 
         runIntakePath(paths.intake1(), 250, 0.5);
