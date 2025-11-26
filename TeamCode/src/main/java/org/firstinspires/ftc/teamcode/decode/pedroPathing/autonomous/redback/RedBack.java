@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.blueback;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.redback;
 
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -9,13 +9,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.limeLight.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-@Autonomous(name = "BlueBack Auto", group = "Auto")
-public class BlueBack extends LinearOpMode {
+@Autonomous(name = "RedBack Auto", group = "Auto")
+public class RedBack extends LinearOpMode {
 
     private Follower follower;
-    private GeneratedPathsBlueBack paths;
+    private GeneratedPathsRedBack paths;
 
     DcMotor intakeMotor;
     Servo leftFlickServo = null;
@@ -63,15 +63,15 @@ public class BlueBack extends LinearOpMode {
         //intakeMotor.setPower(0);
 
         // End of auto
-        telemetry.addLine("BlueBack Auto Finished");
+        telemetry.addLine("RedBack Auto Finished");
         telemetry.update();
     }
 
     private void initialize() {
         follower = Constants.createFollower(hardwareMap);
 
-        // Apply the start pose from GeneratedPathsBlueBack
-        follower.setPose(GeneratedPathsBlueBack.START_POSE);
+        // Apply the start pose from GeneratedPathsRedBack
+        follower.setPose(GeneratedPathsRedBack.START_POSE);
 
         //follower = Constants.createFollower(hardwareMap);
 
@@ -82,7 +82,7 @@ public class BlueBack extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Load paths
-        paths = new GeneratedPathsBlueBack(follower);
+        paths = new GeneratedPathsRedBack(follower);
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -96,7 +96,7 @@ public class BlueBack extends LinearOpMode {
 
         gatesClosed();
 
-        telemetry.addLine("Ready to start BlueBack Auto");
+        telemetry.addLine("Ready to start RedBack Auto");
         telemetry.update();
     }
 
@@ -116,6 +116,9 @@ public class BlueBack extends LinearOpMode {
     public void shoot(int order) {
 
         if (order == 0) {
+
+            gatesClosed();
+
             // shoot the middle one
             middleFlickServo.setPosition(0.75); // open
             sleep(400);
@@ -129,7 +132,21 @@ public class BlueBack extends LinearOpMode {
             leftGate.setPosition(1); // close
 
             sleep(500);
+
+            // shoot middle
+            middleFlickServo.setPosition(0.75); // open
+            sleep(400);
+            middleFlickServo.setPosition(1);
+            sleep(300);
+
             gatesClosed();
+
+            // move left to middle
+            leftGate.setPosition(0.7); // open
+            leftFlickServo.setPosition(0.4); // launch
+            rightGate.setPosition(0); // close
+
+            sleep(300);
 
             // shoot middle
             middleFlickServo.setPosition(0.75); // open
@@ -137,21 +154,8 @@ public class BlueBack extends LinearOpMode {
             middleFlickServo.setPosition(1);
 
             sleep(300);
-
-            // move left to middle
-            leftGate.setPosition(0.7); // open
-            leftFlickServo.setPosition(0.4); // launch
-            rightGate.setPosition(1); // close
-
-            sleep(500);
             gatesClosed();
-
-            // shoot middle
-            middleFlickServo.setPosition(0.75); // open
-            sleep(400);
-            middleFlickServo.setPosition(1);
-
-            sleep(100);
+            sleep(300);
 
 
         }
@@ -183,6 +187,7 @@ public class BlueBack extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setPower(0);
 
         if (stopDelayMs > 0) sleep(stopDelayMs);
+
     }
 
     private void runIntakePath(PathChain path, int stopDelayMs, double speed) {
@@ -211,5 +216,6 @@ public class BlueBack extends LinearOpMode {
 
         if (stopDelayMs > 0) sleep(stopDelayMs);
     }
+
 
 }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.bluemiddle;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.bluemiddle;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.blueback;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.bluefront;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -6,43 +6,43 @@ import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.follower.Follower;
 
-public class GeneratedPathsBlueBack {
+public class GeneratedPathsBlueFront {
 
     private final Follower follower;
 
     // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
-            25.562130177514792,  // X
-            128.83271375464685, // Y
-            Math.toRadians(315) // Heading
+            64.1495327103,  // X
+            9.196261682242984, // Y
+            Math.toRadians(90) // Heading
     );
 
-    public GeneratedPathsBlueBack(Follower follower) {
+    public GeneratedPathsBlueFront(Follower follower) {
         this.follower = follower;
     }
 
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(START_POSE, new Pose(42, 113.844))
+                        new BezierLine(START_POSE, new Pose(58, 13))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(315))
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(120))
                 .build();
     }
 
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(42, 113.844), new Pose(42, 83.300))
+                        new BezierLine(new Pose(58, 13), new Pose(42, 35.664))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(120), Math.toRadians(180))
                 .build();
     }
 
     public PathChain intake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(42, 83.300), new Pose(22, 83.300))
+                        new BezierLine(new Pose(42, 35.664), new Pose(22, 35.664))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -51,18 +51,18 @@ public class GeneratedPathsBlueBack {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(22, 83.300), new Pose(42, 113.844))
+                        new BezierLine(new Pose(22, 35.664), new Pose(58, 13))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(315))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(120))
                 .build();
     }
 
     public PathChain toIntake2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(42, 113.844), new Pose(42, 59.400))
+                        new BezierLine(new Pose(75.589, 21.084), new Pose(42, 59.400))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(60), Math.toRadians(180))
                 .build();
     }
 
@@ -78,9 +78,9 @@ public class GeneratedPathsBlueBack {
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(22, 59.400), new Pose(42, 113.844))
+                        new BezierLine(new Pose(130.991, 60.112), new Pose(58, 13))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(315))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(120))
                 .build();
     }
 }
