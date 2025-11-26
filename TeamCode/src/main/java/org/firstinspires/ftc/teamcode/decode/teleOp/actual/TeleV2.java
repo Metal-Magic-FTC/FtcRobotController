@@ -282,7 +282,7 @@ public class TeleV2 extends LinearOpMode {
     }
 
     private void initLauncher() {
-        pivotServo = hardwareMap.servo.get("pivotServo");
+        pivotServo = hardwareMap.servo.get("launchServo");
         launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
         flickServo = hardwareMap.servo.get("flickServo");
     }
