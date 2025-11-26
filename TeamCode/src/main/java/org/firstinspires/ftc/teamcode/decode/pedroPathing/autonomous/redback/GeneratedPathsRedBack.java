@@ -20,11 +20,19 @@ public class GeneratedPathsRedBack {
     public GeneratedPathsRedBack(Follower follower) {
         this.follower = follower;
     }
+    public PathChain scan(){
+    return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(START_POSE, new Pose(82.221, 129.918))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(90))
+                .build();
+    }
 
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(START_POSE, new Pose(101.353, 113.844))
+                        new BezierLine(new Pose(82.221,129.918), new Pose(101.353, 113.844))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(225))
                 .build();
