@@ -30,6 +30,13 @@ public class CustomMecanumDrive {
 
     }
 
+    public void powerOff() {
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
+    }
+
     public void driveMecanum(double x, double y, double turn) {
         double frontLeftPower = y + x + turn;
         double frontRightPower = y - x - turn;

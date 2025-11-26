@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-@TeleOp(name="!!!!!!!TeleOp – ALIGN TO MY RED LOOKING AHH")
+@TeleOp(name="TeleOp – ALIGN ROTATE ONLY")
 public class AlignToRed extends LinearOpMode {
 
     public static final Pose START_POSE = new Pose(
@@ -17,14 +17,14 @@ public class AlignToRed extends LinearOpMode {
             Math.toRadians(225)
     );
 
-    private CustomMecanumDrive drivetrain;
+    private CustomMecanumDrive drive;
     private Follower follower;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         follower = Constants.createFollower(hardwareMap);
-        drivetrain = new CustomMecanumDrive(hardwareMap);
+        drive = new CustomMecanumDrive(hardwareMap);
 
         follower.setPose(START_POSE);
 
@@ -35,62 +35,63 @@ public class AlignToRed extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            // --------------------------
-            // RUN ALIGNMENT ON 'A'
-            // --------------------------
+            // ALIGN TO START ON 'A'
             if (gamepad1.a) {
-                runAlignmentRoutine();
+                alignToStartPureRotate();
             }
 
-            // --------------------------
-            // NORMAL TELEOP DRIVE
-            // --------------------------
-            double drive  = -gamepad1.left_stick_y;
-            double strafe =  gamepad1.left_stick_x;
-            double turn   =  gamepad1.right_stick_x;
-
-            drivetrain.driveMecanum(strafe, drive, turn);
+            // REGULAR TELEOP
+            drive.driveMecanum(
+                    gamepad1.left_stick_x,
+                    -gamepad1.left_stick_y,
+                    gamepad1.right_stick_x
+            );
 
             follower.update();
         }
     }
 
-    /**
-     * Blocks teleop until robot is facing the START_POSE point
-     */
-    private void runAlignmentRoutine() {
-        Pose current = follower.getPose();
+    private void alignToStartPureRotate() {
 
-        double dx = START_POSE.getX() - current.getX();
-        double dy = START_POSE.getY() - current.getY();
+        while (opModeIsActive() && gamepad1.a) {
 
-        double desiredHeading = Math.atan2(dy, dx);
-        double currentHeading = current.getHeading();
+            Pose pose = follower.getPose();
 
-        double delta = normalizeAngle(desiredHeading - currentHeading);
-        boolean turnLeft = delta > 0;
-        double angleToTurn = Math.abs(delta);
+            // vector from robot → start pos
+            double dx = START_POSE.getX() - pose.getX();
+            double dy = START_POSE.getY() - pose.getY();
 
-        // stop teleop control immediately
-        drivetrain.driveMecanum(0, 0, 0);
+            double desiredHeading = Math.atan2(dy, dx);
+            double currentHeading = pose.getHeading();
 
-        // ---- BLOCKING TURN (Pedro v2) ----
-        follower.turn(angleToTurn, turnLeft);
+            double error = normalize(desiredHeading - currentHeading);
 
-        // ---- WAIT UNTIL WITHIN ±3° ----
-        while (opModeIsActive()) {
-            double err = normalizeAngle(desiredHeading - follower.getPose().getHeading());
-            if (Math.abs(err) < Math.toRadians(3)) break;
+            // DONE?
+            if (Math.abs(error) < Math.toRadians(2)) {
+                drive.driveMecanum(0, 0, 0);
+                return;
+            }
+
+            // proportional turn speed
+            double kP = 0.9;
+            double turnPower = kP * error;
+
+            // clamp to safe turn speed
+            turnPower = Math.max(-0.6, Math.min(0.6, turnPower));
+
+            // **PURE ROTATION ONLY**
+            drive.driveMecanum(0, 0, turnPower);
 
             follower.update();
         }
 
-        // teleop returns automatically after method ends
+        // stop if button released
+        drive.driveMecanum(0, 0, 0);
     }
 
-    private double normalizeAngle(double ang) {
-        while (ang <= -Math.PI) ang += 2.0 * Math.PI;
-        while (ang > Math.PI)   ang -= 2.0 * Math.PI;
-        return ang;
+    private double normalize(double a) {
+        while (a <= -Math.PI) a += 2 * Math.PI;
+        while (a > Math.PI) a -= 2 * Math.PI;
+        return a;
     }
 }
