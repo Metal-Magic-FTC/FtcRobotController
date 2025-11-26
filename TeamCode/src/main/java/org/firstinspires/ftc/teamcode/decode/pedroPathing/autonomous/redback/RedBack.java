@@ -7,15 +7,43 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TeleV2;
 
 @Autonomous(name = "RedBack Auto", group = "Auto")
 public class RedBack extends LinearOpMode {
 
     private Follower follower;
     private GeneratedPathsRedBack paths;
+
+
+    DcMotor intakeMotor;
+    DcMotor launchMotor;
+    DcMotor spinMotor;
+
+    Servo pivotServo;
+    Servo flickServo;
+
+    NormalizedColorSensor backColor, leftColor, rightColor;
+
+    int[] POSITIONS = {-30, 217, 485}; //{0, 257, 515};
+    int[] INTAKE_POSITIONS = {352, -115, 142};
+
+    ballColors[] balls = new ballColors[3];
+    int index = 0;
+    int currentTarget = 0;
+
+    float gain = 20;
+    final float[] hsvValues = new float[3];
+
+    boolean spinControlWas = false;
+
+    enum ballColors {
+        PURPLE, GREEN, EMPTY, UNKNOWN
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -28,9 +56,9 @@ public class RedBack extends LinearOpMode {
 
         // Sequence of autonomous (each with a stop + 250ms pause)
         runPath(paths.scan(), 250, 0.75);
-        
-        runPath(paths.shoot(), 250, 0.75);
 
+        runPath(paths.shoot(), 250, 0.75);
+        launchBallAt(0);
         runPath(paths.toIntake1(), 250, 0.75);
 
         runIntakePath(paths.intake1(), 250, 0.5);
@@ -48,6 +76,33 @@ public class RedBack extends LinearOpMode {
         // End of auto
         telemetry.addLine("RedBack Auto Finished");
         telemetry.update();
+    }
+
+
+    private void moveToPosition(int newIndex, int[] table) {
+        currentTarget = table[newIndex];
+        runToPosition(spinMotor, currentTarget, 0.4);
+
+    }
+
+    private void runToPosition(DcMotor motor, int targetTicks, double power) {
+        motor.setTargetPosition(targetTicks);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(power);
+    }
+
+    private void launchBallAt(int index) {
+        if (balls[index] != ballColors.EMPTY) {
+            flickServo.setPosition(0.6);
+            sleep(200);
+            flickServo.setPosition(1);
+
+            launchMotor.setPower(1);
+            sleep(300);
+            launchMotor.setPower(0);
+
+            balls[index] = ballColors.EMPTY;
+        }
     }
 
     private void initialize() {
