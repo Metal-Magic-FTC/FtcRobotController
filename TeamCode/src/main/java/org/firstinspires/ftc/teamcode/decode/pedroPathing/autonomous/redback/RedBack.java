@@ -28,7 +28,7 @@ public class RedBack extends LinearOpMode {
 
         // Sequence of autonomous (each with a stop + 250ms pause)
         runPath(paths.scan(), 250, 0.75);
-
+        
         runPath(paths.shoot(), 250, 0.75);
 
         runPath(paths.toIntake1(), 250, 0.75);
