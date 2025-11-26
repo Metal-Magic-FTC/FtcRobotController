@@ -17,13 +17,6 @@ public class RedBack extends LinearOpMode {
     private Follower follower;
     private GeneratedPathsRedBack paths;
 
-    DcMotor intakeMotor;
-    Servo leftFlickServo = null;
-    Servo rightFlickServo = null;
-    Servo middleFlickServo = null;
-    Servo leftGate = null;
-    Servo rightGate = null;
-
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -33,32 +26,20 @@ public class RedBack extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        intakeMotor.setPower(0);
-
         // Sequence of autonomous (each with a stop + 250ms pause)
         runPath(paths.shoot(), 250, 0.75);
 
-        shoot(0); // eventually replaced by motiff order
-
         runPath(paths.toIntake1(), 250, 0.75);
-        intakeMotor.setPower(1);
 
         runIntakePath(paths.intake1(), 250, 0.5);
-        intakeMotor.setPower(0);
 
         runPath(paths.shoot2(), 250, 0.75);
 
-        shoot(0); // eventually replaced by motiff order
-
         runPath(paths.toIntake2(), 250, 0.75);
-        intakeMotor.setPower(1);
 
         runIntakePath(paths.intake2(), 250, 0.5);
-        intakeMotor.setPower(0);
 
         runPath(paths.shoot3(), 250, 0.75);
-
-        shoot(0); // eventually replaced by motiff order
 
         //intakeMotor.setPower(0);
 
@@ -84,82 +65,8 @@ public class RedBack extends LinearOpMode {
         // Load paths
         paths = new GeneratedPathsRedBack(follower);
 
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        leftFlickServo = hardwareMap.servo.get("leftFlickServo");
-        middleFlickServo = hardwareMap.servo.get("middleFlickServo");
-        rightFlickServo = hardwareMap.servo.get("rightFlickServo");
-        leftGate = hardwareMap.servo.get("leftGate");
-        rightGate = hardwareMap.servo.get("rightGate");
-
-        gatesClosed();
-
         telemetry.addLine("Ready to start RedBack Auto");
         telemetry.update();
-    }
-
-    public void gatesClosed() {
-        leftGate.setPosition(1); // close
-        rightGate.setPosition(0); // close
-        leftFlickServo.setPosition(1); // open
-        rightFlickServo.setPosition(1); // open
-    }
-
-    /**
-     * 0 - ppg
-     * 1 - pgp
-     * 2 - gpp
-     * @param order - order of shoot
-     */
-    public void shoot(int order) {
-
-        if (order == 0) {
-
-            gatesClosed();
-
-            // shoot the middle one
-            middleFlickServo.setPosition(0.75); // open
-            sleep(400);
-            middleFlickServo.setPosition(1);
-
-            sleep(300);
-
-            // move right to middle
-            rightGate.setPosition(0.3); // open
-            rightFlickServo.setPosition(0.5); // launch
-            leftGate.setPosition(1); // close
-
-            sleep(500);
-
-            // shoot middle
-            middleFlickServo.setPosition(0.75); // open
-            sleep(400);
-            middleFlickServo.setPosition(1);
-            sleep(300);
-
-            gatesClosed();
-
-            // move left to middle
-            leftGate.setPosition(0.7); // open
-            leftFlickServo.setPosition(0.4); // launch
-            rightGate.setPosition(0); // close
-
-            sleep(300);
-
-            // shoot middle
-            middleFlickServo.setPosition(0.75); // open
-            sleep(400);
-            middleFlickServo.setPosition(1);
-
-            sleep(300);
-            gatesClosed();
-            sleep(300);
-
-
-        }
-
     }
 
     private void runPath(PathChain path, int stopDelayMs, double speed) {
