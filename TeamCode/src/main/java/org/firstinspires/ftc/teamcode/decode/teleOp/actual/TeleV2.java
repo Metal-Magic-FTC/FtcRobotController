@@ -150,7 +150,7 @@ public class TeleV2 extends LinearOpMode {
 
         if (resetIndex) {
             index = 0;
-            moveToPosition(index, POSITIONS);
+            moveSpindexer(index, POSITIONS);
         }
 
         if (markUnknown) {
@@ -167,17 +167,17 @@ public class TeleV2 extends LinearOpMode {
 
         if (toNextPurple) {
             index = findClosestColor(ballColors.PURPLE, index);
-            moveToPosition(index, POSITIONS);
+            moveSpindexer(index, POSITIONS);
         }
 
         if (toNextGreen) {
             index = findClosestColor(ballColors.GREEN, index);
-            moveToPosition(index, POSITIONS);
+            moveSpindexer(index, POSITIONS);
         }
 
         if (toNextEmpty) {
             index = findClosestEmpty(index);
-            moveToPosition(index, INTAKE_POSITIONS);
+            moveSpindexer(index, INTAKE_POSITIONS);
         }
 
         if (setPurple) balls[index] = ballColors.PURPLE;
@@ -203,7 +203,7 @@ public class TeleV2 extends LinearOpMode {
     // COLOR + SPIN HELPERS
     // -----------------------------
 
-    private void moveToPosition(int newIndex, int[] table) {
+    private void moveSpindexer(int newIndex, int[] table) {
         currentTarget = table[newIndex];
         runToPosition(spinMotor, currentTarget, 0.4);
     }
