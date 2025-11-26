@@ -324,10 +324,12 @@ public class LimelightAim extends OpMode {
             telemetry.addData("  Z", "%.3f m (distance)", robotTarget.getPosition().z);
             telemetry.addData("Pitch: ", tag.getTargetYDegrees());
             telemetry.addData("Yaw: ", tag.getTargetXDegrees());
-            limelightDistance = Math.abs(robotTarget.getPosition().z);
-            launchPos = (0.000240299*limelightDistance) + 0.66507;
-            if ((launchPos <=1) && (launchPos >=0)) {
-                LaunchServo.setPosition(launchPos);
+            if (gamepad1.a) {
+                limelightDistance = Math.abs(robotTarget.getPosition().z);
+                launchPos = (0.000240299 * limelightDistance) + 0.66507;
+                if ((launchPos <= 1) && (launchPos >= 0)) {
+                    LaunchServo.setPosition(launchPos);
+                }
             }
             // Check if this is being used incorrectly as field coordinates
             if (robotTarget.getPosition().z < 3.0) {
