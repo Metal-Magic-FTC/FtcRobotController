@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.limeLight.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.blueback.GeneratedPathsBlueBack;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.blueback.GeneratedPathsBlueBack;
 
 @Autonomous(name = "BlueBack Auto", group = "Auto")
 public class BlueFront extends LinearOpMode {
