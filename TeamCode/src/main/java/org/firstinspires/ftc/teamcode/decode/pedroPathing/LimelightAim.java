@@ -134,7 +134,7 @@ public class LimelightAim extends OpMode {
         }
 
         displayDiagnostics(result, currentHeading);
-        aimLaunch();
+        //aimLaunch();
     }
 
     private void handleGamepadInput() {
@@ -323,7 +323,7 @@ public class LimelightAim extends OpMode {
             telemetry.addData("  Y", "%.3f m (left)", robotTarget.getPosition().y);
             telemetry.addData("  Z", "%.3f m (distance)", robotTarget.getPosition().z);
             telemetry.addData("Pitch: ", tag.getTargetYDegrees());
-            telemetry.addData("Yaw: ", tag.getTarget9876XDegrees());
+            telemetry.addData("Yaw: ", tag.getTargetXDegrees());
             limelightDistance = Math.abs(robotTarget.getPosition().z);
             launchPos = (0.000240299*limelightDistance) + 0.66507;
             if ((launchPos <=1) && (launchPos >=0)) {
