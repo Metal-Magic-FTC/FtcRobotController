@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.decode.teleOp.align;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.geometry.Point;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -42,9 +43,12 @@ public class PedroAlignToRed extends OpMode {
             double currentHeading = currentPose.getHeading();
             double targetHeading = calculateHeadingToGoal();
 
+            // Create start and end poses at same position but different headings
+//            Pose startPose = new Pose(currentPose.getX(), currentPose.getY(), currentHeading);
+            Pose endPose = new Pose(currentPose.getX(), currentPose.getY());
+
             return follower.pathBuilder()
-                    .addPath(new Point(currentPose.getX(), currentPose.getY(), Point.CARTESIAN),
-                            new Point(currentPose.getX(), currentPose.getY(), Point.CARTESIAN))
+                    .addPath(new Path(new BezierLine(follower::getPose, endPose)))
                     .setLinearHeadingInterpolation(currentHeading, targetHeading)
                     .build();
         };
