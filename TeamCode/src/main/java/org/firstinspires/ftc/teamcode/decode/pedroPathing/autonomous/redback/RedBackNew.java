@@ -96,11 +96,15 @@ public class RedBackNew extends LinearOpMode {
         // ----------------------
         runPath(paths.toIntake1(), 250, 0.75);
         runIntakePath(paths.intake1(), 250, 0.5);
+        shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
 
         runPath(paths.shoot2(), 250, 0.75);
+        shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
+
         runPath(paths.toIntake2(), 250, 0.75);
         runIntakePath(paths.intake2(), 250, 0.5);
         runPath(paths.shoot3(), 250, 0.75);
+        shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
 
         telemetry.addLine("RedBack New Auto Finished");
         telemetry.update();
