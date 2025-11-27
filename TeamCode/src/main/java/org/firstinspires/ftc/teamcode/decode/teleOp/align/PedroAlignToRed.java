@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.decode.teleOp.align;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.geometry.BezierPoint;
-import com.pedropathing.paths.Path;
+import com.pedropathing.geometry.Point;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -28,7 +26,7 @@ public class PedroAlignToRed extends OpMode {
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
-    // Fixed goal point on the field (adjust these coordinates as needed)
+    // Fixed goal point on the field
     private static final double GOAL_X = 130.0;
     private static final double GOAL_Y = 130.0;
 
@@ -38,17 +36,16 @@ public class PedroAlignToRed extends OpMode {
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
 
-        // Lazy path generation for rotation - creates a point turn at current position
+        // Lazy path generation for rotation
         rotationPath = () -> {
             Pose currentPose = follower.getPose();
+            double currentHeading = currentPose.getHeading();
             double targetHeading = calculateHeadingToGoal();
 
             return follower.pathBuilder()
-                    .addPath(new Path(new BezierLine(
-                            new Pose(currentPose.getX(), currentPose.getY()),
-                            new Pose(currentPose.getX(), currentPose.getY())
-                    )))
-                    .setConstantHeadingInterpolation(targetHeading)
+                    .addPath(new Point(currentPose.getX(), currentPose.getY(), Point.CARTESIAN),
+                            new Point(currentPose.getX(), currentPose.getY(), Point.CARTESIAN))
+                    .setLinearHeadingInterpolation(currentHeading, targetHeading)
                     .build();
         };
     }
