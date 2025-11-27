@@ -18,7 +18,11 @@ import java.util.function.Supplier;
 @TeleOp
 public class PedroAlignToRed extends OpMode {
     private Follower follower;
-    public static Pose startingPose;
+    public static Pose startingPose = new Pose(
+            116.6988847583643,
+            128.83271375464685,
+            Math.toRadians(225)
+    );
     private boolean automatedRotation;
     private Supplier<PathChain> rotationPath;
     private boolean slowMode = false;
