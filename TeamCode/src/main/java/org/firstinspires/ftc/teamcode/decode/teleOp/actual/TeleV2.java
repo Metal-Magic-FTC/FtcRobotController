@@ -29,7 +29,7 @@ public class TeleV2 extends LinearOpMode {
 
     NormalizedColorSensor backColor, leftColor, rightColor;
 
-    int[] POSITIONS = {-30, 217, 485}; //{0, 257, 515};
+    int[] POSITIONS = {0, 250, 500};
     int[] INTAKE_POSITIONS = {352, -115, 142};
 
     ballColors[] balls = new ballColors[3];

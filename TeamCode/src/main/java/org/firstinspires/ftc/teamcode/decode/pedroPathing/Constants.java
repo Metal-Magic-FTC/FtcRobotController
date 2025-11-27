@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(8)
+            .mass(22)
             .forwardZeroPowerAcceleration(-48.675)
             .lateralZeroPowerAcceleration(-50.796)
             //.translationalPIDFCoefficients(new PIDFCoefficients(0.005, 0.001, 0.0005, 0.0375))
@@ -39,8 +39,8 @@ public class Constants {
             .yVelocity(53.953);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(180)
-            .strafePodX(0)
+            .forwardPodY(0)
+            .strafePodX(-7)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("odo")
             .encoderResolution(

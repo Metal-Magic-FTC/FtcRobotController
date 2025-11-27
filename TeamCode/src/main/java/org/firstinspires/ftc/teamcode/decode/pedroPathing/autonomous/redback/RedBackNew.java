@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
-@Autonomous(name = "RedBack New Auto", group = "Auto")
+@Autonomous(name = "!!!!!RedBack New Auto", group = "Auto")
 public class RedBackNew extends LinearOpMode {
 
     // -----------------------------
@@ -35,7 +35,7 @@ public class RedBackNew extends LinearOpMode {
 
     NormalizedColorSensor backColor, leftColor, rightColor;
 
-    int[] POSITIONS = {-30, 217, 485};
+    int[] POSITIONS = {0, 250, 500};
     int[] INTAKE_POSITIONS = {352, -115, 142};
 
     ballColors[] balls = new ballColors[3];
@@ -76,6 +76,10 @@ public class RedBackNew extends LinearOpMode {
         scanAllBalls();
         telemetry.addData("Balls", balls[0] + ", " + balls[1] + ", " + balls[2]);
         telemetry.update();
+
+        intakeMotor.setPower(0.4);
+
+        runPath(paths.scan(), 250, 0.75);
 
         // ----------------------
         // 2. Move to shooting position
