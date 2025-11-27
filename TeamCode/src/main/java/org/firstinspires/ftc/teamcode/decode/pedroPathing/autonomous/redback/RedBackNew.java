@@ -77,7 +77,7 @@ public class RedBackNew extends LinearOpMode {
         telemetry.addData("Balls", balls[0] + ", " + balls[1] + ", " + balls[2]);
         telemetry.update();
 
-        intakeMotor.setPower(0.8);
+        intakeMotor.setPower(0.6);
 
         runPath(paths.scan(), 250, 0.75);
 
@@ -206,13 +206,16 @@ public class RedBackNew extends LinearOpMode {
 
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
-            //0.6
-            flickServo.setPosition(0.22);
-            sleep(200);
-            flickServo.setPosition(0);
 
             launchMotor.setPower(1);
-            sleep(300);
+            sleep(500);
+
+            //0.6
+            flickServo.setPosition(0);
+            sleep(500);
+            flickServo.setPosition(1);
+
+
             launchMotor.setPower(0);
 
             balls[index] = ballColors.EMPTY;
