@@ -29,7 +29,7 @@ public class FlickServoTest extends LinearOpMode {
         boolean rightIs = false;
         double power = 1;
         testServo.setPosition(0.70);
-        flickServo.setPosition(0.02);
+        flickServo.setPosition(0);
 
         while (opModeIsActive()) {
             //front distance (close to basket) - position: 0.75 and power: 0.7
@@ -62,7 +62,7 @@ public class FlickServoTest extends LinearOpMode {
                 flickServo.setPosition(0.22); // 0.6
 
             } else {
-                flickServo.setPosition(0.02); // 1
+                flickServo.setPosition(0); // 1
             }
 
             leftWas = gamepad1.left_bumper;
