@@ -96,8 +96,12 @@ public class RedBackNew extends LinearOpMode {
         // ----------------------
         runPath(paths.toIntake1(), 250, 0.75);
         runIntakePath(paths.intakeball1(), 250, 0.5);
+        moveSpindexer(0, POSITIONS);
         runIntakePath(paths.intakeball2(), 250, 0.5);
+        moveSpindexer(1, POSITIONS);
         runIntakePath(paths.intakeball3(), 250, 0.5);
+        moveSpindexer(2, POSITIONS);
+        scanAllBalls();
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
 
         runPath(paths.shoot2(), 250, 0.75);
@@ -187,6 +191,12 @@ public class RedBackNew extends LinearOpMode {
     // -----------------------------
     // TELEOP METHODS (copied line-for-line)
     // -----------------------------
+
+    private void moveSpindexer(int newIndex, int[] table) {
+        currentTarget = table[newIndex];
+        runToPosition(spinMotor, currentTarget, 0.4);
+    }
+
     private void moveToPosition(int newIndex, int[] table) {
         currentTarget = table[newIndex];
         runToPosition(spinMotor, currentTarget, 0.4);
