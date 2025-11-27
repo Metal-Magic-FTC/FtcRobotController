@@ -77,7 +77,7 @@ public class RedBackNew extends LinearOpMode {
         telemetry.addData("Balls", balls[0] + ", " + balls[1] + ", " + balls[2]);
         telemetry.update();
 
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(0.8);
 
         runPath(paths.scan(), 250, 0.75);
 
@@ -90,41 +90,54 @@ public class RedBackNew extends LinearOpMode {
         // 3. Shoot in order: purple → green → purple
         // ----------------------
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
+        moveSpindexer(0, INTAKE_POSITIONS);
 
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
         runPath(paths.toIntake1(), 250, 0.75);
+
+
         runIntakePath(paths.intakeball1(), 250, 0.5);
-        sleep(250);
-        moveSpindexer(0, INTAKE_POSITIONS);
-        sleep(250);
-        runIntakePath(paths.intakeball2(), 250, 0.5);
-        sleep(250);
+        sleep(2000);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(250);
-        runIntakePath(paths.intakeball3(), 250, 0.5);
-        sleep(250);
+        sleep(1000);
+
+        runIntakePath(paths.intakeball2(), 250, 0.5);
+        sleep(2000);
         moveSpindexer(2, INTAKE_POSITIONS);
+        sleep(1000);
+
+        runIntakePath(paths.intakeball3(), 250, 0.5);
+        sleep(2000);
+        moveToPosition(0, POSITIONS);
+        //moveSpindexer(2, INTAKE_POSITIONS);
+        sleep(1000);
+
+
         scanAllBalls();
-        shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
-        moveSpindexer(0, INTAKE_POSITIONS);
 
         runPath(paths.shoot2(), 250, 0.75);
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
+        moveSpindexer(0, INTAKE_POSITIONS);
 
         runPath(paths.toIntake2(), 250, 0.75);
+
         runIntakePath(paths.intakeball4(), 250, 0.5);
-        sleep(250);
-        moveSpindexer(0, INTAKE_POSITIONS);
-        sleep(250);
-        runIntakePath(paths.intakeball5(), 250, 0.5);
-        sleep(250);
+        sleep(2000);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(250);
-        runIntakePath(paths.intakeball6(), 250, 0.5);
-        sleep(250);
+        sleep(1000);
+
+        runIntakePath(paths.intakeball5(), 250, 0.5);
+        sleep(2000);
         moveSpindexer(2, INTAKE_POSITIONS);
+        sleep(1000);
+
+        runIntakePath(paths.intakeball6(), 250, 0.5);
+        sleep(2000);
+        moveToPosition(0, POSITIONS);
+        //moveSpindexer(2, INTAKE_POSITIONS);
+        sleep(1000);
 
         runPath(paths.shoot3(), 250, 0.75);
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});

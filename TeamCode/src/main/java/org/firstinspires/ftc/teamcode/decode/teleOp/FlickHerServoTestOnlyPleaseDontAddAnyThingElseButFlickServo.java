@@ -24,7 +24,7 @@ public class FlickHerServoTestOnlyPleaseDontAddAnyThingElseButFlickServo extends
         boolean rightWas = false;
         boolean rightIs = false;
         double power = 1;
-        flickServo.setPosition(1);
+        flickServo.setPosition(0);
 
         while (opModeIsActive()) {
             //front distance (close to basket) - position: 0.75 and power: 0.7
@@ -42,10 +42,10 @@ public class FlickHerServoTestOnlyPleaseDontAddAnyThingElseButFlickServo extends
                 flickServo.setPosition(flickServo.getPosition() + 0.01);
             }
 
-            if (gamepad1.right_trigger>=0.4f) {
-                flickServo.setPosition(0.6);
+            if (gamepad1.a) {
+                flickServo.setPosition(0);
 
-            } else {
+            } else if (gamepad1.b) {
                 flickServo.setPosition(1);
             }
 
