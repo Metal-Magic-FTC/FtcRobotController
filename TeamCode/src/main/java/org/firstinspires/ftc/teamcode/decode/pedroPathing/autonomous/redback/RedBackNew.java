@@ -95,7 +95,9 @@ public class RedBackNew extends LinearOpMode {
         // 4. Continue auto sequence
         // ----------------------
         runPath(paths.toIntake1(), 250, 0.75);
-        runIntakePath(paths.intake1(), 250, 0.5);
+        runIntakePath(paths.intakeball1(), 250, 0.5);
+        runIntakePath(paths.intakeball2(), 250, 0.5);
+        runIntakePath(paths.intakeball3(), 250, 0.5);
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
 
         runPath(paths.shoot2(), 250, 0.75);
