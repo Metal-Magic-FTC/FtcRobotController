@@ -1,22 +1,30 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.align;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.geometry.BezierPoint;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
+import java.util.function.Supplier;
+
 @Configurable
 @TeleOp
 public class PedroAlignToRed extends OpMode {
     private Follower follower;
-    public static Pose startingPose;
+    public static Pose startingPose = new Pose(
+            116.6988847583643,
+            128.83271375464685,
+            Math.toRadians(225)
+    );
     private boolean automatedRotation;
-    private TelemetryManager telemetryM;
+    private Supplier<PathChain> rotationPath;
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
@@ -29,7 +37,20 @@ public class PedroAlignToRed extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+
+        // Lazy path generation for rotation - creates a point turn at current position
+        rotationPath = () -> {
+            Pose currentPose = follower.getPose();
+            double targetHeading = calculateHeadingToGoal();
+
+            return follower.pathBuilder()
+                    .addPath(new Path(new BezierLine(
+                            new Pose(currentPose.getX(), currentPose.getY()),
+                            new Pose(currentPose.getX(), currentPose.getY())
+                    )))
+                    .setConstantHeadingInterpolation(targetHeading)
+                    .build();
+        };
     }
 
     @Override
@@ -40,7 +61,6 @@ public class PedroAlignToRed extends OpMode {
     @Override
     public void loop() {
         follower.update();
-        telemetryM.update();
 
         if (!automatedRotation) {
             // Normal teleop driving
@@ -63,8 +83,7 @@ public class PedroAlignToRed extends OpMode {
 
         // Rotate to face goal point when A is pressed
         if (gamepad1.aWasPressed()) {
-            double targetHeading = calculateHeadingToGoal();
-            follower.turnTo(targetHeading);
+            follower.followPath(rotationPath.get(), true);
             automatedRotation = true;
         }
 
@@ -87,12 +106,31 @@ public class PedroAlignToRed extends OpMode {
             slowModeMultiplier -= 0.25;
         }
 
-        // Telemetry
-        telemetryM.debug("position", follower.getPose());
-        telemetryM.debug("velocity", follower.getVelocity());
-        telemetryM.debug("automatedRotation", automatedRotation);
-        telemetryM.debug("targetHeading", Math.toDegrees(calculateHeadingToGoal()));
-        telemetryM.debug("goalPoint", "(" + GOAL_X + ", " + GOAL_Y + ")");
+        // Standard FTC Telemetry
+        Pose currentPose = follower.getPose();
+        double targetHeading = calculateHeadingToGoal();
+
+        telemetry.addData("--- Position ---", "");
+        telemetry.addData("X", String.format("%.2f", currentPose.getX()));
+        telemetry.addData("Y", String.format("%.2f", currentPose.getY()));
+        telemetry.addData("Heading (deg)", String.format("%.2f", Math.toDegrees(currentPose.getHeading())));
+        telemetry.addData("", "");
+        telemetry.addData("--- Goal ---", "");
+        telemetry.addData("Goal Point", String.format("(%.1f, %.1f)", GOAL_X, GOAL_Y));
+        telemetry.addData("Target Heading (deg)", String.format("%.2f", Math.toDegrees(targetHeading)));
+        telemetry.addData("Heading Error (deg)", String.format("%.2f",
+                Math.toDegrees(normalizeAngle(targetHeading - currentPose.getHeading()))));
+        telemetry.addData("", "");
+        telemetry.addData("--- Status ---", "");
+        telemetry.addData("Mode", automatedRotation ? "AUTO ROTATE" : "MANUAL");
+        telemetry.addData("Slow Mode", slowMode);
+        telemetry.addData("Follower Busy", follower.isBusy());
+        telemetry.addData("", "");
+        telemetry.addData("--- Controls ---", "");
+        telemetry.addData("A", "Rotate to Goal");
+        telemetry.addData("B", "Cancel Rotation");
+        telemetry.addData("RB", "Toggle Slow Mode");
+        telemetry.update();
     }
 
     /**
@@ -103,5 +141,14 @@ public class PedroAlignToRed extends OpMode {
         double deltaX = GOAL_X - currentPose.getX();
         double deltaY = GOAL_Y - currentPose.getY();
         return Math.atan2(deltaY, deltaX);
+    }
+
+    /**
+     * Normalize angle to -PI to PI range
+     */
+    private double normalizeAngle(double angle) {
+        while (angle > Math.PI) angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
     }
 }

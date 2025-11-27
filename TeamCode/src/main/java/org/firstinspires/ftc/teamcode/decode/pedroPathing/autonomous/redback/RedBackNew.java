@@ -77,7 +77,7 @@ public class RedBackNew extends LinearOpMode {
         telemetry.addData("Balls", balls[0] + ", " + balls[1] + ", " + balls[2]);
         telemetry.update();
 
-        intakeMotor.setPower(0.8);
+        intakeMotor.setPower(0.6);
 
         runPath(paths.scan(), 250, 0.75);
 
