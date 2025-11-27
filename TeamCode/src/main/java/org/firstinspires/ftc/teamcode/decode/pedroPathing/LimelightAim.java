@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing;
 
+import androidx.xr.runtime.math.Pose;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -317,6 +319,7 @@ public class LimelightAim extends OpMode {
 
         // Robot pose relative to tag (robot-centric, NOT field-centric)
         Pose3D robotTarget = tag.getRobotPoseTargetSpace();
+        Pose3D limeCord = result.getBotpose();
         if (robotTarget != null) {
             telemetry.addLine("Robot→Tag (relative):");
             telemetry.addData("  X", "%.3f m (forward)", robotTarget.getPosition().x);
@@ -329,6 +332,14 @@ public class LimelightAim extends OpMode {
                 launchPos = (0.000240299 * limelightDistance) + 0.66507;
                 if ((launchPos <= 1) && (launchPos >= 0)) {
                     LaunchServo.setPosition(launchPos);
+                }
+                if (robotTarget.getPosition().x!=limeCord.getPosition().x) {
+                    if (robotTarget.getPosition().x>limeCord.getPosition().x) {
+                        //rotate robot with odo to the left
+                    }
+                    if (robotTarget.getPosition().x<limeCord.getPosition().x) {
+                        //rotate robot with odo to the right
+                    }
                 }
             }
             // Check if this is being used incorrectly as field coordinates
