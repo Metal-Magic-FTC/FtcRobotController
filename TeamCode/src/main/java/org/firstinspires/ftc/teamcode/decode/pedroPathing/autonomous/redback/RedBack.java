@@ -37,13 +37,13 @@ public class RedBack extends LinearOpMode {
 
         runPath(paths.toIntake1(), 250, 0.75);
 
-      //  runIntakePath(paths.intake1(), 250, 0.5);
+        runIntakePath(paths.intakeball3(), 250, 0.5);
 
         runPath(paths.shoot2(), 250, 0.75);
 
         runPath(paths.toIntake2(), 250, 0.75);
 
-   //     runIntakePath(paths.intake2(), 250, 0.5);
+        runIntakePath(paths.intakeball6(), 250, 0.5);
 
         runPath(paths.shoot3(), 250, 0.75);
 
