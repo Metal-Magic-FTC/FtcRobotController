@@ -187,9 +187,10 @@ public class RedBackNew extends LinearOpMode {
 
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
-            flickServo.setPosition(0.6);
+            //0.6
+            flickServo.setPosition(0.22);
             sleep(200);
-            flickServo.setPosition(1);
+            flickServo.setPosition(0);
 
             launchMotor.setPower(1);
             sleep(300);
