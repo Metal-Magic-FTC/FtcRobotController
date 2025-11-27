@@ -72,6 +72,12 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
                 flickServo.setPosition(0); // 1
             }
 
+            double drive = -gamepad1.left_stick_y;
+            double strafe = gamepad1.left_stick_x;
+            double turn = gamepad1.right_stick_x;
+
+            drivetrain.driveMecanum(strafe, drive, turn);
+
             leftWas = gamepad1.left_bumper;
             rightWas = gamepad1.right_bumper;
 
