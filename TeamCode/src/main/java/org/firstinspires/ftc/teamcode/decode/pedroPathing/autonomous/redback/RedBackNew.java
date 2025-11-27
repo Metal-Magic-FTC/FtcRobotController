@@ -97,12 +97,15 @@ public class RedBackNew extends LinearOpMode {
         runPath(paths.toIntake1(), 250, 0.75);
         runIntakePath(paths.intakeball1(), 250, 0.5);
         moveSpindexer(0, INTAKE_POSITIONS);
+        wait(250);
         runIntakePath(paths.intakeball2(), 250, 0.5);
         moveSpindexer(1, INTAKE_POSITIONS);
+        wait(250);
         runIntakePath(paths.intakeball3(), 250, 0.5);
         moveSpindexer(2, INTAKE_POSITIONS);
         scanAllBalls();
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
+        moveSpindexer(0, INTAKE_POSITIONS);
 
         runPath(paths.shoot2(), 250, 0.75);
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
@@ -110,8 +113,10 @@ public class RedBackNew extends LinearOpMode {
         runPath(paths.toIntake2(), 250, 0.75);
         runIntakePath(paths.intakeball4(), 250, 0.5);
         moveSpindexer(0, INTAKE_POSITIONS);
+        wait(250);
         runIntakePath(paths.intakeball5(), 250, 0.5);
         moveSpindexer(1, INTAKE_POSITIONS);
+        wait(250);
         runIntakePath(paths.intakeball6(), 250, 0.5);
         moveSpindexer(2, INTAKE_POSITIONS);
 

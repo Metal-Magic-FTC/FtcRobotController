@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TeleV2;
 
+@Deprecated
 @Autonomous(name = "RedBack Auto", group = "Auto")
 public class RedBack extends LinearOpMode {
 
@@ -36,13 +37,13 @@ public class RedBack extends LinearOpMode {
 
         runPath(paths.toIntake1(), 250, 0.75);
 
-        runIntakePath(paths.intake1(), 250, 0.5);
+      //  runIntakePath(paths.intake1(), 250, 0.5);
 
         runPath(paths.shoot2(), 250, 0.75);
 
         runPath(paths.toIntake2(), 250, 0.75);
 
-        runIntakePath(paths.intake2(), 250, 0.5);
+   //     runIntakePath(paths.intake2(), 250, 0.5);
 
         runPath(paths.shoot3(), 250, 0.75);
 
