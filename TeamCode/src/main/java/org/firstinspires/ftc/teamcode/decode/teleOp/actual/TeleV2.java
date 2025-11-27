@@ -128,7 +128,7 @@ public class TeleV2 extends LinearOpMode {
     ) {
 
         if (flickButton)  flickServo.setPosition(0.22);
-        else              flickServo.setPosition(0);
+        else              flickServo.setPosition(0.02);
 
         if      (forward) launchMotor.setPower(1);
         else if (reverse) launchMotor.setPower(-1);
@@ -189,7 +189,7 @@ public class TeleV2 extends LinearOpMode {
         if (balls[index] != ballColors.EMPTY) {
             flickServo.setPosition(0.22);
             sleep(200);
-            flickServo.setPosition(0);
+            flickServo.setPosition(0.02);
 
             launchMotor.setPower(1);
             sleep(300);
