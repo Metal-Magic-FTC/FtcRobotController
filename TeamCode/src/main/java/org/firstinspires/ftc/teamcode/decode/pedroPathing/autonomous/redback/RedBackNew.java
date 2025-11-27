@@ -68,6 +68,9 @@ public class RedBackNew extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+
+        pivotServo.setPosition(0.6);
+
         if (isStopRequested()) return;
 
         // ----------------------
@@ -207,14 +210,16 @@ public class RedBackNew extends LinearOpMode {
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
 
+            pivotServo.setPosition(0.735);
             launchMotor.setPower(1);
             sleep(500);
 
             //0.6
             flickServo.setPosition(0);
             sleep(500);
+            pivotServo.setPosition(0.6);
             flickServo.setPosition(1);
-
+            sleep(500);
 
             launchMotor.setPower(0);
 
