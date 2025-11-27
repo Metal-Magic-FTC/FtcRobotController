@@ -198,11 +198,14 @@ public class RedBackNew extends LinearOpMode {
             if (balls[idx] != ballColors.EMPTY) {
                 moveToPosition(idx, POSITIONS);
                 // Charge launcher 1 second
-                launchMotor.setPower(1);
-                sleep(1000);
+//                launchMotor.setPower(1);
+//                sleep(1000);
+//                launchBallAt(idx);
+//                launchMotor.setPower(0);
+//                sleep(250);
+
                 launchBallAt(idx);
-                launchMotor.setPower(0);
-                sleep(250);
+
             }
         }
     }
@@ -210,20 +213,26 @@ public class RedBackNew extends LinearOpMode {
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
 
-            pivotServo.setPosition(0.735);
-            launchMotor.setPower(1);
+            launchMotor.setPower(0.9); // 1
+
             sleep(500);
 
-            //0.6
             flickServo.setPosition(0);
-            sleep(500);
-            pivotServo.setPosition(0.6);
-            flickServo.setPosition(1);
+            pivotServo.setPosition(0.735);
             sleep(500);
 
+            flickServo.setPosition(0.22);
+            sleep(700);
+
+
+            flickServo.setPosition(0);
+            pivotServo.setPosition(0.6);
             launchMotor.setPower(0);
 
+            sleep(500);
+
             balls[index] = ballColors.EMPTY;
+
         }
     }
 
@@ -232,6 +241,7 @@ public class RedBackNew extends LinearOpMode {
     // -----------------------------
 
     private void moveSpindexer(int newIndex, int[] table) {
+        pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
         runToPosition(spinMotor, currentTarget, 0.4);
     }
