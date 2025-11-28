@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.redback;
 
 
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -18,6 +21,8 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
+import java.util.List;
+
 
 @Autonomous(name = "!!!!!RedBack New Auto", group = "Auto")
 public class RedBackNew extends LinearOpMode {
@@ -28,7 +33,6 @@ public class RedBackNew extends LinearOpMode {
     // -----------------------------
     private Follower follower;
     private GeneratedPathsRedBack paths;
-
 
     private CustomMecanumDrive drivetrain;
 
@@ -69,7 +73,7 @@ public class RedBackNew extends LinearOpMode {
     ballColors[] pattern22 = new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE};
     ballColors[] pattern23 = new ballColors[]{ballColors.PURPLE, ballColors.PURPLE, ballColors.GREEN};
 
-
+    private Limelight3A limelight3A;
 
 
     // -----------------------------
@@ -83,7 +87,7 @@ public class RedBackNew extends LinearOpMode {
         resetBallArray();
 
 
-        ballColors[] correctPattern = pattern22; // default to 21 at start so no crashing
+        ballColors[] correctPattern; // default to 21 at start so no crashing
 
 
         // Initialize path follower
@@ -121,7 +125,18 @@ public class RedBackNew extends LinearOpMode {
 
         // SHOULD SCAN APRIL TAG HERE AND DETERMINE CORRECT PATTERN BASED ON TAG ID
 
+        // ------ APRILTAG DETECTION ------
+        int tagId = detectAprilTag(1500); // wait up to 1 sec
 
+        if (tagId == 21) {
+            correctPattern = pattern21;
+        } else if (tagId == 22) {
+            correctPattern = pattern22;
+        } else if (tagId == 23) {
+            correctPattern = pattern23;
+        } else {
+            correctPattern = pattern22; // fallback
+        }
 
 
         // ----------------------
@@ -422,10 +437,48 @@ public class RedBackNew extends LinearOpMode {
         balls[2] = ballColors.EMPTY;
     }
 
+    private int detectAprilTag(long timeoutMs) {
+        long start = System.currentTimeMillis();
+
+        while (opModeIsActive()
+                && !isStopRequested()
+                && System.currentTimeMillis() - start < timeoutMs) {
+
+            LLResult llResult = limelight3A.getLatestResult();
+
+            if (llResult != null && llResult.isValid()) {
+
+                List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
+
+                if (fiducials != null && !fiducials.isEmpty()) {
+
+                    // We only need the first tag detected
+                    LLResultTypes.FiducialResult tag = fiducials.get(0);
+                    int id = tag.getFiducialId();
+
+                    if (id == 21 || id == 22 || id == 23) {
+                        telemetry.addData("AprilTag Found", id);
+                        telemetry.update();
+                        return id;
+                    }
+                }
+            }
+
+            sleep(15);
+        }
+
+        telemetry.addLine("NO tag → Defaulting to 22");
+        telemetry.update();
+        return 22;
+    }
 
     private void initializeHardware() {
         initLauncher();
         initIntake();
+
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(3);  // APRILTAG PIPELINE
+        limelight3A.start();
 
 
         backColor  = hardwareMap.get(NormalizedColorSensor.class, "backColor");
