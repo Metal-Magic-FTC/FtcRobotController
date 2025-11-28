@@ -82,7 +82,7 @@ public class RedBackNew extends LinearOpMode {
 
         intakeMotor.setPower(0.6);
 
-        runPath(paths.scan(), 250, 0.75);
+        runPath(paths.scan(), 250, 1);
 
         // ----------------------
         // 2. Move to shooting position
@@ -98,24 +98,24 @@ public class RedBackNew extends LinearOpMode {
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
-        runPath(paths.toIntake1(), 250, 0.75);
+        runPath(paths.toIntake1(), 250, 1);
 
 
         runIntakePath(paths.intakeball1(), 250, 0.5);
-        sleep(2000);
+        sleep(500);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(1000);
+        sleep(500);
 
         runIntakePath(paths.intakeball2(), 250, 0.5);
-        sleep(2000);
+        sleep(500);
         moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(1000);
+        sleep(500);
 
         runIntakePath(paths.intakeball3(), 250, 0.5);
-        sleep(2000);
+        sleep(500);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(1000);
+        sleep(500);
 
 
         scanAllBalls();
@@ -279,7 +279,7 @@ public class RedBackNew extends LinearOpMode {
     private void moveSpindexer(int newIndex, int[] table) {
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.2);
+        runToPosition(spinMotor, currentTarget, 0.3);
     }
 
 //    private void moveToPosition(int newIndex, int[] table) {
