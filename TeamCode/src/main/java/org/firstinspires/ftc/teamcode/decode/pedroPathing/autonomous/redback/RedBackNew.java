@@ -113,7 +113,7 @@ public class RedBackNew extends LinearOpMode {
 
         runIntakePath(paths.intakeball3(), 250, 0.5);
         sleep(2000);
-        moveToPosition(0, POSITIONS);
+        moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
         sleep(1000);
 
@@ -138,7 +138,7 @@ public class RedBackNew extends LinearOpMode {
 
         runIntakePath(paths.intakeball6(), 250, 0.5);
         sleep(2000);
-        moveToPosition(0, POSITIONS);
+        moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
         sleep(1000);
 
@@ -193,27 +193,46 @@ public class RedBackNew extends LinearOpMode {
     // BALL SHOOTING HELPERS
     // -----------------------------
     private void shootBallsByColorOrder(ballColors[] order) {
-        for (ballColors color : order) {
-            int idx = findClosestColor(color, 0);
-            if (balls[idx] != ballColors.EMPTY) {
-                moveToPosition(idx, POSITIONS);
-                // Charge launcher 1 second
-//                launchMotor.setPower(1);
-//                sleep(1000);
-//                launchBallAt(idx);
-//                launchMotor.setPower(0);
-//                sleep(250);
+        for (ballColors desired : order) {
 
-                launchBallAt(idx);
+            int idx = findClosestColor(desired, 0);
 
+            if (balls[idx] == ballColors.EMPTY) continue;
+
+            // move spindexer to that slot
+            moveSpindexer(idx, POSITIONS);
+
+            // NEW GANGALANGL wait until sensor confirms correct ball is in the firing chamber ---
+            if (waitForBallAtShooter(desired, 1500)) {
+                launchBallAt(idx);   // only fires after sensor confirms color
+            } else {
+                telemetry.addLine("Ball not detected in time, skipping launch");
+                telemetry.update();
             }
         }
     }
+//    private void shootBallsByColorOrder(ballColors[] order) {
+//        for (ballColors color : order) {
+//            int idx = findClosestColor(color, 0);
+//            if (balls[idx] != ballColors.EMPTY) {
+//                moveSpindexer(idx, POSITIONS); // moveToPosition
+//                // Charge launcher 1 second
+// //                launchMotor.setPower(1);
+// //                sleep(1000);
+// //                launchBallAt(idx);
+// //                launchMotor.setPower(0);
+// //                sleep(250);
+//
+//                launchBallAt(idx);
+//
+//            }
+//        }
+//    }
 
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
 
-            launchMotor.setPower(0.9); // 1
+            launchMotor.setPower(1); // 1
 
             sleep(500);
 
@@ -236,6 +255,23 @@ public class RedBackNew extends LinearOpMode {
         }
     }
 
+    private boolean waitForBallAtShooter(ballColors expected, long timeoutMs) {
+        long start = System.currentTimeMillis();
+
+        while (opModeIsActive() && !isStopRequested() &&
+                System.currentTimeMillis() - start < timeoutMs) {
+
+            ballColors sensed = detectBallColorFromSensor(backColor);
+
+            if (sensed == expected) {
+                return true;
+            }
+
+            sleep(20);
+        }
+        return false;
+    }
+
     // -----------------------------
     // TELEOP METHODS (copied line-for-line)
     // -----------------------------
@@ -243,13 +279,14 @@ public class RedBackNew extends LinearOpMode {
     private void moveSpindexer(int newIndex, int[] table) {
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.4);
+        runToPosition(spinMotor, currentTarget, 0.2);
     }
 
-    private void moveToPosition(int newIndex, int[] table) {
-        currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.4);
-    }
+//    private void moveToPosition(int newIndex, int[] table) {
+//        pivotServo.setPosition(0.6);
+//        currentTarget = table[newIndex];
+//        runToPosition(spinMotor, currentTarget, 0.2);
+//    }
 
     private void runToPosition(DcMotor motor, int targetTicks, double power) {
         motor.setTargetPosition(targetTicks);
