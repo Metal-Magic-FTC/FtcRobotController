@@ -35,7 +35,7 @@ public class RedBackNew extends LinearOpMode {
 
     NormalizedColorSensor backColor, leftColor, rightColor;
 
-    int[] POSITIONS = {0, 250, 500};
+    int[] POSITIONS = {0, 245, 490}; //{0, 255, 510};
     int[] INTAKE_POSITIONS = {352, -115, 142};
 
     ballColors[] balls = new ballColors[3];
@@ -104,18 +104,18 @@ public class RedBackNew extends LinearOpMode {
         runIntakePath(paths.intakeball1(), 250, 0.5);
         sleep(500);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(500);
+        sleep(1000);
 
         runIntakePath(paths.intakeball2(), 250, 0.5);
         sleep(500);
         moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(500);
+        sleep(1000);
 
         runIntakePath(paths.intakeball3(), 250, 0.5);
         sleep(500);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(500);
+        sleep(1000);
 
 
         scanAllBalls();
@@ -232,7 +232,7 @@ public class RedBackNew extends LinearOpMode {
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
 
-            launchMotor.setPower(1); // 1
+            launchMotor.setPower(0.95); // 1
 
             sleep(500);
 
@@ -279,7 +279,7 @@ public class RedBackNew extends LinearOpMode {
     private void moveSpindexer(int newIndex, int[] table) {
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.3);
+        runToPosition(spinMotor, currentTarget, 0.2);
     }
 
 //    private void moveToPosition(int newIndex, int[] table) {
