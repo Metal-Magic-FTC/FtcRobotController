@@ -83,7 +83,7 @@ public class RedBackNew extends LinearOpMode {
         resetBallArray();
 
 
-        ballColors[] correctPattern = pattern21; // default to 21 at start so no crashing
+        ballColors[] correctPattern = pattern22; // default to 21 at start so no crashing
 
 
         // Initialize path follower
