@@ -163,20 +163,20 @@ public class RedBackNew extends LinearOpMode {
         runIntakePath(paths.intakeball1(), 250, 0.5);
         sleep(500);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(1000);
+        sleep(500);
 
 
         runIntakePath(paths.intakeball2(), 250, 0.5);
         sleep(500);
         moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(1000);
+        sleep(500);
 
 
         runIntakePath(paths.intakeball3(), 250, 0.5);
         sleep(500);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(1000);
+        sleep(500);
 
 
 
@@ -263,6 +263,10 @@ public class RedBackNew extends LinearOpMode {
     // BALL SHOOTING HELPERS
     // -----------------------------
     private void shootBallsByColorOrder(ballColors[] order) {
+
+        launchMotor.setPower(1);
+        sleep(250);
+
         for (ballColors desired : order) {
 
 
@@ -284,6 +288,9 @@ public class RedBackNew extends LinearOpMode {
                 telemetry.update();
             }
         }
+
+
+        launchMotor.setPower(0);
     }
 //    private void shootBallsByColorOrder(ballColors[] order) {
 //        for (ballColors color : order) {
@@ -327,7 +334,6 @@ public class RedBackNew extends LinearOpMode {
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.6);
-            launchMotor.setPower(0);
 
 
             sleep(500);
@@ -370,7 +376,7 @@ public class RedBackNew extends LinearOpMode {
     private void moveSpindexer(int newIndex, int[] table) {
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.2);
+        runToPosition(spinMotor, currentTarget, 0.3);
     }
 
 
