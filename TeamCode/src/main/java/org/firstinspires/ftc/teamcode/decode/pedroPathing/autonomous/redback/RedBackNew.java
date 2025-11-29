@@ -351,16 +351,17 @@ public class RedBackNew extends LinearOpMode {
 
 
     private void moveSpindexer(int newIndex, int[] table) {
-        if (newIndex == 1) {
-            if (balls[0] != ballColors.EMPTY) {
-                pivotServo.setPosition(0.6);
-            }
-            pivotServo.setPosition(0.6);
-        } else if (newIndex == 2) {
-            if (balls[0] != ballColors.EMPTY || balls[1] != ballColors.EMPTY) {
-                pivotServo.setPosition(0.6);
-            }
-        }
+//        if (newIndex == 1) {
+//            if (balls[0] != ballColors.EMPTY) {
+//                pivotServo.setPosition(0.6);
+//            }
+//            pivotServo.setPosition(0.6);
+//        } else if (newIndex == 2) {
+//            if (balls[0] != ballColors.EMPTY || balls[1] != ballColors.EMPTY) {
+//                pivotServo.setPosition(0.6);
+//            }
+//        }
+        pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
         runToPosition(spinMotor, currentTarget, 0.3);
     }
