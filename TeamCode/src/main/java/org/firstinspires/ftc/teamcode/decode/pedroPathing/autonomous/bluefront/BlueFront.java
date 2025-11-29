@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.limeLight.pedroPathing.autonomous.bluefront;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.bluefront;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.blueback.Ge
 public class BlueFront extends LinearOpMode {
 
     private Follower follower;
-    private GeneratedPathsBlueBack paths;
+    private GeneratedPathsBlueFront paths;
 
     DcMotor intakeMotor;
     Servo leftFlickServo = null;
@@ -43,7 +43,7 @@ public class BlueFront extends LinearOpMode {
         runPath(paths.toIntake1(), 250, 0.75);
         intakeMotor.setPower(1);
 
-        runIntakePath(paths.intake1(), 250, 0.5);
+        runIntakePath(paths.intakeball1(), 250, 0.5);
         intakeMotor.setPower(0);
 
         runPath(paths.shoot2(), 250, 0.75);
@@ -53,7 +53,7 @@ public class BlueFront extends LinearOpMode {
         runPath(paths.toIntake2(), 250, 0.75);
         intakeMotor.setPower(1);
 
-        runIntakePath(paths.intake2(), 250, 0.5);
+        runIntakePath(paths.intakeball2(), 250, 0.5);
         intakeMotor.setPower(0);
 
         runPath(paths.shoot3(), 250, 0.75);
@@ -82,7 +82,7 @@ public class BlueFront extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Load paths
-        paths = new GeneratedPathsBlueBack(follower);
+        paths = new GeneratedPathsBlueFront(follower);
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
