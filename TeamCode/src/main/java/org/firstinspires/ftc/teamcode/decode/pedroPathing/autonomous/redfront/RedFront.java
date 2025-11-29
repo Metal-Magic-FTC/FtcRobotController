@@ -298,14 +298,14 @@ public class RedFront extends LinearOpMode {
         if (balls[index] != ballColors.EMPTY) {
 
 
-            launchMotor.setPower(0.95); // 1
+            launchMotor.setPower(1); // 1
 
 
             sleep(500);
 
 
             flickServo.setPosition(0);
-            pivotServo.setPosition(0.735);
+            pivotServo.setPosition(0.7028);
             sleep(500);
 
 
