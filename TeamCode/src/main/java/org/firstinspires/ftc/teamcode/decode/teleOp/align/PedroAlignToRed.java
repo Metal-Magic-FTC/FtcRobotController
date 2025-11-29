@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.align;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -12,7 +15,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
-
 @Configurable
 @TeleOp
 public class PedroAlignToRed extends OpMode {
@@ -21,135 +23,77 @@ public class PedroAlignToRed extends OpMode {
             116.6988847583643,
             128.83271375464685,
             Math.toRadians(225)
-    );
-    private boolean automatedRotation;
-    private Supplier<PathChain> rotationPath;
+    ); //See ExampleAuto to understand how to use this
+    private boolean automatedDrive;
+    private Supplier<PathChain> pathChain;
+    private TelemetryManager telemetryM;
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
-
-    // Fixed goal point on the field
-    private static final double GOAL_X = 130.0;
-    private static final double GOAL_Y = 130.0;
-
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
-
-        // Lazy path generation for rotation
-        rotationPath = () -> {
-            Pose currentPose = follower.getPose();
-            double currentHeading = currentPose.getHeading();
-            double targetHeading = calculateHeadingToGoal();
-
-            // Create start and end poses at same position but different headings
-//            Pose startPose = new Pose(currentPose.getX(), currentPose.getY(), currentHeading);
-            Pose endPose = new Pose(currentPose.getX(), currentPose.getY());
-
-            return follower.pathBuilder()
-                    .addPath(new Path(new BezierLine(follower::getPose, endPose)))
-                    .setLinearHeadingInterpolation(currentHeading, targetHeading)
-                    .build();
-        };
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(100, 100))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
+                .build();
     }
-
     @Override
     public void start() {
+        //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
+        //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
+        //If you don't pass anything in, it uses the default (false)
         follower.startTeleopDrive();
     }
-
     @Override
     public void loop() {
+        //Call this once per loop
         follower.update();
-
-        if (!automatedRotation) {
-            // Normal teleop driving
-            if (!slowMode) {
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x,
-                        true
-                );
-            } else {
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y * slowModeMultiplier,
-                        -gamepad1.left_stick_x * slowModeMultiplier,
-                        -gamepad1.right_stick_x * slowModeMultiplier,
-                        true
-                );
-            }
+        telemetryM.update();
+        if (!automatedDrive) {
+            //Make the last parameter false for field-centric
+            //In case the drivers want to use a "slowMode" you can scale the vectors
+            //This is the normal version to use in the TeleOp
+            if (!slowMode) follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x,
+                    true // Robot Centric
+            );
+                //This is how it looks with slowMode on
+            else follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y * slowModeMultiplier,
+                    -gamepad1.left_stick_x * slowModeMultiplier,
+                    -gamepad1.right_stick_x * slowModeMultiplier,
+                    true // Robot Centric
+            );
         }
-
-        // Rotate to face goal point when A is pressed
+        //Automated PathFollowing
         if (gamepad1.aWasPressed()) {
-            follower.followPath(rotationPath.get(), true);
-            automatedRotation = true;
+            follower.followPath(pathChain.get());
+            automatedDrive = true;
         }
-
-        // Stop automated rotation if done or B is pressed
-        if (automatedRotation && (gamepad1.bWasPressed() || !follower.isBusy())) {
+        //Stop automated following if the follower is done
+        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
             follower.startTeleopDrive();
-            automatedRotation = false;
+            automatedDrive = false;
         }
-
-        // Slow Mode toggle
+        //Slow Mode
         if (gamepad1.rightBumperWasPressed()) {
             slowMode = !slowMode;
         }
-
-        // Slow mode strength adjustment
+        //Optional way to change slow mode strength
         if (gamepad1.xWasPressed()) {
             slowModeMultiplier += 0.25;
         }
+        //Optional way to change slow mode strength
         if (gamepad2.yWasPressed()) {
             slowModeMultiplier -= 0.25;
         }
-
-        // Standard FTC Telemetry
-        Pose currentPose = follower.getPose();
-        double targetHeading = calculateHeadingToGoal();
-
-        telemetry.addData("--- Position ---", "");
-        telemetry.addData("X", String.format("%.2f", currentPose.getX()));
-        telemetry.addData("Y", String.format("%.2f", currentPose.getY()));
-        telemetry.addData("Heading (deg)", String.format("%.2f", Math.toDegrees(currentPose.getHeading())));
-        telemetry.addData("", "");
-        telemetry.addData("--- Goal ---", "");
-        telemetry.addData("Goal Point", String.format("(%.1f, %.1f)", GOAL_X, GOAL_Y));
-        telemetry.addData("Target Heading (deg)", String.format("%.2f", Math.toDegrees(targetHeading)));
-        telemetry.addData("Heading Error (deg)", String.format("%.2f",
-                Math.toDegrees(normalizeAngle(targetHeading - currentPose.getHeading()))));
-        telemetry.addData("", "");
-        telemetry.addData("--- Status ---", "");
-        telemetry.addData("Mode", automatedRotation ? "AUTO ROTATE" : "MANUAL");
-        telemetry.addData("Slow Mode", slowMode);
-        telemetry.addData("Follower Busy", follower.isBusy());
-        telemetry.addData("", "");
-        telemetry.addData("--- Controls ---", "");
-        telemetry.addData("A", "Rotate to Goal");
-        telemetry.addData("B", "Cancel Rotation");
-        telemetry.addData("RB", "Toggle Slow Mode");
-        telemetry.update();
-    }
-
-    /**
-     * Calculate the heading angle needed to face the goal point from current position
-     */
-    private double calculateHeadingToGoal() {
-        Pose currentPose = follower.getPose();
-        double deltaX = GOAL_X - currentPose.getX();
-        double deltaY = GOAL_Y - currentPose.getY();
-        return Math.atan2(deltaY, deltaX);
-    }
-
-    /**
-     * Normalize angle to -PI to PI range
-     */
-    private double normalizeAngle(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle < -Math.PI) angle += 2 * Math.PI;
-        return angle;
+        telemetryM.debug("position", follower.getPose());
+        telemetryM.debug("velocity", follower.getVelocity());
+        telemetryM.debug("automatedDrive", automatedDrive);
     }
 }
