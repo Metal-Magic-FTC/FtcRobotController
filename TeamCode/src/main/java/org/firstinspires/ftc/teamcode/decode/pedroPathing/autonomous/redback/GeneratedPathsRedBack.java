@@ -23,7 +23,7 @@ public class GeneratedPathsRedBack {
     public PathChain scan(){
     return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(START_POSE, new Pose(90, 133))
+                        new BezierLine(START_POSE, new Pose(90, 100))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(125))
                 .build();
