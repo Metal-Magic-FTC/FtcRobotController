@@ -305,7 +305,7 @@ public class RedFront extends LinearOpMode {
 
 
             flickServo.setPosition(0);
-            pivotServo.setPosition(0.7028);
+            pivotServo.setPosition(0.735);
             sleep(500);
 
 
