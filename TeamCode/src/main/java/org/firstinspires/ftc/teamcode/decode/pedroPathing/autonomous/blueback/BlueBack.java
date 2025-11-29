@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.List;
 
 
-@Autonomous(name = "!!!!!Blue Auto", group = "Auto")
+@Autonomous(name = "!!!!!Blue Back Auto", group = "Auto")
 public class BlueBack extends LinearOpMode {
 
 
@@ -35,7 +35,6 @@ public class BlueBack extends LinearOpMode {
     private GeneratedPathsBlueBack paths;
 
     private CustomMecanumDrive drivetrain;
-
 
     DcMotor intakeMotor;
     DcMotor launchMotor;
