@@ -15,8 +15,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.redback.GeneratedPathsRedBack;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.redback.RedBackNew;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.List;
@@ -77,11 +75,11 @@ public class RedFront extends LinearOpMode {
 
         // Initialize path follower
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRedBack.START_POSE);
+        follower.setPose(GeneratedPathsRedFront.START_POSE);
         paths = new GeneratedPathsRedFront(follower);
 
 
-        telemetry.addLine("Ready to start RedBack New Auto");
+        telemetry.addLine("Ready to start RedFront New Auto");
         telemetry.update();
 
 
