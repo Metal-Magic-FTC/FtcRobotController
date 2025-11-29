@@ -83,7 +83,7 @@ public class GeneratedPathsRedFront {
                 .build();
     }
 
-    public PathChain intakeball() {
+    public PathChain intakeball4() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(new Pose(101.353, 59.400), new Pose(106.5, 60.112))

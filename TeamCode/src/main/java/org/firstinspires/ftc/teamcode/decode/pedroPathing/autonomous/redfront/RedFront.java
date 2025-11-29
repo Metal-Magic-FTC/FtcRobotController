@@ -35,6 +35,8 @@ public class RedFront extends LinearOpMode {
     Servo pivotServo;
     Servo flickServo;
     NormalizedColorSensor backColor, leftColor, rightColor;
+    
+    CustomMecanumDrive drivetrain;
 
 
     int[] POSITIONS = {0, 245, 490}; //{0, 255, 510};
@@ -69,12 +71,15 @@ public class RedFront extends LinearOpMode {
         initializeHardware();
         resetBallArray();
 
-        ballColors[] correctPattern; // default to 21 at start so no crashing
-        // Initialize path follower
 
+        ballColors[] correctPattern; // default to 21 at start so no crashing
+
+
+        // Initialize path follower
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsRedBack.START_POSE);
         paths = new GeneratedPathsRedFront(follower);
+
 
         telemetry.addLine("Ready to start RedBack New Auto");
         telemetry.update();
@@ -85,18 +90,27 @@ public class RedFront extends LinearOpMode {
 
         pivotServo.setPosition(0.6);
 
+
+        if (isStopRequested()) return;
+
+
+        // ----------------------
+        // 1. Scan all balls
+        // ----------------------
         scanAllBalls();
         telemetry.addData("Balls", balls[0] + ", " + balls[1] + ", " + balls[2]);
         telemetry.update();
 
-        if (isStopRequested()) return;
 
-        intakeMotor.setPower(0);
-
+        intakeMotor.setPower(0.6);
 
 
+        //runPath(paths.scan(), 50, 1);
 
 
+        // SHOULD SCAN APRIL TAG HERE AND DETERMINE CORRECT PATTERN BASED ON TAG ID
+
+        // ------ APRILTAG DETECTION ------
         int tagId = detectAprilTag(1500); // wait up to 1 sec
 
         if (tagId == 21) {
@@ -110,11 +124,10 @@ public class RedFront extends LinearOpMode {
         }
 
 
-
-
-
-        // Sequence of autonomous (each with a stop + 250ms pause)
-        runPath(paths.shoot(), 250, 0.75);
+        // ----------------------
+        // 2. Move to shooting position
+        // ----------------------
+        runPath(paths.shoot(), 50, 1);
 
 
         // ----------------------
@@ -123,27 +136,64 @@ public class RedFront extends LinearOpMode {
         shootBallsByColorOrder(correctPattern);
         moveSpindexer(0, INTAKE_POSITIONS);
 
-        runPath(paths.toIntake1(), 250, 0.75);
-        intakeMotor.setPower(1);
 
-        runPath(paths.intake1(), 250, 0.5);
-        intakeMotor.setPower(0);
+        // ----------------------
+        // 4. Continue auto sequence
+        // ----------------------
+        runPath(paths.toIntake1(), 50, 1);
 
-        runPath(paths.shoot2(), 250, 0.75);
 
-        runPath(paths.toIntake2(), 250, 0.75);
-        intakeMotor.setPower(1);
 
-        runPath(paths.intake2(), 250, 0.5);
-        intakeMotor.setPower(0);
+
+        runIntakePath(paths.intakeball1(), 50, 0.5);
+        sleep(500);
+        moveSpindexer(1, INTAKE_POSITIONS);
+        sleep(500);
+
+
+        runIntakePath(paths.intakeball2(), 50, 0.5);
+        sleep(500);
+        moveSpindexer(2, INTAKE_POSITIONS);
+        sleep(500);
+
+
+        runIntakePath(paths.intakeball3(), 50, 0.5);
+        sleep(500);
+        moveSpindexer(0, POSITIONS); // moveToPosition
+        //moveSpindexer(2, INTAKE_POSITIONS);
+        sleep(500);
+
+
+
+
+        scanAllBalls();
+
+
+        runPath(paths.shoot2(), 50, 1);
+        shootBallsByColorOrder(correctPattern);
+        moveSpindexer(0, INTAKE_POSITIONS);
+
+
+        runPath(paths.toIntake2(), 250, 1);
+
+
+        runIntakePath(paths.intakeball4(), 250, 0.5);
+
+
+        runIntakePath(paths.intakeball5(), 250, 0.5);
+
+
+        runIntakePath(paths.intakeball6(), 250, 0.5);
+
 
         runPath(paths.shoot3(), 250, 0.75);
+        shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
 
-        //intakeMotor.setPower(0);
 
         // End of auto
         telemetry.addLine("RedFront Auto Finished");
         telemetry.update();
+        
     }
     // -----------------------------
     // PATH HELPERS
@@ -487,33 +537,6 @@ public class RedFront extends LinearOpMode {
 
         telemetry.addLine("Ready to start RedFront Auto");
         telemetry.update();
-    }
-
-    private void runPath(PathChain path, int stopDelayMs, double speed) {
-
-        follower.setMaxPower(speed); // 0.6 of normal power
-
-        follower.followPath(path);
-
-        // run until path done
-        while (opModeIsActive() && !isStopRequested() && follower.isBusy()) {
-            follower.update();
-        }
-
-
-        follower.breakFollowing();
-
-        // Fully stop all drive motors
-        hardwareMap.get(DcMotor.class, "frontLeft").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hardwareMap.get(DcMotor.class, "frontRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hardwareMap.get(DcMotor.class, "backLeft").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hardwareMap.get(DcMotor.class, "frontLeft").setPower(0);
-        hardwareMap.get(DcMotor.class, "frontRight").setPower(0);
-        hardwareMap.get(DcMotor.class, "backLeft").setPower(0);
-        hardwareMap.get(DcMotor.class, "backRight").setPower(0);
-
-        if (stopDelayMs > 0) sleep(stopDelayMs);
     }
 
 }
