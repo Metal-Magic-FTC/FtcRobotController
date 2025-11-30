@@ -307,7 +307,7 @@ public class BlueBack extends LinearOpMode {
 
 
             flickServo.setPosition(0.22);
-            sleep(700);
+            sleep(1000);
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.57);
@@ -317,7 +317,6 @@ public class BlueBack extends LinearOpMode {
 
 
             balls[index] = ballColors.EMPTY;
-
 
         }
     }
