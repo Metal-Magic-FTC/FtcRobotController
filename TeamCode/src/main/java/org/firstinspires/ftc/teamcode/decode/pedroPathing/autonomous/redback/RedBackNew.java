@@ -49,8 +49,8 @@ public class RedBackNew extends LinearOpMode {
     NormalizedColorSensor backColor, leftColor, rightColor;
 
 
-    int[] POSITIONS = {0, 245, 490}; //{0, 255, 510};
-    int[] INTAKE_POSITIONS = {352, -115, 142};
+    private final int[] POSITIONS = {0, 246, 496};
+    private final int[] INTAKE_POSITIONS = {-373, -132, 127}; // {352, -115, 142};
 
 
     ballColors[] balls = new ballColors[3];
@@ -161,19 +161,19 @@ public class RedBackNew extends LinearOpMode {
 
 
         runIntakePath(paths.intakeball1(), 50, 0.5);
-        sleep(500);
+        sleep(1000);
         moveSpindexer(1, INTAKE_POSITIONS);
         sleep(500);
 
 
         runIntakePath(paths.intakeball2(), 50, 0.5);
-        sleep(500);
+        sleep(1000);
         moveSpindexer(2, INTAKE_POSITIONS);
         sleep(500);
 
 
         runIntakePath(paths.intakeball3(), 50, 0.5);
-        sleep(500);
+        sleep(1000);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
         sleep(500);
@@ -297,7 +297,7 @@ public class RedBackNew extends LinearOpMode {
         if (balls[index] != ballColors.EMPTY) {
 
 
-            launchMotor.setPower(0.95); // 1
+            launchMotor.setPower(0.9); // 1
 
             sleep(500);
 

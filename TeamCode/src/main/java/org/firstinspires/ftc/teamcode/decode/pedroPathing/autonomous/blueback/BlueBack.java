@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.List;
 
 
-@Autonomous(name = "!!!!!Blue Back Auto", group = "Auto")
+@Autonomous(name = "!!!!!BlueBack New Auto", group = "Auto")
 public class BlueBack extends LinearOpMode {
 
 
@@ -35,6 +35,7 @@ public class BlueBack extends LinearOpMode {
     private GeneratedPathsBlueBack paths;
 
     private CustomMecanumDrive drivetrain;
+
 
     DcMotor intakeMotor;
     DcMotor launchMotor;
@@ -48,8 +49,8 @@ public class BlueBack extends LinearOpMode {
     NormalizedColorSensor backColor, leftColor, rightColor;
 
 
-    int[] POSITIONS = {0, 245, 490}; //{0, 255, 510};
-    int[] INTAKE_POSITIONS = {352, -115, 142};
+    private final int[] POSITIONS = {0, 246, 496};
+    private final int[] INTAKE_POSITIONS = {-373, -132, 127}; // {352, -115, 142};
 
 
     ballColors[] balls = new ballColors[3];
@@ -95,14 +96,14 @@ public class BlueBack extends LinearOpMode {
         paths = new GeneratedPathsBlueBack(follower);
 
 
-        telemetry.addLine("Ready to start RedBack New Auto");
+        telemetry.addLine("Ready to start BlueBack New Auto");
         telemetry.update();
 
 
         waitForStart();
 
 
-        pivotServo.setPosition(0.6);
+        pivotServo.setPosition(0.57);
 
 
         if (isStopRequested()) return;
@@ -119,7 +120,7 @@ public class BlueBack extends LinearOpMode {
         intakeMotor.setPower(0.6);
 
 
-        runPath(paths.scan(), 250, 1);
+        runPath(paths.scan(), 50, 1);
 
 
         // SHOULD SCAN APRIL TAG HERE AND DETERMINE CORRECT PATTERN BASED ON TAG ID
@@ -141,7 +142,7 @@ public class BlueBack extends LinearOpMode {
         // ----------------------
         // 2. Move to shooting position
         // ----------------------
-        runPath(paths.shoot(), 250, 0.75);
+        runPath(paths.shoot(), 50, 1);
 
 
         // ----------------------
@@ -154,28 +155,28 @@ public class BlueBack extends LinearOpMode {
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
-        runPath(paths.toIntake1(), 250, 1);
+        runPath(paths.toIntake1(), 50, 1);
 
 
 
 
-        runIntakePath(paths.intakeball1(), 250, 0.5);
-        sleep(500);
+        runIntakePath(paths.intakeball1(), 50, 0.5);
+        sleep(1000);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(1000);
-
-
-        runIntakePath(paths.intakeball2(), 250, 0.5);
         sleep(500);
+
+
+        runIntakePath(paths.intakeball2(), 50, 0.5);
+        sleep(1000);
         moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(1000);
-
-
-        runIntakePath(paths.intakeball3(), 250, 0.5);
         sleep(500);
+
+
+        runIntakePath(paths.intakeball3(), 50, 0.5);
+        sleep(1000);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(1000);
+        sleep(500);
 
 
 
@@ -183,12 +184,12 @@ public class BlueBack extends LinearOpMode {
         scanAllBalls();
 
 
-        runPath(paths.shoot2(), 250, 0.75);
+        runPath(paths.shoot2(), 50, 1);
         shootBallsByColorOrder(correctPattern);
         moveSpindexer(0, INTAKE_POSITIONS);
 
 
-        runPath(paths.toIntake2(), 250, 0.75);
+        runPath(paths.toIntake2(), 250, 1);
 
 
         runIntakePath(paths.intakeball4(), 250, 0.5);
@@ -204,7 +205,7 @@ public class BlueBack extends LinearOpMode {
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
 
 
-        telemetry.addLine("RedBack New Auto Finished");
+        telemetry.addLine("BlueBack New Auto Finished");
         telemetry.update();
     }
 
@@ -262,11 +263,14 @@ public class BlueBack extends LinearOpMode {
     // BALL SHOOTING HELPERS
     // -----------------------------
     private void shootBallsByColorOrder(ballColors[] order) {
+
+        launchMotor.setPower(0.95);
+        sleep(500);
+
         for (ballColors desired : order) {
 
 
             int idx = findClosestColor(desired, 0);
-
 
             if (balls[idx] == ballColors.EMPTY) continue;
 
@@ -283,35 +287,19 @@ public class BlueBack extends LinearOpMode {
                 telemetry.update();
             }
         }
+
+
+        launchMotor.setPower(0);
     }
-//    private void shootBallsByColorOrder(ballColors[] order) {
-//        for (ballColors color : order) {
-//            int idx = findClosestColor(color, 0);
-//            if (balls[idx] != ballColors.EMPTY) {
-//                moveSpindexer(idx, POSITIONS); // moveToPosition
-//                // Charge launcher 1 second
-// //                launchMotor.setPower(1);
-// //                sleep(1000);
-// //                launchBallAt(idx);
-// //                launchMotor.setPower(0);
-// //                sleep(250);
-//
-//                launchBallAt(idx);
-//
-//            }
-//        }
-//    }
 
 
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
 
 
-            launchMotor.setPower(0.95); // 1
-
+            launchMotor.setPower(0.9); // 1
 
             sleep(500);
-
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.735);
@@ -321,12 +309,8 @@ public class BlueBack extends LinearOpMode {
             flickServo.setPosition(0.22);
             sleep(700);
 
-
-
-
             flickServo.setPosition(0);
-            pivotServo.setPosition(0.6);
-            launchMotor.setPower(0);
+            pivotServo.setPosition(0.57);
 
 
             sleep(500);
@@ -367,9 +351,19 @@ public class BlueBack extends LinearOpMode {
 
 
     private void moveSpindexer(int newIndex, int[] table) {
-        pivotServo.setPosition(0.6);
+//        if (newIndex == 1) {
+//            if (balls[0] != ballColors.EMPTY) {
+//                pivotServo.setPosition(0.6);
+//            }
+//            pivotServo.setPosition(0.6);
+//        } else if (newIndex == 2) {
+//            if (balls[0] != ballColors.EMPTY || balls[1] != ballColors.EMPTY) {
+//                pivotServo.setPosition(0.6);
+//            }
+//        }
+        pivotServo.setPosition(0.57);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.2);
+        runToPosition(spinMotor, currentTarget, 0.3);
     }
 
 

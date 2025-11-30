@@ -37,8 +37,8 @@ public class RedFront extends LinearOpMode {
     CustomMecanumDrive drivetrain;
 
 
-    int[] POSITIONS = {0, 245, 490}; //{0, 255, 510};
-    int[] INTAKE_POSITIONS = {352, -115, 142};
+    private final int[] POSITIONS = {0, 246, 496};
+    private final int[] INTAKE_POSITIONS = {-373, -132, 127}; // {352, -115, 142};
 
 
     ballColors[] balls = new ballColors[3];

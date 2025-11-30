@@ -26,8 +26,8 @@ public class TeleV3 extends LinearOpMode {
 
     private DigitalChannel limitSwitch;
 
-    private final int[] POSITIONS = {0, 250, 500};
-    private final int[] INTAKE_POSITIONS = {352, -115, 142};
+    private final int[] POSITIONS = {0, 246, 496};
+    private final int[] INTAKE_POSITIONS = {-373, -132, 127}; // {352, -115, 142};
 
     private float gain = 20;
 
@@ -44,7 +44,7 @@ public class TeleV3 extends LinearOpMode {
     private boolean flicking = false;
     private long flickStartTime = 0;
     private final long HOOD_DELAY = 750;   // ms before flick after pivot down
-    private final long FLICK_DURATION = 250; // ms flick stays up
+    private final long FLICK_DURATION = 500; // ms flick stays up
 
     private long limitPressTime = 0;
     private boolean limitDelayTriggered = false;
@@ -73,7 +73,7 @@ public class TeleV3 extends LinearOpMode {
 
             limitPressed = limitSwitch.getState();
 
-            boolean limitSwitchNew = limitPressed && !limitWasPressed;
+            boolean limitSwitchNew = false; //limitPressed && !limitWasPressed;
 
             double drive  = -gamepad1.left_stick_y;
             double strafe =  gamepad1.left_stick_x;
@@ -119,6 +119,7 @@ public class TeleV3 extends LinearOpMode {
             }
 
             limitWasPressed = limitSwitch.getState();
+            limitPressed = false;
 
             // ============================================================
             //                           TELEMETRY
