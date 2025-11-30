@@ -138,28 +138,34 @@ public class RedFront extends LinearOpMode {
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
-        runPath(paths.toIntake1(), 50, 1);
+        runPath(paths.toIntake1(), 50, 0.75);
 
 
 
 
         runIntakePath(paths.intakeball1(), 50, 0.5);
-        sleep(500);
+        intakeMotor.setPower(0.9);
+        sleep(750);
+        intakeMotor.setPower(0.6);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(500);
+        sleep(750);
 
 
         runIntakePath(paths.intakeball2(), 50, 0.5);
-        sleep(500);
+        intakeMotor.setPower(0.9);
+        sleep(750);
+        intakeMotor.setPower(0.6);
         moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(500);
+        sleep(750);
 
 
         runIntakePath(paths.intakeball3(), 50, 0.5);
-        sleep(500);
+        intakeMotor.setPower(0.9);
+        sleep(750);
+        intakeMotor.setPower(0.6);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(500);
+        sleep(750);
 
 
 
@@ -167,7 +173,8 @@ public class RedFront extends LinearOpMode {
         scanAllBalls();
 
 
-        runPath(paths.shoot2(), 50, 1);
+        runPath(paths.shoot2(), 50, 0.75);
+        scanAllBalls();
         shootBallsByColorOrder(correctPattern);
         moveSpindexer(0, INTAKE_POSITIONS);
 
@@ -185,6 +192,7 @@ public class RedFront extends LinearOpMode {
 
 
         runPath(paths.shoot3(), 250, 0.75);
+        scanAllBalls();
         shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
 
 
@@ -359,7 +367,7 @@ public class RedFront extends LinearOpMode {
     private void moveSpindexer(int newIndex, int[] table) {
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.3);
+        runToPosition(spinMotor, currentTarget, 0.2);
     }
 
 
@@ -441,14 +449,24 @@ public class RedFront extends LinearOpMode {
 
                 if (fiducials != null && !fiducials.isEmpty()) {
 
-                    // We only need the first tag detected
-                    LLResultTypes.FiducialResult tag = fiducials.get(0);
-                    int id = tag.getFiducialId();
+                    // Collect valid tag IDs (21, 22, 23)
+                    int smallestValid = Integer.MAX_VALUE;
 
-                    if (id == 21 || id == 22 || id == 23) {
-                        telemetry.addData("AprilTag Found", id);
+                    for (LLResultTypes.FiducialResult tag : fiducials) {
+                        int id = tag.getFiducialId();
+
+                        if (id == 21 || id == 22 || id == 23) {
+                            if (id < smallestValid) {
+                                smallestValid = id;
+                            }
+                        }
+                    }
+
+                    // If we found at least one valid tag, return the smallest one
+                    if (smallestValid != Integer.MAX_VALUE) {
+                        telemetry.addData("Using Tag", smallestValid);
                         telemetry.update();
-                        return id;
+                        return smallestValid;
                     }
                 }
             }
@@ -489,6 +507,9 @@ public class RedFront extends LinearOpMode {
 
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
+
+        pivotServo.setPosition(0.6);
+
     }
 
 

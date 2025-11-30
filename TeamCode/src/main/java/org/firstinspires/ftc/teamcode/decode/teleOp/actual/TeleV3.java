@@ -24,6 +24,8 @@ public class TeleV3 extends LinearOpMode {
 
     private NormalizedColorSensor backColor, leftColor, rightColor;
 
+    private DigitalChannel limitSwitch;
+
     private final int[] POSITIONS = {0, 250, 500};
     private final int[] INTAKE_POSITIONS = {352, -115, 142};
 
@@ -44,6 +46,10 @@ public class TeleV3 extends LinearOpMode {
     private final long HOOD_DELAY = 750;   // ms before flick after pivot down
     private final long FLICK_DURATION = 250; // ms flick stays up
 
+    private long limitPressTime = 0;
+    private boolean limitDelayTriggered = false;
+    private final long LIMIT_DELAY = 500; // ms
+
     // ============================================================
     //                              INIT
     // ============================================================
@@ -54,6 +60,9 @@ public class TeleV3 extends LinearOpMode {
         initializeHardware();
         initializeBallArray();
 
+        boolean limitPressed = false;
+        boolean limitWasPressed = false;
+
         waitForStart();
 
         while (opModeIsActive()) {
@@ -62,23 +71,27 @@ public class TeleV3 extends LinearOpMode {
             //                 GAMEPAD INPUT COLLECTION
             // ============================================================
 
+            limitPressed = limitSwitch.getState();
+
+            boolean limitSwitchNew = limitPressed && !limitWasPressed;
+
             double drive  = -gamepad1.left_stick_y;
             double strafe =  gamepad1.left_stick_x;
             double turn   =  gamepad1.right_stick_x;
 
             boolean launcherButton = gamepad1.right_trigger > 0.3;
-            boolean flickButton    = gamepad1.right_bumper;
+            boolean flickButton    = gamepad1.dpad_left ;
             boolean intakeEvent    = gamepad1.dpad_down;
             boolean resetAndScan   = gamepad1.left_trigger > 0.3;
 
             boolean gp2ResetIndex  = gamepad2.left_trigger > 0.3;
             boolean gp2ScanAll     = gamepad2.left_bumper;
-            boolean gpMarkUnknown  = gamepad1.dpad_down || gamepad2.dpad_down;
+            boolean gpMarkUnknown  = gamepad1.dpad_down || gamepad2.dpad_down || limitSwitchNew;
             boolean gpLaunchBall   = gamepad2.y;
 
             boolean gpToPurple     = gamepad1.b || gamepad2.b;
             boolean gpToGreen      = gamepad1.a || gamepad2.x;
-            boolean gpToEmpty      = gamepad1.dpad_up || gamepad2.dpad_up;
+            boolean gpToEmpty      = gamepad1.dpad_up || gamepad2.dpad_up || limitSwitchNew;
 
             boolean gpSetPurple    = gamepad2.dpad_right;
             boolean gpSetGreen     = gamepad2.dpad_left;
@@ -100,6 +113,12 @@ public class TeleV3 extends LinearOpMode {
                     gpSetPurple, gpSetGreen,
                     intakeEvent, resetAndScan
             );
+
+            if (gamepad1.dpad_right || gamepad2.dpad_right) {
+                spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            }
+
+            limitWasPressed = limitSwitch.getState();
 
             // ============================================================
             //                           TELEMETRY
@@ -232,7 +251,7 @@ public class TeleV3 extends LinearOpMode {
 
         spinMotor.setTargetPosition(target);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.4);
+        spinMotor.setPower(0.2);
     }
 
     /** Circular nearest search **/
@@ -286,12 +305,14 @@ public class TeleV3 extends LinearOpMode {
         flickServo = hardwareMap.servo.get("flickServo");
         launchMotor = hardwareMap.dcMotor.get("launchMotor");
 
+        limitSwitch = hardwareMap.get(DigitalChannel.class, "limitSwitch");
+
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         spinMotor = hardwareMap.dcMotor.get("spinMotor");
-        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotorSimple.Direction.REVERSE);

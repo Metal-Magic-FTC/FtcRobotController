@@ -21,9 +21,9 @@ public class GeneratedPathsRedBack {
         this.follower = follower;
     }
     public PathChain scan(){
-    return new PathBuilder(follower)
+        return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(START_POSE, new Pose(90, 100))
+                        new BezierLine(START_POSE, new Pose(100, 100))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(125))
                 .build();
@@ -32,7 +32,7 @@ public class GeneratedPathsRedBack {
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(90,100), new Pose(90, 100))
+                        new BezierLine(new Pose(100,100), new Pose(90, 100))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(125), Math.toRadians(45))
                 .build();
