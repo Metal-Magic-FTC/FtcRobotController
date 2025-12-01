@@ -15,6 +15,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @Configurable
 @TeleOp
 public class PedroAlignToRed extends OpMode {

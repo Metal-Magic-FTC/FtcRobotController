@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name="!Test 6k rpm")
 public class Test6k extends LinearOpMode {
 

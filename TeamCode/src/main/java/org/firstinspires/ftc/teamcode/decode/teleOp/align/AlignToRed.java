@@ -7,7 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name="TeleOp – ALIGN ROTATE ONLY")
 public class AlignToRed extends LinearOpMode {
 

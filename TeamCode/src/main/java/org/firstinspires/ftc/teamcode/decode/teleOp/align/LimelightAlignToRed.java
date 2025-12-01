@@ -11,7 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.pedropathing.control.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp
 public class LimelightAlignToRed extends OpMode {
     private Limelight3A camera; //any camera here

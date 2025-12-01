@@ -10,6 +10,9 @@ import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name="TeleOp – Odo Distance Pivot")
 public class TeleOdoPivot extends LinearOpMode {
 
