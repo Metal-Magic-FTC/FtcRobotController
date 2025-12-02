@@ -280,7 +280,7 @@ public class BlueBack extends LinearOpMode {
 
 
             // NEW GANGALANGL wait until sensor confirms correct ball is in the firing chamber ---
-            if (waitForBallAtShooter(desired, 1500)) {
+            if (waitForBallAtShooter(desired, 2000)) {
                 launchBallAt(idx);   // only fires after sensor confirms color
             } else {
                 telemetry.addLine("Ball not detected in time, skipping launch");
