@@ -53,7 +53,7 @@ import com.qualcomm.robotcore.util.Range;
  *
  */
 
-public class RobotHardware {
+public class RobotHardware1 {
 
     /* Declare OpMode members. */
     private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
@@ -72,7 +72,7 @@ public class RobotHardware {
     public static final double ARM_DOWN_POWER  = -0.45 ;
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
-    public RobotHardware (LinearOpMode opmode) {
+    public RobotHardware1 (LinearOpMode opmode) {
         myOpMode = opmode;
     }
 

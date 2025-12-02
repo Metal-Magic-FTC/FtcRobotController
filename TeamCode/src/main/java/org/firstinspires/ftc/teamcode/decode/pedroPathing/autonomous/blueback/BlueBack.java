@@ -155,7 +155,7 @@ public class BlueBack extends LinearOpMode {
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
-        runPath(paths.toIntake1(), 50, 1);
+        runPath(paths.toIntake1(), 50, 0.75);
 
 
 
@@ -189,7 +189,7 @@ public class BlueBack extends LinearOpMode {
         moveSpindexer(0, INTAKE_POSITIONS);
 
 
-        runPath(paths.toIntake2(), 250, 1);
+        runPath(paths.toIntake2(), 250, 0.75);
 
 
         runIntakePath(paths.intakeball4(), 250, 0.5);
@@ -265,7 +265,7 @@ public class BlueBack extends LinearOpMode {
     private void shootBallsByColorOrder(ballColors[] order) {
 
         launchMotor.setPower(0.95);
-        sleep(500);
+        sleep(250);
 
         for (ballColors desired : order) {
 
@@ -307,7 +307,7 @@ public class BlueBack extends LinearOpMode {
 
 
             flickServo.setPosition(0.22);
-            sleep(1000);
+            sleep(750);
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.57);
