@@ -34,7 +34,7 @@ public class GeneratedPathsRedBack {
                 .addPath(
                         new BezierLine(new Pose(100,100), new Pose(86, 87))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(125), Math.toRadians(45.67))
+                .setLinearHeadingInterpolation(Math.toRadians(125), Math.toRadians(46.3067))
                 .build();
     }
 

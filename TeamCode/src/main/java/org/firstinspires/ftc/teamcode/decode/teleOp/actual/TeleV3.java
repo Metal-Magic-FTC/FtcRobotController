@@ -50,6 +50,8 @@ public class TeleV3 extends LinearOpMode {
     private boolean limitDelayTriggered = false;
     private final long LIMIT_DELAY = 500; // ms
 
+    private double launchSpeed = 0.95;
+
     // ============================================================
     //                              INIT
     // ============================================================
@@ -75,9 +77,9 @@ public class TeleV3 extends LinearOpMode {
 
             boolean limitSwitchNew = false; //limitPressed && !limitWasPressed;
 
-            double drive  = -gamepad1.left_stick_y;
-            double strafe =  gamepad1.left_stick_x;
-            double turn   =  gamepad1.right_stick_x;
+            double drive           = -gamepad1.left_stick_y;
+            double strafe          =  gamepad1.left_stick_x;
+            double turn            =  gamepad1.right_stick_x;
 
             boolean launcherButton = gamepad1.right_trigger > 0.3;
             boolean flickButton    = gamepad1.dpad_left ;
@@ -86,23 +88,37 @@ public class TeleV3 extends LinearOpMode {
 
             boolean gp2ResetIndex  = gamepad2.left_trigger > 0.3;
             boolean gp2ScanAll     = gamepad2.left_bumper;
-            boolean gpMarkUnknown  = gamepad1.dpad_down || gamepad2.dpad_down || limitSwitchNew;
+            boolean gp2MoveSpin    = gamepad2.right_trigger > 0.3;
+            boolean gpMarkUnknown  = gamepad1.left_bumper;
             boolean gpLaunchBall   = gamepad2.y;
+            boolean gp2ResetSpin   = gamepad2.a;
+            boolean stopIntake     = gamepad1.y;
 
             boolean gpToPurple     = gamepad1.b || gamepad2.b;
             boolean gpToGreen      = gamepad1.a || gamepad2.x;
-            boolean gpToEmpty      = gamepad1.dpad_up || gamepad2.dpad_up || limitSwitchNew;
+            boolean gpToEmpty      = gamepad1.right_bumper;
 
             boolean gpSetPurple    = gamepad2.dpad_right;
             boolean gpSetGreen     = gamepad2.dpad_left;
+
+            boolean speedHigh      = gamepad1.dpad_up;
+            boolean speedLow       = gamepad1.dpad_down;
 
             // ============================================================
             //                        SUBSYSTEM HANDLING
             // ============================================================
 
+            if (speedLow) {
+                launchSpeed = 0.95;
+            }
+
+            if (speedHigh) {
+                launchSpeed = 1.00;
+            }
+
             drivetrain.driveMecanum(strafe, drive, turn);
 
-            handleIntake(gamepad1.left_bumper);
+            handleIntake(stopIntake);
             handleLauncher(launcherButton);
 
             updateFlickPivot(flickButton);
@@ -111,7 +127,7 @@ public class TeleV3 extends LinearOpMode {
                     gp2ResetIndex, gpMarkUnknown, gp2ScanAll,
                     gpLaunchBall, gpToPurple, gpToGreen, gpToEmpty,
                     gpSetPurple, gpSetGreen,
-                    intakeEvent, resetAndScan
+                    intakeEvent, resetAndScan, gp2MoveSpin, gp2ResetSpin
             );
 
             if (gamepad1.dpad_right || gamepad2.dpad_right) {
@@ -189,7 +205,9 @@ public class TeleV3 extends LinearOpMode {
             boolean setPurple,
             boolean setGreen,
             boolean intakeEvent,
-            boolean resetAndScan
+            boolean resetAndScan,
+            boolean manualSpin,
+            boolean resetSpin
     ) {
 
         if (intakeEvent) balls[index] = BallColor.UNKNOWN;
@@ -227,6 +245,18 @@ public class TeleV3 extends LinearOpMode {
 
         if (setPurple) balls[index] = BallColor.PURPLE;
         if (setGreen)  balls[index] = BallColor.GREEN;
+
+        if (manualSpin) {
+            spinMotor.setTargetPosition(spinMotor.getCurrentPosition() + 50);
+            spinMotor.setPower(0.1);
+        }
+
+        if (resetSpin) {
+            spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        } else {
+            spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
     }
 
     /** Launch ball + update array **/
