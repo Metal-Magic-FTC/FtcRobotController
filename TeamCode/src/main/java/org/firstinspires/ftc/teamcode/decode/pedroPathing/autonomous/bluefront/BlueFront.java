@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.redback.RedBackNew;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.bluefront.GeneratedPathsBlueFront;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.List;
@@ -282,7 +282,7 @@ public class BlueFront extends LinearOpMode {
 
 
     private void launchBallAt(int index) {
-        if (balls[index] != RedBackNew.ballColors.EMPTY) {
+        if (balls[index] != ballColors.EMPTY) {
 
 
             launchMotor.setPower(0.9); // 1
@@ -304,14 +304,14 @@ public class BlueFront extends LinearOpMode {
             sleep(500);
 
 
-            balls[index] = RedBackNew.ballColors.EMPTY;
+            balls[index] = ballColors.EMPTY;
 
 
         }
     }
 
 
-    private boolean waitForBallAtShooter(RedBackNew.ballColors expected, long timeoutMs) {
+    private boolean waitForBallAtShooter(ballColors expected, long timeoutMs) {
         long start = System.currentTimeMillis();
 
 
@@ -319,7 +319,7 @@ public class BlueFront extends LinearOpMode {
                 System.currentTimeMillis() - start < timeoutMs) {
 
 
-            RedBackNew.ballColors sensed = detectBallColorFromSensor(backColor);
+            ballColors sensed = detectBallColorFromSensor(backColor);
 
 
             if (sensed == expected) {
@@ -369,7 +369,7 @@ public class BlueFront extends LinearOpMode {
     }
 
 
-    public int findClosestColor(RedBackNew.ballColors target, int currentIndex) {
+    public int findClosestColor(ballColors target, int currentIndex) {
         for (int offset = 0; offset < balls.length; offset++) {
             int right = (currentIndex + offset) % balls.length;
             int left = (currentIndex - offset + balls.length) % balls.length;
@@ -381,7 +381,7 @@ public class BlueFront extends LinearOpMode {
 
 
     public int findClosestEmpty(int currentIndex) {
-        return findClosestColor(RedBackNew.ballColors.EMPTY, currentIndex);
+        return findClosestColor(ballColors.EMPTY, currentIndex);
     }
 
 
@@ -392,7 +392,7 @@ public class BlueFront extends LinearOpMode {
     }
 
 
-    private RedBackNew.ballColors detectBallColorFromSensor(NormalizedColorSensor sensor) {
+    private ballColors detectBallColorFromSensor(NormalizedColorSensor sensor) {
         NormalizedRGBA c = sensor.getNormalizedColors();
 
 
@@ -400,12 +400,12 @@ public class BlueFront extends LinearOpMode {
         float tol = 0.20f;
 
 
-        if (b > r * (1 + tol) && b > g * (1 + tol)) return RedBackNew.ballColors.PURPLE;
-        if (g > r * (1 + tol) && g > b * (1 + tol)) return RedBackNew.ballColors.GREEN;
+        if (b > r * (1 + tol) && b > g * (1 + tol)) return ballColors.PURPLE;
+        if (g > r * (1 + tol) && g > b * (1 + tol)) return ballColors.GREEN;
 
 
-        if (r > 0.01 || g > 0.01 || b > 0.01) return RedBackNew.ballColors.UNKNOWN;
-        return RedBackNew.ballColors.EMPTY;
+        if (r > 0.01 || g > 0.01 || b > 0.01) return ballColors.UNKNOWN;
+        return ballColors.EMPTY;
     }
 
 
@@ -413,9 +413,9 @@ public class BlueFront extends LinearOpMode {
     // HARDWARE INIT
     // -----------------------------
     private void resetBallArray() {
-        balls[0] = RedBackNew.ballColors.EMPTY;
-        balls[1] = RedBackNew.ballColors.EMPTY;
-        balls[2] = RedBackNew.ballColors.EMPTY;
+        balls[0] = ballColors.EMPTY;
+        balls[1] = ballColors.EMPTY;
+        balls[2] = ballColors.EMPTY;
     }
 
     private int detectAprilTag(long timeoutMs) {
