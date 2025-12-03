@@ -109,7 +109,7 @@ public class RedFront extends LinearOpMode {
         // SHOULD SCAN APRIL TAG HERE AND DETERMINE CORRECT PATTERN BASED ON TAG ID
 
         // ------ APRILTAG DETECTION ------
-        int tagId = detectAprilTag(2000); // wait up to 1 sec
+        int tagId = detectAprilTag(1500); // wait up to 1 sec
 
         if (tagId == 21) {
             correctPattern = pattern21;
