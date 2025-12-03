@@ -265,7 +265,7 @@ public class RedBackNew extends LinearOpMode {
     private void shootBallsByColorOrder(ballColors[] order) {
 
         launchMotor.setPower(0.95);
-        sleep(500);
+        sleep(1000);
 
         for (ballColors desired : order) {
 
