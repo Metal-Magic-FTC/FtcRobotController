@@ -35,7 +35,7 @@ public class BlueFront extends LinearOpMode {
     Servo flickServo;
     NormalizedColorSensor backColor, leftColor, rightColor;
 
-    CustomMecanumDrive drivetrain;
+   // CustomMecanumDrive drivetrain;
 
 
     private final int[] POSITIONS = {0, 246, 496};
@@ -250,17 +250,17 @@ public class BlueFront extends LinearOpMode {
     // -----------------------------
     // BALL SHOOTING HELPERS
     // -----------------------------
-    private void shootBallsByColorOrder(RedBackNew.ballColors[] order) {
+    private void shootBallsByColorOrder(ballColors[] order) {
 
         launchMotor.setPower(0.95);
         sleep(500);
 
-        for (RedBackNew.ballColors desired : order) {
+        for (ballColors desired : order) {
 
 
             int idx = findClosestColor(desired, 0);
 
-            if (balls[idx] == RedBackNew.ballColors.EMPTY) continue;
+            if (balls[idx] == ballColors.EMPTY) continue;
 
 
             // move spindexer to that slot
