@@ -257,11 +257,7 @@ public class BlueFront extends LinearOpMode {
         sleep(500);
 
 <<<<<<< Updated upstream
-<<<<<<< Updated upstream
         for (ballColors desired : order) {
-=======
-        for ( ballColors desired : order) {
->>>>>>> Stashed changes
 =======
         for ( ballColors desired : order) {
 >>>>>>> Stashed changes
