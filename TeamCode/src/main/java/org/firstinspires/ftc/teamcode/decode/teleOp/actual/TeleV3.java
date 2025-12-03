@@ -77,32 +77,34 @@ public class TeleV3 extends LinearOpMode {
 
             boolean limitSwitchNew = false; //limitPressed && !limitWasPressed;
 
-            double drive           = -gamepad1.left_stick_y;
-            double strafe          =  gamepad1.left_stick_x;
-            double turn            =  gamepad1.right_stick_x;
+            double drive = -gamepad1.left_stick_y;
+            double strafe = gamepad1.left_stick_x;
+            double turn = gamepad1.right_stick_x;
 
             boolean launcherButton = gamepad1.right_trigger > 0.3;
-            boolean flickButton    = gamepad1.dpad_left ;
-            boolean intakeEvent    = gamepad1.dpad_down;
-            boolean resetAndScan   = gamepad1.left_trigger > 0.3;
+            boolean flickButton = gamepad1.dpad_left;
+            boolean intakeEvent = gamepad1.dpad_down;
+            boolean resetAndScan = gamepad1.left_trigger > 0.3;
 
-            boolean gp2ResetIndex  = gamepad2.left_trigger > 0.3;
-            boolean gp2ScanAll     = gamepad2.left_bumper;
-            boolean gp2MoveSpin    = gamepad2.right_trigger > 0.3;
-            boolean gpMarkUnknown  = gamepad1.left_bumper;
-            boolean gpLaunchBall   = gamepad2.y;
-            boolean gp2ResetSpin   = gamepad2.a;
-            boolean stopIntake     = gamepad1.y;
+            boolean gp2ResetIndex = false;
+            boolean gp2ScanAll = gamepad2.left_bumper;
+            boolean gp2MoveSpin = false;
+            boolean gpMarkUnknown = gamepad1.left_bumper;
+            boolean gpLaunchBall = gamepad2.y;
+            boolean stopIntake = gamepad1.y;
 
-            boolean gpToPurple     = gamepad1.b || gamepad2.b;
-            boolean gpToGreen      = gamepad1.a || gamepad2.x;
-            boolean gpToEmpty      = gamepad1.right_bumper;
+            boolean gpToPurple = gamepad1.b;
+            boolean gpToGreen = gamepad1.a;
+            boolean gpToEmpty = gamepad1.right_bumper;
 
-            boolean gpSetPurple    = gamepad2.dpad_right;
-            boolean gpSetGreen     = gamepad2.dpad_left;
+            boolean gpSetPurple = gamepad2.dpad_right;
+            boolean gpSetGreen = gamepad2.dpad_left;
 
-            boolean speedHigh      = gamepad1.dpad_up;
-            boolean speedLow       = gamepad1.dpad_down;
+            boolean speedHigh = gamepad1.dpad_up;
+            boolean speedLow = gamepad1.dpad_down;
+
+            boolean gp2ResetSpin = gamepad2.a;
+            double motorPowerReset = 0.1 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
             // ============================================================
             //                        SUBSYSTEM HANDLING
@@ -123,12 +125,21 @@ public class TeleV3 extends LinearOpMode {
 
             updateFlickPivot(flickButton);
 
-            handleBallCommands(
-                    gp2ResetIndex, gpMarkUnknown, gp2ScanAll,
-                    gpLaunchBall, gpToPurple, gpToGreen, gpToEmpty,
-                    gpSetPurple, gpSetGreen,
-                    intakeEvent, resetAndScan, gp2MoveSpin, gp2ResetSpin
-            );
+            if (gp2ResetSpin) {
+
+                spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                spinMotor.setPower(motorPowerReset);
+
+            } else {
+
+                handleBallCommands(
+                        gp2ResetIndex, gpMarkUnknown, gp2ScanAll,
+                        gpLaunchBall, gpToPurple, gpToGreen, gpToEmpty,
+                        gpSetPurple, gpSetGreen,
+                        intakeEvent, resetAndScan
+                );
+
+            }
 
             if (gamepad1.dpad_right || gamepad2.dpad_right) {
                 spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -205,9 +216,7 @@ public class TeleV3 extends LinearOpMode {
             boolean setPurple,
             boolean setGreen,
             boolean intakeEvent,
-            boolean resetAndScan,
-            boolean manualSpin,
-            boolean resetSpin
+            boolean resetAndScan
     ) {
 
         if (intakeEvent) balls[index] = BallColor.UNKNOWN;
@@ -245,17 +254,6 @@ public class TeleV3 extends LinearOpMode {
 
         if (setPurple) balls[index] = BallColor.PURPLE;
         if (setGreen)  balls[index] = BallColor.GREEN;
-
-        if (manualSpin) {
-            spinMotor.setTargetPosition(spinMotor.getCurrentPosition() + 50);
-            spinMotor.setPower(0.1);
-        }
-
-        if (resetSpin) {
-            spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        } else {
-            spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
 
     }
 
@@ -343,6 +341,7 @@ public class TeleV3 extends LinearOpMode {
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         spinMotor = hardwareMap.dcMotor.get("spinMotor");
+        spinMotor.setTargetPosition(0);
         //spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
