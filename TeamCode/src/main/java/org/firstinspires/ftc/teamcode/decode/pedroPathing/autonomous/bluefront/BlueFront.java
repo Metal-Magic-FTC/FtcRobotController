@@ -35,7 +35,7 @@ public class BlueFront extends LinearOpMode {
     Servo flickServo;
     NormalizedColorSensor backColor, leftColor, rightColor;
 
-   // CustomMecanumDrive drivetrain;
+    CustomMecanumDrive drivetrain;
 
 
     private final int[] POSITIONS = {0, 246, 496};
@@ -110,7 +110,7 @@ public class BlueFront extends LinearOpMode {
         // SHOULD SCAN APRIL TAG HERE AND DETERMINE CORRECT PATTERN BASED ON TAG ID
 
         // ------ APRILTAG DETECTION ------
-        int tagId = detectAprilTag(2000); // wait up to 1 sec
+        int tagId = detectAprilTag(1500); // wait up to 1 sec
 
         if (tagId == 21) {
             correctPattern = pattern21;
@@ -250,17 +250,17 @@ public class BlueFront extends LinearOpMode {
     // -----------------------------
     // BALL SHOOTING HELPERS
     // -----------------------------
-    private void shootBallsByColorOrder(ballColors[] order) {
+    private void shootBallsByColorOrder(RedBackNew.ballColors[] order) {
 
         launchMotor.setPower(0.95);
         sleep(500);
 
-        for (ballColors desired : order) {
+        for (RedBackNew.ballColors desired : order) {
 
 
             int idx = findClosestColor(desired, 0);
 
-            if (balls[idx] == ballColors.EMPTY) continue;
+            if (balls[idx] == RedBackNew.ballColors.EMPTY) continue;
 
 
             // move spindexer to that slot
