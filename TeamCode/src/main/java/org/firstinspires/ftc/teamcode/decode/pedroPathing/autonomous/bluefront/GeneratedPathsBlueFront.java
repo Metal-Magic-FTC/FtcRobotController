@@ -33,7 +33,7 @@ public class GeneratedPathsBlueFront {
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(55.85046728971962, 13), new Pose(42.647, 34))
+                        new BezierLine(new Pose(55.85046728971962, 13), new Pose(42.647, 38))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(99), Math.toRadians(180))
                 .build();
@@ -42,7 +42,7 @@ public class GeneratedPathsBlueFront {
     public PathChain intakeball1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(42.647, 34), new Pose(40, 34))
+                        new BezierLine(new Pose(42.647, 38), new Pose(40, 38))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -50,7 +50,7 @@ public class GeneratedPathsBlueFront {
     public PathChain intakeball2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(40, 34), new Pose(35, 34))
+                        new BezierLine(new Pose(40, 38), new Pose(35, 38))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -59,7 +59,7 @@ public class GeneratedPathsBlueFront {
     public PathChain intakeball3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(35, 34), new Pose(24, 34))
+                        new BezierLine(new Pose(35, 38), new Pose(24, 38))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -68,9 +68,9 @@ public class GeneratedPathsBlueFront {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(24, 34), new Pose(55.85046728971962, 13))
+                        new BezierLine(new Pose(24, 38), new Pose(55.85046728971962, 13))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(99))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(105))
                 .build();
     }
 

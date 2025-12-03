@@ -253,7 +253,7 @@ public class BlueFront extends LinearOpMode {
     // -----------------------------
     private void shootBallsByColorOrder(ballColors[] order) {
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(1);
         sleep(500);
 
         for (ballColors desired : order) {
@@ -286,13 +286,13 @@ public class BlueFront extends LinearOpMode {
         if (balls[index] != ballColors.EMPTY) {
 
 
-            launchMotor.setPower(0.9); // 1
+            launchMotor.setPower(1); // 1
 
             sleep(500);
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.735);
-            sleep(500);
+            sleep(700);
 
 
             flickServo.setPosition(0.22);

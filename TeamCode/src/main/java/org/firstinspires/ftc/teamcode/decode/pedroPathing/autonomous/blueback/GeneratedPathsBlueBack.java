@@ -20,7 +20,7 @@ public class GeneratedPathsBlueBack {
     public GeneratedPathsBlueBack(Follower follower) {
         this.follower = follower;
     }
-    public PathChain scan(){
+    public PathChain scan() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(START_POSE, new Pose(54, 101))
@@ -81,7 +81,7 @@ public class GeneratedPathsBlueBack {
                 .addPath(
                         new BezierLine(new Pose(144-121.900, 83), new Pose(59, 81))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180-0), Math.toRadians(135.67))
+                .setLinearHeadingInterpolation(Math.toRadians(180-0), Math.toRadians(136.67))
                 .build();
     }
 
@@ -90,7 +90,7 @@ public class GeneratedPathsBlueBack {
                 .addPath(
                         new BezierLine(new Pose(144-90, 100), new Pose(144-101.353, 59.400))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(137.67), Math.toRadians(180-0))
+                .setLinearHeadingInterpolation(Math.toRadians(136.67), Math.toRadians(180-0))
                 .build();
     }
 
