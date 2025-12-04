@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.List;
 
 
-@Autonomous(name = "BlueBack  Auto", group = "Auto")
+@Autonomous(name = "BlueFront Auto", group = "Auto")
 public class BlueFront extends LinearOpMode {
 
     private Follower follower;
