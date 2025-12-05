@@ -113,6 +113,7 @@ public class BlueBack extends LinearOpMode {
         // 1. Scan all balls
         // ----------------------
         scanAllBalls();
+        scanAllBalls();
         telemetry.addData("Balls", balls[0] + ", " + balls[1] + ", " + balls[2]);
         telemetry.update();
 
@@ -362,7 +363,7 @@ public class BlueBack extends LinearOpMode {
 //        }
         pivotServo.setPosition(0.57);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.3);
+        runToPosition(spinMotor, currentTarget, 0.2);
     }
 
 

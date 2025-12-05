@@ -103,6 +103,7 @@ public class BlueFront extends LinearOpMode {
 
 
         intakeMotor.setPower(0.6);
+        launchMotor.setPower(0.95);
 
 
         //runPath(paths.scan(), 50, 1);
@@ -183,10 +184,10 @@ public class BlueFront extends LinearOpMode {
         runIntakePath(paths.intakeball4(), 250, 0.5);
 
 
-        runIntakePath(paths.intakeball5(), 250, 0.5);
+        runIntakePath(paths.intakeball5(), 500, 0.5);
 
 
-        runIntakePath(paths.intakeball6(), 250, 0.5);
+        runIntakePath(paths.intakeball6(), 500, 0.5);
 
 
         runPath(paths.shoot3(), 250, 0.75);
@@ -197,6 +198,8 @@ public class BlueFront extends LinearOpMode {
         // End of auto
         telemetry.addLine("BlueFront Auto Finished");
         telemetry.update();
+
+        idle();
     }
 
     // -----------------------------
@@ -269,7 +272,7 @@ public class BlueFront extends LinearOpMode {
 
 
             // NEW GANGALANGL wait until sensor confirms correct ball is in the firing chamber ---
-            if (waitForBallAtShooter(desired, 1500)) {
+            if (waitForBallAtShooter(desired, 2500)) {
                 launchBallAt(idx);   // only fires after sensor confirms color
             } else {
                 telemetry.addLine("Ball not detected in time, skipping launch");
@@ -278,7 +281,7 @@ public class BlueFront extends LinearOpMode {
         }
 
 
-        launchMotor.setPower(0);
+//        launchMotor.setPower(0);
     }
 
 
@@ -321,7 +324,6 @@ public class BlueFront extends LinearOpMode {
 
 
             ballColors sensed = detectBallColorFromSensor(backColor);
-
 
             if (sensed == expected) {
                 return true;
@@ -387,9 +389,33 @@ public class BlueFront extends LinearOpMode {
 
 
     public void scanAllBalls() {
-        balls[0] = detectBallColorFromSensor(backColor);
-        balls[1] = detectBallColorFromSensor(rightColor);
-        balls[2] = detectBallColorFromSensor(leftColor);
+        ballColors backColor1 = detectBallColorFromSensor(backColor);
+        ballColors rightColor1 = detectBallColorFromSensor(rightColor);
+        ballColors leftColor1 = detectBallColorFromSensor(leftColor);
+
+        sleep(50);
+
+        ballColors backColor2 = detectBallColorFromSensor(backColor);
+        ballColors rightColor2 = detectBallColorFromSensor(rightColor);
+        ballColors leftColor2 = detectBallColorFromSensor(leftColor);
+
+        if (backColor1 != ballColors.EMPTY) {
+            balls[0] = backColor1;
+        } else {
+            balls[0] = backColor2;
+        }
+
+        if (rightColor1 != ballColors.EMPTY) {
+            balls[1] = rightColor1;
+        } else {
+            balls[1] = rightColor2;
+        }
+
+        if (leftColor1 != ballColors.EMPTY) {
+            balls[2] = leftColor1;
+        } else {
+            balls[2] = leftColor2;
+        }
     }
 
 

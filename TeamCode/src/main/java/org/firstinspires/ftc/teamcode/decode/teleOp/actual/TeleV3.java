@@ -93,12 +93,16 @@ public class TeleV3 extends LinearOpMode {
             boolean gpLaunchBall = gamepad2.y;
             boolean stopIntake = gamepad1.y;
 
+            boolean gp2Pos1 = gamepad2.dpad_up;
+            boolean gp2Pos2 = gamepad2.dpad_left;
+            boolean gp2Pos3 = gamepad2.dpad_down;
+
             boolean gpToPurple = gamepad1.b;
             boolean gpToGreen = gamepad1.a;
             boolean gpToEmpty = gamepad1.right_bumper;
 
-            boolean gpSetPurple = gamepad2.dpad_right;
-            boolean gpSetGreen = gamepad2.dpad_left;
+            boolean gpSetPurple = gamepad2.x;
+            boolean gpSetGreen = gamepad2.x;
 
             boolean speedHigh = gamepad1.dpad_up;
             boolean speedLow = gamepad1.dpad_down;
@@ -136,7 +140,8 @@ public class TeleV3 extends LinearOpMode {
                         gp2ResetIndex, gpMarkUnknown, gp2ScanAll,
                         gpLaunchBall, gpToPurple, gpToGreen, gpToEmpty,
                         gpSetPurple, gpSetGreen,
-                        intakeEvent, resetAndScan
+                        intakeEvent, resetAndScan,
+                        gp2Pos1, gp2Pos2, gp2Pos3
                 );
 
             }
@@ -216,7 +221,10 @@ public class TeleV3 extends LinearOpMode {
             boolean setPurple,
             boolean setGreen,
             boolean intakeEvent,
-            boolean resetAndScan
+            boolean resetAndScan,
+            boolean spin1,
+            boolean spin2,
+            boolean spin3
     ) {
 
         if (intakeEvent) balls[index] = BallColor.UNKNOWN;
@@ -255,6 +263,17 @@ public class TeleV3 extends LinearOpMode {
         if (setPurple) balls[index] = BallColor.PURPLE;
         if (setGreen)  balls[index] = BallColor.GREEN;
 
+        if (spin1) {
+            goToIndex(0, POSITIONS);
+        }
+
+        if (spin2) {
+            goToIndex(1, POSITIONS);
+        }
+
+        if (spin3) {
+            goToIndex(2, POSITIONS);
+        }
     }
 
     /** Launch ball + update array **/
