@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.List;
 
 
-@Autonomous(name = "!!!!!RedBack New Auto", group = "Auto")
+@Autonomous(name = "! Red Close Auto", group = "Auto")
 public class RedBackNew extends LinearOpMode {
 
 
@@ -155,10 +155,9 @@ public class RedBackNew extends LinearOpMode {
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
+        intakeMotor.setPower(0);
         runPath(paths.toIntake1(), 50, 1);
-
-
-
+        intakeMotor.setPower(0.6);
 
         runIntakePath(paths.intakeball1(), 50, 0.5);
         sleep(1000);
@@ -178,32 +177,14 @@ public class RedBackNew extends LinearOpMode {
         //moveSpindexer(2, INTAKE_POSITIONS);
         sleep(500);
 
-
-
-
         scanAllBalls();
-
 
         runPath(paths.shoot2(), 50, 1);
         shootBallsByColorOrder(correctPattern);
         moveSpindexer(0, INTAKE_POSITIONS);
 
-
+        intakeMotor.setPower(0);
         runPath(paths.toIntake2(), 250, 1);
-
-
-        runIntakePath(paths.intakeball4(), 250, 0.5);
-
-
-        runIntakePath(paths.intakeball5(), 250, 0.5);
-
-
-        runIntakePath(paths.intakeball6(), 250, 0.5);
-
-
-        runPath(paths.shoot3(), 250, 0.75);
-        shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
-
 
         telemetry.addLine("RedBack New Auto Finished");
         telemetry.update();
@@ -264,8 +245,8 @@ public class RedBackNew extends LinearOpMode {
     // -----------------------------
     private void shootBallsByColorOrder(ballColors[] order) {
 
-        launchMotor.setPower(0.95);
-        sleep(500);
+        launchMotor.setPower(0.75);
+        sleep(750);
 
         for (ballColors desired : order) {
 
@@ -297,12 +278,12 @@ public class RedBackNew extends LinearOpMode {
         if (balls[index] != ballColors.EMPTY) {
 
 
-            launchMotor.setPower(0.9); // 1
+            launchMotor.setPower(0.75); // 1
 
             sleep(500);
 
             flickServo.setPosition(0);
-            pivotServo.setPosition(0.735);
+            pivotServo.setPosition(0.76);
             sleep(500);
 
 
@@ -363,7 +344,7 @@ public class RedBackNew extends LinearOpMode {
 //        }
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.3);
+        runToPosition(spinMotor, currentTarget, 0.2);
     }
 
 

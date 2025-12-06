@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
-@TeleOp(name="TeleV3 - Optimized Modular Controller")
+@TeleOp(name="! TeleV3 - run this")
 public class TeleV3 extends LinearOpMode {
 
     // ============================================================
@@ -23,8 +23,6 @@ public class TeleV3 extends LinearOpMode {
     private Servo flickServo;
 
     private NormalizedColorSensor backColor, leftColor, rightColor;
-
-    private DigitalChannel limitSwitch;
 
     private final int[] POSITIONS = {0, 246, 496};
     private final int[] INTAKE_POSITIONS = {-373, -132, 127}; // {352, -115, 142};
@@ -43,7 +41,7 @@ public class TeleV3 extends LinearOpMode {
 
     private boolean flicking = false;
     private long flickStartTime = 0;
-    private final long HOOD_DELAY = 750;   // ms before flick after pivot down
+    private final long HOOD_DELAY = 100;   // ms before flick after pivot down
     private final long FLICK_DURATION = 500; // ms flick stays up
 
     private long limitPressTime = 0;
@@ -73,8 +71,6 @@ public class TeleV3 extends LinearOpMode {
             //                 GAMEPAD INPUT COLLECTION
             // ============================================================
 
-            limitPressed = limitSwitch.getState();
-
             boolean limitSwitchNew = false; //limitPressed && !limitWasPressed;
 
             double drive = -gamepad1.left_stick_y;
@@ -101,14 +97,29 @@ public class TeleV3 extends LinearOpMode {
             boolean gpToGreen = gamepad1.a;
             boolean gpToEmpty = gamepad1.right_bumper;
 
-            boolean gpSetPurple = gamepad2.x;
-            boolean gpSetGreen = gamepad2.x;
+            boolean gpSetPurple = false;
+            boolean gpSetGreen = false;
 
             boolean speedHigh = gamepad1.dpad_up;
             boolean speedLow = gamepad1.dpad_down;
 
             boolean gp2ResetSpin = gamepad2.a;
             double motorPowerReset = 0.1 * (gamepad2.right_trigger - gamepad2.left_trigger);
+
+            if (gamepad2.right_bumper) {
+                initializeBallArray();
+            }
+
+            if (gamepad2.y) {
+                intakeMotor.setPower(-0.5);
+            }
+
+            if (gamepad2.x) {
+                launchMotor.setPower(-0.1);
+            }
+            if (gamepad2.b) {
+                launchMotor.setPower(0);
+            }
 
             // ============================================================
             //                        SUBSYSTEM HANDLING
@@ -150,17 +161,14 @@ public class TeleV3 extends LinearOpMode {
                 spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
 
-            limitWasPressed = limitSwitch.getState();
-            limitPressed = false;
-
             // ============================================================
             //                           TELEMETRY
             // ============================================================
-            telemetry.addData("Index", index);
-            telemetry.addData("Ball @ Index", balls[index]);
-            telemetry.addData("Spindexer Pos", spinMotor.getCurrentPosition());
-            telemetry.addData("Flicking?", flicking);
+            telemetry.addData("0", balls[0].name());
+            telemetry.addData("1", balls[1].name());
+            telemetry.addData("2", balls[2].name());
             telemetry.update();
+
         }
     }
 
@@ -231,7 +239,7 @@ public class TeleV3 extends LinearOpMode {
 
         if (resetAndScan) {
             index = 0;
-            goToIndex(0, POSITIONS);
+            goToIndex(index, POSITIONS);
             scanAllBalls();
         }
 
@@ -352,8 +360,6 @@ public class TeleV3 extends LinearOpMode {
         pivotServo = hardwareMap.servo.get("launchServo");
         flickServo = hardwareMap.servo.get("flickServo");
         launchMotor = hardwareMap.dcMotor.get("launchMotor");
-
-        limitSwitch = hardwareMap.get(DigitalChannel.class, "limitSwitch");
 
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

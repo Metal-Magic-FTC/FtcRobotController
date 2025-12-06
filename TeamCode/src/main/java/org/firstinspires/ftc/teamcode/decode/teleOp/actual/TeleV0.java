@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.actual;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 @TeleOp
+@Disabled
 public class TeleV0 extends LinearOpMode {
 
     private CustomMecanumDrive drivetrain;

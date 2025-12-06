@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.List;
 
 
-@Autonomous(name = "BlueFront Auto", group = "Auto")
+@Autonomous(name = "! Blue Far Auto", group = "Auto")
 public class BlueFront extends LinearOpMode {
 
     private Follower follower;
@@ -354,7 +354,7 @@ public class BlueFront extends LinearOpMode {
 //        }
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
-        runToPosition(spinMotor, currentTarget, 0.3);
+        runToPosition(spinMotor, currentTarget, 0.2);
     }
 
 

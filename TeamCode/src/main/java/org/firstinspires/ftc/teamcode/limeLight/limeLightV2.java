@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.limeLight;
 
 import com.qualcomm.hardware.limelightvision.*;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 import java.util.List;
 
 @TeleOp(name = "Sensor: limelightV2", group = "Sensor")
+@Disabled
 public class limeLightV2 extends OpMode {
 
     Limelight3A limelight;

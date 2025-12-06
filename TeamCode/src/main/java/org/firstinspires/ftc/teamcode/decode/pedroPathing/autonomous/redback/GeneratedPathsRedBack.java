@@ -25,23 +25,23 @@ public class GeneratedPathsRedBack {
                 .addPath(
                         new BezierLine(START_POSE, new Pose(100, 100))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(125))
+                .setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(110))
                 .build();
     }
 
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(100,100), new Pose(86, 87))
+                        new BezierLine(new Pose(100,100), new Pose(93, 94))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(125), Math.toRadians(46.3067))
+                .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(46.3067))
                 .build();
     }
 
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(86, 87), new Pose(101.353, 81))
+                        new BezierLine(new Pose(93, 94), new Pose(101.353, 81))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
                 .build();
@@ -79,7 +79,7 @@ public class GeneratedPathsRedBack {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(121.900, 81), new Pose(86, 87))
+                        new BezierLine(new Pose(121.900, 81), new Pose(93, 94))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(41.67))
                 .build();
@@ -88,7 +88,7 @@ public class GeneratedPathsRedBack {
     public PathChain toIntake2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(86, 87), new Pose(101.353, 59.400))
+                        new BezierLine(new Pose(93, 94), new Pose(101.353, 59.400))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
                 .build();

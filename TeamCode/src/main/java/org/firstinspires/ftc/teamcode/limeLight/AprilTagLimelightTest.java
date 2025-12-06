@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPin
 
 import java.util.List;
 
-@TeleOp
+@TeleOp(name="April Tag Limelight Test")
 public class AprilTagLimelightTest extends OpMode {
 
     private Limelight3A limelight3A;

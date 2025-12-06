@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.limeLight;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 import java.util.List;
 
 @TeleOp(name = "Sensor: LimeLightAprilTagData", group = "Sensor")
+@Disabled
 public class LimeLlightAprilTagTelemetry extends OpMode {
 
     private Limelight3A limelight;

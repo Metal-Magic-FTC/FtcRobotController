@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name="!Drivetrain Manual Test")
+@Disabled
 public class DriveRobot extends LinearOpMode {
 
     private CustomMecanumDrive drivetrain;

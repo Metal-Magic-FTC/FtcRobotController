@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.limeLight;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -10,6 +11,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 @TeleOp(name="Limelight Basic Pose", group="Vision")
+@Disabled
 public class LimelightPoseBasic extends LinearOpMode {
 
     // Change to your Limelight’s IP if needed

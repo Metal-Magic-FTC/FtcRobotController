@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.limeLight;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPin
  * This is the recommended approach for competitive FTC robots.
  */
 @TeleOp(name = "Limelight + Odometry Fusion", group = "Limelight")
+@Disabled
 public class LimelightOdometryFusion extends OpMode {
 
     // Localization

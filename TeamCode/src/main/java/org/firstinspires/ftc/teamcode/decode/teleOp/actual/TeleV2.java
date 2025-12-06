@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.actual;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,7 +12,8 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
-@TeleOp(name="!!!!! IM MID GOON SESSION DONT DISTURBME IM GOONING TO TeleV2 - Modular")
+@TeleOp(name="! TeleV2 - Modular")
+@Disabled
 public class TeleV2 extends LinearOpMode {
 
     // -----------------------------

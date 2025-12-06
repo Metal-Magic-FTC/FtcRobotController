@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.limeLight;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.opencv.ml.ParamGrid;
 
 @TeleOp(name = "!Sensor: LimeLightDistance", group = "Sensor")
+@Disabled
 public class limeLightDistance extends OpMode {
     private Limelight3A limelight;
     //TestBench bench = new TestBench();

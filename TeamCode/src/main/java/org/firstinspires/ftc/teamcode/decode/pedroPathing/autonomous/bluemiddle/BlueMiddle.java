@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.bluemiddle
 
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.pedropathing.follower.Follower;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 @Autonomous(name = "BlueMiddle Auto", group = "Auto")
+@Disabled
 public class BlueMiddle extends LinearOpMode {
 
     private Follower follower;

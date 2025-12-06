@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.pedropathing.follower.Follower;
@@ -12,6 +13,7 @@ import com.pedropathing.paths.PathChain;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @TeleOp(name = "TeleOp + AprilTag One-Line Path (Corrected)", group = "PedroPathing")
+@Disabled
 public class LimelightAutoAlignTeleOp extends OpMode {
 
     private Limelight3A limelight;

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.limeLight;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
  * - Success rate and statistics
  */
 @TeleOp(name = "Limelight Localization Demo", group = "Limelight")
+@Disabled
 public class LimelightLocalizationDemo extends OpMode {
 
     // Localization

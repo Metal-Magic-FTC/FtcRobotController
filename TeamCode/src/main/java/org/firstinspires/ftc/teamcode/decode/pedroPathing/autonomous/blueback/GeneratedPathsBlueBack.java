@@ -25,7 +25,7 @@ public class GeneratedPathsBlueBack {
                 .addPath(
                         new BezierLine(START_POSE, new Pose(54, 101))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180-225), Math.toRadians(73))
+                .setLinearHeadingInterpolation(Math.toRadians(180-225), Math.toRadians(60))
                 .build();
     }
 
@@ -34,7 +34,7 @@ public class GeneratedPathsBlueBack {
                 .addPath(
                         new BezierLine(new Pose(54,101), new Pose(59, 81))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(73), Math.toRadians(128))
+                .setLinearHeadingInterpolation(Math.toRadians(60), Math.toRadians(128))
                 .build();
     }
 

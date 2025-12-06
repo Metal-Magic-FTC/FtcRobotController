@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.limeLight;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -44,6 +45,7 @@ import java.util.List;
  * initialize Pinpoint heading using absolute heading from MegaTag2.
  */
 @TeleOp(name = "Limelight Coordinate Diagnostic", group = "Diagnostic")
+@Disabled
 public class LimelightCoordinateDiagnostic extends OpMode {
 
     private Limelight3A limelight;

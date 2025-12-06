@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
 @TeleOp(name="Wheel directions")
+@Disabled
 public class DrivetrainDirections extends LinearOpMode {
     DcMotor leftFront = null;
     DcMotor leftBack = null;

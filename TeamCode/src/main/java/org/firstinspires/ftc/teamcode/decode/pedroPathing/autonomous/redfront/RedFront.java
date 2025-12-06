@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.List;
 
-@Autonomous(name = "Im Gooning To RedFront TSTSTSTSTSTTSTSTSTTSTSTTSTSTTTSTSTTRSTTSTS GURT IN YOU", group = "Auto")
+@Autonomous(name = "! Red Far Auto", group = "Auto")
 public class RedFront extends LinearOpMode {
 
     private Follower follower;

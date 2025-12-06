@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.List;
 
 
-@Autonomous(name = "!!!!!BlueBack New Auto", group = "Auto")
+@Autonomous(name = "! Blue Close Auto", group = "Auto")
 public class BlueBack extends LinearOpMode {
 
 
@@ -156,8 +156,9 @@ public class BlueBack extends LinearOpMode {
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
+        intakeMotor.setPower(0);
         runPath(paths.toIntake1(), 50, 0.75);
-
+        intakeMotor.setPower(0.6);
 
 
 
