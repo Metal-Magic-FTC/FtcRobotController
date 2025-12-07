@@ -23,25 +23,25 @@ public class GeneratedPathsBlueFront {
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(START_POSE, new Pose(60, 13))
+                        new BezierLine(START_POSE, new Pose(54, 13))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(112))
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(114.5))
                 .build();
     }
 
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(60, 13), new Pose(47, 38))
+                        new BezierLine(new Pose(54, 13), new Pose(47, 33))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(112), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(114.5), Math.toRadians(180))
                 .build();
     }
 
     public PathChain intakeball1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(47, 38), new Pose(42, 38))
+                        new BezierLine(new Pose(47, 33), new Pose(38, 33))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -50,7 +50,7 @@ public class GeneratedPathsBlueFront {
     public PathChain intakeball2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(42, 38), new Pose(37, 38))
+                        new BezierLine(new Pose(42, 33), new Pose(33, 33))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -59,7 +59,7 @@ public class GeneratedPathsBlueFront {
     public PathChain intakeball3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(37, 38), new Pose(31, 38))
+                        new BezierLine(new Pose(37, 33), new Pose(29, 33))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -68,7 +68,7 @@ public class GeneratedPathsBlueFront {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(31, 38), new Pose(60, 13))
+                        new BezierLine(new Pose(31, 33), new Pose(54, 13))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(112))
                 .build();
@@ -77,7 +77,7 @@ public class GeneratedPathsBlueFront {
     public PathChain toIntake2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(55.85046728971962, 13), new Pose(144-101.353, 60.112))
+                        new BezierLine(new Pose(54, 13), new Pose(144-101.353, 60.112))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(112), Math.toRadians(180))
                 .build();

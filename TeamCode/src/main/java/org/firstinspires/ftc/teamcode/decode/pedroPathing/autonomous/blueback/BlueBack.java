@@ -118,7 +118,7 @@ public class BlueBack extends LinearOpMode {
         telemetry.update();
 
 
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
 
 
         runPath(paths.scan(), 50, 1);
@@ -158,7 +158,8 @@ public class BlueBack extends LinearOpMode {
         // ----------------------
         intakeMotor.setPower(0);
         runPath(paths.toIntake1(), 50, 0.75);
-        intakeMotor.setPower(0.6);
+        sleep(500);
+        intakeMotor.setPower(1);
 
 
 
@@ -266,7 +267,7 @@ public class BlueBack extends LinearOpMode {
     // -----------------------------
     private void shootBallsByColorOrder(ballColors[] order) {
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.91);
         sleep(250);
 
         for (ballColors desired : order) {

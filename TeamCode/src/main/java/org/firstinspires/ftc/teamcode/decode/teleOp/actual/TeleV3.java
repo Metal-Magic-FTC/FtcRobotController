@@ -104,7 +104,7 @@ public class TeleV3 extends LinearOpMode {
             boolean speedLow = gamepad1.dpad_down;
 
             boolean gp2ResetSpin = gamepad2.a;
-            double motorPowerReset = 0.1 * (gamepad2.right_trigger - gamepad2.left_trigger);
+            double motorPowerReset = 0.2 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
             if (gamepad2.right_bumper) {
                 initializeBallArray();
@@ -178,7 +178,7 @@ public class TeleV3 extends LinearOpMode {
 
     /** INTAKE **/
     private void handleIntake(boolean active) {
-        intakeMotor.setPower(active ? 0.0 : 0.67);
+        intakeMotor.setPower(active ? 0.0 : 1);
     }
 
     /** LAUNCHER + HOOD **/

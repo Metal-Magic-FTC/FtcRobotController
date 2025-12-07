@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.blueback.BlueBack;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.bluefront.GeneratedPathsBlueFront;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
@@ -81,7 +82,7 @@ public class BlueFront extends LinearOpMode {
         paths = new GeneratedPathsBlueFront(follower);
 
 
-        telemetry.addLine("Ready to start BlueFront New Auto");
+        telemetry.addLine("Ready to start RedFront New Auto");
         telemetry.update();
 
 
@@ -102,8 +103,7 @@ public class BlueFront extends LinearOpMode {
         telemetry.update();
 
 
-        intakeMotor.setPower(0.6);
-        launchMotor.setPower(0.95);
+        intakeMotor.setPower(1);
 
 
         //runPath(paths.scan(), 50, 1);
@@ -144,29 +144,33 @@ public class BlueFront extends LinearOpMode {
         runPath(paths.toIntake1(), 50, 0.75);
 
 
+
+
         runIntakePath(paths.intakeball1(), 50, 0.5);
-        intakeMotor.setPower(0.9);
+        intakeMotor.setPower(1);
         sleep(750);
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
         moveSpindexer(1, INTAKE_POSITIONS);
         sleep(750);
 
 
         runIntakePath(paths.intakeball2(), 50, 0.5);
-        intakeMotor.setPower(0.9);
+        intakeMotor.setPower(1);
         sleep(750);
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
         moveSpindexer(2, INTAKE_POSITIONS);
         sleep(750);
 
 
         runIntakePath(paths.intakeball3(), 50, 0.5);
-        intakeMotor.setPower(0.9);
+        intakeMotor.setPower(1);
         sleep(750);
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
         sleep(750);
+
+
 
 
         scanAllBalls();
@@ -184,10 +188,10 @@ public class BlueFront extends LinearOpMode {
         runIntakePath(paths.intakeball4(), 250, 0.5);
 
 
-        runIntakePath(paths.intakeball5(), 500, 0.5);
+        runIntakePath(paths.intakeball5(), 250, 0.5);
 
 
-        runIntakePath(paths.intakeball6(), 500, 0.5);
+        runIntakePath(paths.intakeball6(), 250, 0.5);
 
 
         runPath(paths.shoot3(), 250, 0.75);
@@ -196,10 +200,8 @@ public class BlueFront extends LinearOpMode {
 
 
         // End of auto
-        telemetry.addLine("BlueFront Auto Finished");
+        telemetry.addLine("RedFront Auto Finished");
         telemetry.update();
-
-        idle();
     }
 
     // -----------------------------
@@ -257,12 +259,13 @@ public class BlueFront extends LinearOpMode {
     private void shootBallsByColorOrder(ballColors[] order) {
 
         launchMotor.setPower(1);
-        sleep(500);
+        sleep(250);
 
         for (ballColors desired : order) {
 
 
             int idx = findClosestColor(desired, 0);
+
 
             if (balls[idx] == ballColors.EMPTY) continue;
 
@@ -272,7 +275,7 @@ public class BlueFront extends LinearOpMode {
 
 
             // NEW GANGALANGL wait until sensor confirms correct ball is in the firing chamber ---
-            if (waitForBallAtShooter(desired, 2500)) {
+            if (waitForBallAtShooter(desired, 1500)) {
                 launchBallAt(idx);   // only fires after sensor confirms color
             } else {
                 telemetry.addLine("Ball not detected in time, skipping launch");
@@ -281,8 +284,25 @@ public class BlueFront extends LinearOpMode {
         }
 
 
-//        launchMotor.setPower(0);
+        launchMotor.setPower(0);
     }
+//    private void shootBallsByColorOrder(ballColors[] order) {
+//        for (ballColors color : order) {
+//            int idx = findClosestColor(color, 0);
+//            if (balls[idx] != ballColors.EMPTY) {
+//                moveSpindexer(idx, POSITIONS); // moveToPosition
+//                // Charge launcher 1 second
+// //                launchMotor.setPower(1);
+// //                sleep(1000);
+// //                launchBallAt(idx);
+// //                launchMotor.setPower(0);
+// //                sleep(250);
+//
+//                launchBallAt(idx);
+//
+//            }
+//        }
+//    }
 
 
     private void launchBallAt(int index) {
@@ -291,15 +311,20 @@ public class BlueFront extends LinearOpMode {
 
             launchMotor.setPower(1); // 1
 
+
             sleep(500);
+
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.735);
-            sleep(700);
+            sleep(500);
 
 
             flickServo.setPosition(0.22);
             sleep(700);
+
+
+
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.6);
@@ -325,6 +350,7 @@ public class BlueFront extends LinearOpMode {
 
             ballColors sensed = detectBallColorFromSensor(backColor);
 
+
             if (sensed == expected) {
                 return true;
             }
@@ -342,16 +368,6 @@ public class BlueFront extends LinearOpMode {
 
 
     private void moveSpindexer(int newIndex, int[] table) {
-//        if (newIndex == 1) {
-//            if (balls[0] != ballColors.EMPTY) {
-//                pivotServo.setPosition(0.6);
-//            }
-//            pivotServo.setPosition(0.6);
-//        } else if (newIndex == 2) {
-//            if (balls[0] != ballColors.EMPTY || balls[1] != ballColors.EMPTY) {
-//                pivotServo.setPosition(0.6);
-//            }
-//        }
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
         runToPosition(spinMotor, currentTarget, 0.2);
@@ -375,9 +391,9 @@ public class BlueFront extends LinearOpMode {
     public int findClosestColor(ballColors target, int currentIndex) {
         for (int offset = 0; offset < balls.length; offset++) {
             int right = (currentIndex + offset) % balls.length;
-            int left = (currentIndex - offset + balls.length) % balls.length;
+            int left  = (currentIndex - offset + balls.length) % balls.length;
             if (balls[right] == target) return right;
-            if (balls[left] == target) return left;
+            if (balls[left] == target)  return left;
         }
         return currentIndex;
     }
@@ -389,33 +405,9 @@ public class BlueFront extends LinearOpMode {
 
 
     public void scanAllBalls() {
-        ballColors backColor1 = detectBallColorFromSensor(backColor);
-        ballColors rightColor1 = detectBallColorFromSensor(rightColor);
-        ballColors leftColor1 = detectBallColorFromSensor(leftColor);
-
-        sleep(50);
-
-        ballColors backColor2 = detectBallColorFromSensor(backColor);
-        ballColors rightColor2 = detectBallColorFromSensor(rightColor);
-        ballColors leftColor2 = detectBallColorFromSensor(leftColor);
-
-        if (backColor1 != ballColors.EMPTY) {
-            balls[0] = backColor1;
-        } else {
-            balls[0] = backColor2;
-        }
-
-        if (rightColor1 != ballColors.EMPTY) {
-            balls[1] = rightColor1;
-        } else {
-            balls[1] = rightColor2;
-        }
-
-        if (leftColor1 != ballColors.EMPTY) {
-            balls[2] = leftColor1;
-        } else {
-            balls[2] = leftColor2;
-        }
+        balls[0] = detectBallColorFromSensor(backColor);
+        balls[1] = detectBallColorFromSensor(rightColor);
+        balls[2] = detectBallColorFromSensor(leftColor);
     }
 
 
@@ -460,14 +452,24 @@ public class BlueFront extends LinearOpMode {
 
                 if (fiducials != null && !fiducials.isEmpty()) {
 
-                    // We only need the first tag detected
-                    LLResultTypes.FiducialResult tag = fiducials.get(0);
-                    int id = tag.getFiducialId();
+                    // Collect valid tag IDs (21, 22, 23)
+                    int smallestValid = Integer.MAX_VALUE;
 
-                    if (id == 21 || id == 22 || id == 23) {
-                        telemetry.addData("AprilTag Found", id);
+                    for (LLResultTypes.FiducialResult tag : fiducials) {
+                        int id = tag.getFiducialId();
+
+                        if (id == 21 || id == 22 || id == 23) {
+                            if (id < smallestValid) {
+                                smallestValid = id;
+                            }
+                        }
+                    }
+
+                    // If we found at least one valid tag, return the smallest one
+                    if (smallestValid != Integer.MAX_VALUE) {
+                        telemetry.addData("Using Tag", smallestValid);
                         telemetry.update();
-                        return id;
+                        return smallestValid;
                     }
                 }
             }
@@ -489,8 +491,8 @@ public class BlueFront extends LinearOpMode {
         limelight3A.start();
 
 
-        backColor = hardwareMap.get(NormalizedColorSensor.class, "backColor");
-        leftColor = hardwareMap.get(NormalizedColorSensor.class, "leftColor");
+        backColor  = hardwareMap.get(NormalizedColorSensor.class, "backColor");
+        leftColor  = hardwareMap.get(NormalizedColorSensor.class, "leftColor");
         rightColor = hardwareMap.get(NormalizedColorSensor.class, "rightColor");
 
 
@@ -508,6 +510,9 @@ public class BlueFront extends LinearOpMode {
 
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
+
+        pivotServo.setPosition(0.6);
+
     }
 
 
@@ -529,5 +534,30 @@ public class BlueFront extends LinearOpMode {
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
+    }
+
+    private void initialize() {
+        follower = Constants.createFollower(hardwareMap);
+
+        // Apply the start pose from GeneratedPathsRedFront
+        follower.setPose(GeneratedPathsBlueFront.START_POSE);
+
+        //follower = Constants.createFollower(hardwareMap);
+
+        // Set motors to BRAKE to stop drift when idle
+        hardwareMap.get(DcMotor.class, "frontLeft").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hardwareMap.get(DcMotor.class, "frontRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hardwareMap.get(DcMotor.class, "backLeft").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Load paths
+        paths = new GeneratedPathsBlueFront(follower);
+
+        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        telemetry.addLine("Ready to start RedFront Auto");
+        telemetry.update();
     }
 }

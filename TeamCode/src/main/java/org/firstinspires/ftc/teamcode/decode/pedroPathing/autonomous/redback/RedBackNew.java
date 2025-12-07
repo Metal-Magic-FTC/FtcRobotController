@@ -117,7 +117,7 @@ public class RedBackNew extends LinearOpMode {
         telemetry.update();
 
 
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
 
 
         runPath(paths.scan(), 50, 1);
@@ -157,7 +157,7 @@ public class RedBackNew extends LinearOpMode {
         // ----------------------
         intakeMotor.setPower(0);
         runPath(paths.toIntake1(), 50, 1);
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
 
         runIntakePath(paths.intakeball1(), 50, 0.5);
         sleep(1000);
@@ -278,7 +278,7 @@ public class RedBackNew extends LinearOpMode {
         if (balls[index] != ballColors.EMPTY) {
 
 
-            launchMotor.setPower(0.75); // 1
+            launchMotor.setPower(0.78); // 1
 
             sleep(500);
 

@@ -100,7 +100,7 @@ public class RedFront extends LinearOpMode {
         telemetry.update();
 
 
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
 
 
         //runPath(paths.scan(), 50, 1);
@@ -144,25 +144,25 @@ public class RedFront extends LinearOpMode {
 
 
         runIntakePath(paths.intakeball1(), 50, 0.5);
-        intakeMotor.setPower(0.9);
+        intakeMotor.setPower(1);
         sleep(750);
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
         moveSpindexer(1, INTAKE_POSITIONS);
         sleep(750);
 
 
         runIntakePath(paths.intakeball2(), 50, 0.5);
-        intakeMotor.setPower(0.9);
+        intakeMotor.setPower(1);
         sleep(750);
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
         moveSpindexer(2, INTAKE_POSITIONS);
         sleep(750);
 
 
         runIntakePath(paths.intakeball3(), 50, 0.5);
-        intakeMotor.setPower(0.9);
+        intakeMotor.setPower(1);
         sleep(750);
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(1);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
         sleep(750);
