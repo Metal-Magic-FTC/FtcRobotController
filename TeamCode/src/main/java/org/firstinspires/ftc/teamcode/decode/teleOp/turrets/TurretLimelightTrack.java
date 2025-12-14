@@ -1,0 +1,133 @@
+package org.firstinspires.ftc.teamcode.decode.teleOp.turrets;
+
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import com.pedropathing.follower.Follower;
+
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+
+@TeleOp(name = "!!!!!!Turret Limelight Track Test")
+public class TurretLimelightTrack extends LinearOpMode {
+
+    // ts constants
+    private static final double START_X = 116.6988847583643;
+    private static final double START_Y = 128.83271375464685;
+    private static final double START_HEADING =
+            Math.toRadians(225);
+
+    private static final int TURRET_MIN = 0;
+    private static final int TURRET_MAX = 555;
+    private static final double TICKS_PER_RADIAN =
+            TURRET_MAX / (2 * Math.PI);
+
+    private DcMotor turretMotor;
+    private Follower follower;
+
+    private Limelight3A limelight;
+
+    // mera start pose les go les go
+    private Pose startPose = new Pose(
+            START_X,
+            START_Y,
+            START_HEADING
+    );
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        initHardware();
+
+        follower = Constants.createFollower(hardwareMap);
+        follower.setPose(startPose);
+
+        telemetry.addLine("Turret Odometry Track Ready");
+        telemetry.update();
+
+        waitForStart();
+        if (isStopRequested()) return;
+
+        while (opModeIsActive()) {
+
+            follower.update();
+
+            updateTurretAim();
+
+            telemetry.addData("Robot X", follower.getPose().getX());
+            telemetry.addData("Robot Y", follower.getPose().getY());
+            telemetry.addData("Robot Heading (deg)",
+                    Math.toDegrees(follower.getPose().getHeading()));
+            telemetry.addData("Turret Encoder",
+                    turretMotor.getCurrentPosition());
+            LLResult result = limelight.getLatestResult();
+            if (result != null && result.isValid()) {
+                double tx = result.getTx();
+                double ty = result.getTy();
+                double ta = result.getTa();
+
+                telemetry.addData("Target X", tx);
+                telemetry.addData("Target Y", ty);
+                telemetry.addData("Target Area", ta);
+            } else {
+                telemetry.addData("limelight", "no targets");
+            }
+            telemetry.update();
+        }
+    }
+
+    // THE LOGICCCCC
+    private void updateTurretAim() {
+
+        Pose robotPose = follower.getPose();
+
+        // double dx = START_X - robotPose.getX();
+        // double dy = START_Y - robotPose.getY();
+
+        double dx = 136 - robotPose.getX();
+        double dy = 136 - robotPose.getY();
+
+        double fieldAngleToStart = Math.atan2(dy, dx);
+
+        double turretAngle =
+                normalizeRadians(fieldAngleToStart - robotPose.getHeading());
+
+        int targetTicks =
+                (int) Math.round(turretAngle * TICKS_PER_RADIAN);
+
+        targetTicks = clamp(targetTicks, TURRET_MIN, TURRET_MAX);
+
+        turretMotor.setTargetPosition(targetTicks);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.6);
+    }
+
+    // we be helping
+    private double normalizeRadians(double angle) {
+        while (angle < 0) angle += 2 * Math.PI;
+        while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
+        return angle;
+    }
+
+    private int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    // init init init
+    private void initHardware() {
+
+        turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
+
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        limelight.pipelineSwitch(3);
+        limelight.setPollRateHz(100);
+    }
+}
