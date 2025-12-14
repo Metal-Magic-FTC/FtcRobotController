@@ -3,18 +3,17 @@ package org.firstinspires.ftc.teamcode.decode.teleOp.turrets;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-@Autonomous(name = "!Turret Odometry Track Test", group = "Test")
+@TeleOp(name = "!!!!!!Turret Odometry Track Test")
 public class TurretOdometryTrack extends LinearOpMode {
 
-    // --------------------
-    // CONSTANTS
-    // --------------------
+    // ts constants
     private static final double START_X = 144 - 116.6988847583643;
     private static final double START_Y = 128.83271375464685;
     private static final double START_HEADING =
@@ -25,15 +24,10 @@ public class TurretOdometryTrack extends LinearOpMode {
     private static final double TICKS_PER_RADIAN =
             TURRET_MAX / (2 * Math.PI);
 
-    // --------------------
-    // HARDWARE
-    // --------------------
     private DcMotor turretMotor;
     private Follower follower;
 
-    // --------------------
-    // START POSE
-    // --------------------
+    // mera start pose les go les go
     private Pose startPose = new Pose(
             START_X,
             START_Y,
@@ -70,15 +64,16 @@ public class TurretOdometryTrack extends LinearOpMode {
         }
     }
 
-    // --------------------
-    // TURRET AIM LOGIC
-    // --------------------
+    // THE LOGICCCCC
     private void updateTurretAim() {
 
         Pose robotPose = follower.getPose();
 
-        double dx = START_X - robotPose.getX();
-        double dy = START_Y - robotPose.getY();
+        // double dx = START_X - robotPose.getX();
+        // double dy = START_Y - robotPose.getY();
+
+        double dx = 136 - robotPose.getX();
+        double dy = 136 - robotPose.getY();
 
         double fieldAngleToStart = Math.atan2(dy, dx);
 
@@ -95,9 +90,7 @@ public class TurretOdometryTrack extends LinearOpMode {
         turretMotor.setPower(0.4);
     }
 
-    // --------------------
-    // HELPERS
-    // --------------------
+    // we be helping
     private double normalizeRadians(double angle) {
         while (angle < 0) angle += 2 * Math.PI;
         while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
@@ -108,9 +101,7 @@ public class TurretOdometryTrack extends LinearOpMode {
         return Math.max(min, Math.min(max, value));
     }
 
-    // --------------------
-    // INIT
-    // --------------------
+    // init init init
     private void initHardware() {
 
         turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
