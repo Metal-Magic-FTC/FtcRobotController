@@ -20,8 +20,8 @@ public class TurretOdometryTrack extends LinearOpMode {
     private static final double START_HEADING =
             Math.toRadians(180 - 225);
 
-    private static final int TURRET_MIN = 0;
-    private static final int TURRET_MAX = 555;
+    private static final int TURRET_MIN = 0+278;
+    private static final int TURRET_MAX = 555+278;
     private static final double TICKS_PER_RADIAN =
             TURRET_MAX / (2 * Math.PI);
 
