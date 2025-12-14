@@ -37,7 +37,7 @@ public class BlueFront extends LinearOpMode {
     Servo flickServo;
     NormalizedColorSensor backColor, leftColor, rightColor;
 
-   // CustomMecanumDrive drivetrain;
+    // CustomMecanumDrive drivetrain;
 
 
     private final int[] POSITIONS = {0, 246, 496};
@@ -261,31 +261,7 @@ public class BlueFront extends LinearOpMode {
         launchMotor.setPower(1);
         sleep(250);
 
-<<<<<<< Updated upstream
-        for (ballColors desired : order) {
-=======
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        for (ballColors desired : order) {
-=======
         for ( ballColors desired : order) {
->>>>>>> Stashed changes
-=======
-        for ( ballColors desired : order) {
->>>>>>> Stashed changes
-=======
-        for ( ballColors desired : order) {
->>>>>>> Stashed changes
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 
             int idx = findClosestColor(desired, 0);
