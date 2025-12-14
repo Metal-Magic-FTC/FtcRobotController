@@ -261,7 +261,23 @@ public class BlueFront extends LinearOpMode {
         launchMotor.setPower(1);
         sleep(250);
 
+<<<<<<< Updated upstream
         for (ballColors desired : order) {
+=======
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+        for (ballColors desired : order) {
+=======
+        for ( ballColors desired : order) {
+>>>>>>> Stashed changes
+=======
+        for ( ballColors desired : order) {
+>>>>>>> Stashed changes
+=======
+        for ( ballColors desired : order) {
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 
             int idx = findClosestColor(desired, 0);
