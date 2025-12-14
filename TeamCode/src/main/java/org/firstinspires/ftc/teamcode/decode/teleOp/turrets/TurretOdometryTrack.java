@@ -14,13 +14,13 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 public class TurretOdometryTrack extends LinearOpMode {
 
     // ts constants
-    private static final double START_X = 144 - 116.6988847583643;
+    private static final double START_X = 116.6988847583643;
     private static final double START_Y = 128.83271375464685;
     private static final double START_HEADING =
-            Math.toRadians(180 - 225);
+            Math.toRadians(225);
 
-    private static final int TURRET_MIN = 0+278;
-    private static final int TURRET_MAX = 555+278;
+    private static final int TURRET_MIN = 0;
+    private static final int TURRET_MAX = 555;
     private static final double TICKS_PER_RADIAN =
             TURRET_MAX / (2 * Math.PI);
 
@@ -87,7 +87,7 @@ public class TurretOdometryTrack extends LinearOpMode {
 
         turretMotor.setTargetPosition(targetTicks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.4);
+        turretMotor.setPower(0.6);
     }
 
     // we be helping
