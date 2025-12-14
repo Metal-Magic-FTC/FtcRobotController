@@ -267,6 +267,7 @@ public class BlueFront extends LinearOpMode {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         for (ballColors desired : order) {
 =======
         for ( ballColors desired : order) {
@@ -277,6 +278,9 @@ public class BlueFront extends LinearOpMode {
 =======
         for ( ballColors desired : order) {
 >>>>>>> Stashed changes
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 
