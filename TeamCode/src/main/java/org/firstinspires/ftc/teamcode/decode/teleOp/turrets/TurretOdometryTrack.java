@@ -87,7 +87,7 @@ public class TurretOdometryTrack extends LinearOpMode {
 
         turretMotor.setTargetPosition(targetTicks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.6);
+        turretMotor.setPower(0.9);
     }
 
     // we be helping
