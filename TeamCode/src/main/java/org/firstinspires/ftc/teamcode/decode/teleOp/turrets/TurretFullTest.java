@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 public class TurretFullTest extends LinearOpMode {
 
     /* ================= CONSTANTS ================= */
+
     private static final int TARGET_TAG_ID = 24;
 
     private static final int TURRET_MAX_TICKS = 555;
@@ -22,7 +23,12 @@ public class TurretFullTest extends LinearOpMode {
 
     private static final double METERS_TO_INCHES = 39.3701;
 
+    // ✅ Tag directly in front of robot, facing robot
+    private static final Pose TAG_24_FIELD_POSE =
+            new Pose(0, 24, Math.toRadians(270)); // example: 24 inches ahead
+
     /* ================= HARDWARE ================= */
+
     private DcMotor turretMotor;
     private Limelight3A limelight;
     private Follower follower;
@@ -30,140 +36,116 @@ public class TurretFullTest extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        /* ===== Turret ===== */
         turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        /* ===== Limelight ===== */
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(3); // AprilTag pipeline
+        limelight.pipelineSwitch(3);
         limelight.setPollRateHz(100);
         limelight.start();
 
-        /* ===== Pedro Pathing ===== */
         follower = Constants.createFollower(hardwareMap);
 
-        // 🔴 Start odometry at (0,0,0)
-        follower.setPose(new Pose(0, 0, Math.toRadians(-90)));
-
-        telemetry.addLine("TurretFullTest READY");
-        telemetry.update();
+        // ✅ Known start
+        follower.setPose(new Pose(0, 0, Math.toRadians(90)));
 
         waitForStart();
 
         while (opModeIsActive()) {
-
             follower.update();
-
-            // Auto-correct odometry if tag is visible
-            boolean visionCorrected = correctOdometryFromTag();
-
-            // Always aim turret at origin (0,0)
+            correctOdometryFromTag();
             updateTurretAim();
 
-            Pose pose = follower.getPose();
-
-            telemetry.addLine("=== ODOMETRY ===");
-            telemetry.addData("X (in)", "%.2f", pose.getX());
-            telemetry.addData("Y (in)", "%.2f", pose.getY());
-            telemetry.addData("Heading (deg)",
-                    "%.1f", Math.toDegrees(pose.getHeading()));
-
-            telemetry.addLine("=== TURRET ===");
-            telemetry.addData("Turret Ticks",
-                    turretMotor.getCurrentPosition());
-            telemetry.addData("Turret Angle (deg)",
-                    "%.1f",
-                    Math.toDegrees(
-                            turretMotor.getCurrentPosition() / TICKS_PER_RADIAN
-                    ));
-
-            telemetry.addLine("=== VISION ===");
-            telemetry.addData("Tag 24 Visible",
-                    visionCorrected ? "YES (ODO CORRECTED)" : "NO");
-
+            Pose p = follower.getPose();
+            telemetry.addData("X", "%.2f", p.getX());
+            telemetry.addData("Y", "%.2f", p.getY());
+            telemetry.addData("H", "%.1f°", Math.toDegrees(p.getHeading()));
             telemetry.update();
         }
     }
 
     /* ===================================================== */
-    /* ========== TURRET AIM: FACE (0,10) ================== */
+    /* ================= TURRET AIM ======================== */
     /* ===================================================== */
+
     private void updateTurretAim() {
 
         Pose pose = follower.getPose();
 
-        // Target point is (0, 10)
-        double dx = 0.0 - pose.getX();
-        double dy = 10.0 - pose.getY();
+        double dx = -pose.getX();
+        double dy = 10 - pose.getY();
 
         double fieldAngle = Math.atan2(dy, dx);
-
         double turretAngle =
                 normalizeRadians(fieldAngle - pose.getHeading());
 
-        int targetTicks =
-                (int) Math.round(turretAngle * TICKS_PER_RADIAN);
+        int ticks = (int) Math.round(turretAngle * TICKS_PER_RADIAN);
 
-        turretMotor.setTargetPosition(targetTicks);
+        turretMotor.setTargetPosition(ticks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.5);
     }
 
     /* ===================================================== */
-    /* ===== LIMELIGHT → ODOMETRY CORRECTION (TAG 24) ======= */
+    /* ========== APRILTAG → FIELD ODOMETRY ================= */
     /* ===================================================== */
-    private boolean correctOdometryFromTag() {
+
+    private void correctOdometryFromTag() {
 
         LLResult result = limelight.getLatestResult();
-        if (result == null || !result.isValid()) return false;
+        if (result == null || !result.isValid()) return;
 
-        for (LLResultTypes.FiducialResult tag :
-                result.getFiducialResults()) {
+        for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
 
             if (tag.getFiducialId() != TARGET_TAG_ID) continue;
 
-            Pose3D robotToTag = tag.getRobotPoseTargetSpace();
-            if (robotToTag == null) return false;
+            Pose3D robotInTag = tag.getRobotPoseTargetSpace();
+            if (robotInTag == null) return;
 
-            // Robot relative to tag (camera frame)
-            double relX = robotToTag.getPosition().x * METERS_TO_INCHES;
-            double relY = robotToTag.getPosition().y * METERS_TO_INCHES;
+            // Robot pose RELATIVE TO TAG (Limelight frame)
+            double rx = robotInTag.getPosition().x * METERS_TO_INCHES;
+            double ry = robotInTag.getPosition().y * METERS_TO_INCHES;
+            double rYaw = Math.toRadians(robotInTag.getOrientation().getYaw());
 
-            // Turret rotation in radians
-            double turretYaw = turretMotor.getCurrentPosition() / TICKS_PER_RADIAN;
+            // 🔥 FIX LIMELIGHT TAG FRAME (180° flip)
+            rx = -rx;
+            ry = -ry;
+            rYaw = normalizeRadians(rYaw + Math.PI);
 
-            // Camera yaw in radians
-            double cameraYaw = Math.toRadians(robotToTag.getOrientation().getYaw());
+            // Undo turret rotation
+            double turretYaw =
+                    turretMotor.getCurrentPosition() / TICKS_PER_RADIAN;
 
-            // True robot heading in field frame
-            double robotHeading = normalizeRadians(cameraYaw - turretYaw + Math.toRadians(60));
+            double cosT = Math.cos(-turretYaw);
+            double sinT = Math.sin(-turretYaw);
 
-            // Rotate relative position into field frame
-            double cos = Math.cos(robotHeading);
-            double sin = Math.sin(robotHeading);
+            double rxFixed = rx * cosT - ry * sinT;
+            double ryFixed = rx * sinT + ry * cosT;
 
-            double fieldX = -(relX * cos - relY * sin);
-            double fieldY = -(relX * sin + relY * cos);
+            // Tag → field
+            double cosF = Math.cos(TAG_24_FIELD_POSE.getHeading());
+            double sinF = Math.sin(TAG_24_FIELD_POSE.getHeading());
 
-            follower.setPose(new Pose(
-                    fieldX,
-                    fieldY,
-                    robotHeading
-            ));
+            double fieldX =
+                    TAG_24_FIELD_POSE.getX() - (rxFixed * cosF - ryFixed * sinF);
+            double fieldY =
+                    TAG_24_FIELD_POSE.getY() - (rxFixed * sinF + ryFixed * cosF);
 
-            telemetry.addLine("✔ ODOMETRY CORRECTED FROM TAG 24");
-            return true;
+            double fieldHeading =
+                    normalizeRadians(
+                            TAG_24_FIELD_POSE.getHeading()
+                                    + rYaw
+                                    - turretYaw
+                    );
+
+            follower.setPose(new Pose(fieldX, fieldY, fieldHeading));
         }
-
-        return false;
     }
 
-    /* ================= HELPERS ================= */
     private double normalizeRadians(double a) {
-        while (a > Math.PI) a -= 2.0 * Math.PI;
-        while (a < -Math.PI) a += 2.0 * Math.PI;
+        while (a > Math.PI) a -= 2 * Math.PI;
+        while (a < -Math.PI) a += 2 * Math.PI;
         return a;
     }
 }
