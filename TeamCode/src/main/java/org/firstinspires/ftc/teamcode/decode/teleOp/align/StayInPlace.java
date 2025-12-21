@@ -55,13 +55,15 @@ public class StayInPlace extends LinearOpMode {
 
 
                 drivetrain.driveMecanum(strafe, drive, turn);
-
+                telemetry.addData("Move: ", drive+strafe+turn);
                 if (drive+strafe+turn==0) {
                     if (oneTime) {
                         savePose = follower.getPose();
                         oneTime = false;
+                        telemetry.addLine("Moving");
                     } else {
                         follower.holdPoint(savePose);
+                        telemetry.addLine("Saving Pose");
                     }
                 } else {
                     oneTime = true;
