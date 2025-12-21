@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 import java.util.List;
 
 @TeleOp(name = "Sensor: Limelight AprilTag Telemetry", group = "Sensor")
-@Disabled
+//@Disabled
 public class LimelightAprilTagTelemetry2 extends OpMode {
 
     private Limelight3A limelight;

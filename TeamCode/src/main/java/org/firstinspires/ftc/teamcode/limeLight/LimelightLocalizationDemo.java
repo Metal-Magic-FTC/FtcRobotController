@@ -29,7 +29,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
  * - Success rate and statistics
  */
 @TeleOp(name = "Limelight Localization Demo", group = "Limelight")
-@Disabled
+//@Disabled
 public class LimelightLocalizationDemo extends OpMode {
 
     // Localization
