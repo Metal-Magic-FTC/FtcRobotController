@@ -45,7 +45,7 @@ import java.util.List;
  * initialize Pinpoint heading using absolute heading from MegaTag2.
  */
 @TeleOp(name = "Limelight Coordinate Diagnostic", group = "Diagnostic")
-//@Disabled
+@Disabled
 public class LimelightCoordinateDiagnostic extends OpMode {
 
     private Limelight3A limelight;
