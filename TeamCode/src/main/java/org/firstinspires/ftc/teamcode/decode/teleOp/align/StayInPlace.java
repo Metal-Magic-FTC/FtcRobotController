@@ -61,7 +61,7 @@ public class StayInPlace extends LinearOpMode {
                         savePose = follower.getPose();
                         oneTime = false;
                     } else {
-                        follower.setPose(savePose);
+                        follower.holdPoint(savePose);
                     }
                 } else {
                     oneTime = true;
