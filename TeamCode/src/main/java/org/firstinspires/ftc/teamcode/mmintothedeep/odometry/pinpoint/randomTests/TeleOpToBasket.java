@@ -23,6 +23,14 @@ public class TeleOpToBasket extends LinearOpMode {
     DcMotor rightFrontDrive;
     DcMotor leftBackDrive;
     DcMotor rightBackDrive;
+    Pose2D holdPose = null;
+    boolean holdingPosition = false;
+    double DEADZONE = 0.05;
+
+    boolean driverDriving =
+            Math.abs(gamepad1.left_stick_x) > DEADZONE ||
+                    Math.abs(gamepad1.left_stick_y) > DEADZONE ||
+                    Math.abs(gamepad1.right_stick_x) > DEADZONE;
 
     GoBildaPinpointDriver odo; // Declare OpMode member for the Odometry Computer
     DriveToPoint nav = new DriveToPoint(this); //OpMode member for the point-to-point navigation class
