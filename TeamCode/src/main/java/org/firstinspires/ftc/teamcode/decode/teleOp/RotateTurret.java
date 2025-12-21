@@ -16,7 +16,6 @@ import com.pedropathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 @TeleOp(name="!Turret Manual Test")
-@Disabled
 public class RotateTurret extends LinearOpMode {
 
 
@@ -42,6 +41,12 @@ public class RotateTurret extends LinearOpMode {
             Math.toRadians(225)
     );
 
+    private Pose target2 = new Pose(
+            0,
+            0,
+            Math.toRadians(0)
+    );
+
     @Override
     public void runOpMode() throws InterruptedException {
         initialize(); // initializing everything
@@ -61,8 +66,14 @@ public class RotateTurret extends LinearOpMode {
 
             follower.update();
 
-            turret.updateTurretAim(follower.getPose(), target);
-            
+            if (gamepad1.x) {
+                turret.updateTurretAim(follower.getPose(), target);
+            }
+
+            if (gamepad1.y) {
+                turret.updateTurretAim(follower.getPose(), target2);
+            }
+
             telemetry.update();
         }
     }
