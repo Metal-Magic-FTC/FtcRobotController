@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.turrets;
 
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -10,8 +12,8 @@ import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-@TeleOp(name = "!!!!!!Turret Odometry Track Test")
-public class TurretOdometryTrack extends LinearOpMode {
+@TeleOp(name = "!!!!!!Turret Limelight Track Test")
+public class TurretLimelightTrack extends LinearOpMode {
 
     // ts constants
     private static final double START_X = 116.6988847583643;
@@ -26,6 +28,8 @@ public class TurretOdometryTrack extends LinearOpMode {
 
     private DcMotor turretMotor;
     private Follower follower;
+
+    private Limelight3A limelight;
 
     // mera start pose les go les go
     private Pose startPose = new Pose(
@@ -60,6 +64,18 @@ public class TurretOdometryTrack extends LinearOpMode {
                     Math.toDegrees(follower.getPose().getHeading()));
             telemetry.addData("Turret Encoder",
                     turretMotor.getCurrentPosition());
+            LLResult result = limelight.getLatestResult();
+            if (result != null && result.isValid()) {
+                double tx = result.getTx();
+                double ty = result.getTy();
+                double ta = result.getTa();
+
+                telemetry.addData("Target X", tx);
+                telemetry.addData("Target Y", ty);
+                telemetry.addData("Target Area", ta);
+            } else {
+                telemetry.addData("limelight", "no targets");
+            }
             telemetry.update();
         }
     }
@@ -87,7 +103,7 @@ public class TurretOdometryTrack extends LinearOpMode {
 
         turretMotor.setTargetPosition(targetTicks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.9);
+        turretMotor.setPower(0.6);
     }
 
     // we be helping
@@ -108,5 +124,10 @@ public class TurretOdometryTrack extends LinearOpMode {
 
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        limelight.pipelineSwitch(3);
+        limelight.setPollRateHz(100);
     }
 }
