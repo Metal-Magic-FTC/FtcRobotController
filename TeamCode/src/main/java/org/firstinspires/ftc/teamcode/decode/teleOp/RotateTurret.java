@@ -66,12 +66,12 @@ public class RotateTurret extends LinearOpMode {
 
             follower.update();
 
-            if (gamepad1.x) {
+            if (!gamepad1.x) {
                 turret.updateTurretAim(follower.getPose(), target);
             }
 
             if (gamepad1.y) {
-                turret.updateTurretAim(follower.getPose(), target2);
+                turret.rotateTurret(0);
             }
 
             telemetry.update();

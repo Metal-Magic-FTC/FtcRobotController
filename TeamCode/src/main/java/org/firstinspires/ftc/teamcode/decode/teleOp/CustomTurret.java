@@ -36,6 +36,12 @@ public class CustomTurret {
         return Math.max(min, Math.min(max, value));
     }
 
+    public void rotateTurret(int targetTurretPosition) {
+        turretMotor.setTargetPosition(targetTurretPosition);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.5);
+    }
+
     public void updateTurretAim(Pose robotPose, Pose targetPose) {
 
         // double dx = START_X - robotPose.getX();
