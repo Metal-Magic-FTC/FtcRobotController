@@ -38,6 +38,8 @@ public class StayInPlace extends LinearOpMode {
         @Override
         public void runOpMode() throws InterruptedException {
 
+            drivetrain = new CustomMecanumDrive(hardwareMap);
+
             waitForStart();
             follower = Constants.createFollower(hardwareMap);
             oneTime = true;
