@@ -53,21 +53,36 @@ public class StayInPlace extends LinearOpMode {
                 double strafe = gamepad1.left_stick_x;
                 double turn = gamepad1.right_stick_x;
 
+                boolean idle =
+                        Math.abs(drive) < 0.05 &&
+                                Math.abs(strafe) < 0.05 &&
+                                Math.abs(turn) < 0.05 && !(gamepad1.right_bumper);
 
-                drivetrain.driveMecanum(strafe, drive, turn);
+
                 telemetry.addData("Move: ", drive+strafe+turn);
-                if (drive+strafe+turn==0) {
+                if (idle) {
+
+                    // HOLD POSITION
                     if (oneTime) {
+                        follower.update();
                         savePose = follower.getPose();
                         oneTime = false;
-                        telemetry.addLine("Moving");
-                    } else {
                         follower.holdPoint(savePose);
-                        telemetry.addLine("Saving Pose");
                     }
+                    telemetry.addLine("Holding Position");
+
+                    follower.update();
+
                 } else {
+                    drivetrain.driveMecanum(strafe, drive, turn);
                     oneTime = true;
+                    telemetry.addLine("Manual Drive");
                 }
+
+
+
+                telemetry.addData("Pose", follower.getPose());
+                telemetry.update();
 
             }
         }
