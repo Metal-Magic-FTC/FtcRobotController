@@ -68,7 +68,8 @@ public class TeleOpPositionHold extends LinearOpMode {
             boolean driverActive =
                     Math.abs(x) > DEADBAND ||
                             Math.abs(y) > DEADBAND ||
-                            Math.abs(turn) > DEADBAND;
+                            Math.abs(turn) > DEADBAND ||
+                            gamepad1.a;
 
             if (driverActive) {
                 // driver control
