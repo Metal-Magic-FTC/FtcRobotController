@@ -70,6 +70,7 @@ public class LimelightPosition extends LinearOpMode {
 
             telemetry.addData("limelight position", limelight);
 
+            telemetry.addData("follower position", follower.getPose());
 
             follower.update();
 
