@@ -38,6 +38,8 @@ public class NewSpinTest extends LinearOpMode {
 
             if (aPressed && !aWasPressed) {
                 int target = spinMotor.getCurrentPosition()+30;
+                telemetry.addData("Current Position: ", spinMotor.getCurrentPosition());
+                telemetry.addData("Target Position: ", target);
                 while (opModeIsActive() && spinMotor.getCurrentPosition()<target) {
                     spinMotor.setPower(0.02);
                 }
