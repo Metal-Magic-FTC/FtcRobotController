@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.redmiddle;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv0.redmiddle;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;

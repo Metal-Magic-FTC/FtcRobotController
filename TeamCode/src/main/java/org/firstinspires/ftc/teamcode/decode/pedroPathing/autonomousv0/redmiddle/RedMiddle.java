@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.bluemiddle;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv0.redmiddle;
 
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -11,12 +11,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-@Autonomous(name = "BlueMiddle Auto", group = "Auto")
+@Autonomous(name = "RedMiddle Auto", group = "Auto")
 @Disabled
-public class BlueMiddle extends LinearOpMode {
+public class RedMiddle extends LinearOpMode {
 
     private Follower follower;
-    private GeneratedPathsBlueMiddle paths;
+    private GeneratedPathsRedMiddle paths;
 
     DcMotor intakeMotor;
 
@@ -53,15 +53,15 @@ public class BlueMiddle extends LinearOpMode {
         //intakeMotor.setPower(0);
 
         // End of auto
-        telemetry.addLine("BlueMiddle Auto Finished");
+        telemetry.addLine("RedMiddle Auto Finished");
         telemetry.update();
     }
 
     private void initialize() {
         follower = Constants.createFollower(hardwareMap);
 
-        // Apply the start pose from GeneratedPathsBlueMiddle
-        follower.setPose(GeneratedPathsBlueMiddle.START_POSE);
+        // Apply the start pose from GeneratedPathsRedMiddle
+        follower.setPose(GeneratedPathsRedMiddle.START_POSE);
 
         //follower = Constants.createFollower(hardwareMap);
 
@@ -72,13 +72,13 @@ public class BlueMiddle extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Load paths
-        paths = new GeneratedPathsBlueMiddle(follower);
+        paths = new GeneratedPathsRedMiddle(follower);
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        telemetry.addLine("Ready to start BlueMiddle Auto");
+        telemetry.addLine("Ready to start RedMiddle Auto");
         telemetry.update();
     }
 

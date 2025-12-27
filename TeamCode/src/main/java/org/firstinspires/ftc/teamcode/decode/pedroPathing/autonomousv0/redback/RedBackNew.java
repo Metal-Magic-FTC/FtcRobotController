@@ -1,12 +1,15 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomous.redfront;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv0.redback;
 
-import com.pedropathing.follower.Follower;
+
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -14,16 +17,25 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.List;
 
-@Autonomous(name = "! Red Far Auto", group = "Auto")
-public class RedFront extends LinearOpMode {
 
+@Autonomous(name = "! Red Close Auto", group = "Auto")
+public class RedBackNew extends LinearOpMode {
+
+
+    // -----------------------------
+    // HARDWARE + GLOBAL VARS
+    // -----------------------------
     private Follower follower;
-    private GeneratedPathsRedFront paths;
+    private GeneratedPathsRedBack paths;
+
+    private CustomMecanumDrive drivetrain;
+
 
     DcMotor intakeMotor;
     DcMotor launchMotor;
@@ -32,9 +44,9 @@ public class RedFront extends LinearOpMode {
 
     Servo pivotServo;
     Servo flickServo;
+
+
     NormalizedColorSensor backColor, leftColor, rightColor;
-    
-    CustomMecanumDrive drivetrain;
 
 
     private final int[] POSITIONS = {0, 246, 496};
@@ -63,8 +75,13 @@ public class RedFront extends LinearOpMode {
 
     private Limelight3A limelight3A;
 
+
+    // -----------------------------
+    // RUNOPMODE
+    // -----------------------------
     @Override
     public void runOpMode() throws InterruptedException {
+
 
         initializeHardware();
         resetBallArray();
@@ -75,11 +92,11 @@ public class RedFront extends LinearOpMode {
 
         // Initialize path follower
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRedFront.START_POSE);
-        paths = new GeneratedPathsRedFront(follower);
+        follower.setPose(GeneratedPathsRedBack.START_POSE);
+        paths = new GeneratedPathsRedBack(follower);
 
 
-        telemetry.addLine("Ready to start RedFront New Auto");
+        telemetry.addLine("Ready to start RedBack New Auto");
         telemetry.update();
 
 
@@ -103,7 +120,7 @@ public class RedFront extends LinearOpMode {
         intakeMotor.setPower(1);
 
 
-        //runPath(paths.scan(), 50, 1);
+        runPath(paths.scan(), 50, 1);
 
 
         // SHOULD SCAN APRIL TAG HERE AND DETERMINE CORRECT PATTERN BASED ON TAG ID
@@ -138,69 +155,42 @@ public class RedFront extends LinearOpMode {
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
-        runPath(paths.toIntake1(), 50, 0.75);
-
-
-
+        intakeMotor.setPower(0);
+        runPath(paths.toIntake1(), 50, 1);
+        intakeMotor.setPower(1);
 
         runIntakePath(paths.intakeball1(), 50, 0.5);
-        intakeMotor.setPower(1);
-        sleep(750);
-        intakeMotor.setPower(1);
+        sleep(1000);
         moveSpindexer(1, INTAKE_POSITIONS);
-        sleep(750);
+        sleep(500);
 
 
         runIntakePath(paths.intakeball2(), 50, 0.5);
-        intakeMotor.setPower(1);
-        sleep(750);
-        intakeMotor.setPower(1);
+        sleep(1000);
         moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(750);
+        sleep(500);
 
 
         runIntakePath(paths.intakeball3(), 50, 0.5);
-        intakeMotor.setPower(1);
-        sleep(750);
-        intakeMotor.setPower(1);
+        sleep(1000);
         moveSpindexer(0, POSITIONS); // moveToPosition
         //moveSpindexer(2, INTAKE_POSITIONS);
-        sleep(750);
-
-
-
+        sleep(500);
 
         scanAllBalls();
 
-
-        runPath(paths.shoot2(), 50, 0.75);
-        scanAllBalls();
+        runPath(paths.shoot2(), 50, 1);
         shootBallsByColorOrder(correctPattern);
         moveSpindexer(0, INTAKE_POSITIONS);
 
-
+        intakeMotor.setPower(0);
         runPath(paths.toIntake2(), 250, 1);
 
-
-        runIntakePath(paths.intakeball4(), 250, 0.5);
-
-
-        runIntakePath(paths.intakeball5(), 250, 0.5);
-
-
-        runIntakePath(paths.intakeball6(), 250, 0.5);
-
-
-        runPath(paths.shoot3(), 250, 0.75);
-        scanAllBalls();
-        shootBallsByColorOrder(new ballColors[]{ballColors.PURPLE, ballColors.GREEN, ballColors.PURPLE});
-
-
-        // End of auto
-        telemetry.addLine("RedFront Auto Finished");
+        telemetry.addLine("RedBack New Auto Finished");
         telemetry.update();
-        
     }
+
+
     // -----------------------------
     // PATH HELPERS
     // -----------------------------
@@ -255,14 +245,13 @@ public class RedFront extends LinearOpMode {
     // -----------------------------
     private void shootBallsByColorOrder(ballColors[] order) {
 
-        launchMotor.setPower(1);
-        sleep(250);
+        launchMotor.setPower(0.75);
+        sleep(750);
 
         for (ballColors desired : order) {
 
 
             int idx = findClosestColor(desired, 0);
-
 
             if (balls[idx] == ballColors.EMPTY) continue;
 
@@ -283,45 +272,23 @@ public class RedFront extends LinearOpMode {
 
         launchMotor.setPower(0);
     }
-//    private void shootBallsByColorOrder(ballColors[] order) {
-//        for (ballColors color : order) {
-//            int idx = findClosestColor(color, 0);
-//            if (balls[idx] != ballColors.EMPTY) {
-//                moveSpindexer(idx, POSITIONS); // moveToPosition
-//                // Charge launcher 1 second
-// //                launchMotor.setPower(1);
-// //                sleep(1000);
-// //                launchBallAt(idx);
-// //                launchMotor.setPower(0);
-// //                sleep(250);
-//
-//                launchBallAt(idx);
-//
-//            }
-//        }
-//    }
 
 
     private void launchBallAt(int index) {
         if (balls[index] != ballColors.EMPTY) {
 
 
-            launchMotor.setPower(1); // 1
-
+            launchMotor.setPower(0.78); // 1
 
             sleep(500);
 
-
             flickServo.setPosition(0);
-            pivotServo.setPosition(0.735);
+            pivotServo.setPosition(0.76);
             sleep(500);
 
 
             flickServo.setPosition(0.22);
             sleep(700);
-
-
-
 
             flickServo.setPosition(0);
             pivotServo.setPosition(0.6);
@@ -365,6 +332,16 @@ public class RedFront extends LinearOpMode {
 
 
     private void moveSpindexer(int newIndex, int[] table) {
+//        if (newIndex == 1) {
+//            if (balls[0] != ballColors.EMPTY) {
+//                pivotServo.setPosition(0.6);
+//            }
+//            pivotServo.setPosition(0.6);
+//        } else if (newIndex == 2) {
+//            if (balls[0] != ballColors.EMPTY || balls[1] != ballColors.EMPTY) {
+//                pivotServo.setPosition(0.6);
+//            }
+//        }
         pivotServo.setPosition(0.6);
         currentTarget = table[newIndex];
         runToPosition(spinMotor, currentTarget, 0.2);
@@ -449,24 +426,14 @@ public class RedFront extends LinearOpMode {
 
                 if (fiducials != null && !fiducials.isEmpty()) {
 
-                    // Collect valid tag IDs (21, 22, 23)
-                    int smallestValid = Integer.MAX_VALUE;
+                    // We only need the first tag detected
+                    LLResultTypes.FiducialResult tag = fiducials.get(0);
+                    int id = tag.getFiducialId();
 
-                    for (LLResultTypes.FiducialResult tag : fiducials) {
-                        int id = tag.getFiducialId();
-
-                        if (id == 21 || id == 22 || id == 23) {
-                            if (id < smallestValid) {
-                                smallestValid = id;
-                            }
-                        }
-                    }
-
-                    // If we found at least one valid tag, return the smallest one
-                    if (smallestValid != Integer.MAX_VALUE) {
-                        telemetry.addData("Using Tag", smallestValid);
+                    if (id == 21 || id == 22 || id == 23) {
+                        telemetry.addData("AprilTag Found", id);
                         telemetry.update();
-                        return smallestValid;
+                        return id;
                     }
                 }
             }
@@ -507,9 +474,6 @@ public class RedFront extends LinearOpMode {
 
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
-
-        pivotServo.setPosition(0.6);
-
     }
 
 
@@ -532,30 +496,4 @@ public class RedFront extends LinearOpMode {
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
     }
-
-    private void initialize() {
-        follower = Constants.createFollower(hardwareMap);
-
-        // Apply the start pose from GeneratedPathsRedFront
-        follower.setPose(GeneratedPathsRedFront.START_POSE);
-
-        //follower = Constants.createFollower(hardwareMap);
-
-        // Set motors to BRAKE to stop drift when idle
-        hardwareMap.get(DcMotor.class, "frontLeft").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hardwareMap.get(DcMotor.class, "frontRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hardwareMap.get(DcMotor.class, "backLeft").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        // Load paths
-        paths = new GeneratedPathsRedFront(follower);
-
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        telemetry.addLine("Ready to start RedFront Auto");
-        telemetry.update();
-    }
-
 }
