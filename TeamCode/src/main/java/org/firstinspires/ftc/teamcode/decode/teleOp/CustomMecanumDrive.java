@@ -30,6 +30,13 @@ public class CustomMecanumDrive {
 
     }
 
+    public void updateDirections(DcMotorSimple.Direction flDirection, DcMotorSimple.Direction frDirection, DcMotorSimple.Direction blDirection, DcMotorSimple.Direction brDirection) {
+        frontLeft.setDirection(flDirection);
+        frontRight.setDirection(flDirection);
+        backLeft.setDirection(flDirection);
+        backRight.setDirection(flDirection);
+    }
+
     public void powerOff() {
         frontLeft.setPower(0);
         frontRight.setPower(0);
