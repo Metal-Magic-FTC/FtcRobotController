@@ -29,7 +29,7 @@ public class PedroVisionOdoUpdate extends LinearOpMode {
         follower.setPose(new Pose(0, 0, 0));
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(0); // AprilTag pipeline
+        limelight.pipelineSwitch(3); // AprilTag pipeline
         limelight.start();
 
         telemetry.addLine("FTC Limelight Vision Odo Ready");
