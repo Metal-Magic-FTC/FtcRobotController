@@ -5,6 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+
+import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TeleV4;
+
+import java.lang.reflect.Array;
 
 @TeleOp(name = "!!!SpindexerTest")
 public class NewSpinTest extends LinearOpMode {
@@ -22,59 +29,25 @@ public class NewSpinTest extends LinearOpMode {
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set direction (flip if needed)
-        spinMotor.setDirection(DcMotor.Direction.FORWARD);
-
-        // 3 positions
-        int[] positions = {0, 1500, 3000};
-        int index = 0;
-
-        boolean aWasPressed = false;
+        spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            boolean aPressed = gamepad1.a;
-
-            if (aPressed && !aWasPressed) {
-                int target = spinMotor.getCurrentPosition()+30;
-                telemetry.addData("Current Position: ", spinMotor.getCurrentPosition());
-                telemetry.addData("Target Position: ", target);
-                while (opModeIsActive() && spinMotor.getCurrentPosition()<target) {
-                    spinMotor.setPower(0.02);
-                }
-//                // Advance index
-//                index = (index + 1) % positions.length;
-//                int target = positions[index];
-//
-//                // ----- MANUAL RUN_USING_ENCODER MOVEMENT -----
-//                if (target > spinMotor.getCurrentPosition()) {
-//                    // Move forward
-//                    spinMotor.setPower(-0.02);
-//                    while (opModeIsActive() && spinMotor.getCurrentPosition() < target) {
-//                        telemetry.addData("Moving → Target", target);
-//                        telemetry.addData("Position", spinMotor.getCurrentPosition());
-//                        telemetry.update();
-//                    }
-//                } else {
-//                    // Move backward
-//                    spinMotor.setPower(0.02);
-//                    while (opModeIsActive() && spinMotor.getCurrentPosition() > target) {
-//                        telemetry.addData("Moving ← Target", target);
-//                        telemetry.addData("Position", spinMotor.getCurrentPosition());
-//                        telemetry.update();
-//                    }
-//                }
-//
-//                // Stop motor once target reached
-//                spinMotor.setPower(0);
-            }
-
-            aWasPressed = aPressed;
-
-            telemetry.addData("Target Index", index);
             telemetry.addData("Current Position", spinMotor.getCurrentPosition());
             telemetry.update();
         }
     }
+//    private BallColor detectColor(NormalizedColorSensor sensor) {
+//        NormalizedRGBA c = sensor.getNormalizedColors();
+//        float r = c.red, g = c.green, b = c.blue;
+//        float tol = 0.20f;
+//
+//        if (b > r*(1+tol) && b > g*(1+tol)) return BallColor.PURPLE;
+//        if (g > r*(1+tol) && g > b*(1+tol)) return BallColor.GREEN;
+//
+//        if (r > 0.01 || g > 0.01 || b > 0.01) return BallColor.EMPTY;
+//        return BallColor.EMPTY;
+//    }
 }
