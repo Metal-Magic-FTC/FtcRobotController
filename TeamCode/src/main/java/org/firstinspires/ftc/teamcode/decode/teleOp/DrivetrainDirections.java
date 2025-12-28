@@ -16,10 +16,10 @@ public class DrivetrainDirections extends LinearOpMode {
     DcMotor rightBack = null;
 
     public void runOpMode() {
-        leftFront = hardwareMap.get(DcMotor.class, "frontLeft");
-        leftBack = hardwareMap.get(DcMotor.class, "backLeft");
-        rightFront = hardwareMap.get(DcMotor.class, "frontRight");
-        rightBack = hardwareMap.get(DcMotor.class, "backRight");
+        leftFront = hardwareMap.get(DcMotor.class, "frontLeft"); // control 0
+        leftBack = hardwareMap.get(DcMotor.class, "backLeft"); // control 2
+        rightFront = hardwareMap.get(DcMotor.class, "frontRight"); // expansion 0
+        rightBack = hardwareMap.get(DcMotor.class, "backRight"); // expansion 3
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
