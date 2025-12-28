@@ -39,7 +39,7 @@ public class StayInPlace extends LinearOpMode {
         public void runOpMode() throws InterruptedException {
 
             drivetrain = new CustomMecanumDrive(hardwareMap);
-            drivetrain.updateDirections(DcMotorSimple.Direction.REVERSE, DcMotorSimple.Direction.FORWARD, DcMotorSimple.Direction.FORWARD, DcMotorSimple.Direction.FORWARD);
+            drivetrain.updateDirections(DcMotorSimple.Direction.FORWARD, DcMotorSimple.Direction.FORWARD, DcMotorSimple.Direction.REVERSE, DcMotorSimple.Direction.FORWARD);
             waitForStart();
             follower = Constants.createFollower(hardwareMap);
             oneTime = true;
@@ -80,7 +80,11 @@ public class StayInPlace extends LinearOpMode {
                 }
 
 
-                telemetry.addData("fl", -1);
+                telemetry.addData("fl", drivetrain.isFrontLeftForward());
+                telemetry.addData("fr", drivetrain.isFrontRightForward());
+                telemetry.addData("bl", drivetrain.isBackLeftForward());
+                telemetry.addData("br", drivetrain.isBackRightForward());
+
                 telemetry.addData("Pose", follower.getPose());
                 telemetry.update();
 

@@ -1,23 +1,13 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv1;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv1.bluefront;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
-
-import java.util.List;
 
 
 @Autonomous(name = "! v1 Blue Far Auto", group = "Auto")
