@@ -42,20 +42,8 @@ public class BlueFront extends LinearOpMode {
         // ----------------------
         // 2. Move to shooting position
         // ----------------------
-        runPath(paths.shoot(), 50, 1);
+        runPath(paths.move(), 50, 1);
 
-        // ----------------------
-        // 4. Continue auto sequence
-        // ----------------------
-        runPath(paths.toIntake1(), 50, 0.75);
-
-        runPath(paths.shoot2(), 50, 0.75);
-
-
-        runPath(paths.toIntake2(), 50, 0.75);
-
-
-        runPath(paths.shoot3(), 50, 0.75);
 
         // End of auto
         telemetry.addLine("Blue Front Auto Finished");
