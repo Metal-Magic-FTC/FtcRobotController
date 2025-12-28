@@ -58,7 +58,7 @@ public class NewSpinTest extends LinearOpMode {
         }
     }
     private int iterIndex(int index) {
-        if (index==3) {
+        if (index==2) {
             index=0;
             return index;
         } else {
