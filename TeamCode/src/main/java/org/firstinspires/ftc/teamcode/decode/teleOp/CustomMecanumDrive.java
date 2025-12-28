@@ -37,6 +37,22 @@ public class CustomMecanumDrive {
         backRight.setDirection(flDirection);
     }
 
+    public boolean isFrontLeftForward() {
+        return frontLeft.getDirection() == DcMotorSimple.Direction.FORWARD;
+    }
+
+    public boolean isFrontRightForward() {
+        return frontRight.getDirection() == DcMotorSimple.Direction.FORWARD;
+    }
+
+    public boolean isBackLeftForward() {
+        return backLeft.getDirection() == DcMotorSimple.Direction.FORWARD;
+    }
+
+    public boolean isBackRightForward() {
+        return backRight.getDirection() == DcMotorSimple.Direction.FORWARD;
+    }
+
     public void powerOff() {
         frontLeft.setPower(0);
         frontRight.setPower(0);

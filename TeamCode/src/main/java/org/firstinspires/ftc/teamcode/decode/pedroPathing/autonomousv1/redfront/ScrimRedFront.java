@@ -1,30 +1,20 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv1;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv1.redfront;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
-import java.util.List;
 
-
-@Autonomous(name = "! v1 Blue Far Auto", group = "Auto")
-public class BlueFront extends LinearOpMode {
+@Autonomous(name = "! v1 Red Far Auto", group = "Auto")
+public class ScrimRedFront extends LinearOpMode {
 
     private Follower follower;
-    private GeneratedPathsBlueFront paths;
+    private GeneratedPathsRedFront paths;
     private CustomMecanumDrive drivetrain;
 
     // CustomMecanumDrive drivetrain;
@@ -35,8 +25,8 @@ public class BlueFront extends LinearOpMode {
         initializeHardware();
         // Initialize path follower
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlueFront.START_POSE);
-        paths = new GeneratedPathsBlueFront(follower);
+        follower.setPose(GeneratedPathsRedFront.START_POSE);
+        paths = new GeneratedPathsRedFront(follower);
 
 
         telemetry.addLine("Ready to start RedFront New Auto");
@@ -52,23 +42,23 @@ public class BlueFront extends LinearOpMode {
         // ----------------------
         // 2. Move to shooting position
         // ----------------------
-        runPath(paths.shoot(), 50, 1);
+       runPath(paths.move(), 50, 1);
 
         // ----------------------
         // 4. Continue auto sequence
         // ----------------------
-        runPath(paths.toIntake1(), 50, 0.75);
+   //     runPath(paths.toIntake1(), 50, 0.75);
 
-        runPath(paths.shoot2(), 50, 0.75);
-
-
-        runPath(paths.toIntake2(), 50, 0.75);
+     //   runPath(paths.shoot2(), 50, 0.75);
 
 
-        runPath(paths.shoot3(), 50, 0.75);
+       // runPath(paths.toIntake2(), 50, 0.75)
+
+
+      //  runPath(paths.shoot3(), 50, 0.75);
 
         // End of auto
-        telemetry.addLine("Blue Front Auto Finished");
+        telemetry.addLine("Red Front Auto Finished");
         telemetry.update();
     }
 
@@ -113,7 +103,7 @@ public class BlueFront extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
 
         // Apply the start pose from GeneratedPathsRedFront
-        follower.setPose(GeneratedPathsBlueFront.START_POSE);
+        follower.setPose(GeneratedPathsRedFront.START_POSE);
 
         //follower = Constants.createFollower(hardwareMap);
 
@@ -124,7 +114,7 @@ public class BlueFront extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "backRight").setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Load paths
-        paths = new GeneratedPathsBlueFront(follower);
+        paths = new GeneratedPathsRedFront(follower);
 
         telemetry.addLine("Ready to start RedFront Auto");
         telemetry.update();
