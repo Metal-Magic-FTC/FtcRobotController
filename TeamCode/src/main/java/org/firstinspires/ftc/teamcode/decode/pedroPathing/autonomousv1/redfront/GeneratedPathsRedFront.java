@@ -21,6 +21,16 @@ public class GeneratedPathsRedFront {
         this.follower = follower;
     }
 
+    public PathChain move () {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(START_POSE, new Pose(84, 30))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(71))
+                .build();
+    }
+
+
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(
