@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-@Disabled
 @TeleOp(name="!!! GURT ON YO AHH BECAUSE WE NEED TO FIND THE POSITION OF TS JAWN BECAUSE SPINDEXER IS FRIED")
 public class GetSpindexerPositions extends LinearOpMode {
 
@@ -19,6 +18,8 @@ public class GetSpindexerPositions extends LinearOpMode {
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        waitForStart();
 
         while (opModeIsActive()) {
             telemetry.addData("ts jawns position", spinMotor.getCurrentPosition());

@@ -4,19 +4,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-
-import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TeleV4;
-
-import java.lang.reflect.Array;
-
 @TeleOp(name = "!!!SpindexerTest")
 public class NewSpinTest extends LinearOpMode {
 
     private DcMotor spinMotor;
+    int[] positions = {0,9,18};
+    double[] shooting = {4.5,13.5,22.5};
+    int index = 0;
+
+    boolean rightTriggerPressed = false;
+    boolean rightTriggerWasPressed = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -25,7 +22,8 @@ public class NewSpinTest extends LinearOpMode {
 
         // Encoder setup
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        ;
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set direction (flip if needed)
@@ -35,8 +33,37 @@ public class NewSpinTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
+            rightTriggerPressed = gamepad1.right_bumper;
+
+            if (rightTriggerPressed) {
+                spinMotor.setTargetPosition(positions[iterIndex(index)]);
+                spinMotor.setPower(0.02);
+            } else if (gamepad1.left_trigger>=0.01f){
+                spinMotor.setTargetPosition(positions[iterIndex(index)]);
+                spinMotor.setPower(-0.02);
+            } else {
+                spinMotor.setPower(0);
+            }
+
+//            if (rightTriggerPressed && !rightTriggerWasPressed) {
+//                spinMotor.setTargetPosition(spinMotor.getCurrentPosition()+9);
+//                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                spinMotor.setPower(0.05);
+//            }
+
+//            rightTriggerWasPressed = gamepad1.right_bumper;
+
             telemetry.addData("Current Position", spinMotor.getCurrentPosition());
             telemetry.update();
+        }
+    }
+    private int iterIndex(int index) {
+        if (index==3) {
+            index=0;
+            return index;
+        } else {
+            index+=1;
+            return index;
         }
     }
 //    private BallColor detectColor(NormalizedColorSensor sensor) {

@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Disabled
 @TeleOp(name = "!!!SpindexerTest")
 public class SpindexerTest extends LinearOpMode {
-
     private DcMotor spinMotor;
 
     @Override
@@ -33,11 +32,12 @@ public class SpindexerTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
+            telemetry.addLine("Op mode active");
             boolean aPressed = gamepad1.a;
 
             if (aPressed && !aWasPressed) {
-
+                telemetry.addData("A pressed: ", gamepad1.a);
+                telemetry.update();
                 // Advance index
                 index = (index + 1) % positions.length;
                 int target = positions[index];
@@ -63,6 +63,9 @@ public class SpindexerTest extends LinearOpMode {
 
                 // Stop motor once target reached
                 spinMotor.setPower(0);
+            } else {
+                telemetry.addLine("Nothing pressed");
+                telemetry.update();
             }
 
             aWasPressed = aPressed;
