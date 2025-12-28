@@ -20,6 +20,15 @@ public class GeneratedPathsBlueFront {
         this.follower = follower;
     }
 
+
+    public PathChain move() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(START_POSE, new Pose(54, 25))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(114.5))
+                .build();
+    }
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(

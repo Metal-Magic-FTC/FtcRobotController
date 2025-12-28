@@ -24,9 +24,9 @@ public class GeneratedPathsRedFront {
     public PathChain move () {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(START_POSE, new Pose(84, 30))
+                        new BezierLine(START_POSE, new Pose(86, 25))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(71))
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
                 .build();
     }
 
