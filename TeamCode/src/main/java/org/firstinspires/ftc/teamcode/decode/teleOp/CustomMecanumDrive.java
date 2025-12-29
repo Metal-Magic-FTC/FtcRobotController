@@ -18,8 +18,8 @@ public class CustomMecanumDrive {
 
         // Set motor directions as needed for your robot's configuration
 //        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD); // controls backLeft on new robot
-        frontRight.setDirection(DcMotorSimple.Direction.FORWARD); // frontRight on new robot
+        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -31,27 +31,37 @@ public class CustomMecanumDrive {
 
     }
 
-    public void updateDirections(DcMotorSimple.Direction flDirection, DcMotorSimple.Direction frDirection, DcMotorSimple.Direction blDirection, DcMotorSimple.Direction brDirection) {
-        frontLeft.setDirection(flDirection);
-        frontRight.setDirection(flDirection);
-        backLeft.setDirection(flDirection);
-        backRight.setDirection(flDirection);
+
+    public void updateFrontLeft(boolean isForward) {
+        if (isForward) {
+            frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        } else {
+            frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
     }
 
-    public boolean isFrontLeftForward() {
-        return frontLeft.getDirection() == DcMotorSimple.Direction.FORWARD;
+    public void updateFrontRight(boolean isForward) {
+        if (isForward) {
+            frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        } else {
+            frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
     }
 
-    public boolean isFrontRightForward() {
-        return frontRight.getDirection() == DcMotorSimple.Direction.FORWARD;
+    public void updateBackLeft(boolean isForward) {
+        if (isForward) {
+            backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        } else {
+            backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
     }
 
-    public boolean isBackLeftForward() {
-        return backLeft.getDirection() == DcMotorSimple.Direction.FORWARD;
-    }
-
-    public boolean isBackRightForward() {
-        return backRight.getDirection() == DcMotorSimple.Direction.FORWARD;
+    public void updateBackRight(boolean isForward) {
+        if (isForward) {
+            backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        } else {
+            backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
     }
 
     public void powerOff() {
