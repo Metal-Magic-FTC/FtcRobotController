@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
@@ -16,6 +17,8 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
     Servo flickServo;
     DcMotor launchMotor;
 
+    DcMotor spinMotor;
+
     private CustomMecanumDrive drivetrain;
 
     @Override
@@ -24,7 +27,18 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
         hoodServo = hardwareMap.servo.get("hoodServo");
         flickServo = hardwareMap.servo.get("flickServo");
         launchMotor = hardwareMap.dcMotor.get("launchMotor");
+        spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         drivetrain = new CustomMecanumDrive(hardwareMap);
+
+        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ;
+        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Set direction (flip if needed)
+        spinMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        launchMotor.setDirection(DcMotor.Direction.REVERSE);
 
         waitForStart();
 
@@ -81,6 +95,10 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
 
             leftWas = gamepad1.left_bumper;
             rightWas = gamepad1.right_bumper;
+
+            spinMotor.setTargetPosition(0);
+            spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            spinMotor.setPower(0.2);
 
             telemetry.addData("Servo pos:", hoodServo.getPosition());
             telemetry.addData("Launch power:", power);
