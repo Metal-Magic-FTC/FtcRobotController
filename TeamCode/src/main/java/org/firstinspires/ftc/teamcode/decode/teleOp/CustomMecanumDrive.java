@@ -17,9 +17,10 @@ public class CustomMecanumDrive {
         backRight = hardwareMap.get(DcMotor.class, "backRight");
 
         // Set motor directions as needed for your robot's configuration
-        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+//        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD); // controls backLeft on new robot
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD); // frontRight on new robot
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Set zero power behavior

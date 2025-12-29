@@ -12,33 +12,47 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-@TeleOp(name = "!Pedro * Limelight")
+@TeleOp(name = "!Limelight * Pedro", group = "Test")
 public class FusedLocalization extends LinearOpMode {
 
-    private Follower follower;
     private Limelight3A limelight;
 
-    // Track data source for telemetry
-    private String positionSource = "None";
+    // Stored pose when no AprilTag is visible
+    private double lastX = 0;
+    private double lastY = 0;
+    private double lastHeading = 0;
+    private boolean hasEverSeenTag = false;
 
-    // Constants for unit conversion
-    private static final double METERS_TO_INCHES = 39.3701;
-    private static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
+    private static final double START_X = 116.6988847583643;
+    private static final double START_Y = 128.83271375464685;
+    private static final double START_HEADING =
+            Math.toRadians(225);
+
+    private Follower follower;
+
+    private Pose startPose = new Pose(
+            START_X,
+            START_Y,
+            START_HEADING
+    );
+
+    private CustomMecanumDrive drivetrain;
+
+    private CustomTurret turret;
+
 
     @Override
     public void runOpMode() {
 
-        // Initialize Pedro Pathing Follower
-        // Adjust FConstants.class and LConstants.class to match your configuration
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(116.6988847583643, 128.83271375464685, 225));
-
-        // Initialize Limelight
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(3);
         limelight.start();
 
-        telemetry.addLine("Pedro + Limelight Fusion Ready");
+        follower = Constants.createFollower(hardwareMap);
+        follower.setPose(startPose);
+
+        telemetry.addLine("Limelight Only Localization");
+        telemetry.addLine("No odometry. No IMU.");
         telemetry.addLine("Press START to begin");
         telemetry.update();
 
@@ -46,55 +60,48 @@ public class FusedLocalization extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            // Update Pedro Pathing's localizer
             follower.update();
 
-            // Get current pose from Pedro Pathing (inches, radians)
-            Pose pedroPose = follower.getPose();
-
-            // Check for Limelight AprilTag detection
             LLResult result = limelight.getLatestResult();
 
             if (result != null && result.isValid()) {
+
+                // Use MT1 (getBotpose) since we have no IMU for MT2
                 Pose3D botpose = result.getBotpose();
 
                 if (botpose != null) {
+
                     Position pos = botpose.getPosition();
                     YawPitchRollAngles angles = botpose.getOrientation();
 
-                    // Convert Limelight data to Pedro Pathing units
-                    // Limelight: meters, degrees → Pedro: inches, radians
-                    double limelightX = pos.x * METERS_TO_INCHES;
-                    double limelightY = pos.y * METERS_TO_INCHES;
-                    double limelightHeading = angles.getYaw() * DEGREES_TO_RADIANS;
+                    // Update current pose
+                    lastX = pos.x;
+                    lastY = pos.y;
+                    lastHeading = angles.getYaw();
+                    hasEverSeenTag = true;
 
-                    // Create corrected pose for Pedro Pathing
-                    Pose correctedPose = new Pose(limelightX, limelightY, limelightHeading);
+                    telemetry.addLine("=== LIVE POSE (Tag Visible) ===");
+                    telemetry.addData("X", "%.3f m (%.1f in)", lastX, lastX * 39.3701);
+                    telemetry.addData("Y", "%.3f m (%.1f in)", lastY, lastY * 39.3701);
+                    telemetry.addData("Heading", "%.2f°", lastHeading);
 
-                    // Correct Pedro Pathing's pose with Limelight's absolute position
-                    follower.setStartingPose(correctedPose);
-
-                    positionSource = "LIMELIGHT (Corrected)";
-
-                    // Display fused position
-                    displayPose(correctedPose, "FUSED (Limelight Correction)");
+                    if (gamepad1.x) {
+                        Pose botpose2d = new Pose(botpose.getPosition().x, botpose.getPosition().y, botpose.getOrientation().getYaw());
+                        follower.setPose(botpose2d);
+                    }
 
                 } else {
-                    positionSource = "PEDRO PATHING";
-                    displayPose(pedroPose, "PEDRO PATHING (No botpose)");
+                    displayLastKnownPose("Pose null");
                 }
 
             } else {
-                positionSource = "PEDRO PATHING";
-                displayPose(pedroPose, "PEDRO PATHING (No tag)");
+                displayLastKnownPose("No tag visible");
             }
 
-            // Display raw data for debugging
-            telemetry.addLine();
-            telemetry.addLine("=== RAW PEDRO POSE ===");
-            telemetry.addData("X", "%.2f in", pedroPose.getX());
-            telemetry.addData("Y", "%.2f in", pedroPose.getY());
-            telemetry.addData("Heading", "%.2f°", Math.toDegrees(pedroPose.getHeading()));
+            telemetry.addData("Robot X", follower.getPose().getX());
+            telemetry.addData("Robot Y", follower.getPose().getY());
+            telemetry.addData("Robot Heading (deg)",
+                    Math.toDegrees(follower.getPose().getHeading()));
 
             telemetry.update();
         }
@@ -102,11 +109,19 @@ public class FusedLocalization extends LinearOpMode {
         limelight.stop();
     }
 
-    private void displayPose(Pose pose, String source) {
-        telemetry.addLine("=== CURRENT POSITION ===");
-        telemetry.addData("Source", source);
-        telemetry.addData("X", "%.2f in (%.3f m)", pose.getX(), pose.getX() / METERS_TO_INCHES);
-        telemetry.addData("Y", "%.2f in (%.3f m)", pose.getY(), pose.getY() / METERS_TO_INCHES);
-        telemetry.addData("Heading", "%.2f°", Math.toDegrees(pose.getHeading()));
+    private void displayLastKnownPose(String reason) {
+        if (hasEverSeenTag) {
+            telemetry.addLine("=== LAST KNOWN POSE ===");
+            telemetry.addData("Status", reason);
+            telemetry.addData("X", "%.3f m (%.1f in)", lastX, lastX * 39.3701);
+            telemetry.addData("Y", "%.3f m (%.1f in)", lastY, lastY * 39.3701);
+            telemetry.addData("Heading", "%.2f°", lastHeading);
+            telemetry.addLine();
+            telemetry.addLine("WARNING: Position is stale!");
+            telemetry.addLine("Find an AprilTag to update.");
+        } else {
+            telemetry.addLine("No AprilTag detected yet");
+            telemetry.addLine("Point camera at an AprilTag");
+        }
     }
 }
