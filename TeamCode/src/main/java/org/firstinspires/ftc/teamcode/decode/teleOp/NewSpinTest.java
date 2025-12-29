@@ -33,25 +33,21 @@ public class NewSpinTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            rightTriggerPressed = gamepad1.right_bumper;
-
-            if (rightTriggerPressed) {
-                spinMotor.setTargetPosition(positions[iterIndex(index)]);
-                spinMotor.setPower(0.02);
-            } else if (gamepad1.left_trigger>=0.01f){
-                spinMotor.setTargetPosition(positions[iterIndex(index)]);
-                spinMotor.setPower(-0.02);
-            } else {
-                spinMotor.setPower(0);
-            }
-
-// 250
-            if (gamepad1.aWasReleased())
+            if (gamepad1.a) {
                 spinMotor.setTargetPosition(250);
-            if (gamepad1.bWasReleased())
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.2);
+            }
+            if (gamepad1.b) {
                 spinMotor.setTargetPosition(500);
-            if (gamepad1.xWasReleased())
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.2);
+            }
+            if (gamepad1.x) {
                 spinMotor.setTargetPosition(0);
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.2);
+            }
 //            if (rightTriggerPressed && !rightTriggerWasPressed) {
 //                spinMotor.setTargetPosition(spinMotor.getCurrentPosition()+9);
 //                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -64,24 +60,4 @@ public class NewSpinTest extends LinearOpMode {
             telemetry.update();
         }
     }
-    private int iterIndex(int index) {
-        if (index==2) {
-            index=0;
-            return index;
-        } else {
-            index+=1;
-            return index;
-        }
-    }
-//    private BallColor detectColor(NormalizedColorSensor sensor) {
-//        NormalizedRGBA c = sensor.getNormalizedColors();
-//        float r = c.red, g = c.green, b = c.blue;
-//        float tol = 0.20f;
-//
-//        if (b > r*(1+tol) && b > g*(1+tol)) return BallColor.PURPLE;
-//        if (g > r*(1+tol) && g > b*(1+tol)) return BallColor.GREEN;
-//
-//        if (r > 0.01 || g > 0.01 || b > 0.01) return BallColor.EMPTY;
-//        return BallColor.EMPTY;
-//    }
 }

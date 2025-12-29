@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 @TeleOp(name="Drive, Flick, Launch")
-@Disabled
+//@Disabled
 public class TeleOp_Flick_Launch extends LinearOpMode {
 
-    Servo testServo;
+    Servo hoodServo;
     Servo flickServo;
     DcMotor launchMotor;
 
@@ -21,9 +21,7 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-
-
-        testServo = hardwareMap.servo.get("launchServo");
+        hoodServo = hardwareMap.servo.get("hoodServo");
         flickServo = hardwareMap.servo.get("flickServo");
         launchMotor = hardwareMap.dcMotor.get("launchMotor");
         drivetrain = new CustomMecanumDrive(hardwareMap);
@@ -38,8 +36,8 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
         boolean rightWas = false;
         boolean rightIs = false;
         double power = 1;
-        testServo.setPosition(0.70);
-        flickServo.setPosition(0);
+        hoodServo.setPosition(0);
+        flickServo.setPosition(0.90);
 
         while (opModeIsActive()) {
             //front distance (close to basket) - position: 0.75 and power: 0.7
@@ -61,17 +59,18 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
             rightIs = gamepad1.right_bumper;
 
             if (gamepad1.right_bumper) {
-                testServo.setPosition((testServo.getPosition() + 0.001));
+                hoodServo.setPosition((hoodServo.getPosition() + 0.001));
             }
 
             if (gamepad1.left_bumper) {
-                testServo.setPosition((testServo.getPosition() - 0.001));
+                hoodServo.setPosition((hoodServo.getPosition() - 0.001));
             }
+
             if (gamepad1.right_trigger>=0.4f) {
-                flickServo.setPosition(0.22); // 0.6
+                flickServo.setPosition(0.67); // 0.6
 
             } else {
-                flickServo.setPosition(0); // 1
+                flickServo.setPosition(0.9); // 1
             }
 
             double drive = -gamepad1.left_stick_y;
@@ -83,7 +82,7 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
             leftWas = gamepad1.left_bumper;
             rightWas = gamepad1.right_bumper;
 
-            telemetry.addData("Servo pos:", testServo.getPosition());
+            telemetry.addData("Servo pos:", hoodServo.getPosition());
             telemetry.addData("Launch power:", power);
             telemetry.addData("Flick pos:", flickServo.getPosition());
 
