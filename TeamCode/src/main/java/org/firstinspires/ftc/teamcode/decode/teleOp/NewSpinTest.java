@@ -45,6 +45,13 @@ public class NewSpinTest extends LinearOpMode {
                 spinMotor.setPower(0);
             }
 
+
+            if (gamepad1.aWasReleased())
+                spinMotor.setTargetPosition(9);
+            if (gamepad1.bWasReleased())
+                spinMotor.setTargetPosition(18);
+            if (gamepad1.cWasReleased())
+                spinMotor.setTargetPosition(27);
 //            if (rightTriggerPressed && !rightTriggerWasPressed) {
 //                spinMotor.setTargetPosition(spinMotor.getCurrentPosition()+9);
 //                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
