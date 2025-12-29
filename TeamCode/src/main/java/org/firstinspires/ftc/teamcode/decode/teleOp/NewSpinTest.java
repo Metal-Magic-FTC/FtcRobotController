@@ -22,7 +22,7 @@ public class NewSpinTest extends LinearOpMode {
 
         // Encoder setup
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         ;
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
