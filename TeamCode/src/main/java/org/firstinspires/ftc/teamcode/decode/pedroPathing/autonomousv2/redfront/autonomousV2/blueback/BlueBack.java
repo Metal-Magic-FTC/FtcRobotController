@@ -28,15 +28,23 @@ public class BlueBack extends LinearOpMode {
     private Limelight3A limelight3A;
 
     // -----------------------------
-    // SPINDEXER (NEW SYSTEM)
+    // SPINDEXER (MATCHES SpindexerV2)
     // -----------------------------
     private enum Ball { EMPTY, PURPLE, GREEN }
     private Ball[] slots = {Ball.EMPTY, Ball.EMPTY, Ball.EMPTY};
 
-    private static final int[] INTAKE_POS  = {125, 375, 625};
     private static final int[] OUTTAKE_POS = {500, 0, 250};
+    private static final int[] INTAKE_POS  = {125, 375, 625};
 
     private int index = 0;
+    private boolean intakeActive = false;
+    private boolean waitingForBall = false;
+
+    private boolean waitingToRotate = false;
+    private long colorDetectedTime = 0;
+    private static final long COLOR_DELAY_MS = 100;
+    private int nextIndexAfterDelay = -1;
+
     private double spinMotorSpeed = 0.35;
     private float gain = 20;
 
@@ -47,9 +55,6 @@ public class BlueBack extends LinearOpMode {
     private final Ball[] pattern22 = {Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
     private final Ball[] pattern23 = {Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
 
-    // -----------------------------
-    // RUN OPMODE
-    // -----------------------------
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -59,15 +64,11 @@ public class BlueBack extends LinearOpMode {
         follower.setPose(GeneratedPathsBlueBack.START_POSE);
         paths = new GeneratedPathsBlueBack(follower);
 
-        telemetry.addLine("BlueBack Auto Ready");
-        telemetry.update();
-
         waitForStart();
         if (isStopRequested()) return;
 
         pivotServo.setPosition(0.57);
 
-        // Initial scan
         scanAllSlots();
 
         runPath(paths.scan(), 50, 1);
@@ -77,28 +78,24 @@ public class BlueBack extends LinearOpMode {
                 tagId == 21 ? pattern21 :
                         tagId == 23 ? pattern23 : pattern22;
 
-        // ---- Shoot preload ----
         runPath(paths.shoot(), 50, 1);
         shootThreeBalls(correctPattern);
 
-        // ---- Intake Ball 3 (NEW CONTINUOUS) ----
+        // -------- INTAKE BALL 3 --------
+        intakeActive = true;
         runPath(paths.toIntake1(), 50, 1);
-        runIntakePathContinuous(paths.intakeball3(), 0.65);
-        scanAllSlots();
+        runIntakePath(paths.intakeball3());
 
         runPath(paths.shoot2(), 50, 1);
         shootThreeBalls(correctPattern);
 
-        // ---- Intake Ball 6 (NEW CONTINUOUS) ----
+        // -------- INTAKE BALL 6 --------
+        intakeActive = true;
         runPath(paths.toIntake2(), 250, 0.75);
-        runIntakePathContinuous(paths.intakeball6(), 0.65);
-        scanAllSlots();
+        runIntakePath(paths.intakeball6());
 
         runPath(paths.shoot3(), 250, 0.75);
         shootThreeBalls(new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE});
-
-        telemetry.addLine("BlueBack Auto Finished");
-        telemetry.update();
     }
 
     // -----------------------------
@@ -107,38 +104,44 @@ public class BlueBack extends LinearOpMode {
     private void runPath(PathChain path, int delayMs, double speed) {
         follower.setMaxPower(speed);
         follower.followPath(path);
-
-        while (opModeIsActive() && follower.isBusy()) {
-            follower.update();
-        }
-
+        while (opModeIsActive() && follower.isBusy()) follower.update();
         follower.breakFollowing();
         stopDriveMotors();
         if (delayMs > 0) sleep(delayMs);
     }
 
-    private void runIntakePathContinuous(PathChain path, double speed) {
-        follower.setMaxPower(speed);
+    private void runIntakePath(PathChain path) {
         follower.followPath(path);
-
-        intakeMotor.setPower(1);
+        intakeMotor.setPower(-0.8);
 
         while (opModeIsActive() && follower.isBusy()) {
             follower.update();
 
-            if (!spinMotor.isBusy()) {
-                scanAllSlots();
-                for (int i = 0; i < 3; i++) {
-                    if (slots[i] == Ball.EMPTY) {
-                        rotateToIndex(i, true);
-                        break;
-                    }
+            if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
+                Ball detected = detectColor(backColor);
+                if (detected != Ball.EMPTY) {
+                    slots[index] = detected;
+                    waitingForBall = false;
+
+                    nextIndexAfterDelay = findNextEmpty();
+                    colorDetectedTime = System.currentTimeMillis();
+                    waitingToRotate = true;
                 }
+            }
+
+            if (waitingToRotate &&
+                    System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+
+                if (nextIndexAfterDelay != -1) {
+                    rotateToIndex(nextIndexAfterDelay);
+                    waitingForBall = true;
+                } else {
+                    intakeActive = false;
+                }
+                waitingToRotate = false;
             }
         }
 
-        follower.breakFollowing();
-        stopDriveMotors();
         intakeMotor.setPower(0);
     }
 
@@ -161,38 +164,27 @@ public class BlueBack extends LinearOpMode {
             int target = findClosest(desired);
             if (target == -1) continue;
 
-            rotateToIndex(target, false);
+            rotateToIndex(target);
             while (opModeIsActive() && spinMotor.isBusy()) idle();
 
-            fire();
+            flickServo.setPosition(0.75);
+            sleep(500);
+            flickServo.setPosition(0.9);
+
             slots[target] = Ball.EMPTY;
         }
-
         launchMotor.setPower(0);
     }
 
-    private void fire() {
-        flickServo.setPosition(0);
-        pivotServo.setPosition(0.735);
-        sleep(500);
-
-        flickServo.setPosition(0.22);
-        sleep(750);
-
-        flickServo.setPosition(0);
-        pivotServo.setPosition(0.57);
-        sleep(400);
-    }
-
     // -----------------------------
-    // SPINDEXER CORE
+    // SPINDEXER CORE (IDENTICAL)
     // -----------------------------
-    private void rotateToIndex(int target, boolean intake) {
+    private void rotateToIndex(int target) {
         index = target;
-        int base = intake ? INTAKE_POS[target] : OUTTAKE_POS[target];
-        int pos = closestModular(base, spinMotor.getCurrentPosition());
+        int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
+        int targetPos = closestModular(base, spinMotor.getCurrentPosition());
 
-        spinMotor.setTargetPosition(pos);
+        spinMotor.setTargetPosition(targetPos);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(spinMotorSpeed);
     }
@@ -207,6 +199,14 @@ public class BlueBack extends LinearOpMode {
         return best;
     }
 
+    private int findNextEmpty() {
+        for (int i = 0; i < 3; i++) {
+            int idx = (index + i) % 3;
+            if (slots[idx] == Ball.EMPTY) return idx;
+        }
+        return -1;
+    }
+
     private int findClosest(Ball target) {
         for (int i = 0; i < 3; i++) {
             int idx = (index + i) % 3;
@@ -216,19 +216,15 @@ public class BlueBack extends LinearOpMode {
     }
 
     // -----------------------------
-    // COLOR SENSING
+    // COLOR (IDENTICAL TO TELEOP)
     // -----------------------------
-    private void scanAllSlots() {
-        slots[0] = detectColor(backColor);
-        slots[1] = detectColor(rightColor);
-        slots[2] = detectColor(leftColor);
-    }
-
-    private Ball detectColor(NormalizedColorSensor s) {
-        NormalizedRGBA c = s.getNormalizedColors();
+    private Ball detectColor(NormalizedColorSensor sensor) {
+        NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        if (r + g + b < 0.07f) return Ball.EMPTY;
+        float total = r + g + b;
+        if (total < 0.07f) return Ball.EMPTY;
+
         if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) return Ball.PURPLE;
         if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) return Ball.GREEN;
 
@@ -236,7 +232,7 @@ public class BlueBack extends LinearOpMode {
     }
 
     // -----------------------------
-    // APRILTAG
+    // APRILTAG + INIT
     // -----------------------------
     private int detectAprilTag(long timeout) {
         long start = System.currentTimeMillis();
@@ -251,35 +247,26 @@ public class BlueBack extends LinearOpMode {
         return 22;
     }
 
-    // -----------------------------
-    // HARDWARE INIT
-    // -----------------------------
     private void initHardware() {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
-        flickServo = hardwareMap.servo.get("flickServo");
-        pivotServo = hardwareMap.servo.get("hoodServo");
+        spinMotor   = hardwareMap.get(DcMotor.class, "spinMotor");
 
-        spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
+        pivotServo = hardwareMap.servo.get("hoodServo");
+        flickServo = hardwareMap.servo.get("flickServo");
+
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        backColor = hardwareMap.get(NormalizedColorSensor.class, "backColor");
-        leftColor = hardwareMap.get(NormalizedColorSensor.class, "leftColor");
+        backColor  = hardwareMap.get(NormalizedColorSensor.class, "backColor");
+        leftColor  = hardwareMap.get(NormalizedColorSensor.class, "leftColor");
         rightColor = hardwareMap.get(NormalizedColorSensor.class, "rightColor");
 
         backColor.setGain(gain);
         leftColor.setGain(gain);
         rightColor.setGain(gain);
-
-        if (backColor instanceof SwitchableLight) ((SwitchableLight) backColor).enableLight(true);
-        if (leftColor instanceof SwitchableLight) ((SwitchableLight) leftColor).enableLight(true);
-        if (rightColor instanceof SwitchableLight) ((SwitchableLight) rightColor).enableLight(true);
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(3);
