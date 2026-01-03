@@ -47,7 +47,15 @@ public class SpindexerV2 extends LinearOpMode {
     private long flickStartTime = 0;
     private boolean flicking = false;
 
-    private static final long FLICK_TIME_MS = 250;
+    private static final long FLICK_TIME_MS = 500; // 500 ms flick
+
+    private double spinMotorSpeed = 0.35;
+
+    // ---- COLOR SENSOR DELAY ----
+    private boolean waitingToRotate = false;
+    private long colorDetectedTime = 0;
+    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
+    private int nextIndexAfterDelay = -1;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -56,7 +64,7 @@ public class SpindexerV2 extends LinearOpMode {
 
         waitForStart();
 
-        hoodServo.setPosition(0.75);
+        hoodServo.setPosition(0.8);
         flickServo.setPosition(0.90);
 
         while (opModeIsActive()) {
@@ -80,42 +88,50 @@ public class SpindexerV2 extends LinearOpMode {
             prevY = gamepad1.y;
             prevB = gamepad1.b;
 
+            if (gamepad1.dpad_left) {
+                spinMotorSpeed = 0.35;
+            }
+
+            if (gamepad1.dpad_right) {
+                spinMotorSpeed = 0.45;
+            }
+
             if (launchAllPressed && !autoLaunching) {
                 autoLaunching = true;
                 autoLaunchTarget = findClosestLoaded();
-                launchMotor.setPower(0.9);
+                launchMotor.setPower(0.9); // spin to shooting speed
             }
 
             if (autoLaunching) {
 
-                // no balls left → stop
+                // No balls left → stop everything
                 if (autoLaunchTarget == -1) {
                     autoLaunching = false;
                     launchMotor.setPower(0);
                     flickServo.setPosition(0.9);
                 } else {
 
-                    // rotate if needed
+                    // Rotate to the current ball if not aligned
                     if (index != autoLaunchTarget && !spinMotor.isBusy()) {
                         rotateToIndex(autoLaunchTarget);
                     }
 
-                    // once aligned, flick
+                    // Once aligned and not flicking → flick servo out
                     if (!spinMotor.isBusy() && !flicking) {
                         flickServo.setPosition(0.75);
                         flickStartTime = System.currentTimeMillis();
                         flicking = true;
                     }
 
-                    // retract flick after 250ms
+                    // Retract servo after FLICK_TIME_MS
                     if (flicking && System.currentTimeMillis() - flickStartTime >= FLICK_TIME_MS) {
                         flickServo.setPosition(0.9);
                         flicking = false;
 
-                        // clear slot
+                        // Clear the slot
                         slots[index] = Ball.EMPTY;
 
-                        // find next ball
+                        // Move to next loaded ball
                         autoLaunchTarget = findClosestLoaded();
                     }
                 }
@@ -162,9 +178,9 @@ public class SpindexerV2 extends LinearOpMode {
             // shoot
 
             if (shootPressed && !autoLaunching) {
-                flickServo.setPosition(0.75); // 0.6
-            } else {
-                flickServo.setPosition(0.9); // 1
+                flickServo.setPosition(0.75);
+            } else if (!autoLaunching) {
+                flickServo.setPosition(0.9);
             }
 
             if (shootPressed && !autoLaunching) {
@@ -182,22 +198,33 @@ public class SpindexerV2 extends LinearOpMode {
 
             // spindexer logic (COLOR-BASED DETECTION)
 
-            if (waitingForBall && intakeActive && !spinMotor.isBusy()) {
+            // spindexer logic (COLOR-BASED DETECTION) with delay
+            if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
                 Ball detected = detectColor(intakeColor);
 
                 if (detected != Ball.EMPTY) {
                     slots[index] = detected;
                     waitingForBall = false;
 
+                    // compute next index, but don't rotate yet
                     int nextEmpty = findNextEmpty();
+                    nextIndexAfterDelay = nextEmpty;
+                    colorDetectedTime = System.currentTimeMillis();
+                    waitingToRotate = true;
+                }
+            }
 
-                    if (nextEmpty != -1) {
-                        rotateToIndex(nextEmpty);
-                        waitingForBall = true;
+            // after COLOR_DELAY_MS, rotate if needed
+            if (waitingToRotate) {
+                if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+                    if (nextIndexAfterDelay != -1) {
+                        rotateToIndex(nextIndexAfterDelay);
+                        waitingForBall = true; // continue intake
                     } else {
                         intakeActive = false;
-                        rotateToIndex(0);
+                        rotateToIndex(0); // back to home
                     }
+                    waitingToRotate = false; // reset
                 }
             }
 
@@ -225,7 +252,7 @@ public class SpindexerV2 extends LinearOpMode {
 
         spinMotor.setTargetPosition(targetPos);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(spinMotorSpeed);
     }
 
     private int closestModular(int mod, int current) {
