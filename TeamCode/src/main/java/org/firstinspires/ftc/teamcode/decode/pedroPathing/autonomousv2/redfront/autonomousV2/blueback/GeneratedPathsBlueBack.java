@@ -151,9 +151,26 @@ public class GeneratedPathsBlueBack {
 public PathChain intakeball8() {
     return new PathBuilder(follower)
             .addPath(
-                    new BezierLine(new Pose(42, 35.5), new Pose(36, 35.5))
+                    new BezierLine(new Pose(36, 35.5), new Pose(30, 35.5))
             )
             .setLinearHeadingInterpolation(Math.toRadians(180 - 0), Math.toRadians(180 - 0))
             .build();
 }
+    public PathChain intakeball9() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(new Pose(30, 35.5), new Pose(22, 35.5))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(180 - 0), Math.toRadians(180 - 0))
+                .build();
+    }
+    public PathChain shoot4() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(new Pose(22, 35.5), new Pose(59, 81))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(180 - 0), Math.toRadians(180 - 45))
+                .build();
+    }
+
 }
