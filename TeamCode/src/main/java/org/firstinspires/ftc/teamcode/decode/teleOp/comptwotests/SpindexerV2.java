@@ -24,6 +24,7 @@ public class SpindexerV2 extends LinearOpMode {
     Servo flickServo;
 
     private NormalizedColorSensor intakeColor;
+    private NormalizedColorSensor intakeColor2;
 
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
@@ -48,6 +49,11 @@ public class SpindexerV2 extends LinearOpMode {
     private boolean flicking = false;
 
     private static final long FLICK_TIME_MS = 500; // 500 ms flick
+
+    // ---- POST FLICK DELAY ----
+    private boolean waitingAfterFlick = false;
+    private long flickEndTime = 0;
+    private static final long POST_FLICK_DELAY_MS = 250; // 100 ms delay after flick retract
 
     private double spinMotorSpeed = 0.35;
 
@@ -104,20 +110,21 @@ public class SpindexerV2 extends LinearOpMode {
 
             if (autoLaunching) {
 
-                // No balls left → stop everything
+                // No balls left - stop everything
                 if (autoLaunchTarget == -1) {
                     autoLaunching = false;
                     launchMotor.setPower(0);
                     flickServo.setPosition(0.9);
+                    waitingAfterFlick = false;
                 } else {
 
                     // Rotate to the current ball if not aligned
-                    if (index != autoLaunchTarget && !spinMotor.isBusy()) {
+                    if (index != autoLaunchTarget && !spinMotor.isBusy() && !waitingAfterFlick) {
                         rotateToIndex(autoLaunchTarget);
                     }
 
-                    // Once aligned and not flicking → flick servo out
-                    if (!spinMotor.isBusy() && !flicking) {
+                    // Once aligned and not flicking - flick servo out
+                    if (!spinMotor.isBusy() && !flicking && !waitingAfterFlick) {
                         flickServo.setPosition(0.75);
                         flickStartTime = System.currentTimeMillis();
                         flicking = true;
@@ -131,8 +138,15 @@ public class SpindexerV2 extends LinearOpMode {
                         // Clear the slot
                         slots[index] = Ball.EMPTY;
 
-                        // Move to next loaded ball
+                        // Start post-flick delay
+                        waitingAfterFlick = true;
+                        flickEndTime = System.currentTimeMillis();
+                    }
+
+                    // Wait POST_FLICK_DELAY_MS before moving to next ball
+                    if (waitingAfterFlick && System.currentTimeMillis() - flickEndTime >= POST_FLICK_DELAY_MS) {
                         autoLaunchTarget = findClosestLoaded();
+                        waitingAfterFlick = false;
                     }
                 }
             }
@@ -200,7 +214,7 @@ public class SpindexerV2 extends LinearOpMode {
 
             // spindexer logic (COLOR-BASED DETECTION) with delay
             if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
-                Ball detected = detectColor(intakeColor);
+                Ball detected = detectColor(intakeColor, intakeColor2);
 
                 if (detected != Ball.EMPTY) {
                     slots[index] = detected;
@@ -239,6 +253,13 @@ public class SpindexerV2 extends LinearOpMode {
             telemetry.addData("G", "%.2f", c.green);
             telemetry.addData("B", "%.2f", c.blue);
             telemetry.addData("Sum", "%.2f", c.red + c.green + c.blue);
+            telemetry.update();
+
+            NormalizedRGBA c2 = intakeColor2.getNormalizedColors();
+            telemetry.addData("R", "%.2f", c2.red);
+            telemetry.addData("G", "%.2f", c2.green);
+            telemetry.addData("B", "%.2f", c2.blue);
+            telemetry.addData("Sum", "%.2f", c2.red + c2.green + c2.blue);
             telemetry.update();
         }
     }
@@ -298,7 +319,19 @@ public class SpindexerV2 extends LinearOpMode {
 
     // COLOR SENSOR (WIDE MARGIN + FLOOR REJECTION)
 
-    private Ball detectColor(NormalizedColorSensor sensor) {
+    private Ball detectColor(NormalizedColorSensor sensor1, NormalizedColorSensor sensor2) {
+        Ball ball1 = detectSingleSensor(sensor1);
+        Ball ball2 = detectSingleSensor(sensor2);
+
+        // Prioritize detected balls
+        if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
+        if (ball1 == Ball.GREEN  || ball2 == Ball.GREEN)  return Ball.GREEN;
+
+        return Ball.EMPTY;
+    }
+
+    // helper function for a single sensor
+    private Ball detectSingleSensor(NormalizedColorSensor sensor) {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
@@ -328,6 +361,7 @@ public class SpindexerV2 extends LinearOpMode {
     public void initialize() {
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
+        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -336,6 +370,9 @@ public class SpindexerV2 extends LinearOpMode {
 
         intakeColor.setGain(gain);
         enableLight(intakeColor);
+
+        intakeColor2.setGain(gain);
+        enableLight(intakeColor2);
 
         launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.REVERSE); // same as TeleOp_Flick_Launch

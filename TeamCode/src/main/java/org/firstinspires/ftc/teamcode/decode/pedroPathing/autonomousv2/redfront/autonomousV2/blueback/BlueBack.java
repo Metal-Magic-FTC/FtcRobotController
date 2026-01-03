@@ -9,10 +9,11 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
+import org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests.SpindexerV2;
 
 import java.util.List;
 
-@Autonomous(name = "! Blue Close Auto V2", group = "Auto")
+@Autonomous(name = "! Blue Close Auto V2 Refactored", group = "Auto")
 public class BlueBack extends LinearOpMode {
 
     // -----------------------------
@@ -23,12 +24,12 @@ public class BlueBack extends LinearOpMode {
     private CustomMecanumDrive drivetrain;
 
     private DcMotor intakeMotor, launchMotor, spinMotor;
-    private Servo pivotServo, flickServo;
-    private NormalizedColorSensor backColor, leftColor, rightColor;
+    private Servo hoodServo, flickServo;
+    private NormalizedColorSensor intakeColor, intakeColor2;
     private Limelight3A limelight3A;
 
     // -----------------------------
-    // SPINDEXER (MATCHES SpindexerV2)
+    // SPINDEXER (USE TELEOP LOGIC)
     // -----------------------------
     private enum Ball { EMPTY, PURPLE, GREEN }
     private Ball[] slots = {Ball.EMPTY, Ball.EMPTY, Ball.EMPTY};
@@ -67,21 +68,38 @@ public class BlueBack extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        pivotServo.setPosition(0.57);
+        hoodServo.setPosition(0.8);
+        flickServo.setPosition(0.90);
 
-        scanAllSlots();
+        // ------------------- START AUTO -------------------
+        pivotServoOrHood(0.57);
 
+        // -------- PRE-SCAN BALLS --------
+        intakeActive = true; // mark intake active for INTAKE_POS
+        for (int slot = 0; slot < 3; slot++) {
+            rotateToIndex(slot); // rotate spindexer to intake position
+            sleep(250); // allow spinMotor to reach position
+
+            // detect ball at this slot
+            Ball detected = detectColor(intakeColor, intakeColor2);
+            slots[slot] = detected;
+        }
+        intakeActive = false; // done scanning
+
+        // Scan path
         runPath(paths.scan(), 50, 1);
 
+        // Detect AprilTag for pattern
         int tagId = detectAprilTag(1500);
         Ball[] correctPattern =
                 tagId == 21 ? pattern21 :
                         tagId == 23 ? pattern23 : pattern22;
 
+        // First 3 balls
         runPath(paths.shoot(), 50, 1);
         shootThreeBalls(correctPattern);
 
-        // -------- INTAKE BALL 3 --------
+        // Intake 4th-6th balls using spindexer logic
         intakeActive = true;
         runPath(paths.toIntake1(), 50, 1);
         runIntakePath(paths.intakeball3());
@@ -89,7 +107,6 @@ public class BlueBack extends LinearOpMode {
         runPath(paths.shoot2(), 50, 1);
         shootThreeBalls(correctPattern);
 
-        // -------- INTAKE BALL 6 --------
         intakeActive = true;
         runPath(paths.toIntake2(), 250, 0.75);
         runIntakePath(paths.intakeball6());
@@ -99,26 +116,18 @@ public class BlueBack extends LinearOpMode {
     }
 
     // -----------------------------
-    // PATH HELPERS
+    // TELEOP-SPINDEXER METHODS
     // -----------------------------
-    private void runPath(PathChain path, int delayMs, double speed) {
-        follower.setMaxPower(speed);
-        follower.followPath(path);
-        while (opModeIsActive() && follower.isBusy()) follower.update();
-        follower.breakFollowing();
-        stopDriveMotors();
-        if (delayMs > 0) sleep(delayMs);
-    }
-
     private void runIntakePath(PathChain path) {
         follower.followPath(path);
         intakeMotor.setPower(-0.8);
+        waitingForBall = true;
 
         while (opModeIsActive() && follower.isBusy()) {
             follower.update();
 
             if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
-                Ball detected = detectColor(backColor);
+                Ball detected = detectColor(intakeColor, intakeColor2);
                 if (detected != Ball.EMPTY) {
                     slots[index] = detected;
                     waitingForBall = false;
@@ -131,12 +140,12 @@ public class BlueBack extends LinearOpMode {
 
             if (waitingToRotate &&
                     System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
-
                 if (nextIndexAfterDelay != -1) {
                     rotateToIndex(nextIndexAfterDelay);
                     waitingForBall = true;
                 } else {
                     intakeActive = false;
+                    rotateToIndex(0); // home
                 }
                 waitingToRotate = false;
             }
@@ -145,18 +154,7 @@ public class BlueBack extends LinearOpMode {
         intakeMotor.setPower(0);
     }
 
-    private void stopDriveMotors() {
-        for (String name : new String[]{"frontLeft","frontRight","backLeft","backRight"}) {
-            DcMotor m = hardwareMap.get(DcMotor.class, name);
-            m.setPower(0);
-            m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
-    }
-
-    // -----------------------------
-    // SHOOTING
-    // -----------------------------
-    private void shootThreeBalls(Ball[] order) {
+    private void shootThreeBalls(Ball[] order) throws InterruptedException {
         launchMotor.setPower(0.9);
         sleep(300);
 
@@ -176,9 +174,6 @@ public class BlueBack extends LinearOpMode {
         launchMotor.setPower(0);
     }
 
-    // -----------------------------
-    // SPINDEXER CORE (IDENTICAL)
-    // -----------------------------
     private void rotateToIndex(int target) {
         index = target;
         int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
@@ -215,10 +210,16 @@ public class BlueBack extends LinearOpMode {
         return -1;
     }
 
-    // -----------------------------
-    // COLOR (IDENTICAL TO TELEOP)
-    // -----------------------------
-    private Ball detectColor(NormalizedColorSensor sensor) {
+    private Ball detectColor(NormalizedColorSensor s1, NormalizedColorSensor s2) {
+        Ball ball1 = detectSingleSensor(s1);
+        Ball ball2 = detectSingleSensor(s2);
+
+        if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
+        if (ball1 == Ball.GREEN || ball2 == Ball.GREEN) return Ball.GREEN;
+        return Ball.EMPTY;
+    }
+
+    private Ball detectSingleSensor(NormalizedColorSensor sensor) {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
@@ -227,13 +228,29 @@ public class BlueBack extends LinearOpMode {
 
         if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) return Ball.PURPLE;
         if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) return Ball.GREEN;
-
         return Ball.EMPTY;
     }
 
     // -----------------------------
-    // APRILTAG + INIT
+    // PATH + APRILTAG
     // -----------------------------
+    private void runPath(PathChain path, int delayMs, double speed) {
+        follower.setMaxPower(speed);
+        follower.followPath(path);
+        while (opModeIsActive() && follower.isBusy()) follower.update();
+        follower.breakFollowing();
+        stopDriveMotors();
+        if (delayMs > 0) sleep(delayMs);
+    }
+
+    private void stopDriveMotors() {
+        for (String name : new String[]{"frontLeft","frontRight","backLeft","backRight"}) {
+            DcMotor m = hardwareMap.get(DcMotor.class, name);
+            m.setPower(0);
+            m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+    }
+
     private int detectAprilTag(long timeout) {
         long start = System.currentTimeMillis();
         while (opModeIsActive() && System.currentTimeMillis() - start < timeout) {
@@ -247,12 +264,15 @@ public class BlueBack extends LinearOpMode {
         return 22;
     }
 
+    // -----------------------------
+    // HARDWARE INIT (MATCH TELEOP)
+    // -----------------------------
     private void initHardware() {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
         spinMotor   = hardwareMap.get(DcMotor.class, "spinMotor");
 
-        pivotServo = hardwareMap.servo.get("hoodServo");
+        hoodServo = hardwareMap.servo.get("hoodServo");
         flickServo = hardwareMap.servo.get("flickServo");
 
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -260,18 +280,20 @@ public class BlueBack extends LinearOpMode {
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        backColor  = hardwareMap.get(NormalizedColorSensor.class, "backColor");
-        leftColor  = hardwareMap.get(NormalizedColorSensor.class, "leftColor");
-        rightColor = hardwareMap.get(NormalizedColorSensor.class, "rightColor");
+        intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
+        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
-        backColor.setGain(gain);
-        leftColor.setGain(gain);
-        rightColor.setGain(gain);
+        intakeColor.setGain(gain);
+        intakeColor2.setGain(gain);
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(3);
         limelight3A.start();
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
+    }
+
+    private void pivotServoOrHood(double pos) {
+        hoodServo.setPosition(pos);
     }
 }
