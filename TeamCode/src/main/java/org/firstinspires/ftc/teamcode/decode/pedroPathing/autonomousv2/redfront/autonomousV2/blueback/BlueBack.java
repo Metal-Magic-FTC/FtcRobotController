@@ -261,7 +261,7 @@ public class BlueBack extends LinearOpMode {
 
         launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
         flickServo = hardwareMap.servo.get("flickServo");
-        pivotServo = hardwareMap.servo.get("launchServo");
+        pivotServo = hardwareMap.servo.get("hoodServo");
 
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
