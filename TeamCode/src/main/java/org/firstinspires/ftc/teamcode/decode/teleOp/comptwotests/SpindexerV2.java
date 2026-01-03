@@ -56,7 +56,7 @@ public class SpindexerV2 extends LinearOpMode {
 
         waitForStart();
 
-        hoodServo.setPosition(0.2);
+        hoodServo.setPosition(0.75);
         flickServo.setPosition(0.90);
 
         while (opModeIsActive()) {
