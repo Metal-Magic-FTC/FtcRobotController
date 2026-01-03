@@ -40,6 +40,15 @@ public class SpindexerV2 extends LinearOpMode {
     // prev thingy
     private boolean prevA, prevX, prevY, prevB;
 
+    // ---- AUTO LAUNCH ALL ----
+    private boolean autoLaunching = false;
+    private int autoLaunchTarget = -1;
+
+    private long flickStartTime = 0;
+    private boolean flicking = false;
+
+    private static final long FLICK_TIME_MS = 250;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -64,11 +73,53 @@ public class SpindexerV2 extends LinearOpMode {
             boolean runLaunch          = gamepad1.right_trigger >= 0.3;
             boolean intakePower        = gamepad1.right_bumper;
             boolean intakePowerReverse = gamepad1.left_bumper;
+            boolean launchAllPressed = gamepad1.dpad_up;
 
             prevA = gamepad1.a;
             prevX = gamepad1.x;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
+
+            if (launchAllPressed && !autoLaunching) {
+                autoLaunching = true;
+                autoLaunchTarget = findClosestLoaded();
+                launchMotor.setPower(0.9);
+            }
+
+            if (autoLaunching) {
+
+                // no balls left → stop
+                if (autoLaunchTarget == -1) {
+                    autoLaunching = false;
+                    launchMotor.setPower(0);
+                    flickServo.setPosition(0.9);
+                } else {
+
+                    // rotate if needed
+                    if (index != autoLaunchTarget && !spinMotor.isBusy()) {
+                        rotateToIndex(autoLaunchTarget);
+                    }
+
+                    // once aligned, flick
+                    if (!spinMotor.isBusy() && !flicking) {
+                        flickServo.setPosition(0.75);
+                        flickStartTime = System.currentTimeMillis();
+                        flicking = true;
+                    }
+
+                    // retract flick after 250ms
+                    if (flicking && System.currentTimeMillis() - flickStartTime >= FLICK_TIME_MS) {
+                        flickServo.setPosition(0.9);
+                        flicking = false;
+
+                        // clear slot
+                        slots[index] = Ball.EMPTY;
+
+                        // find next ball
+                        autoLaunchTarget = findClosestLoaded();
+                    }
+                }
+            }
 
             if (intakePower) {
                 intakeMotor.setPower(-0.8);
@@ -110,13 +161,13 @@ public class SpindexerV2 extends LinearOpMode {
 
             // shoot
 
-            if (shootPressed) {
+            if (shootPressed && !autoLaunching) {
                 flickServo.setPosition(0.75); // 0.6
             } else {
                 flickServo.setPosition(0.9); // 1
             }
 
-            if (shootPressed) {
+            if (shootPressed && !autoLaunching) {
                 if (slots[index] != Ball.EMPTY) {
                     // INSERT TS launcher code
                     slots[index] = Ball.EMPTY;
