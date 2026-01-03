@@ -265,7 +265,7 @@ public class BlueBack extends LinearOpMode {
 
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spinMotor.setMode(DcMot\\or.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
