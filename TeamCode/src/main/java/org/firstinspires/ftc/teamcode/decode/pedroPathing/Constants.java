@@ -32,8 +32,8 @@ public class Constants {
             .rightFrontMotorName("frontRight")
             .rightRearMotorName("backRight")
             .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .xVelocity(63.17)
             .yVelocity(53.953);
@@ -48,7 +48,6 @@ public class Constants {
             )
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
-
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
