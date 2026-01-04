@@ -12,7 +12,7 @@ public class GeneratedPathsBlueBack {
 
     // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
-            116.6988847583643,  // X
+            22,  // X
             128.83271375464685, // Y
             Math.toRadians(180 - 225) // Heading
     );

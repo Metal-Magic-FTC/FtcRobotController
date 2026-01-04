@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.List;
 
-@Autonomous(name = "! Red Back V2 Auto", group = "Auto")
+@Autonomous(name = "!! Red Close Jan 10", group = "Auto")
 public class RedBackV2 extends LinearOpMode {
 
     // -----------------------------
@@ -31,7 +31,7 @@ public class RedBackV2 extends LinearOpMode {
 
     private DcMotor intakeMotor, launchMotor, spinMotor;
     private Servo hoodServo, flickServo;
-    private NormalizedColorSensor intakeColor, intakeColor2;
+    private NormalizedColorSensor intakeColor;
     private Limelight3A limelight3A;
 
     private final int[] OUTTAKE_POS = {500, 0, 250};
@@ -196,7 +196,7 @@ public class RedBackV2 extends LinearOpMode {
             // wait for sensor to detect ball
             long start = System.currentTimeMillis();
             while (opModeIsActive() && System.currentTimeMillis() - start < 1500) {
-                if (detectColor(intakeColor, intakeColor2) == desired) break;
+                if (detectColor(intakeColor) == desired) break;
                 sleep(20);
             }
 
@@ -223,16 +223,18 @@ public class RedBackV2 extends LinearOpMode {
     }
 
     private void scanBalls() {
-        slots[0] = detectColor(intakeColor, intakeColor2);
-        slots[1] = detectColor(intakeColor, intakeColor2);
-        slots[2] = detectColor(intakeColor, intakeColor2);
+        slots[0] = detectColor(intakeColor);
+        slots[1] = detectColor(intakeColor);
+        slots[2] = detectColor(intakeColor);
     }
 
-    private Ball detectColor(NormalizedColorSensor s1, NormalizedColorSensor s2) {
+    private Ball detectColor(NormalizedColorSensor s1) {
         Ball b1 = detectSingle(s1);
-        Ball b2 = detectSingle(s2);
-        if (b1 == Ball.PURPLE || b2 == Ball.PURPLE) return Ball.PURPLE;
-        if (b1 == Ball.GREEN  || b2 == Ball.GREEN) return Ball.GREEN;
+//        Ball b2 = detectSingle(s2);
+        if (b1 == Ball.PURPLE) return Ball.PURPLE;
+        if (b1 == Ball.GREEN) return Ball.GREEN;
+//        if (b1 == Ball.PURPLE || b2 == Ball.PURPLE) return Ball.PURPLE;
+//        if (b1 == Ball.GREEN  || b2 == Ball.GREEN) return Ball.GREEN;
         return Ball.EMPTY;
     }
 
@@ -271,7 +273,7 @@ public class RedBackV2 extends LinearOpMode {
     private void initializeHardware() {
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
-        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
+//        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -279,7 +281,7 @@ public class RedBackV2 extends LinearOpMode {
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
         intakeColor.setGain(gain); enableLight(intakeColor);
-        intakeColor2.setGain(gain); enableLight(intakeColor2);
+//        intakeColor2.setGain(gain); enableLight(intakeColor2);
 
         launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -293,6 +295,8 @@ public class RedBackV2 extends LinearOpMode {
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
+
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
     }
 
     private void enableLight(NormalizedColorSensor s) {

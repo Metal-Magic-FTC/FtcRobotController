@@ -74,17 +74,17 @@ public class BlueBack extends LinearOpMode {
         // ------------------- START AUTO -------------------
         pivotServoOrHood(0.57);
 
-        // -------- PRE-SCAN BALLS --------
-        intakeActive = true; // mark intake active for INTAKE_POS
-        for (int slot = 0; slot < 3; slot++) {
-            rotateToIndex(slot); // rotate spindexer to intake position
-            sleep(250); // allow spinMotor to reach position
-
-            // detect ball at this slot
-            Ball detected = detectColor(intakeColor, intakeColor2);
-            slots[slot] = detected;
-        }
-        intakeActive = false; // done scanning
+//        // -------- PRE-SCAN BALLS --------
+//        intakeActive = true; // mark intake active for INTAKE_POS
+//        for (int slot = 0; slot < 3; slot++) {
+//            rotateToIndex(slot); // rotate spindexer to intake position
+//            sleep(250); // allow spinMotor to reach position
+//
+//            // detect ball at this slot
+//            Ball detected = detectColor(intakeColor, intakeColor2);
+//            slots[slot] = detected;
+//        }
+//        intakeActive = false; // done scanning
 
         // Scan path
         runPath(paths.scan(), 50, 1);
@@ -95,24 +95,31 @@ public class BlueBack extends LinearOpMode {
                 tagId == 21 ? pattern21 :
                         tagId == 23 ? pattern23 : pattern22;
 
+        for (Ball id : correctPattern) {
+            telemetry.addData("id", id);
+        }
+
         // First 3 balls
         runPath(paths.shoot(), 50, 1);
-        shootThreeBalls(correctPattern);
+//        shootThreeBalls(correctPattern);
 
         // Intake 4th-6th balls using spindexer logic
         intakeActive = true;
         runPath(paths.toIntake1(), 50, 1);
-        runIntakePath(paths.intakeball3());
+//        runIntakePath(paths.intakeball3());
+        runPath(paths.intakeball3(), 50, 0.6);
+
 
         runPath(paths.shoot2(), 50, 1);
-        shootThreeBalls(correctPattern);
+//        shootThreeBalls(correctPattern);
 
         intakeActive = true;
         runPath(paths.toIntake2(), 250, 0.75);
-        runIntakePath(paths.intakeball6());
+//        runIntakePath(paths.intakeball6());
+        runPath(paths.intakeball6(), 50, 0.6);
 
         runPath(paths.shoot3(), 250, 0.75);
-        shootThreeBalls(new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE});
+//        shootThreeBalls(new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE});
     }
 
     // -----------------------------
