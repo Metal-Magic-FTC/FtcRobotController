@@ -26,7 +26,7 @@ public class GeneratedPathsRedBack {
     public static final Pose SHOOT_POSE = new Pose(
             93,
             94,
-            Math.toRadians(46)
+            Math.toRadians(43)
     );
 
 
@@ -38,7 +38,7 @@ public class GeneratedPathsRedBack {
                 .addPath(
                         new BezierLine(START_POSE, SCAN_POSE)
                 )
-                .setLinearHeadingInterpolation(START_POSE.getHeading(), SCAN_POSE.getHeading())
+                .setLinearHeadingInterpolation(START_POSE.getHeading(), Math.toRadians(105))
                 .build();
     }
 
@@ -47,7 +47,7 @@ public class GeneratedPathsRedBack {
                 .addPath(
                         new BezierLine(SCAN_POSE, SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(SCAN_POSE.getHeading(), SHOOT_POSE.getHeading())
+                .setLinearHeadingInterpolation(Math.toRadians(105), SHOOT_POSE.getHeading())
                 .build();
     }
 
@@ -94,7 +94,7 @@ public class GeneratedPathsRedBack {
                 .addPath(
                         new BezierLine(new Pose(116, 84), new Pose(93, 94))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(46))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(43))
                 .build();
     }
 
@@ -103,7 +103,7 @@ public class GeneratedPathsRedBack {
                 .addPath(
                         new BezierLine(new Pose(93, 94), new Pose(101.353, 59.400))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(46), Math.toRadians(0))
+                .setLinearHeadingInterpolation(Math.toRadians(43), Math.toRadians(0))
                 .build();
     }
 
@@ -137,7 +137,7 @@ public class GeneratedPathsRedBack {
                 .addPath(
                         new BezierLine(new Pose(126, 59.400), new Pose(93, 94))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(46))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(43))
                 .build();
     }
 }
