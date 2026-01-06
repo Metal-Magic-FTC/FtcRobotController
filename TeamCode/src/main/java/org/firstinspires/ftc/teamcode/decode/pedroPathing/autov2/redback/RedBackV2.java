@@ -230,7 +230,9 @@ public class RedBackV2 extends LinearOpMode {
         }
 
         intakeActive = true;
-        while ((opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) || !Arrays.asList(slots).contains(Ball.EMPTY)) {
+        while (opModeIsActive()
+                && System.currentTimeMillis() - start < timeoutMs
+                && Arrays.asList(slots).contains(Ball.EMPTY)) {
             intake();
         }
 
