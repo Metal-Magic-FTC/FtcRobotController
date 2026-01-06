@@ -12,9 +12,9 @@ public class GeneratedPathsRedBack {
 
     // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
-            116.6988847583643,  // X
-            128.83271375464685, // Y
-            Math.toRadians(225) // Heading
+            87,  // X
+            135, // Y
+            Math.toRadians(270) // Heading
     );
 
     public static final Pose SCAN_POSE = new Pose(
@@ -81,7 +81,7 @@ public class GeneratedPathsRedBack {
     public PathChain intakeball3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(105, 84), new Pose(114, 84))
+                        new BezierLine(new Pose(105, 84), new Pose(110, 84))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -126,7 +126,7 @@ public class GeneratedPathsRedBack {
     public PathChain intakeball6() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(105, 59.400), new Pose(114, 59.400))
+                        new BezierLine(new Pose(105, 59.400), new Pose(110, 59.400))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
