@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.decode.teleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TeleV4;
 @TeleOp(name = "!!!SpindexerTest")
 public class NewSpinTest extends LinearOpMode {
 
-    private DcMotor spinMotor;
+    private DcMotorEx spinMotor;
     int[] outtakePositions = {0,250,500};
     int[] intakePositions = {125, 375, 625};
     boolean intakeActive = false;
@@ -33,16 +33,16 @@ public class NewSpinTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
+        spinMotor = hardwareMap.get(DcMotorEx.class, "spinMotor");
 
         // Encoder setup
-        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spinMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        spinMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ;
-        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        spinMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         // Set direction (flip if needed)
-        spinMotor.setDirection(DcMotor.Direction.REVERSE);
+        spinMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
 
@@ -122,6 +122,8 @@ public class NewSpinTest extends LinearOpMode {
 
             telemetry.addData("Current Position", spinMotor.getCurrentPosition());
             telemetry.addData("Index", index);
+            telemetry.addData("Launch Velocity", spinMotor.getVelocity());
+            telemetry.addData("Launch Power", spinMotor.getPower());
             telemetry.update();
         }
     }
@@ -156,7 +158,7 @@ public class NewSpinTest extends LinearOpMode {
         }
 
         spinMotor.setTargetPosition(closestModular(targetPosition, spinMotor.getCurrentPosition()));
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(0.25);
     }
 

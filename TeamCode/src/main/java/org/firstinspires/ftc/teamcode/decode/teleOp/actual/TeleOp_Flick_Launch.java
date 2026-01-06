@@ -4,9 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 @TeleOp(name="Drive, Flick, Launch")
@@ -15,7 +17,7 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
 
     Servo hoodServo;
     Servo flickServo;
-    DcMotor launchMotor;
+    DcMotorEx launchMotor;
 
     DcMotor spinMotor;
 
@@ -26,7 +28,7 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
 
         hoodServo = hardwareMap.servo.get("hoodServo");
         flickServo = hardwareMap.servo.get("flickServo");
-        launchMotor = hardwareMap.dcMotor.get("launchMotor");
+        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         drivetrain = new CustomMecanumDrive(hardwareMap);
 
@@ -103,6 +105,9 @@ public class TeleOp_Flick_Launch extends LinearOpMode {
             telemetry.addData("Servo pos:", hoodServo.getPosition());
             telemetry.addData("Launch power:", power);
             telemetry.addData("Flick pos:", flickServo.getPosition());
+            telemetry.addData("Launch power", launchMotor.getPower());
+            telemetry.addData("Launch Velocity", launchMotor.getVelocity());
+            telemetry.addData("RPM", (launchMotor.getVelocity(AngleUnit.DEGREES))/6);
 
             telemetry.update();
 

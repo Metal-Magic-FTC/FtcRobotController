@@ -43,6 +43,7 @@ public class RedBackV2 extends LinearOpMode {
     private int index = 0;
     private boolean intakeActive = false;
     private boolean waitingForBall = false;
+
     private boolean autoLaunching = false;
     private int autoLaunchTarget = -1;
 
@@ -118,7 +119,7 @@ public class RedBackV2 extends LinearOpMode {
 
         runIntakePath(paths.intakeball3(), 50, 0.5);
         sleep(1000); moveSpindexer(0, INTAKE_POS); sleep(500);
-
+// 0.7844
         scanBalls();
 
         runPath(paths.shoot2(), 50, 1);
