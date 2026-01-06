@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv2.redfront.autonomousV2.blueback;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
-import org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests.SpindexerV2;
 
 import java.util.List;
 
