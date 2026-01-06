@@ -2,40 +2,30 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
+import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
-import java.util.List;
-
 @Autonomous(name = "!! Red Close Jan 10", group = "Auto")
 public class RedBackV2 extends LinearOpMode {
 
-    // -----------------------------
-    // HARDWARE + GLOBAL VARS
-    // -----------------------------
+    // ---------------- DRIVE ----------------
     private Follower follower;
     private GeneratedPathsRedBack paths;
     private CustomMecanumDrive drivetrain;
+    private Limelight3A limelight;
 
-    private DcMotor intakeMotor, launchMotor, spinMotor;
+    // ---------------- SPINDEXER ----------------
+    private DcMotor spinMotor, intakeMotor, launchMotor;
     private Servo hoodServo, flickServo;
-    private NormalizedColorSensor intakeColor;
-    private Limelight3A limelight3A;
+    private NormalizedColorSensor intakeColor, intakeColor2;
 
-    private final int[] OUTTAKE_POS = {500, 0, 250};
-    private final int[] INTAKE_POS = {125, 375, 625};
+    private static final int[] OUTTAKE_POS = {500, 0, 250};
+    private static final int[] INTAKE_POS  = {125, 375, 625};
 
     private enum Ball { EMPTY, PURPLE, GREEN }
     private Ball[] slots = {Ball.EMPTY, Ball.EMPTY, Ball.EMPTY};
@@ -43,265 +33,291 @@ public class RedBackV2 extends LinearOpMode {
     private int index = 0;
     private boolean intakeActive = false;
     private boolean waitingForBall = false;
-
-    private boolean autoLaunching = false;
-    private int autoLaunchTarget = -1;
-
-    private long flickStartTime = 0;
-    private boolean flicking = false;
-    private boolean waitingAfterFlick = false;
-    private long flickEndTime = 0;
-    private static final long FLICK_TIME_MS = 500;
-    private static final long POST_FLICK_DELAY_MS = 250;
-
     private boolean waitingToRotate = false;
+
     private long colorDetectedTime = 0;
     private int nextIndexAfterDelay = -1;
+
+    private static final long COLOR_DELAY_MS = 100;
+    private static final long FLICK_TIME_MS = 500;
+    private static final long POST_FLICK_DELAY_MS = 250;
 
     private float gain = 20;
     private double spinMotorSpeed = 0.35;
 
-    // -----------------------------
-    // RUNOPMODE
-    // -----------------------------
+    // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
 
-        initializeHardware();
+        initHardware();
         resetSlots();
 
-        // Initialize path follower
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsRedBack.START_POSE);
         paths = new GeneratedPathsRedBack(follower);
 
-        telemetry.addLine("Ready to start RedBack V2 Auto");
+        telemetry.addLine("Ready");
         telemetry.update();
 
         waitForStart();
-
         if (isStopRequested()) return;
 
-        hoodServo.setPosition(0.8);
-        flickServo.setPosition(0.9);
+        // ---- SCAN WHILE MOVING (OLD LOGIC) ----
+        startIntakeScan();
+        runPathWithScan(paths.scan(), 1.0);
+        runPathWithScan(paths.shoot(), 1.0);
+        finishScanWithAssumption();
 
-        // 1. Scan initial balls
-        scanBalls();
+        // ---- APRILTAG ----
+        Ball[] pattern = getPatternFromTag();
 
-        intakeMotor.setPower(1);
-        runPath(paths.scan(), 50, 1);
+        // ---- SHOOT ----
+        shootPattern(pattern);
 
-        // 2. Detect AprilTag
-        int tagId = detectAprilTag(2000);
-        Ball[] correctPattern;
-        switch (tagId) {
-            case 21: correctPattern = new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE}; break;
-            case 23: correctPattern = new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN}; break;
-            default: correctPattern = new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE}; break;
-        }
-
-        // 3. Move to shoot position and shoot first set
-        runPath(paths.shoot(), 50, 1);
-        shootPattern(correctPattern);
-
-        moveSpindexer(0, INTAKE_POS);
-
-        // 4. Intake balls with color detection
-        intakeMotor.setPower(0);
+        // ---- INTAKE 1–3 ----
         runPath(paths.toIntake1(), 50, 1);
-        intakeMotor.setPower(1);
+        runPathWithIntake(paths.intakeball3(), 0.2);
 
-        runIntakePath(paths.intakeball1(), 50, 0.5);
-        sleep(1000); moveSpindexer(1, INTAKE_POS); sleep(500);
-
-        runIntakePath(paths.intakeball2(), 50, 0.5);
-        sleep(1000); moveSpindexer(2, INTAKE_POS); sleep(500);
-
-        runIntakePath(paths.intakeball3(), 50, 0.5);
-        sleep(1000); moveSpindexer(0, INTAKE_POS); sleep(500);
-// 0.7844
-        scanBalls();
-
+        // ---- SHOOT AGAIN ----
         runPath(paths.shoot2(), 50, 1);
-        shootPattern(correctPattern);
-        moveSpindexer(0, INTAKE_POS);
+        shootPattern(pattern);
 
-        intakeMotor.setPower(0);
-        runPath(paths.toIntake2(), 250, 1);
+        // ---- INTAKE 4–6 ----
+        runPath(paths.toIntake2(), 50, 1);
+        runPathWithIntake(paths.intakeball6(), 0.2);
 
-        telemetry.addLine("RedBack V2 Auto Finished");
+        telemetry.addLine("Finished");
         telemetry.update();
     }
 
-    // -----------------------------
-    // PATH HELPERS
-    // -----------------------------
-    private void runPath(PathChain path, int stopDelayMs, double speed) {
+    // ---------------- PATH HELPERS ----------------
+    private void runPath(PathChain path, int stopDelay, double speed) {
         follower.setMaxPower(speed);
         follower.followPath(path);
         while (opModeIsActive() && follower.isBusy()) follower.update();
         follower.breakFollowing();
-        stopDriveMotors();
-        if (stopDelayMs > 0) sleep(stopDelayMs);
+        if (stopDelay > 0) sleep(stopDelay);
     }
 
-    private void runIntakePath(PathChain path, int stopDelayMs, double speed) {
+    private void runPathWithScan(PathChain path, double speed) {
         follower.setMaxPower(speed);
         follower.followPath(path);
-        while (opModeIsActive() && follower.isBusy()) follower.update();
+        while (opModeIsActive() && follower.isBusy()) {
+            follower.update();
+            updateSpindexer(); // OLD SCAN = just normal intake logic
+        }
         follower.breakFollowing();
-        stopDriveMotors();
-        if (stopDelayMs > 0) sleep(stopDelayMs);
     }
 
-    private void stopDriveMotors() {
-        for (String m : new String[]{"frontLeft","frontRight","backLeft","backRight"}) {
-            DcMotor motor = hardwareMap.get(DcMotor.class, m);
-            motor.setPower(0);
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    // ---------------- OLD SCAN LOGIC ----------------
+    private void startIntakeScan() {
+        intakeActive = true;
+        waitingForBall = true;
+        rotateToIndex(0);
+        intakeMotor.setPower(-0.8);
+    }
+
+    private void finishScanWithAssumption() {
+
+        intakeMotor.setPower(0);
+        intakeActive = false;
+
+        int greens = 0;
+        for (Ball b : slots) if (b == Ball.GREEN) greens++;
+
+        for (int i = 0; i < 3; i++) {
+            if (slots[i] == Ball.EMPTY) {
+                slots[i] = (greens == 0) ? Ball.GREEN : Ball.PURPLE;
+                greens++;
+            }
         }
     }
 
-    // -----------------------------
-    // SPINDEXER + LAUNCH
-    // -----------------------------
-    private void moveSpindexer(int targetIndex, int[] table) {
-        index = targetIndex;
-        int targetPos = closestModular(table[targetIndex], spinMotor.getCurrentPosition());
+    // ---------------- INTAKE ----------------
+    private void runPathWithIntake(PathChain path, double speed) {
+
+        intakeActive = true;
+        waitingForBall = true;
+
+        moveSpindexerToIntake(); // ✅ intake alignment fix
+        intakeMotor.setPower(-0.8);
+
+        follower.setMaxPower(speed);
+        follower.followPath(path);
+
+        while (opModeIsActive() && follower.isBusy()) {
+            follower.update();
+            updateSpindexer();
+        }
+
+        intakeMotor.setPower(0);
+        intakeActive = false;
+        follower.breakFollowing();
+    }
+
+    private void moveSpindexerToIntake() {
+        rotateToIndex(index);
+        waitForSpin();
+    }
+
+    // ---------------- SPINDEXER CORE ----------------
+    private void updateSpindexer() {
+
+        if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
+
+            Ball detected = detectColor(intakeColor, intakeColor2);
+            if (detected != Ball.EMPTY) {
+
+                slots[index] = detected;
+                waitingForBall = false;
+
+                nextIndexAfterDelay = findNextEmpty();
+                colorDetectedTime = System.currentTimeMillis();
+                waitingToRotate = true;
+            }
+        }
+
+        if (waitingToRotate && System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+
+            if (nextIndexAfterDelay != -1) {
+                rotateToIndex(nextIndexAfterDelay);
+                waitingForBall = true;
+            }
+
+            waitingToRotate = false;
+        }
+    }
+
+    private void rotateToIndex(int target) {
+        index = target;
+        int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
+        int targetPos = closestModular(base, spinMotor.getCurrentPosition());
+
         spinMotor.setTargetPosition(targetPos);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(spinMotorSpeed);
     }
 
-    private int closestModular(int target, int current) {
-        int best = target;
-        int minDiff = Integer.MAX_VALUE;
+    private int closestModular(int mod, int current) {
+        int best = mod, min = Integer.MAX_VALUE;
         for (int k = -2; k <= 2; k++) {
-            int candidate = target + 750 * k;
-            int diff = Math.abs(candidate - current);
-            if (diff < minDiff) { minDiff = diff; best = candidate; }
+            int c = mod + 750 * k;
+            int d = Math.abs(c - current);
+            if (d < min) { min = d; best = c; }
         }
         return best;
     }
 
+    private void waitForSpin() {
+        while (opModeIsActive() && spinMotor.isBusy()) sleep(10);
+    }
+
+    // ---------------- SHOOTING ----------------
     private void shootPattern(Ball[] pattern) {
-        launchMotor.setPower(0.9);
-        sleep(750);
 
-        for (Ball desired : pattern) {
-            int slot = findClosestBall(desired);
-            if (slot == -1) continue;
+        launchMotor.setPower(1);
+        sleep(500);
 
-            moveSpindexer(slot, OUTTAKE_POS);
+        for (Ball target : pattern) {
+            int idx = findSlot(target);
+            if (idx == -1) continue;
 
-            // wait for sensor to detect ball
-            long start = System.currentTimeMillis();
-            while (opModeIsActive() && System.currentTimeMillis() - start < 1500) {
-                if (detectColor(intakeColor) == desired) break;
-                sleep(20);
-            }
+            rotateToIndex(idx);
+            waitForSpin();
 
-            // fire
             flickServo.setPosition(0.75);
-            hoodServo.setPosition(0.76);
-            sleep(500);
+            sleep(FLICK_TIME_MS);
             flickServo.setPosition(0.9);
-            hoodServo.setPosition(0.8);
 
-            slots[slot] = Ball.EMPTY;
-            sleep(250);
+            slots[idx] = Ball.EMPTY;
+            index = idx;
+            sleep(POST_FLICK_DELAY_MS);
         }
 
         launchMotor.setPower(0);
     }
 
-    private int findClosestBall(Ball b) {
-        for (int i = 0; i < 3; i++) {
-            int idx = (index + i) % 3;
-            if (slots[idx] == b) return idx;
-        }
-        return -1;
-    }
-
-    private void scanBalls() {
-        slots[0] = detectColor(intakeColor);
-        slots[1] = detectColor(intakeColor);
-        slots[2] = detectColor(intakeColor);
-    }
-
-    private Ball detectColor(NormalizedColorSensor s1) {
-        Ball b1 = detectSingle(s1);
-//        Ball b2 = detectSingle(s2);
-        if (b1 == Ball.PURPLE) return Ball.PURPLE;
-        if (b1 == Ball.GREEN) return Ball.GREEN;
-//        if (b1 == Ball.PURPLE || b2 == Ball.PURPLE) return Ball.PURPLE;
-//        if (b1 == Ball.GREEN  || b2 == Ball.GREEN) return Ball.GREEN;
+    // ---------------- UTILS ----------------
+    private Ball detectColor(NormalizedColorSensor s1, NormalizedColorSensor s2) {
+        Ball b1 = detectSingle(s1), b2 = detectSingle(s2);
+        if (b1 == Ball.PURPLE || b2 == Ball.PURPLE) return Ball.PURPLE;
+        if (b1 == Ball.GREEN || b2 == Ball.GREEN) return Ball.GREEN;
         return Ball.EMPTY;
     }
 
     private Ball detectSingle(NormalizedColorSensor s) {
         NormalizedRGBA c = s.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
-        float sum = r + g + b;
-        if (sum < 0.07f) return Ball.EMPTY;
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) return Ball.PURPLE;
-        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) return Ball.GREEN;
+        if (r + g + b < 0.07) return Ball.EMPTY;
+        if (b > r * 1.35 && b > g * 1.25 && b > 0.12) return Ball.PURPLE;
+        if (g > r * 1.15 && g > b * 1.15 && g > 0.15) return Ball.GREEN;
         return Ball.EMPTY;
     }
 
-    // -----------------------------
-    // APRILTAG
-    // -----------------------------
+    private int findNextEmpty() {
+        for (int i = 0; i < 3; i++) {
+            int idx = (index + i) % 3;
+            if (slots[idx] == Ball.EMPTY) return idx;
+        }
+        return -1;
+    }
+
+    private int findSlot(Ball t) {
+        for (int i = 0; i < 3; i++) if (slots[i] == t) return i;
+        return -1;
+    }
+
+    // ---------------- APRILTAG ----------------
+    private Ball[] getPatternFromTag() {
+        int id = detectAprilTag(2000);
+        if (id == 21) return new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE};
+        if (id == 23) return new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
+        return new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
+    }
+
     private int detectAprilTag(long timeoutMs) {
         long start = System.currentTimeMillis();
         while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
-            LLResult llResult = limelight3A.getLatestResult();
-            if (llResult != null && llResult.isValid()) {
-                List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
-                if (fiducials != null && !fiducials.isEmpty()) {
-                    int id = fiducials.get(0).getFiducialId();
-                    if (id == 21 || id == 22 || id == 23) return id;
-                }
-            }
+            LLResult r = limelight.getLatestResult();
+            if (r != null && r.isValid() && !r.getFiducialResults().isEmpty())
+                return r.getFiducialResults().get(0).getFiducialId();
             sleep(15);
         }
-        return 22; // default
+        return 22;
     }
 
-    // -----------------------------
-    // HARDWARE INIT
-    // -----------------------------
-    private void initializeHardware() {
+    // ---------------- INIT ----------------
+    private void initHardware() {
+
+        drivetrain = new CustomMecanumDrive(hardwareMap);
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
+        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
+
+        hoodServo = hardwareMap.servo.get("hoodServo");
+        flickServo = hardwareMap.servo.get("flickServo");
+
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
-//        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
+        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        intakeColor.setGain(gain); enableLight(intakeColor);
-//        intakeColor2.setGain(gain); enableLight(intakeColor2);
-
-        launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
-        launchMotor.setDirection(DcMotor.Direction.REVERSE);
-        launchMotor.setPower(0);
-
-        hoodServo = hardwareMap.servo.get("hoodServo");
-        flickServo = hardwareMap.servo.get("flickServo");
-
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        drivetrain = new CustomMecanumDrive(hardwareMap);
+        intakeColor.setGain(gain);
+        intakeColor2.setGain(gain);
+        if (intakeColor instanceof SwitchableLight) ((SwitchableLight) intakeColor).enableLight(true);
+        if (intakeColor2 instanceof SwitchableLight) ((SwitchableLight) intakeColor2).enableLight(true);
 
-        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-    }
-
-    private void enableLight(NormalizedColorSensor s) {
-        if (s instanceof SwitchableLight) ((SwitchableLight) s).enableLight(true);
+        hoodServo.setPosition(0.8);
+        flickServo.setPosition(0.9);
     }
 
     private void resetSlots() {
