@@ -45,6 +45,8 @@ public class RedBackV2 extends LinearOpMode {
     private float gain = 20;
     private double spinMotorSpeed = 0.35;
 
+    private int scanIndex = 0;
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -62,11 +64,11 @@ public class RedBackV2 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
+        scanAllBalls();
+
         // ---- SCAN WHILE MOVING (OLD LOGIC) ----
-        startIntakeScan();
-        runPathWithScan(paths.scan(), 1.0);
-        runPathWithScan(paths.shoot(), 1.0);
-        finishScanWithAssumption();
+        runPath(paths.scan(), 250, 1.0);
+        runPath(paths.shoot(), 250, 1.0);
 
         // ---- APRILTAG ----
         Ball[] pattern = getPatternFromTag();
@@ -76,7 +78,7 @@ public class RedBackV2 extends LinearOpMode {
 
         // ---- INTAKE 1–3 ----
         runPath(paths.toIntake1(), 50, 1);
-        runPathWithIntake(paths.intakeball3(), 0.2);
+        runPathWithIntake(paths.intakeball3(), 0.3);
 
         // ---- SHOOT AGAIN ----
         runPath(paths.shoot2(), 50, 1);
@@ -84,7 +86,7 @@ public class RedBackV2 extends LinearOpMode {
 
         // ---- INTAKE 4–6 ----
         runPath(paths.toIntake2(), 50, 1);
-        runPathWithIntake(paths.intakeball6(), 0.2);
+        runPathWithIntake(paths.intakeball6(), 0.3);
 
         telemetry.addLine("Finished");
         telemetry.update();
@@ -110,27 +112,28 @@ public class RedBackV2 extends LinearOpMode {
     }
 
     // ---------------- OLD SCAN LOGIC ----------------
-    private void startIntakeScan() {
-        intakeActive = true;
-        waitingForBall = true;
-        rotateToIndex(0);
-        intakeMotor.setPower(-0.8);
-    }
+    private void scanAllBalls() {
+        intakeMotor.setPower(-0.8); // run intake
+        scanIndex = 0;
 
-    private void finishScanWithAssumption() {
+        // scan all 3 slots
+        while (opModeIsActive() && scanIndex < 3) {
+            // move spindexer to current slot
+            rotateToIndex(scanIndex);
+            waitForSpin();
 
-        intakeMotor.setPower(0);
-        intakeActive = false;
-
-        int greens = 0;
-        for (Ball b : slots) if (b == Ball.GREEN) greens++;
-
-        for (int i = 0; i < 3; i++) {
-            if (slots[i] == Ball.EMPTY) {
-                slots[i] = (greens == 0) ? Ball.GREEN : Ball.PURPLE;
-                greens++;
+            // detect color
+            Ball detected = detectColor(intakeColor, intakeColor2);
+            if (detected != Ball.EMPTY) {
+                slots[scanIndex] = detected;
+            } else {
+                slots[scanIndex] = Ball.PURPLE; // default assumption
             }
+
+            scanIndex++;
         }
+
+        intakeMotor.setPower(0); // stop intake
     }
 
     // ---------------- INTAKE ----------------
