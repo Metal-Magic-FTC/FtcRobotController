@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -15,7 +16,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 public class SpindexerV2 extends LinearOpMode {
 
     private DcMotor spinMotor;
-    private DcMotor launchMotor;
+    private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
 
     private CustomMecanumDrive drivetrain;
@@ -260,6 +261,10 @@ public class SpindexerV2 extends LinearOpMode {
             telemetry.addData("G", "%.2f", c2.green);
             telemetry.addData("B", "%.2f", c2.blue);
             telemetry.addData("Sum", "%.2f", c2.red + c2.green + c2.blue);
+
+            telemetry.addData("Launch Velocity", launchMotor.getVelocity());
+            telemetry.addData("Launch Power", launchMotor.getPower());
+
             telemetry.update();
         }
     }
@@ -374,7 +379,7 @@ public class SpindexerV2 extends LinearOpMode {
         intakeColor2.setGain(gain);
         enableLight(intakeColor2);
 
-        launchMotor = hardwareMap.get(DcMotor.class, "launchMotor");
+        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.REVERSE); // same as TeleOp_Flick_Launch
         launchMotor.setPower(0);
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv2.redfront.autonomousV2.redfront;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redfront;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;

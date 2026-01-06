@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv2.redfront.autonomousV2.blueback;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -12,7 +12,7 @@ public class GeneratedPathsBlueBack {
 
     // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
-            116.6988847583643,  // X
+            22,  // X
             128.83271375464685, // Y
             Math.toRadians(180 - 225) // Heading
     );
