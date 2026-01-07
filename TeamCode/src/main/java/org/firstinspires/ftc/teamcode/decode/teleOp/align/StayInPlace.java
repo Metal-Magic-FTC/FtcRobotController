@@ -29,7 +29,28 @@ public class StayInPlace extends LinearOpMode {
         private CustomMecanumDrive drivetrain;
         private Follower follower;
         private boolean oneTime;
+
+        public enum HoldState {
+            MANUAL,
+            HOLD,
+            FACE
+        };
+
+        HoldState holdState = HoldState.MANUAL;
+
+        private boolean faceGoal;
         private Pose savePose;
+
+        private Pose START_POSE = new Pose (
+                83,
+                135,
+                Math.toRadians(270)
+        );
+
+        private Pose GOAL_POSE = new Pose (
+                136,
+                136
+        );
 
         // ============================================================
         //                              INIT
@@ -39,8 +60,9 @@ public class StayInPlace extends LinearOpMode {
         public void runOpMode() throws InterruptedException {
 
             drivetrain = new CustomMecanumDrive(hardwareMap);
-            waitForStart();
             follower = Constants.createFollower(hardwareMap);
+
+            waitForStart();
             oneTime = true;
             while (opModeIsActive()) {
 
@@ -70,19 +92,28 @@ public class StayInPlace extends LinearOpMode {
                     }
                     telemetry.addLine("Holding Position");
 
+
                     follower.update();
 
                 } else {
                     drivetrain.driveMecanum(strafe, drive, turn);
                     oneTime = true;
                     telemetry.addLine("Manual Drive");
-                }
 
+                }
 
                 telemetry.addData("Pose", follower.getPose());
                 telemetry.update();
 
             }
         }
+
+        // Returns the correct heading to the goal
+        public double faceGoal(Pose curr, Pose goal) {
+            double yDiff = goal.getY()-curr.getY();
+            double xDiff = goal.getX()-curr.getX();
+            return Math.atan2(yDiff, xDiff);
+        }
+
 
 }
