@@ -9,9 +9,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
-import org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests.SpindexerV2;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,14 +25,14 @@ public class RedBackV2 extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsRedBack paths;
+    private GeneratedPathsRedBackV2 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
     // ---------------- INTAKE, TRANSFER, SCORING ----------------
 
     private DcMotor spinMotor;
-    private DcMotor launchMotor;
+    private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
     Servo hoodServo;
     Servo flickServo;
@@ -53,7 +51,7 @@ public class RedBackV2 extends LinearOpMode {
     private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
-    private static final int SPIN_TOLERANCE_TICKS = 10;
+    private static final int SPIN_TOLERANCE_TICKS = 5;
     private static final long SPIN_TIMEOUT_MS = 5000;
 
     private int lastSpinTarget = 0;
@@ -70,8 +68,8 @@ public class RedBackV2 extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRedBack.START_POSE);
-        paths = new GeneratedPathsRedBack(follower);
+        follower.setPose(GeneratedPathsRedBackV2.START_POSE);
+        paths = new GeneratedPathsRedBackV2(follower);
         hoodServo.setPosition(0.77);
 
 
@@ -190,7 +188,10 @@ public class RedBackV2 extends LinearOpMode {
         intakeActive = false;
 
         for (Ball ball : pattern) {
-            if (ball != Ball.EMPTY) shootOne(ball);
+            if (ball != Ball.EMPTY) {
+                sleep(200);
+                shootOne(ball);
+            }
         }
 
     }
@@ -441,7 +442,7 @@ public class RedBackV2 extends LinearOpMode {
         enableLight(intakeColor2);
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotor.Direction.REVERSE); // same as TeleOp_Flick_Launch
+        launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
         launchMotor.setPower(0);
 
         hoodServo = hardwareMap.servo.get("hoodServo");

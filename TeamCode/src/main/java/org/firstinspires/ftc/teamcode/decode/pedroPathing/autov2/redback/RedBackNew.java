@@ -29,7 +29,7 @@ public class RedBackNew extends LinearOpMode {
     // HARDWARE + GLOBAL VARS
     // -----------------------------
     private Follower follower;
-    private GeneratedPathsRedBack paths;
+    private GeneratedPathsRedBackV2 paths;
 
     private CustomMecanumDrive drivetrain;
 
@@ -89,8 +89,8 @@ public class RedBackNew extends LinearOpMode {
 
         // Initialize path follower
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRedBack.START_POSE);
-        paths = new GeneratedPathsRedBack(follower);
+        follower.setPose(GeneratedPathsRedBackV2.START_POSE);
+        paths = new GeneratedPathsRedBackV2(follower);
 
 
         telemetry.addLine("Ready to start RedBack New Auto");
