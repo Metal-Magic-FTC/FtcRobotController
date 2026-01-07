@@ -138,7 +138,7 @@ public class SpindexerV2 extends LinearOpMode {
 
                     // Once aligned and not flicking - flick servo out
                     if (!spinMotor.isBusy() && !flicking && !waitingAfterFlick) {
-                        flickServo.setPosition(0.75);
+                        flickServo.setPosition(0.71);
                         flickStartTime = System.currentTimeMillis();
                         flicking = true;
                     }
