@@ -12,8 +12,8 @@ public class GeneratedPathsBlueBack {
 
     // Central definition of the starting pose
     public static final Pose START_POSE = new Pose(
-            22,  // X
-            128.83271375464685, // Y
+            56,  // X
+            136, // Y
             Math.toRadians(180 - 225) // Heading
     );
 
@@ -24,16 +24,16 @@ public class GeneratedPathsBlueBack {
     public PathChain scan() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(START_POSE, new Pose(54, 101))
+                        new BezierLine(START_POSE, new Pose(56, 116))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180 - 225), Math.toRadians(60))
+                .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(90))
                 .build();
     }
 
     public PathChain shoot() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(54, 101), new Pose(59, 81))
+                        new BezierLine(new Pose(56, 116), new Pose(53, 100))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(60), Math.toRadians(123))
                 .build();
