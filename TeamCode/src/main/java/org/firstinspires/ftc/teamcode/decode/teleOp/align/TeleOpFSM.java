@@ -45,6 +45,7 @@ public class TeleOpFSM extends LinearOpMode {
     public void runOpMode() {
         drivetrain = new CustomMecanumDrive(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
+        follower.setPose(new Pose(87, 135, Math.toRadians(270)));
 
         waitForStart();
 
