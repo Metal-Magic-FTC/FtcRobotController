@@ -48,7 +48,7 @@ public class RedBackV2 extends LinearOpMode {
     private boolean waitingToRotate = false;
     private boolean waitingForBall = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
@@ -80,7 +80,6 @@ public class RedBackV2 extends LinearOpMode {
         if (isStopRequested()) return;
 
         launchMotor.setPower(1);
-        intakeMotor.setPower(-0.8);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -89,10 +88,14 @@ public class RedBackV2 extends LinearOpMode {
 
         Ball[] pattern = getPatternFromTag();
 
+        aimClosest(pattern[0]);
+
         runPath(paths.shoot(), 250, 1.0);
 
         // ---- SHOOT ----
         shoot(pattern);
+
+        intakeMotor.setPower(-0.8);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -101,11 +104,21 @@ public class RedBackV2 extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake1(), 50, 1);
-        runPathWithIntake(paths.intakeball3(), 250, 0.3);
+        runPathWithIntake(paths.intakeball3(), 250, 0.2);
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.GREEN;
 
-        // ---- SHOOT AGAIN ----
-        runPath(paths.shoot2(), 50, 1);
+        aimClosest(pattern[0]);
+
+        runPath(paths.shoot2(), 250, 1.0);
+
+        // ---- SHOOT ----
         shoot(pattern);
+
+        intakeMotor.setPower(-0.8);
+        intakeActive = true;
+        rotateToIndex(0);
         resetSlots();
 
         // ---- INTAKE 4–6 ----
@@ -175,9 +188,10 @@ public class RedBackV2 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
+        sleep(250);
 
         flickServo.setPosition(0.71);
-        sleep(750);
+        sleep(500);
         flickServo.setPosition(0.9);
         sleep(300);
 
@@ -186,13 +200,15 @@ public class RedBackV2 extends LinearOpMode {
     private void shoot(Ball[] pattern) {
 
         intakeActive = false;
+        intakeMotor.setPower(0);
 
         for (Ball ball : pattern) {
             if (ball != Ball.EMPTY) {
-                sleep(200);
                 shootOne(ball);
             }
         }
+
+        intakeMotor.setPower(-0.8);
 
     }
     
@@ -326,12 +342,14 @@ public class RedBackV2 extends LinearOpMode {
 //        }
 
         intakeActive = true;
+        waitingForBall = true;
 
         follower.setMaxPower(speed);
         follower.followPath(path);
         while (opModeIsActive() && follower.isBusy()) {
             follower.update();
 
+            waitingForBall = true;
             intakeActive = true;
             intake();
 
