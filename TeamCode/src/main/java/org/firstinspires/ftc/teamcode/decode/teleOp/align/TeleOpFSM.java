@@ -40,7 +40,7 @@ public class TeleOpFSM extends LinearOpMode {
     private CustomMecanumDrive drivetrain;
     private Follower follower;
 
-    static final Pose GOAL_POSE = new Pose(72, 36, 0); // example goal location
+    static final Pose GOAL_POSE = new Pose(136, 136, 0);
 
     @Override
     public void runOpMode() {
