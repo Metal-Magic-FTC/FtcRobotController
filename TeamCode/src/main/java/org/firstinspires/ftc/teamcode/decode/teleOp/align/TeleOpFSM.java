@@ -36,7 +36,6 @@ public class TeleOpFSM extends LinearOpMode {
     Pose savePose;
     boolean holdInitialized = false;
 
-    // Assume these already exist in your project
     private CustomMecanumDrive drivetrain;
     private Follower follower;
 

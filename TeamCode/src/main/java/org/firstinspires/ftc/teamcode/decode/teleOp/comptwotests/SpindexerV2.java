@@ -44,8 +44,16 @@ public class SpindexerV2 extends LinearOpMode {
 
     private float gain = 20;
 
-    // prev thingy
-    private boolean prevA, prevX, prevY, prevB;
+    // ---- RISING EDGE DETECTORS ----
+    private boolean
+            prevA,
+            prevX,
+            prevY,
+            prevB,
+            prevLeftBumper,
+            prevRightBumper,
+            prevLeftTrigger,
+            prevRightTrigger;
 
     // ---- AUTO LAUNCH ALL ----
     private boolean autoLaunching = false;
@@ -68,6 +76,18 @@ public class SpindexerV2 extends LinearOpMode {
     private long colorDetectedTime = 0;
     private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
+
+    // ---- BUTTON STATES ----
+
+    private boolean
+        intakePressed,
+        aimGreenPressed,
+        aimPurplePressed,
+        shootPressed,
+        runLaunch,
+        intakePower,
+        intakePowerReverse,
+        launchAllPressed;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -93,19 +113,23 @@ public class SpindexerV2 extends LinearOpMode {
             //spindexer shoot green - a
             //launch all three - left arrow (dpad)
             //reverse intake - left trigger
-            boolean intakePressed      = gamepad1.dpad_up && !prevX;
-            boolean aimGreenPressed    = gamepad1.a && !prevA;
-            boolean aimPurplePressed   = gamepad1.b && !prevB;
-            boolean shootPressed       = gamepad1.right_bumper; // && !prevB;
-            boolean runLaunch          = gamepad1.left_bumper;
-            boolean intakePower        = gamepad1.right_trigger >= 0.3f;
-            boolean intakePowerReverse = gamepad1.left_trigger >= 0.3f;
-            boolean launchAllPressed = gamepad1.dpad_left;
+            intakePressed      = gamepad1.dpad_up && !prevX;
+            aimGreenPressed    = gamepad1.a && !prevA;
+            aimPurplePressed   = gamepad1.b && !prevB;
+            shootPressed       = gamepad1.right_bumper; // && !prevB;
+            runLaunch          = (gamepad1.left_bumper && !prevLeftBumper) != runLaunch;
+            intakePower        = (gamepad1.right_trigger >= 0.3f && !prevRightTrigger) != intakePower;
+            intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
+            launchAllPressed = gamepad1.dpad_left;
 
             prevA = gamepad1.a;
             prevX = gamepad1.x;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
+            prevLeftBumper = gamepad1.left_bumper;
+            prevRightBumper = gamepad1.right_bumper;
+            prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
+            prevRightTrigger = gamepad1.right_trigger >= 0.3F;
 
             if (gamepad1.dpad_left) {
                 spinMotorSpeed = 0.35;
