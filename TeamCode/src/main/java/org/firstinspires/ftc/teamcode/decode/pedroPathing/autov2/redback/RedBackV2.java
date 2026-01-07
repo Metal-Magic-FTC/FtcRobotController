@@ -74,14 +74,15 @@ public class RedBackV2 extends LinearOpMode {
         paths = new GeneratedPathsRedBack(follower);
         hoodServo.setPosition(0.77);
 
-        launchMotor.setPower(1);
-        intakeMotor.setPower(0.8);
 
         telemetry.addLine("Ready");
         telemetry.update();
 
         waitForStart();
         if (isStopRequested()) return;
+
+        launchMotor.setPower(1);
+        intakeMotor.setPower(-0.8);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -96,6 +97,7 @@ public class RedBackV2 extends LinearOpMode {
         shoot(pattern);
         intakeActive = true;
         rotateToIndex(0);
+        resetSlots();
 
         // ---- INTAKE 1–3 ----
         intakeActive = true;
@@ -106,6 +108,7 @@ public class RedBackV2 extends LinearOpMode {
         // ---- SHOOT AGAIN ----
         runPath(paths.shoot2(), 50, 1);
         shoot(pattern);
+        resetSlots();
 
         // ---- INTAKE 4–6 ----
         intakeActive = true;
@@ -212,12 +215,16 @@ public class RedBackV2 extends LinearOpMode {
         // after COLOR_DELAY_MS, rotate if needed
         if (waitingToRotate) {
             if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+//                int nextEmpty = findNextEmpty();
+//                nextIndexAfterDelay = nextEmpty;
                 if (nextIndexAfterDelay != -1) {
                     rotateToIndex(nextIndexAfterDelay);
                     waitingForBall = true; // continue intake
                 } else {
-                    intakeActive = false;
-                    rotateToIndex(0); // back to home
+//                    intakeActive = false;
+//                    rotateToIndex(0); // back to home
+                    // Stay in intake position, keep waiting
+                    waitingForBall = true;
                 }
                 waitingToRotate = false; // reset
             }
@@ -299,23 +306,25 @@ public class RedBackV2 extends LinearOpMode {
 
     private void runPathWithIntake(PathChain path, int stopDelay, double speed) {
 
-        int nextEmpty = findNextEmpty();
+//        int nextEmpty = findNextEmpty();
+//
+//        if (nextEmpty != -1) {
+//            // normal intake
+//            intakeActive = true;
+//            waitingForBall = true;
+//            rotateToIndex(nextEmpty);
+//        } else {
+//            // all full then go shoot
+//            intakeActive = false;
+//            waitingForBall = false;
+//
+//            int nextLoaded = findClosestLoaded();
+//            if (nextLoaded != -1) {
+//                rotateToIndex(nextLoaded);
+//            }
+//        }
 
-        if (nextEmpty != -1) {
-            // normal intake
-            intakeActive = true;
-            waitingForBall = true;
-            rotateToIndex(nextEmpty);
-        } else {
-            // all full then go shoot
-            intakeActive = false;
-            waitingForBall = false;
-
-            int nextLoaded = findClosestLoaded();
-            if (nextLoaded != -1) {
-                rotateToIndex(nextLoaded);
-            }
-        }
+        intakeActive = true;
 
         follower.setMaxPower(speed);
         follower.followPath(path);

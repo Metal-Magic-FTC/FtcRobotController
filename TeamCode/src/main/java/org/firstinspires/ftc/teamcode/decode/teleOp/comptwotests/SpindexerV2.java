@@ -98,7 +98,7 @@ public class SpindexerV2 extends LinearOpMode {
             boolean aimPurplePressed   = gamepad1.b && !prevB;
             boolean shootPressed       = gamepad1.right_bumper; // && !prevB;
             boolean runLaunch          = gamepad1.left_bumper;
-            //boolean intakePower        = gamepad1.right_bumper;
+            boolean intakePower        = gamepad1.right_trigger >= 0.3f;
             boolean intakePowerReverse = gamepad1.left_trigger >= 0.3f;
             boolean launchAllPressed = gamepad1.dpad_left;
 
@@ -165,11 +165,11 @@ public class SpindexerV2 extends LinearOpMode {
             }
 
             if (intakePower) {
-                intakeMotor.setPower(-0.8);
+                intakeMotor.setPower(0);
             } else if (intakePowerReverse) {
                 intakeMotor.setPower(0.8);
             } else {
-                intakeMotor.setPower(0);
+                intakeMotor.setPower(-0.8);
             }
 
             // intake
