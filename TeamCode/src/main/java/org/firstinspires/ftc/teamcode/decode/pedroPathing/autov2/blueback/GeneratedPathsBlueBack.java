@@ -14,7 +14,7 @@ public class GeneratedPathsBlueBack {
     public static final Pose START_POSE = new Pose(
             56,  // X
             136, // Y
-            Math.toRadians(180 - 225) // Heading
+            Math.toRadians(270) // Heading
     );
 
     public GeneratedPathsBlueBack(Follower follower) {
