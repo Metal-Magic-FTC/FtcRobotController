@@ -15,6 +15,11 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 @TeleOp(name = "!!!!!SpindexerV2")
 public class SpindexerV2 extends LinearOpMode {
 
+    //launch motor - left bumper
+    //flick servo - right trigger
+    //spindexer intake - up arrow
+    //spindexer shoot purple - b
+    //spindexer shoot green - a
     private DcMotor spinMotor;
     private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
@@ -81,14 +86,21 @@ public class SpindexerV2 extends LinearOpMode {
             double turn = gamepad1.right_stick_x;
             drivetrain.driveMecanum(strafe, drive, turn);
 
-            boolean intakePressed      = gamepad1.a && !prevA;
-            boolean aimGreenPressed    = gamepad1.x && !prevX;
-            boolean aimPurplePressed   = gamepad1.y && !prevY;
-            boolean shootPressed       = gamepad1.b; // && !prevB;
-            boolean runLaunch          = gamepad1.right_trigger >= 0.3;
-            boolean intakePower        = gamepad1.right_bumper;
-            boolean intakePowerReverse = gamepad1.left_bumper;
-            boolean launchAllPressed = gamepad1.dpad_up;
+            //launch motor - left bumper
+            //flick servo - right bumper
+            //spindexer intake - up arrow (dpad)
+            //spindexer shoot purple - b
+            //spindexer shoot green - a
+            //launch all three - left arrow (dpad)
+            //reverse intake - left trigger
+            boolean intakePressed      = gamepad1.dpad_up && !prevX;
+            boolean aimGreenPressed    = gamepad1.a && !prevA;
+            boolean aimPurplePressed   = gamepad1.b && !prevB;
+            boolean shootPressed       = gamepad1.right_bumper; // && !prevB;
+            boolean runLaunch          = gamepad1.left_bumper;
+            //boolean intakePower        = gamepad1.right_bumper;
+            boolean intakePowerReverse = gamepad1.left_trigger >= 0.3f;
+            boolean launchAllPressed = gamepad1.dpad_left;
 
             prevA = gamepad1.a;
             prevX = gamepad1.x;
