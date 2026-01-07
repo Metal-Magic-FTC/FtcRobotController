@@ -179,7 +179,7 @@ public class RedBackV2 extends LinearOpMode {
         waitForSpindexer();
 
         flickServo.setPosition(0.75);
-        sleep(300);
+        sleep(500);
         flickServo.setPosition(0.9);
         sleep(300);
 
