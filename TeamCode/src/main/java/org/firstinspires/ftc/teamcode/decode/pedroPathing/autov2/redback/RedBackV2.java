@@ -53,6 +53,11 @@ public class RedBackV2 extends LinearOpMode {
     private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
+    private static final int SPIN_TOLERANCE_TICKS = 10;
+    private static final long SPIN_TIMEOUT_MS = 5000;
+
+    private int lastSpinTarget = 0;
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -60,9 +65,17 @@ public class RedBackV2 extends LinearOpMode {
         initHardware();
         resetSlots();
 
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.GREEN;
+        slots[2] = Ball.PURPLE;
+
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsRedBack.START_POSE);
         paths = new GeneratedPathsRedBack(follower);
+        hoodServo.setPosition(0.77);
+
+        launchMotor.setPower(1);
+        intakeMotor.setPower(0.8);
 
         telemetry.addLine("Ready");
         telemetry.update();
@@ -71,7 +84,7 @@ public class RedBackV2 extends LinearOpMode {
         if (isStopRequested()) return;
 
         // scan balls
-        scanBallsInSlots(5000);
+        //scanBallsInSlots(5000);
 
         runPath(paths.scan(), 250, 1.0);
 
@@ -81,6 +94,8 @@ public class RedBackV2 extends LinearOpMode {
 
         // ---- SHOOT ----
         shoot(pattern);
+        intakeActive = true;
+        rotateToIndex(0);
 
         // ---- INTAKE 1–3 ----
         intakeActive = true;
@@ -111,6 +126,8 @@ public class RedBackV2 extends LinearOpMode {
         index = target;
         int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
         int targetPos = closestModular(base, spinMotor.getCurrentPosition());
+
+        lastSpinTarget = targetPos; // store target
 
         spinMotor.setTargetPosition(targetPos);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -156,7 +173,7 @@ public class RedBackV2 extends LinearOpMode {
         if (!targetAL.contains(target)) return; // check if has a ball
 
         aimClosest(target);
-        sleep(1000);
+        waitForSpindexer();
 
         flickServo.setPosition(0.75);
         sleep(300);
@@ -259,6 +276,8 @@ public class RedBackV2 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
+        rotateToIndex(0);
+
     }
 
     private int findClosestLoaded() {
@@ -313,6 +332,24 @@ public class RedBackV2 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
+    }
+
+    private void waitForSpindexer() {
+        long start = System.currentTimeMillis();
+
+        while (opModeIsActive()) {
+            int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
+
+            if (error <= SPIN_TOLERANCE_TICKS) {
+                break;
+            }
+
+            if (System.currentTimeMillis() - start > SPIN_TIMEOUT_MS) {
+                break; // safety exit
+            }
+
+            sleep(5); // yield to system
+        }
     }
 
     // ---------------- APRILTAG AND COLOR SENSORS ----------------

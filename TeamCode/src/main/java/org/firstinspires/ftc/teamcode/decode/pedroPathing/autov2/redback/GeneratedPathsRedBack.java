@@ -20,7 +20,7 @@ public class GeneratedPathsRedBack {
     public static final Pose SCAN_POSE = new Pose(
             100,
             100,
-            Math.toRadians(105)
+            Math.toRadians(150)
     );
 
     public static final Pose SHOOT_POSE = new Pose(
@@ -92,7 +92,7 @@ public class GeneratedPathsRedBack {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(114, 84), SHOOT_POSE)
+                        new BezierLine(new Pose(116, 84), SHOOT_POSE)
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(48))
                 .build();
@@ -135,7 +135,7 @@ public class GeneratedPathsRedBack {
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(114, 59.400), SHOOT_POSE)
+                        new BezierLine(new Pose(120, 59.400), SHOOT_POSE)
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(48))
                 .build();
