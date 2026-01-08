@@ -86,13 +86,10 @@ public class BlueBack extends LinearOpMode {
          * INTAKE 1–3
          * ============================= */
         intakeActive = true;
-        runIntakePath(paths.toIntake1());
+        runPath(paths.toIntake1(), 50, 0.75);
         rotateToIndex(0);
-        runIntakePath(paths.intakeball1());
-        rotateToIndex(1);
-        runIntakePath(paths.intakeball2());
-        rotateToIndex(2);
-        runIntakePath(paths.intakeball3());
+
+        runPath(paths.intakeball3(), 50, 0.3);
         intakeActive = false;
 
         runPath(paths.shoot2(), 50, 1.0);
@@ -102,13 +99,8 @@ public class BlueBack extends LinearOpMode {
          * INTAKE 4–6
          * ============================= */
         intakeActive = true;
-        runIntakePath(paths.toIntake2());
-        rotateToIndex(0);
-        runIntakePath(paths.intakeball4());
-        rotateToIndex(1);
-        runIntakePath(paths.intakeball5());
-        rotateToIndex(2);
-        runIntakePath(paths.intakeball6());
+        runPath(paths.toIntake2(), 50, 0.75);
+        runPath(paths.intakeball6(),50,0.3);
         intakeActive = false;
 
         runPath(paths.shoot3(), 50, 1.0);
@@ -118,13 +110,8 @@ public class BlueBack extends LinearOpMode {
          * INTAKE 7–9
          * ============================= */
         intakeActive = true;
-        runIntakePath(paths.toIntake3());
-        rotateToIndex(0);
-        runIntakePath(paths.intakeball7());
-        rotateToIndex(1);
-        runIntakePath(paths.intakeball8());
-        rotateToIndex(2);
-        runIntakePath(paths.intakeball9());
+        runPath(paths.toIntake3(),50,.75);
+        runPath(paths.intakeball9(),50,.75);
         intakeActive = false;
 
         runPath(paths.shoot4(), 50, 1.0);
