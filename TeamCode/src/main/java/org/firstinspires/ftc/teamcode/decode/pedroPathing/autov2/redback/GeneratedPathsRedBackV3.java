@@ -80,7 +80,7 @@ public class GeneratedPathsRedBackV3 {
     public PathChain intakeball3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(101.353, 84), new Pose(122, 84))
+                        new BezierLine(new Pose(101.353, 84), new Pose(116, 84))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -91,7 +91,7 @@ public class GeneratedPathsRedBackV3 {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(122, 84), SHOOT_POSE)
+                        new BezierLine(new Pose(116, 84), SHOOT_POSE)
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(41))
                 .build();
