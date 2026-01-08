@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.GeneratedPathsRedBackV2;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.RedBackV2;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.RedBackV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.List;
@@ -83,7 +84,7 @@ public class BlueBack extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsBlueBack.START_POSE);
         paths = new GeneratedPathsBlueBack(follower);
-        hoodServo.setPosition(0.77);
+        hoodServo.setPosition(0.8);
 
 
         telemetry.addLine("Ready");
@@ -103,7 +104,7 @@ public class BlueBack extends LinearOpMode {
 
         aimClosest(pattern[0]);
 
-        runPath(paths.shoot(), 50, 1.0);
+        runPath(paths.shoot(), 250, 1.0);
 
         // ---- SHOOT ----
         shoot(pattern);
@@ -202,7 +203,7 @@ public class BlueBack extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(250);
+        sleep(400);
 
         flickServo.setPosition(0.71);
         sleep(500);
