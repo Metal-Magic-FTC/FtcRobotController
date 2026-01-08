@@ -165,11 +165,11 @@ public class SpindexerV2 extends LinearOpMode {
             }
 
             // ----- MANUAL SPINDEXER CONTROL (HOLD X) -----
-            if (gamepad1.x) {
+            if (gamepad2.x) {
 
                 spinMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-                double manualPower = gamepad1.right_trigger - gamepad1.left_trigger;
+                double manualPower = 0.2*(gamepad2.right_trigger - gamepad2.left_trigger);
 
                 spinMotor.setPower(manualPower);
 
