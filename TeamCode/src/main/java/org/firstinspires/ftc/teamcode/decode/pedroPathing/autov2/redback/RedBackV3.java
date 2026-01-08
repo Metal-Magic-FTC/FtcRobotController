@@ -42,17 +42,17 @@ public class RedBackV3 extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.35;
+    private double spinMotorSpeed = 0.4;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
     private boolean waitingForBall = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
-    private static final long SPIN_TIMEOUT_MS = 5000;
+    private static final long SPIN_TIMEOUT_MS = 10000;
 
     private int lastSpinTarget = 0;
 
@@ -104,7 +104,7 @@ public class RedBackV3 extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake1(), 50, 1);
-        runPathWithIntake(paths.intakeball3(), 250, 0.4);
+        runPathWithIntake(paths.intakeball3(), 250, 0.20);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
@@ -125,7 +125,7 @@ public class RedBackV3 extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 50, 1);
-        runPathWithIntake(paths.intakeball6(), 250, 0.4);
+        runPathWithIntake(paths.intakeball6(), 250, 0.20);
 
         runPath(paths.shoot3(), 50, 1);
         shoot(pattern);
