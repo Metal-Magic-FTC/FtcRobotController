@@ -79,6 +79,9 @@ public class SpindexerV2 extends LinearOpMode {
 
     // ---- BUTTON STATES ----
 
+    // ---- GAMEPAD 2 FAILSAFES ----
+    private boolean prev2A, prev2B;
+
     private boolean
         intakePressed,
         aimGreenPressed,
@@ -131,12 +134,57 @@ public class SpindexerV2 extends LinearOpMode {
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
 
-            if (gamepad1.dpad_left) {
-                spinMotorSpeed = 0.35;
+            // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
+            boolean manualGreen  = gamepad2.a && !prev2A;
+            boolean manualPurple = gamepad2.b && !prev2B;
+
+            prev2A = gamepad2.a;
+            prev2B = gamepad2.b;
+
+            if (intakePower) {
+                intakeMotor.setPower(0);
+            } else if (intakePowerReverse) {
+                intakeMotor.setPower(0.8);
+            } else {
+                intakeMotor.setPower(-0.8);
             }
 
-            if (gamepad1.dpad_right) {
-                spinMotorSpeed = 0.45;
+            if (waitingForBall && intakeActive && !spinMotor.isBusy()) {
+
+                if (manualGreen || manualPurple) {
+                    Ball forced = manualGreen ? Ball.GREEN : Ball.PURPLE;
+
+                    slots[index] = forced;
+                    waitingForBall = false;
+
+                    int nextEmpty = findNextEmpty();
+                    nextIndexAfterDelay = nextEmpty;
+                    colorDetectedTime = System.currentTimeMillis();
+                    waitingToRotate = true;
+                }
+            }
+
+            // ----- MANUAL SPINDEXER CONTROL (HOLD X) -----
+            if (gamepad1.x) {
+
+                spinMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+                double manualPower = gamepad1.right_trigger - gamepad1.left_trigger;
+
+                spinMotor.setPower(manualPower);
+
+                // Encoder reset while holding X + DPAD UP
+                if (gamepad1.dpad_up) {
+                    spinMotor.setPower(0);
+                    spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    index = 0;
+                }
+
+                // HARD EXIT so auto logic doesn't fight you
+                telemetry.addLine("MANUAL SPINDEXER MODE");
+                telemetry.update();
+                continue;
             }
 
             if (launchAllPressed && !autoLaunching) {
@@ -186,14 +234,6 @@ public class SpindexerV2 extends LinearOpMode {
                         waitingAfterFlick = false;
                     }
                 }
-            }
-
-            if (intakePower) {
-                intakeMotor.setPower(0);
-            } else if (intakePowerReverse) {
-                intakeMotor.setPower(0.8);
-            } else {
-                intakeMotor.setPower(-0.8);
             }
 
             // intake
