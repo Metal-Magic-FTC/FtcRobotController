@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -21,7 +24,9 @@ public class RotateToTag extends OpMode {
 
     private boolean rotatingToTag = false;
     private double targetHeading = 0;
-
+    Pose startPose = new Pose (0,0,0);
+    Pose endPose = new Pose (0,0,0);
+    PathChain rotationPath;
     private static final double HEADING_TOLERANCE = Math.toRadians(2);
     private static final double ROTATE_SPEED = 0.3;
 
@@ -35,6 +40,7 @@ public class RotateToTag extends OpMode {
 
         telemetry.addLine("Rear Limelight + PedroPathing TeleOp Initialized");
         telemetry.update();
+
     }
 
     @Override
@@ -52,7 +58,7 @@ public class RotateToTag extends OpMode {
             double x = gamepad1.left_stick_x;   // strafe
             double rx = gamepad1.right_stick_x; // rotate
 
-            follower.setTeleOpDrive(x, y, rx, false);
+            //follower.setTeleOpDrive(x, y, rx, false);
 
             // ========== Press A to face tag ==========
             if (gamepad1.a) {
@@ -68,17 +74,22 @@ public class RotateToTag extends OpMode {
                         Pose3D robotToTag = tag.getRobotPoseTargetSpace();
 
                         // Yaw from Limelight (tag relative to robot)
-                        double yawToTag = robotToTag.getOrientation().getYaw();
+                        double yawToTag = tag.getTargetXDegrees();
 
                         // Because Limelight is mounted facing backwards, flip the direction
                         // and add 180° so the robot front faces the tag.
-                        yawToTag = -yawToTag + Math.PI;
+                        //yawToTag = -yawToTag + Math.PI;
 
                         double currentHeading = follower.getPose().getHeading();
                         targetHeading = normalizeAngle(currentHeading + yawToTag);
-
+                        Path path = new Path();
+                        rotationPath = follower.pathBuilder()
+                                .addPath(new BezierLine(startPose, endPose))
+                                .setLinearHeadingInterpolation(currentHeading, targetHeading)
+                                .build();
+                        follower.followPath(rotationPath);
                         rotatingToTag = true;
-                        telemetry.addLine("Rear Limelight: rotating to face tag...");
+                        telemetry.addLine("Limelight: rotating to face tag...");
                     } else {
                         telemetry.addLine("No AprilTags detected.");
                     }
@@ -90,17 +101,17 @@ public class RotateToTag extends OpMode {
 
         // ========== Rotate until facing tag ==========
         else {
-            double currentHeading = follower.getPose().getHeading();
-            double error = normalizeAngle(targetHeading - currentHeading);
-            double rotPower = Math.copySign(ROTATE_SPEED, error);
-
-            if (Math.abs(error) < HEADING_TOLERANCE) {
-                rotPower = 0;
-                rotatingToTag = false;
-                telemetry.addLine("Rotation complete.");
-            }
-
-            follower.setTeleOpDrive(0, 0, rotPower, false);
+//            double currentHeading = follower.getPose().getHeading();
+//            double error = normalizeAngle(targetHeading - currentHeading);
+//            double rotPower = Math.copySign(ROTATE_SPEED, error);
+//
+//            if (Math.abs(error) < HEADING_TOLERANCE) {
+//                rotPower = 0;
+//                rotatingToTag = false;
+//                telemetry.addLine("Rotation complete.");
+//            }
+//
+//            follower.setTeleOpDrive(0, 0, rotPower, false);
         }
 
         // ========== Telemetry ==========
