@@ -51,6 +51,7 @@ public class SpindexerV2 extends LinearOpMode {
             prevY,
             prevB,
             prevLeftBumper,
+            prev2LeftBumper,
             prevRightBumper,
             prevLeftTrigger,
             prevRightTrigger;
@@ -119,8 +120,8 @@ public class SpindexerV2 extends LinearOpMode {
             intakePressed      = gamepad1.dpad_up && !prevX;
             aimGreenPressed    = gamepad1.a && !prevA;
             aimPurplePressed   = gamepad1.b && !prevB;
-            shootPressed       = gamepad1.right_bumper || gamepad2.right_bumper; // && !prevB;
-            runLaunch          = (gamepad1.left_bumper && !prevLeftBumper) != runLaunch;
+            shootPressed       = gamepad1.right_bumper; // && !prevB;
+            runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
             intakePower        = (gamepad1.right_trigger >= 0.3f && !prevRightTrigger) != intakePower;
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
@@ -129,7 +130,8 @@ public class SpindexerV2 extends LinearOpMode {
             prevX = gamepad1.x;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
-            prevLeftBumper = gamepad1.left_bumper || gamepad2.right_bumper;
+            prevLeftBumper = gamepad1.left_bumper;
+            prev2LeftBumper = gamepad2.left_bumper;
             prevRightBumper = gamepad1.right_bumper;
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
@@ -146,7 +148,7 @@ public class SpindexerV2 extends LinearOpMode {
             } else if (intakePowerReverse) {
                 intakeMotor.setPower(0.8);
             } else {
-                intakeMotor.setPower(-0.8);
+                intakeMotor.setPower(-0.6);
             }
 
             if (waitingForBall && intakeActive && !spinMotor.isBusy()) {

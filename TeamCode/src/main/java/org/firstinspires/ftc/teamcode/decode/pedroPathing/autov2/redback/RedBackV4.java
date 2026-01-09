@@ -95,7 +95,7 @@ public class RedBackV4 extends LinearOpMode {
         // ---- SHOOT ----
         shoot(pattern);
 
-        intakeMotor.setPower(-0.8);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -120,7 +120,7 @@ public class RedBackV4 extends LinearOpMode {
             intakeActive = true;
             intake();
         }
-        intakeMotor.setPower(-0.8);
+        intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
@@ -132,7 +132,7 @@ public class RedBackV4 extends LinearOpMode {
         // ---- SHOOT ----
         shoot(pattern);
 
-        intakeMotor.setPower(-0.8);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -224,7 +224,7 @@ public class RedBackV4 extends LinearOpMode {
             }
         }
 
-        intakeMotor.setPower(-0.8);
+        intakeMotor.setPower(-0.6);
 
     }
 
@@ -255,7 +255,7 @@ public class RedBackV4 extends LinearOpMode {
                 if (nextIndexAfterDelay != -1) {
                     rotateToIndex(nextIndexAfterDelay);
                     waitingForBall = true; // continue intake
-                    intakeMotor.setPower(-0.8);
+                    intakeMotor.setPower(-0.6);
                 } else {
 //                    intakeActive = false;
 //                    rotateToIndex(0); // back to home
