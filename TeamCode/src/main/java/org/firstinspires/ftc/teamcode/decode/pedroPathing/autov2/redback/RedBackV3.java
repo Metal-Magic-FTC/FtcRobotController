@@ -139,7 +139,7 @@ public class RedBackV3 extends LinearOpMode {
 
     // ---------------- SPINDEXER ----------------
 
-    private void rotateToIndex(int target) {
+    private int rotateToIndex(int target) {
         index = target;
         int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
         int targetPos = closestModular(base, spinMotor.getCurrentPosition());
@@ -149,6 +149,8 @@ public class RedBackV3 extends LinearOpMode {
         spinMotor.setTargetPosition(targetPos);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(spinMotorSpeed);
+
+        return targetPos;
     }
 
     private int closestModular(int mod, int current) {
@@ -224,6 +226,8 @@ public class RedBackV3 extends LinearOpMode {
             if (detected != Ball.EMPTY) {
                 slots[index] = detected;
                 waitingForBall = false;
+//                if (intakeRow)
+//                    follower.pausePathFollowing();
 
                 // compute next index, but don't rotate yet
                 int nextEmpty = findNextEmpty();
@@ -252,6 +256,9 @@ public class RedBackV3 extends LinearOpMode {
                 waitingToRotate = false; // reset
             }
         }
+//        waitForSpindexer();
+        intakeRow = false;
+//        follower.resumePathFollowing();
     }
 
     private void scanBallsInSlots(long timeoutMs) {
