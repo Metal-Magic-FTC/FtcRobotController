@@ -42,7 +42,7 @@ public class RedBackV3 extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.4;
+    private double spinMotorSpeed = 0.5;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -70,7 +70,7 @@ public class RedBackV3 extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsRedBackV3.START_POSE);
         paths = new GeneratedPathsRedBackV3(follower);
-        hoodServo.setPosition(0.77);
+        hoodServo.setPosition(0.80);
 
 
         telemetry.addLine("Ready");
@@ -104,7 +104,8 @@ public class RedBackV3 extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake1(), 50, 1);
-        runPathWithIntake(paths.intakeball3(), 250, 0.20);
+        runPathWithIntake(paths.intakeball3(), 20, 0.21);
+        intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
@@ -213,6 +214,7 @@ public class RedBackV3 extends LinearOpMode {
     }
 
     private void intake() {
+
         // spindexer logic (COLOR-BASED DETECTION) with delay
         if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
@@ -226,6 +228,7 @@ public class RedBackV3 extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
+                intakeMotor.setPower(0);
             }
         }
 
@@ -237,6 +240,7 @@ public class RedBackV3 extends LinearOpMode {
                 if (nextIndexAfterDelay != -1) {
                     rotateToIndex(nextIndexAfterDelay);
                     waitingForBall = true; // continue intake
+                    intakeMotor.setPower(-0.8);
                 } else {
 //                    intakeActive = false;
 //                    rotateToIndex(0); // back to home
@@ -341,6 +345,7 @@ public class RedBackV3 extends LinearOpMode {
 //            }
 //        }
 
+        launchMotor.setPower(0);
         intakeActive = true;
         waitingForBall = true;
 
@@ -359,6 +364,8 @@ public class RedBackV3 extends LinearOpMode {
 
         intakeActive = false;
         waitingForBall = false;
+
+        launchMotor.setPower(1);
 
     }
 
