@@ -119,7 +119,7 @@ public class SpindexerV2 extends LinearOpMode {
             intakePressed      = gamepad1.dpad_up && !prevX;
             aimGreenPressed    = gamepad1.a && !prevA;
             aimPurplePressed   = gamepad1.b && !prevB;
-            shootPressed       = gamepad1.right_bumper; // && !prevB;
+            shootPressed       = gamepad1.right_bumper || gamepad2.right_bumper; // && !prevB;
             runLaunch          = (gamepad1.left_bumper && !prevLeftBumper) != runLaunch;
             intakePower        = (gamepad1.right_trigger >= 0.3f && !prevRightTrigger) != intakePower;
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
@@ -129,7 +129,7 @@ public class SpindexerV2 extends LinearOpMode {
             prevX = gamepad1.x;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
-            prevLeftBumper = gamepad1.left_bumper;
+            prevLeftBumper = gamepad1.left_bumper || gamepad2.right_bumper;
             prevRightBumper = gamepad1.right_bumper;
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
