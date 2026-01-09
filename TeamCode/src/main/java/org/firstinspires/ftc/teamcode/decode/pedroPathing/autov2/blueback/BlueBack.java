@@ -118,7 +118,7 @@ public class BlueBack extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake1(), 50, 1);
-        runPathWithIntake(paths.intakeball3(), 250, 0.2);
+        runPathWithIntake(paths.intakeball3(), 250, 0.4);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
@@ -139,7 +139,7 @@ public class BlueBack extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 50, 1);
-        runPathWithIntake(paths.intakeball6(), 250, 0.3);
+        runPathWithIntake(paths.intakeball6(), 250, 0.4);
 
         runPath(paths.shoot3(), 50, 1);
         shoot(pattern);
