@@ -122,10 +122,14 @@ public class RedBackV4 extends LinearOpMode {
         }
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.GREEN;
 
         aimClosest(pattern[0]);
+
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.GREEN;
 
         runPath(paths.shoot2(), 250, 1.0);
 
@@ -219,6 +223,7 @@ public class RedBackV4 extends LinearOpMode {
         intakeMotor.setPower(0);
 
         for (Ball ball : pattern) {
+            //shootOne(ball);
             if (ball != Ball.EMPTY) {
                 shootOne(ball);
             }

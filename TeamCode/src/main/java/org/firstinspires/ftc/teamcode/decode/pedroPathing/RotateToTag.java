@@ -24,11 +24,11 @@ public class RotateToTag extends OpMode {
 
     private boolean rotatingToTag = false;
     private double targetHeading = 0;
+    private double iterate = 0;
+    private boolean right = false;
     Pose startPose = new Pose (0,0,0);
     Pose endPose = new Pose (0,0,0);
     PathChain rotationPath;
-    private static final double HEADING_TOLERANCE = Math.toRadians(2);
-    private static final double ROTATE_SPEED = 0.3;
 
     @Override
     public void init() {
@@ -40,7 +40,6 @@ public class RotateToTag extends OpMode {
 
         telemetry.addLine("Rear Limelight + PedroPathing TeleOp Initialized");
         telemetry.update();
-
     }
 
     @Override
@@ -54,11 +53,6 @@ public class RotateToTag extends OpMode {
 
         // ========== Normal Drive ==========
         if (!rotatingToTag) {
-            double y = -gamepad1.left_stick_y;  // forward
-            double x = gamepad1.left_stick_x;   // strafe
-            double rx = gamepad1.right_stick_x; // rotate
-
-            //follower.setTeleOpDrive(x, y, rx, false);
 
             // ========== Press A to face tag ==========
             if (gamepad1.a) {
@@ -71,7 +65,7 @@ public class RotateToTag extends OpMode {
                         LLResultTypes.FiducialResult tag = fiducials.get(0);
 
                         // Pose of the tag relative to the robot
-                        Pose3D robotToTag = tag.getRobotPoseTargetSpace();
+                        //Pose3D robotToTag = tag.getRobotPoseTargetSpace();
 
                         // Yaw from Limelight (tag relative to robot)
                         double yawToTag = tag.getTargetXDegrees();
@@ -81,15 +75,30 @@ public class RotateToTag extends OpMode {
                         //yawToTag = -yawToTag + Math.PI;
 
                         double currentHeading = follower.getPose().getHeading();
-                        targetHeading = normalizeAngle(currentHeading + yawToTag);
-                        Path path = new Path();
-                        rotationPath = follower.pathBuilder()
-                                .addPath(new BezierLine(startPose, endPose))
-                                .setLinearHeadingInterpolation(currentHeading, targetHeading)
-                                .build();
-                        follower.followPath(rotationPath);
-                        rotatingToTag = true;
-                        telemetry.addLine("Limelight: rotating to face tag...");
+
+                        if (!rotatingToTag) {
+                            targetHeading = normalizeAngle(currentHeading + yawToTag);
+                            rotatingToTag = true;
+                            if (yawToTag>0) {
+                                right = true;
+                            } else {
+                                right = false;
+                            }
+                        }
+                        while (targetHeading<yawToTag) {
+                            if (right) {
+                                iterate+=1;
+                            } else {
+                                iterate-=1;
+                            }
+                            rotationPath = follower.pathBuilder()
+                                    .addPath(new BezierLine(startPose, endPose))
+                                    .setLinearHeadingInterpolation(currentHeading, targetHeading+iterate)
+                                    .build();
+                            follower.followPath(rotationPath);
+                            telemetry.addLine("Limelight: rotating to face tag...");
+                        }
+                        iterate = 0;
                     } else {
                         telemetry.addLine("No AprilTags detected.");
                     }
