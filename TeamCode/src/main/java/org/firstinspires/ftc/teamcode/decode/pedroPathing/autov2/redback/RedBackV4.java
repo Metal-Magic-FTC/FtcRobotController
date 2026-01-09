@@ -215,6 +215,10 @@ public class RedBackV4 extends LinearOpMode {
         flickServo.setPosition(0.9);
         sleep(300);
 
+        if (slots[index] == target) {
+            slots[index] = Ball.EMPTY;
+        }
+
     }
 
     private void shoot(Ball[] pattern) {
