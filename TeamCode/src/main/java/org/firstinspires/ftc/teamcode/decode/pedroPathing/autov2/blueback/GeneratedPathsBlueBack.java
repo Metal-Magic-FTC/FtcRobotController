@@ -42,7 +42,7 @@ public class GeneratedPathsBlueBack {
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(53, 81), new Pose(36, 81))
+                        new BezierLine(new Pose(40, 110), new Pose(36, 81))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(123), Math.toRadians(180 - 0))
                 .build();
