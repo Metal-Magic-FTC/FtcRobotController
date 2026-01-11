@@ -92,7 +92,9 @@ public class SpindexerV2 extends LinearOpMode {
         runLaunch,
         intakePower,
         intakePowerReverse,
-        launchAllPressed;
+        launchAllPressed,
+        nextIntake2,
+        prevNextIntake2;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -127,6 +129,8 @@ public class SpindexerV2 extends LinearOpMode {
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
 
+            nextIntake2 = gamepad2.dpad_down;
+
             prevA = gamepad1.a;
             prevX = gamepad1.x;
             prevY = gamepad1.y;
@@ -138,12 +142,19 @@ public class SpindexerV2 extends LinearOpMode {
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
             prev2RightBumper = gamepad2.right_bumper;
 
+            prevNextIntake2 = gamepad2.dpad_down;
+
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
             boolean manualGreen  = gamepad2.a && !prev2A;
             boolean manualPurple = gamepad2.b && !prev2B;
 
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
+
+            if (nextIntake2 && !prevNextIntake2) {
+                index++;
+                index = index % 3;
+            }
 
             if (intakePower) {
                 intakeMotor.setPower(0);
@@ -178,10 +189,13 @@ public class SpindexerV2 extends LinearOpMode {
                 spinMotor.setPower(manualPower);
 
                 // Encoder reset while holding X + DPAD UP
-                if (gamepad1.dpad_up) {
+                if (gamepad2.dpad_up) {
                     spinMotor.setPower(0);
                     spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    slots[0] = Ball.EMPTY;
+                    slots[1] = Ball.EMPTY;
+                    slots[2] = Ball.EMPTY;
                     index = 0;
                 }
 

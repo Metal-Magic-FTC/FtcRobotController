@@ -11,16 +11,22 @@ public class GeneratedPathsRedBackV4 {
     private final Follower follower;
 
     // Central definition of the starting pose
+//    public static final Pose START_POSE = new Pose(
+//            92,  // X
+//            135, // Y
+//            Math.toRadians(270) // Heading
+//    );
+
     public static final Pose START_POSE = new Pose(
-            92,  // X
-            135, // Y
-            Math.toRadians(270) // Heading
+            116,  // X
+            128, // Y
+            Math.toRadians(225) // Heading
     );
 
     public static final Pose SCAN_POSE = new Pose(
-            92,
+            102,
             120,
-            Math.toRadians(96)
+            Math.toRadians(107)
     );
 
     public static final Pose SHOOT_POSE = new Pose(
@@ -53,7 +59,7 @@ public class GeneratedPathsRedBackV4 {
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(SHOOT_POSE, new Pose(91, 84))
+                        new BezierLine(SHOOT_POSE, new Pose(87, 89))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(52), Math.toRadians(0))
                 .build();
@@ -62,7 +68,7 @@ public class GeneratedPathsRedBackV4 {
     public PathChain intakeball1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(91, 84), new Pose(98, 84))
+                        new BezierLine(new Pose(87, 89), new Pose(94, 89))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -71,7 +77,7 @@ public class GeneratedPathsRedBackV4 {
     public PathChain intakeball2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(98, 84), new Pose(103, 84))
+                        new BezierLine(new Pose(94, 89), new Pose(99, 89))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -80,7 +86,7 @@ public class GeneratedPathsRedBackV4 {
     public PathChain intakeball3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(103, 84), new Pose(110, 84))
+                        new BezierLine(new Pose(99, 89), new Pose(107, 89))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -91,7 +97,7 @@ public class GeneratedPathsRedBackV4 {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(110, 84), SHOOT_POSE) // x used to be 116
+                        new BezierLine(new Pose(107, 89), SHOOT_POSE) // x used to be 116
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(41))
                 .build();

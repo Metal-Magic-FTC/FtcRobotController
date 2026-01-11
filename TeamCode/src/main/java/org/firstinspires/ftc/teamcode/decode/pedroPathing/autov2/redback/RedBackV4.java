@@ -137,18 +137,18 @@ public class RedBackV4 extends LinearOpMode {
         shoot(pattern);
 
         intakeMotor.setPower(-0.6);
-        intakeActive = true;
+        intakeActive = false;
         rotateToIndex(0);
         resetSlots();
 
         // ---- INTAKE 4–6 ----
-        intakeActive = true;
+        intakeActive = false;
         rotateToIndex(0);
-        runPath(paths.toIntake2(), 50, 1);
-        runPathWithIntake(paths.intakeball6(), 250, 0.20);
-
-        runPath(paths.shoot3(), 50, 1);
-        shoot(pattern);
+//        runPath(paths.toIntake2(), 50, 1);
+//        runPathWithIntake(paths.intakeball6(), 250, 0.20);
+//
+//        runPath(paths.shoot3(), 50, 1);
+//        shoot(pattern);
 
         telemetry.addLine("Finished");
         telemetry.update();
@@ -474,6 +474,8 @@ public class RedBackV4 extends LinearOpMode {
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(3);  // APRILTAG PIPELINE
+        limelight.start();
 
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
