@@ -54,7 +54,8 @@ public class SpindexerV2 extends LinearOpMode {
             prev2LeftBumper,
             prevRightBumper,
             prevLeftTrigger,
-            prevRightTrigger;
+            prevRightTrigger,
+            prev2RightBumper;
 
     // ---- AUTO LAUNCH ALL ----
     private boolean autoLaunching = false;
@@ -122,7 +123,7 @@ public class SpindexerV2 extends LinearOpMode {
             aimPurplePressed   = gamepad1.b && !prevB;
             shootPressed       = gamepad1.right_bumper; // && !prevB;
             runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
-            intakePower        = (gamepad1.right_trigger >= 0.3f && !prevRightTrigger) != intakePower;
+            intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
 
@@ -135,6 +136,7 @@ public class SpindexerV2 extends LinearOpMode {
             prevRightBumper = gamepad1.right_bumper;
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
+            prev2RightBumper = gamepad2.right_bumper;
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
             boolean manualGreen  = gamepad2.a && !prev2A;
