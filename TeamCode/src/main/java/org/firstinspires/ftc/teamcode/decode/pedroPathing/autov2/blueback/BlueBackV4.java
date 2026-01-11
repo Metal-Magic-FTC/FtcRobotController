@@ -8,14 +8,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.GeneratedPathsRedBackV4;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.RedBackV4;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
+import java.util.Arrays;
 import java.util.List;
 
-import java.util.Arrays;
-
-@Autonomous(name = "! Blue Close Auto V2 FINAL", group = "Auto")
-public class BlueBack extends LinearOpMode {
+@Autonomous(name = "!!!!! V4 V4 V4 V4 Blue Close Jan 10")
+public class BlueBackV4 extends LinearOpMode {
 
     private int index = 0;
 
@@ -26,7 +27,7 @@ public class BlueBack extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsBlueBack paths;
+    private GeneratedPathsBlueBackV4 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -43,22 +44,24 @@ public class BlueBack extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.35;
+    private double spinMotorSpeed = 0.4;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
     private boolean waitingForBall = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
-    private static final long SPIN_TIMEOUT_MS = 5000;
+    private static final long SPIN_TIMEOUT_MS = 10000;
 
     private int lastSpinTarget = 0;
 
+    // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
+
 
         initHardware();
         resetSlots();
@@ -68,9 +71,9 @@ public class BlueBack extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlueBack.START_POSE);
-        paths = new GeneratedPathsBlueBack(follower);
-        hoodServo.setPosition(0.8);
+        follower.setPose(GeneratedPathsBlueBackV4.START_POSE);
+        paths = new GeneratedPathsBlueBackV4(follower);
+        hoodServo.setPosition(0.80);
 
 
         telemetry.addLine("Ready");
@@ -84,18 +87,22 @@ public class BlueBack extends LinearOpMode {
         // scan balls
         //scanBallsInSlots(5000);
 
-        runPath(paths.scan(), 50, 1.0);
+        runPath(paths.scan(), 250, 1.0);
+        telemetry.addData("X SCAN", follower.getPose().getX());
+        telemetry.addData("Y SCAN", follower.getPose().getY());
 
         Ball[] pattern = getPatternFromTag();
 
         aimClosest(pattern[0]);
 
         runPath(paths.shoot(), 250, 1.0);
+        telemetry.addData("X SHOOT", follower.getPose().getX());
+        telemetry.addData("Y SHOOT", follower.getPose().getY());
 
         // ---- SHOOT ----
         shoot(pattern);
 
-        intakeMotor.setPower(-0.8);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -104,19 +111,41 @@ public class BlueBack extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake1(), 50, 1);
-        runPathWithIntake(paths.intakeball3(), 250, 0.23);
+        telemetry.addData("X intake1", follower.getPose().getX());
+        telemetry.addData("Y intake2", follower.getPose().getY());
+        resetSlots();
+        runPathWithIntake(paths.intakeball1(), 250, 0.21);
+        runPathWithIntake(paths.intakeball2(), 250, 0.21);
+        double startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() < startTime + 1000) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+        runPathWithIntake(paths.intakeball3(), 250, 0.21);
+        startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() < startTime + 1000) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+        intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
         aimClosest(pattern[0]);
 
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.GREEN;
+
         runPath(paths.shoot2(), 250, 1.0);
 
         // ---- SHOOT ----
         shoot(pattern);
 
-        intakeMotor.setPower(-0.8);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -125,14 +154,13 @@ public class BlueBack extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 50, 1);
-        runPathWithIntake(paths.intakeball6(), 250, 0.23);
+        runPathWithIntake(paths.intakeball6(), 250, 0.20);
 
         runPath(paths.shoot3(), 50, 1);
         shoot(pattern);
 
         telemetry.addLine("Finished");
         telemetry.update();
-
     }
 
     // ---------------- SPINDEXER ----------------
@@ -196,6 +224,10 @@ public class BlueBack extends LinearOpMode {
         flickServo.setPosition(0.9);
         sleep(300);
 
+        if (slots[index] == target) {
+            slots[index] = Ball.EMPTY;
+        }
+
     }
 
     private void shoot(Ball[] pattern) {
@@ -204,16 +236,18 @@ public class BlueBack extends LinearOpMode {
         intakeMotor.setPower(0);
 
         for (Ball ball : pattern) {
+            //shootOne(ball);
             if (ball != Ball.EMPTY) {
                 shootOne(ball);
             }
         }
 
-        intakeMotor.setPower(-0.8);
+        intakeMotor.setPower(-0.6);
 
     }
 
     private void intake() {
+
         // spindexer logic (COLOR-BASED DETECTION) with delay
         if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
@@ -227,6 +261,7 @@ public class BlueBack extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
+                intakeMotor.setPower(0);
             }
         }
 
@@ -238,6 +273,7 @@ public class BlueBack extends LinearOpMode {
                 if (nextIndexAfterDelay != -1) {
                     rotateToIndex(nextIndexAfterDelay);
                     waitingForBall = true; // continue intake
+                    intakeMotor.setPower(-0.6);
                 } else {
 //                    intakeActive = false;
 //                    rotateToIndex(0); // back to home
@@ -342,6 +378,7 @@ public class BlueBack extends LinearOpMode {
 //            }
 //        }
 
+        launchMotor.setPower(0);
         intakeActive = true;
         waitingForBall = true;
 
@@ -360,6 +397,8 @@ public class BlueBack extends LinearOpMode {
 
         intakeActive = false;
         waitingForBall = false;
+
+        launchMotor.setPower(1);
 
     }
 
