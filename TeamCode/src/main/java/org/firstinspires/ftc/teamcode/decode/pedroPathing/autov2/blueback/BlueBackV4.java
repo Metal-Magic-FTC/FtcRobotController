@@ -95,7 +95,7 @@ public class BlueBackV4 extends LinearOpMode {
 
         aimClosest(pattern[0]);
 
-        runPath(paths.shoot(), 250, 1.0);
+        runPath(paths.shoot(), 250, 0.725);
         telemetry.addData("X SHOOT", follower.getPose().getX());
         telemetry.addData("Y SHOOT", follower.getPose().getY());
 
@@ -140,7 +140,7 @@ public class BlueBackV4 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 250, 1.0);
+        runPath(paths.shoot2(), 250, 0.75);
 
         // ---- SHOOT ----
         shoot(pattern);

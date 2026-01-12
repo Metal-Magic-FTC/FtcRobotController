@@ -154,6 +154,11 @@ public class SpindexerV2 extends LinearOpMode {
             if (nextIntake2 && !prevNextIntake2) {
                 index++;
                 index = index % 3;
+
+                // normal intake
+                intakeActive = true;
+                waitingForBall = true;
+                rotateToIndex(index);
             }
 
             if (intakePower) {
