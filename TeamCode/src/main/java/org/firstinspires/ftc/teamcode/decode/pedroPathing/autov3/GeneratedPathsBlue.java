@@ -18,9 +18,9 @@ public class GeneratedPathsBlue {
 //    );
 
     public static final Pose START_POSE = new Pose(
-            116,  // X
-            128, // Y
-            Math.toRadians(225) // Heading
+            0,  // X
+            0, // Y
+            Math.toRadians(-45) // Heading
     );
 
     public static final Pose SCAN_POSE = new Pose(

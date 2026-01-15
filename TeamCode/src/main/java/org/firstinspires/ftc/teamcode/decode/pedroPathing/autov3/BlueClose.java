@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "!!Red Close")
+@Autonomous(name = "!!Blue Close")
 public class BlueClose extends LinearOpMode {
 
     private int index = 0;
