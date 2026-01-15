@@ -71,7 +71,7 @@ public class SpindexerV2 extends LinearOpMode {
     private long flickEndTime = 0;
     private static final long POST_FLICK_DELAY_MS = 250; // 100 ms delay after flick retract
 
-    private double spinMotorSpeed = 0.35;
+    private double spinMotorSpeed = 0.5;
 
     // ---- COLOR SENSOR DELAY ----
     private boolean waitingToRotate = false;
@@ -104,7 +104,7 @@ public class SpindexerV2 extends LinearOpMode {
         waitForStart();
 
         hoodServo.setPosition(0.8);
-        flickServo.setPosition(0.90);
+        flickServo.setPosition(0.710);
 
         while (opModeIsActive()) {
 
@@ -222,7 +222,7 @@ public class SpindexerV2 extends LinearOpMode {
                 if (autoLaunchTarget == -1) {
                     autoLaunching = false;
                     launchMotor.setPower(0);
-                    flickServo.setPosition(0.9);
+                    flickServo.setPosition(0.71);
                     waitingAfterFlick = false;
                 } else {
 
@@ -233,14 +233,14 @@ public class SpindexerV2 extends LinearOpMode {
 
                     // Once aligned and not flicking - flick servo out
                     if (!spinMotor.isBusy() && !flicking && !waitingAfterFlick) {
-                        flickServo.setPosition(0.71);
+                        flickServo.setPosition(1);
                         flickStartTime = System.currentTimeMillis();
                         flicking = true;
                     }
 
                     // Retract servo after FLICK_TIME_MS
                     if (flicking && System.currentTimeMillis() - flickStartTime >= FLICK_TIME_MS) {
-                        flickServo.setPosition(0.9);
+                        flickServo.setPosition(0.71);
                         flicking = false;
 
                         // Clear the slot
@@ -292,9 +292,9 @@ public class SpindexerV2 extends LinearOpMode {
             // shoot
 
             if (shootPressed && !autoLaunching) {
-                flickServo.setPosition(0.75);
+                flickServo.setPosition(1);
             } else if (!autoLaunching) {
-                flickServo.setPosition(0.9);
+                flickServo.setPosition(0.71);
             }
 
             if (shootPressed && !autoLaunching) {
