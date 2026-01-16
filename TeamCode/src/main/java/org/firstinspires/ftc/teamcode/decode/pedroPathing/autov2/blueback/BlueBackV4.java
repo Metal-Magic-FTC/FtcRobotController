@@ -44,7 +44,7 @@ public class BlueBackV4 extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.4;
+    private double spinMotorSpeed = 0.55;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -108,27 +108,39 @@ public class BlueBackV4 extends LinearOpMode {
         resetSlots();
 
         // ---- INTAKE 1–3 ----
+
+        double startTime;
+
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake1(), 50, 1);
         telemetry.addData("X intake1", follower.getPose().getX());
         telemetry.addData("Y intake2", follower.getPose().getY());
         resetSlots();
-        runPathWithIntake(paths.intakeball1(), 250, 0.21);
-        runPathWithIntake(paths.intakeball2(), 250, 0.21);
-        double startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 1000) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-        runPathWithIntake(paths.intakeball3(), 250, 0.21);
+//        runPathWithIntake(paths.intakeball1(), 250, 0.21);
+//        runPathWithIntake(paths.intakeball2(), 250, 0.21);
+//        startTime = System.currentTimeMillis();
+//        while (System.currentTimeMillis() < startTime + 1000) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//        runPathWithIntake(paths.intakeball3(), 250, 0.21);
+//        startTime = System.currentTimeMillis();
+//        while (System.currentTimeMillis() < startTime + 1000) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+
         startTime = System.currentTimeMillis();
+        runPathWithIntake(paths.intakeball123(), 250, 0.21);
         while (System.currentTimeMillis() < startTime + 1000) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
+
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
