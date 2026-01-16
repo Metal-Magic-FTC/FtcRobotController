@@ -83,6 +83,9 @@ public class SpindexerV2 extends LinearOpMode {
 
     // ---- GAMEPAD 2 FAILSAFES ----
     private boolean prev2A, prev2B;
+    
+    private double flickUp = 0.77 ;
+    private double flickDown = 1;
 
     private boolean
         intakePressed,
@@ -104,7 +107,7 @@ public class SpindexerV2 extends LinearOpMode {
         waitForStart();
 
         hoodServo.setPosition(0.8);
-        flickServo.setPosition(0.710);
+        flickServo.setPosition(flickDown);
 
         while (opModeIsActive()) {
 
@@ -222,7 +225,7 @@ public class SpindexerV2 extends LinearOpMode {
                 if (autoLaunchTarget == -1) {
                     autoLaunching = false;
                     launchMotor.setPower(0);
-                    flickServo.setPosition(0.71);
+                    flickServo.setPosition(flickDown);
                     waitingAfterFlick = false;
                 } else {
 
@@ -233,14 +236,14 @@ public class SpindexerV2 extends LinearOpMode {
 
                     // Once aligned and not flicking - flick servo out
                     if (!spinMotor.isBusy() && !flicking && !waitingAfterFlick) {
-                        flickServo.setPosition(1);
+                        flickServo.setPosition(flickUp);
                         flickStartTime = System.currentTimeMillis();
                         flicking = true;
                     }
 
                     // Retract servo after FLICK_TIME_MS
                     if (flicking && System.currentTimeMillis() - flickStartTime >= FLICK_TIME_MS) {
-                        flickServo.setPosition(0.71);
+                        flickServo.setPosition(flickDown);
                         flicking = false;
 
                         // Clear the slot
@@ -292,9 +295,9 @@ public class SpindexerV2 extends LinearOpMode {
             // shoot
 
             if (shootPressed && !autoLaunching) {
-                flickServo.setPosition(1);
+                flickServo.setPosition(flickUp);
             } else if (!autoLaunching) {
-                flickServo.setPosition(0.71);
+                flickServo.setPosition(flickDown);
             }
 
             if (shootPressed && !autoLaunching) {

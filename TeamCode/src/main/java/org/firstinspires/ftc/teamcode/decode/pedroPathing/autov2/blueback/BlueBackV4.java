@@ -44,7 +44,7 @@ public class BlueBackV4 extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.55;
+    private double spinMotorSpeed = 0.38;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -87,7 +87,7 @@ public class BlueBackV4 extends LinearOpMode {
         // scan balls
         //scanBallsInSlots(5000);
 
-        runPath(paths.scan(), 250, 1.0);
+        runPath(paths.scan(), 0, 1.0);
         telemetry.addData("X SCAN", follower.getPose().getX());
         telemetry.addData("Y SCAN", follower.getPose().getY());
 
@@ -95,7 +95,7 @@ public class BlueBackV4 extends LinearOpMode {
 
         aimClosest(pattern[0]);
 
-        runPath(paths.shoot(), 250, 0.725);
+        runPath(paths.shoot(), 0, 0.8);
         telemetry.addData("X SHOOT", follower.getPose().getX());
         telemetry.addData("Y SHOOT", follower.getPose().getY());
 
@@ -113,29 +113,30 @@ public class BlueBackV4 extends LinearOpMode {
 
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 50, 1);
+        runPath(paths.toIntake1(), 0, 1);
         telemetry.addData("X intake1", follower.getPose().getX());
         telemetry.addData("Y intake2", follower.getPose().getY());
         resetSlots();
-//        runPathWithIntake(paths.intakeball1(), 250, 0.21);
-//        runPathWithIntake(paths.intakeball2(), 250, 0.21);
-//        startTime = System.currentTimeMillis();
-//        while (System.currentTimeMillis() < startTime + 1000) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-//        runPathWithIntake(paths.intakeball3(), 250, 0.21);
-//        startTime = System.currentTimeMillis();
-//        while (System.currentTimeMillis() < startTime + 1000) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
 
+        runPathWithIntake(paths.intakeball1(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        runPathWithIntake(paths.intakeball123(), 250, 0.21);
-        while (System.currentTimeMillis() < startTime + 1000) {
+        while (System.currentTimeMillis() < startTime + 750) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+
+        runPathWithIntake(paths.intakeball2(), 0, 0.3);
+        startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() < startTime + 750) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+
+        runPathWithIntake(paths.intakeball3(), 0, 0.3);
+        startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() < startTime + 500) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -229,12 +230,12 @@ public class BlueBackV4 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(400);
+        sleep(250); // 400
 
         flickServo.setPosition(0.71);
-        sleep(500);
+        sleep(250); // 500
         flickServo.setPosition(0.9);
-        sleep(300);
+        sleep(250); // 300
 
         if (slots[index] == target) {
             slots[index] = Ball.EMPTY;
