@@ -99,7 +99,7 @@ public class NihalsGeneratedPathsRedV1 {
                 .addPath(
                         new BezierLine(new Pose(107, 89), SHOOT_POSE) // x used to be 116
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(41))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
                 .build();
     }
 
@@ -140,9 +140,9 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(127, 59), SHOOT_POSE)
+                        new BezierLine(new Pose(84, 80), SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(41))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
                 .build();
     }
 }
