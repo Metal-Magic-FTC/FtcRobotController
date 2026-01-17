@@ -98,7 +98,7 @@ public class NihalsRedV1 extends LinearOpMode {
         // scan balls
         //scanBallsInSlots(5000);
 
-        runPath(paths.scan(), 0, 1.0);
+//        runPath(paths.scan(), 0, 1.0);
         telemetry.addData("X SCAN", follower.getPose().getX());
         telemetry.addData("Y SCAN", follower.getPose().getY());
 
