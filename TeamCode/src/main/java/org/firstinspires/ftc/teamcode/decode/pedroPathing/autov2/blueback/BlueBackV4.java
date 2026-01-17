@@ -44,7 +44,7 @@ public class BlueBackV4 extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {504, 0, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.35;
+    private double spinMotorSpeed = 0.38;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -85,7 +85,7 @@ public class BlueBackV4 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(0.935);
+        launchMotor.setPower(0.925);
 
         flickServo.setPosition(flickDown);
 
@@ -297,10 +297,10 @@ public class BlueBackV4 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(400); // 400
+        sleep(350); // 400
 
         flickServo.setPosition(flickUp);
-        sleep(500); // 500
+        sleep(400); // 500
         flickServo.setPosition(flickDown);
         sleep(250); // 300
 
@@ -478,7 +478,7 @@ public class BlueBackV4 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.935);
+        launchMotor.setPower(0.925);
 
     }
 

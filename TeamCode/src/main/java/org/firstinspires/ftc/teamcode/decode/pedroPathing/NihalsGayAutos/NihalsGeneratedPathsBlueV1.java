@@ -13,7 +13,7 @@ public class NihalsGeneratedPathsBlueV1 {
     public static final Pose START_POSE = new Pose(
             56,  // X
             8, // Y
-            Math.toRadians(225) // Heading
+            Math.toRadians(90) // Heading
     );
 
 
