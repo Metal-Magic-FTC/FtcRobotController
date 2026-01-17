@@ -41,7 +41,7 @@ public class BlueBackV4 extends LinearOpMode {
     NormalizedColorSensor intakeColor;
     NormalizedColorSensor intakeColor2;
 
-    private static final int[] OUTTAKE_POS = {492, 0, 243};
+    private static final int[] OUTTAKE_POS = {504, 0, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
     private double spinMotorSpeed = 0.35;
@@ -50,7 +50,7 @@ public class BlueBackV4 extends LinearOpMode {
     private boolean waitingToRotate = false;
     private boolean waitingForBall = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
@@ -85,7 +85,7 @@ public class BlueBackV4 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.935);
 
         flickServo.setPosition(flickDown);
 
@@ -126,7 +126,7 @@ public class BlueBackV4 extends LinearOpMode {
         runPathWithIntake(paths.intakeball1(), 0, 0.3);
         startTime = System.currentTimeMillis();
         //slots[0] = Ball.PURPLE;
-        while (System.currentTimeMillis() < startTime + 600) {
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -135,7 +135,7 @@ public class BlueBackV4 extends LinearOpMode {
         runPathWithIntake(paths.intakeball2(), 0, 0.3);
         startTime = System.currentTimeMillis();
         //slots[0] = Ball.PURPLE;
-        while (System.currentTimeMillis() < startTime + 750) {
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -161,7 +161,9 @@ public class BlueBackV4 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 50, 1);
+        intakeMotor.setPower(-0.6);
+        runPath(paths.shoot2(), 5, 1);
+        intakeMotor.setPower(-0.8);
 
         // ---- SHOOT ----
         shoot(pattern);
@@ -186,7 +188,7 @@ public class BlueBackV4 extends LinearOpMode {
         runPathWithIntake(paths.intakeball4(), 0, 0.3);
         startTime = System.currentTimeMillis();
         //slots[0] = Ball.PURPLE;
-        while (System.currentTimeMillis() < startTime + 500) {
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -195,7 +197,7 @@ public class BlueBackV4 extends LinearOpMode {
         runPathWithIntake(paths.intakeball5(), 0, 0.3);
         startTime = System.currentTimeMillis();
         //slots[0] = Ball.GREEN;
-        while (System.currentTimeMillis() < startTime + 500) {
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -221,7 +223,9 @@ public class BlueBackV4 extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot3(), 50, 1);
+        intakeMotor.setPower(-0.6);
+        runPath(paths.shoot3(), 5, 1);
+        intakeMotor.setPower(-0.8);
 
         // ---- SHOOT ----
         shoot(pattern);
@@ -233,7 +237,7 @@ public class BlueBackV4 extends LinearOpMode {
 
         intakeActive = false;
         rotateToIndex(0);
-        runPath(paths.toGate(), 50, 1);
+        runPath(paths.toGate(), 5, 1);
 
         telemetry.addLine("Finished");
         telemetry.update();
@@ -293,12 +297,12 @@ public class BlueBackV4 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(250); // 400
+        sleep(400); // 400
 
         flickServo.setPosition(flickUp);
-        sleep(400); // 500
+        sleep(500); // 500
         flickServo.setPosition(flickDown);
-        sleep(300); // 300
+        sleep(250); // 300
 
         if (slots[index] == target) {
             slots[index] = Ball.EMPTY;
@@ -474,7 +478,7 @@ public class BlueBackV4 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.935);
 
     }
 
