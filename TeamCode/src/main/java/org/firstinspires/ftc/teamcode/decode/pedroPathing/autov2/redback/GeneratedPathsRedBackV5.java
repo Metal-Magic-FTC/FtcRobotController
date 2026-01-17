@@ -108,6 +108,7 @@ public class GeneratedPathsRedBackV5 {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(87, 59))
                 )
+                .setLinearHeadingInterpolation(Math.toRadians(41), Math.toRadians(0))
                 .build();
     }
 
