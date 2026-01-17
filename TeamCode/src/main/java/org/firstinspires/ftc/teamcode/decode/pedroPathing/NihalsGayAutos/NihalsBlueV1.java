@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.BlueBackV4;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.GeneratedPathsBlueBackV4;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
@@ -64,6 +65,9 @@ public class NihalsBlueV1 extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
+    private double flickUp = 0.75;
+    private double flickDown = 1;
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -101,7 +105,7 @@ public class NihalsBlueV1 extends LinearOpMode {
 
         aimClosest(pattern[0]);
 
-        runPath(paths.shoot(), 250, 0.725);
+        runPath(paths.shoot(), 5, 1);
         telemetry.addData("X SHOOT", follower.getPose().getX());
         telemetry.addData("Y SHOOT", follower.getPose().getY());
 
@@ -252,12 +256,12 @@ public class NihalsBlueV1 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(400);
+        sleep(350); // 400
 
-        flickServo.setPosition(0.71);
-        sleep(500);
-        flickServo.setPosition(0.9);
-        sleep(300);
+        flickServo.setPosition(flickUp);
+        sleep(400); // 500
+        flickServo.setPosition(flickDown);
+        sleep(250); // 300
 
         if (slots[index] == target) {
             slots[index] = Ball.EMPTY;
@@ -277,7 +281,7 @@ public class NihalsBlueV1 extends LinearOpMode {
             }
         }
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(-0.8);
 
     }
 
@@ -433,7 +437,7 @@ public class NihalsBlueV1 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(1);
+        launchMotor.setPower(0.95);
 
     }
 
