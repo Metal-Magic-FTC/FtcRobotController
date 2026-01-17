@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.Arrays;
 import java.util.List;
-
 @Autonomous(name = "!!Red Close Qualy 2")
 public class RedCloseV5 extends LinearOpMode {
 
