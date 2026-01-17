@@ -40,7 +40,7 @@ public class RedCloseV5 extends LinearOpMode {
     NormalizedColorSensor intakeColor;
     NormalizedColorSensor intakeColor2;
 
-    private static final int[] OUTTAKE_POS = {500, 0, 250};
+    private static final int[] OUTTAKE_POS = {504, 0, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
     private double spinMotorSpeed = 0.38;
@@ -53,7 +53,7 @@ public class RedCloseV5 extends LinearOpMode {
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
-    private static final long SPIN_TIMEOUT_MS = 10000;
+    private static final long SPIN_TIMEOUT_MS = 3000;
 
     private int lastSpinTarget = 0;
 
@@ -281,11 +281,14 @@ public class RedCloseV5 extends LinearOpMode {
 
     private void shootOne(Ball target) {
 
+        aimClosest(target);
+
         List<Ball> targetAL = Arrays.asList(slots);
         if (!targetAL.contains(target)) return; // check if has a ball
 
-        aimClosest(target);
         waitForSpindexer();
+        telemetry.addData("spindex pos", spinMotor.getCurrentPosition());
+        telemetry.addData("spindex ideal", spinMotor.getTargetPosition());
         sleep(250); // 400
 
         flickServo.setPosition(flickUp);
@@ -477,13 +480,14 @@ public class RedCloseV5 extends LinearOpMode {
         while (opModeIsActive()) {
             int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
 
-            if (error <= SPIN_TOLERANCE_TICKS) {
+            if (error <= SPIN_TOLERANCE_TICKS && !spinMotor.isBusy() || error <= SPIN_TOLERANCE_TICKS/2) {
                 break;
             }
 
             if (System.currentTimeMillis() - start > SPIN_TIMEOUT_MS) {
                 break; // safety exit
             }
+
 
             sleep(5); // yield to system
         }
