@@ -1,21 +1,28 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.NihalsGayAutos;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.*;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.GeneratedPathsRedBackV5;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.GeneratedPathsRedBackV5;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.Arrays;
 import java.util.List;
-@Autonomous(name = "!!Red Close Qualy 2")
-public class RedCloseV5 extends LinearOpMode {
+
+@Autonomous(name = "!!Nihals red qualy 3")
+public class NihalsRedV1 extends LinearOpMode {
 
     private int index = 0;
 
@@ -26,7 +33,7 @@ public class RedCloseV5 extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsRedBackV5 paths;
+    private NihalsGeneratedPathsRedV1 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -40,7 +47,7 @@ public class RedCloseV5 extends LinearOpMode {
     NormalizedColorSensor intakeColor;
     NormalizedColorSensor intakeColor2;
 
-    private static final int[] OUTTAKE_POS = {504, 0, 252};
+    private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
     private double spinMotorSpeed = 0.38;
@@ -53,7 +60,7 @@ public class RedCloseV5 extends LinearOpMode {
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
-    private static final long SPIN_TIMEOUT_MS = 3000;
+    private static final long SPIN_TIMEOUT_MS = 10000;
 
     private int lastSpinTarget = 0;
 
@@ -73,8 +80,8 @@ public class RedCloseV5 extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRedBackV5.START_POSE);
-        paths = new GeneratedPathsRedBackV5(follower);
+        follower.setPose(NihalsGeneratedPathsRedV1.START_POSE);
+        paths = new NihalsGeneratedPathsRedV1(follower);
         hoodServo.setPosition(0.80);
 
 
@@ -281,14 +288,11 @@ public class RedCloseV5 extends LinearOpMode {
 
     private void shootOne(Ball target) {
 
-        aimClosest(target);
-
         List<Ball> targetAL = Arrays.asList(slots);
         if (!targetAL.contains(target)) return; // check if has a ball
 
+        aimClosest(target);
         waitForSpindexer();
-        telemetry.addData("spindex pos", spinMotor.getCurrentPosition());
-        telemetry.addData("spindex ideal", spinMotor.getTargetPosition());
         sleep(250); // 400
 
         flickServo.setPosition(flickUp);
@@ -480,14 +484,13 @@ public class RedCloseV5 extends LinearOpMode {
         while (opModeIsActive()) {
             int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
 
-            if (error <= SPIN_TOLERANCE_TICKS && !spinMotor.isBusy() || error <= SPIN_TOLERANCE_TICKS/2) {
+            if (error <= SPIN_TOLERANCE_TICKS) {
                 break;
             }
 
             if (System.currentTimeMillis() - start > SPIN_TIMEOUT_MS) {
                 break; // safety exit
             }
-
 
             sleep(5); // yield to system
         }
