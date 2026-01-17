@@ -84,7 +84,7 @@ public class SpindexerV2 extends LinearOpMode {
     // ---- GAMEPAD 2 FAILSAFES ----
     private boolean prev2A, prev2B;
     
-    private double flickUp = 0.77;
+    private double flickUp = 0.75;
     private double flickDown = 1;
 
     private boolean
@@ -106,7 +106,7 @@ public class SpindexerV2 extends LinearOpMode {
 
         waitForStart();
 
-        hoodServo.setPosition(0.8);
+        hoodServo.setPosition(0.83);
         flickServo.setPosition(flickDown);
 
         while (opModeIsActive()) {
