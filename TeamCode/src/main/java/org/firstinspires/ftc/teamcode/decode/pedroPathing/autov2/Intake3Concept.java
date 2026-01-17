@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -42,14 +41,11 @@ public class Intake3Concept extends OpMode {
 
     // ---------------- INTAKE STATE ----------------
     private boolean intakeActive = false;
-    private boolean waitingForBall = false;
-    private boolean spindexerRotating = false;
 
     // ---------------- PATH FOLLOWING ----------------
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-    private boolean pathPaused = false;
 
     // ---------------- POSES ----------------
     private final Pose startPose = new Pose(0, 0, Math.toRadians(90));
@@ -58,115 +54,113 @@ public class Intake3Concept extends OpMode {
     private final Pose pickup3Pose = new Pose(0, 17, Math.toRadians(90));
 
     // ---------------- PATHS ----------------
-    private PathChain pickup3;
+    private PathChain intakeAllThree;
 
     // ================== PATH BUILDING ==================
     public void buildPaths() {
-        pickup3 = follower.pathBuilder()
+        intakeAllThree = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, pickup3Pose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), pickup3Pose.getHeading())
+
+                // At 25% of path (near ball 1) - check for ball and handle intake
+                .addParametricCallback(0.25, () -> {
+                    handleBallIntake();
+                })
+
+                // At 50% of path (near ball 2) - check for ball and handle intake
+                .addParametricCallback(0.50, () -> {
+                    handleBallIntake();
+                })
+
+                // At 75% of path (near ball 3) - check for ball and handle intake
+                .addParametricCallback(0.75, () -> {
+                    handleBallIntake();
+                })
+
                 .build();
     }
 
-    public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.resetTimer();
-    }
-
-    // ================== MAIN LOOP ==================
-    @Override
-    public void loop() {
-        // Update follower (only moves if not paused)
-        follower.update();
-
-        // Run intake logic continuously
-        processIntake();
-
-        // Handle path pausing/resuming based on spindexer state
-        handlePathPausing();
-
-        // If path is active and not paused, follow it
-        if (!pathPaused && pathState == 1) {
-            follower.followPath(pickup3);
-        }
-
-        // Telemetry
-        telemetry.addData("Path State", pathState);
-        telemetry.addData("Path Paused", pathPaused);
-        telemetry.addData("Spindexer Rotating", spindexerRotating);
-        telemetry.addData("Current Index", index);
-        telemetry.addData("Slots", slots[0] + ", " + slots[1] + ", " + slots[2]);
-        telemetry.addData("X", follower.getPose().getX());
-        telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Heading", follower.getPose().getHeading());
-        telemetry.update();
-    }
-
-    // ================== INTAKE PROCESSING ==================
-    private void processIntake() {
-        if (!intakeActive || !waitingForBall) return;
-
-        // Check if spindexer is still rotating
-        if (spindexerRotating) {
-            if (isSpindexerAtTarget()) {
-                spindexerRotating = false;
-                // Resume path following now that spindexer is ready
-                resumePath();
-            }
-            return; // Don't check for balls while rotating
-        }
-
-        // Detect ball at current slot
+    // ================== INTAKE HANDLING (called from callbacks) ==================
+    private void handleBallIntake() {
+        // Detect if there's a ball
         Ball detected = detectColor(intakeColor, intakeColor2);
 
         if (detected != Ball.EMPTY) {
-            // Ball detected - store it
+            // Pause path following immediately
+            follower.pausePathFollowing();
+
+            // Store ball in current slot
             slots[index] = detected;
 
             // Find next empty slot
             int nextEmpty = findNextEmpty();
 
             if (nextEmpty != -1) {
-                // Pause path following immediately
-                pausePath();
-
-                // Start rotating to next slot
-                spindexerRotating = true;
+                // Rotate spindexer to next slot
                 rotateToIndex(nextEmpty);
             } else {
                 // All slots full - stop intake
                 intakeActive = false;
-                waitingForBall = false;
                 intakeMotor.setPower(0);
             }
         }
     }
 
-    // ================== PATH PAUSE/RESUME ==================
-    private void handlePathPausing() {
-        // This method ensures path state is consistent with spindexer state
-        if (spindexerRotating && !pathPaused) {
-            pausePath();
+    // ================== STATE MACHINE ==================
+    public void setPathState(int pState) {
+        pathState = pState;
+        pathTimer.resetTimer();
+    }
+
+    public void autonomousPathUpdate() {
+        switch (pathState) {
+            case 0: // Start intake path
+                intakeActive = true;
+                intakeMotor.setPower(-0.6);
+                rotateToIndex(0);
+                follower.followPath(intakeAllThree, true);
+                setPathState(1);
+                break;
+
+            case 1: // Following path, handling intake via callbacks
+                // Check if spindexer has finished rotating while paused
+                if (!follower.isBusy()) {
+                    // Path complete
+                    setPathState(2);
+                } else if (isSpindexerAtTarget() && follower.isBusy()) {
+                    // Spindexer done rotating, resume path
+                    follower.resumePathFollowing();
+                }
+                break;
+
+            case 2: // Path complete
+                intakeActive = false;
+                intakeMotor.setPower(0);
+                // Done - could transition to shooting state here
+                break;
         }
     }
 
-    private void pausePath() {
-        if (!pathPaused) {
-            pathPaused = true;
-            follower.pausePathFollowing();
-            // Stop motors to hold position
-            // follower.holdPoint() could be used if available
-        }
-    }
+    // ================== MAIN LOOP ==================
+    @Override
+    public void loop() {
+        // Update follower
+        follower.update();
 
-    private void resumePath() {
-        if (pathPaused) {
-            pathPaused = false;
-            // Re-engage path following
-            if (pathState == 1) {
-                follower.followPath(pickup3);
-            }
-        }
+        // Run state machine
+        autonomousPathUpdate();
+
+        // Telemetry
+        telemetry.addData("Path State", pathState);
+//        telemetry.addData("Path Paused", follower.isPathFollowingPaused());
+        telemetry.addData("Current Index", index);
+        telemetry.addData("Slots", slots[0] + ", " + slots[1] + ", " + slots[2]);
+        telemetry.addData("Spindexer Pos", spinMotor.getCurrentPosition());
+        telemetry.addData("Spindexer Target", lastSpinTarget);
+        telemetry.addData("X", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.update();
     }
 
     // ================== SPINDEXER METHODS ==================
@@ -218,7 +212,6 @@ public class Intake3Concept extends OpMode {
         Ball ball1 = detectSingleSensor(sensor1);
         Ball ball2 = detectSingleSensor(sensor2);
 
-        // Prioritize detected balls
         if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
         if (ball1 == Ball.GREEN  || ball2 == Ball.GREEN)  return Ball.GREEN;
 
@@ -229,16 +222,13 @@ public class Intake3Concept extends OpMode {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        // Reject far / floor
         float total = r + g + b;
         if (total < 0.07f) return Ball.EMPTY;
 
-        // PURPLE: blue-dominant
         if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
             return Ball.PURPLE;
         }
 
-        // GREEN: looser dominance + absolute floor
         if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
             return Ball.GREEN;
         }
@@ -260,10 +250,10 @@ public class Intake3Concept extends OpMode {
         opmodeTimer.resetTimer();
 
         follower = Constants.createFollower(hardwareMap);
-        buildPaths();
         follower.setStartingPose(startPose);
 
         initHardware();
+        buildPaths();
         resetSlots();
     }
 
@@ -293,23 +283,13 @@ public class Intake3Concept extends OpMode {
 
     @Override
     public void init_loop() {
-        // Nothing needed here
     }
 
     // ================== START ==================
     @Override
     public void start() {
         opmodeTimer.resetTimer();
-        setPathState(1);
-
-        // Start intake
-        intakeMotor.setPower(-0.6);
-        intakeActive = true;
-        waitingForBall = true;
-        rotateToIndex(0);
-
-        // Start following path
-        follower.followPath(pickup3);
+        setPathState(0);
     }
 
     // ================== STOP ==================
