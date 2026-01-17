@@ -8,13 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.GeneratedPathsRedBackV5;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback.GeneratedPathsRedBackV5;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.GeneratedPathsBlueBackV4;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.BlueBackV4;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.Arrays;
 import java.util.List;
-@Autonomous(name = "!!Red Close Qualy 2")
+
+@Autonomous(name = "!!Red Close V5 Qualy 2")
 public class RedCloseV5 extends LinearOpMode {
 
     private int index = 0;
@@ -43,21 +44,21 @@ public class RedCloseV5 extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {504, 0, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.38;
+    private double spinMotorSpeed = 0.35;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
     private boolean waitingForBall = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
-    private static final long SPIN_TIMEOUT_MS = 3000;
+    private static final long SPIN_TIMEOUT_MS = 10000;
 
     private int lastSpinTarget = 0;
 
-    private double flickUp = 0.77;
+    private double flickUp = 0.75;
     private double flickDown = 1;
 
     // ---------------- RUN ----------------
@@ -84,7 +85,7 @@ public class RedCloseV5 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.935);
 
         flickServo.setPosition(flickDown);
 
@@ -99,14 +100,14 @@ public class RedCloseV5 extends LinearOpMode {
 
         aimClosest(pattern[0]);
 
-        runPath(paths.shoot(), 0, 0.8);
+        runPath(paths.shoot(), 0, 1);
         telemetry.addData("X SHOOT", follower.getPose().getX());
         telemetry.addData("Y SHOOT", follower.getPose().getY());
 
         // ---- SHOOT ----
         shoot(pattern);
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(-0.8);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -124,7 +125,8 @@ public class RedCloseV5 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball1(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 750) {
+        //slots[0] = Ball.PURPLE;
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -132,7 +134,8 @@ public class RedCloseV5 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball2(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 750) {
+        //slots[0] = Ball.PURPLE;
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -140,13 +143,14 @@ public class RedCloseV5 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball3(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 500) {
+        //slots[0] = Ball.GREEN;
+        while (System.currentTimeMillis() < startTime + 250) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
@@ -157,7 +161,9 @@ public class RedCloseV5 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 250, 0.75);
+        intakeMotor.setPower(-0.6);
+        runPath(paths.shoot2(), 5, 1);
+        intakeMotor.setPower(-0.8);
 
         // ---- SHOOT ----
         shoot(pattern);
@@ -181,7 +187,8 @@ public class RedCloseV5 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball4(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 750) {
+        //slots[0] = Ball.PURPLE;
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -189,7 +196,8 @@ public class RedCloseV5 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball5(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 750) {
+        //slots[0] = Ball.GREEN;
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
@@ -197,13 +205,14 @@ public class RedCloseV5 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball6(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 500) {
+        //slots[0] = Ball.PURPLE;
+        while (System.currentTimeMillis() < startTime + 250) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
@@ -214,7 +223,9 @@ public class RedCloseV5 extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot3(), 250, 0.75);
+        intakeMotor.setPower(-0.6);
+        runPath(paths.shoot3(), 5, 1);
+        intakeMotor.setPower(-0.8);
 
         // ---- SHOOT ----
         shoot(pattern);
@@ -226,7 +237,7 @@ public class RedCloseV5 extends LinearOpMode {
 
         intakeActive = false;
         rotateToIndex(0);
-//        runPath(paths.toGate(), 50, 1);
+//        runPath(paths.toGate(), 5, 1);
 
         telemetry.addLine("Finished");
         telemetry.update();
@@ -281,18 +292,15 @@ public class RedCloseV5 extends LinearOpMode {
 
     private void shootOne(Ball target) {
 
-        aimClosest(target);
-
         List<Ball> targetAL = Arrays.asList(slots);
         if (!targetAL.contains(target)) return; // check if has a ball
 
+        aimClosest(target);
         waitForSpindexer();
-        telemetry.addData("spindex pos", spinMotor.getCurrentPosition());
-        telemetry.addData("spindex ideal", spinMotor.getTargetPosition());
-        sleep(250); // 400
+        sleep(400); // 400
 
         flickServo.setPosition(flickUp);
-        sleep(250); // 500
+        sleep(500); // 500
         flickServo.setPosition(flickDown);
         sleep(250); // 300
 
@@ -314,7 +322,7 @@ public class RedCloseV5 extends LinearOpMode {
             }
         }
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(-0.8);
 
     }
 
@@ -470,7 +478,7 @@ public class RedCloseV5 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.935);
 
     }
 
@@ -480,14 +488,13 @@ public class RedCloseV5 extends LinearOpMode {
         while (opModeIsActive()) {
             int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
 
-            if (error <= SPIN_TOLERANCE_TICKS && !spinMotor.isBusy() || error <= SPIN_TOLERANCE_TICKS/2) {
+            if (error <= SPIN_TOLERANCE_TICKS) {
                 break;
             }
 
             if (System.currentTimeMillis() - start > SPIN_TIMEOUT_MS) {
                 break; // safety exit
             }
-
 
             sleep(5); // yield to system
         }
