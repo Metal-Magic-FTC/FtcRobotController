@@ -1,511 +1,439 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov3;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.*;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
-import java.util.Arrays;
-import java.util.List;
+@Autonomous(name = "Mechanism Auto", group = "Autonomous")
+public class BlueClose extends OpMode {
 
-@Autonomous(name = "!!Blue Close")
-public class BlueClose extends LinearOpMode {
+    // ========== MECHANISM STATE ENUMS ==========
+    public enum SpindexerState {
+        IDLE,
+        INDEXING,
+        EJECTING,
+        RESET
+    }
 
-    private int index = 0;
+    public enum IntakeState {
+        IDLE,
+        INTAKING,
+        OUTTAKING,
+        RESET
+    }
 
-    private float gain = 20;
+    public enum FlickerState {
+        IDLE,
+        FLICKING,
+        RESET
+    }
 
-    private enum Ball { EMPTY, PURPLE, GREEN }
-    private Ball[] slots = {Ball.EMPTY, Ball.EMPTY, Ball.EMPTY};
+    public enum LauncherState {
+        IDLE,
+        SPINNING_UP,
+        READY,
+        LAUNCHING,
+        RESET
+    }
 
-    // ---------------- DRIVE ----------------
+    public enum ShooterHoodState {
+        IDLE,
+        HIGH_GOAL,
+        MID_GOAL,
+        LOW_GOAL,
+        MOVING
+    }
+
+    // ========== MECHANISM STATE VARIABLES ==========
+    private SpindexerState spindexerState = SpindexerState.IDLE;
+    private IntakeState intakeState = IntakeState.IDLE;
+    private FlickerState flickerState = FlickerState.IDLE;
+    private LauncherState launcherState = LauncherState.IDLE;
+    private ShooterHoodState shooterHoodState = ShooterHoodState.IDLE;
+
+    // ========== PATH FOLLOWING ==========
     private Follower follower;
-    private GeneratedPathsBlue paths;
-    private CustomMecanumDrive drivetrain;
-    private Limelight3A limelight;
+    private Timer pathTimer, actionTimer, opmodeTimer;
+    private int pathState;
 
-    // ---------------- INTAKE, TRANSFER, SCORING ----------------
+    // ========== POSES ==========
+    private final Pose startPose = new Pose(28.5, 128, Math.toRadians(180));
+    private final Pose scorePose = new Pose(60, 85, Math.toRadians(135));
+    private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
 
-    private DcMotor spinMotor;
-    private DcMotorEx launchMotor;
-    private DcMotor intakeMotor;
-    Servo hoodServo;
-    Servo flickServo;
-    NormalizedColorSensor intakeColor;
-    NormalizedColorSensor intakeColor2;
+    // ========== PATHS ==========
+    private Path scorePreload;
+    private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
 
-    private static final int[] OUTTAKE_POS = {500, 0, 250};
-    private static final int[] INTAKE_POS  = {125, 375, 625};
+    // ========== HARDWARE (Add your actual hardware here) ==========
+    // private DcMotor spindexerMotor;
+    // private CRServo intakeServo;
+    // private Servo flickerServo;
+    // private DcMotor launcherMotor;
+    // private Servo shooterHoodServo;
 
-    private double spinMotorSpeed = 0.4;
+    /** Build all autonomous paths **/
+    public void buildPaths() {
+        scorePreload = new Path(new BezierLine(startPose, scorePose));
+        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
-    private boolean intakeActive = false;
-    private boolean waitingToRotate = false;
-    private boolean waitingForBall = false;
-    private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
-    private int nextIndexAfterDelay = -1;
+        grabPickup1 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, pickup1Pose))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+                .build();
 
-    private static final int SPIN_TOLERANCE_TICKS = 5;
-    private static final long SPIN_TIMEOUT_MS = 10000;
+        scorePickup1 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup1Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+                .build();
 
-    private int lastSpinTarget = 0;
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, pickup2Pose))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
+                .build();
 
-    // ---------------- RUN ----------------
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+                .build();
+
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, pickup3Pose))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
+    }
+
+    /** Main autonomous path state machine **/
+    public void autonomousPathUpdate() {
+        switch (pathState) {
+            case 0: // Start - prepare launcher and move to score
+                setLauncherState(LauncherState.SPINNING_UP);
+                setShooterHoodState(ShooterHoodState.HIGH_GOAL);
+                follower.followPath(scorePreload);
+                setPathState(1);
+                break;
+
+            case 1: // Wait for launcher to be ready
+                if (isLauncherReady() && isShooterHoodReady()) {
+                    setPathState(2);
+                }
+                break;
+
+            case 2: // Move to score position
+                if (!follower.isBusy()) {
+                    setFlickerState(FlickerState.FLICKING);
+                    setPathState(3);
+                }
+                break;
+
+            case 3: // Score preload
+                if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    setFlickerState(FlickerState.RESET);
+                    setLauncherState(LauncherState.RESET);
+                    follower.followPath(grabPickup1, true);
+                    setIntakeState(IntakeState.INTAKING); // Intake while driving
+                    setPathState(4);
+                }
+                break;
+
+            case 4: // Grab pickup 1
+                if (!follower.isBusy()) {
+                    setIntakeState(IntakeState.RESET);
+                    setSpindexerState(SpindexerState.INDEXING);
+                    setPathState(5);
+                }
+                break;
+
+            case 5: // Wait for spindexer to index
+                if (isSpindexerReady()) {
+                    setLauncherState(LauncherState.SPINNING_UP);
+                    follower.followPath(scorePickup1, true);
+                    setPathState(6);
+                }
+                break;
+
+            case 6: // Move to score and wait for launcher
+                if (!follower.isBusy() && isLauncherReady()) {
+                    setFlickerState(FlickerState.FLICKING);
+                    setPathState(7);
+                }
+                break;
+
+            case 7: // Score pickup 1
+                if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    setFlickerState(FlickerState.RESET);
+                    follower.followPath(grabPickup2, true);
+                    setIntakeState(IntakeState.INTAKING); // Intake while driving
+                    setPathState(8);
+                }
+                break;
+
+            case 8: // Grab pickup 2
+                if (!follower.isBusy()) {
+                    setIntakeState(IntakeState.RESET);
+                    setSpindexerState(SpindexerState.INDEXING);
+                    setPathState(9);
+                }
+                break;
+
+            case 9: // Wait for spindexer to index
+                if (isSpindexerReady()) {
+                    follower.followPath(scorePickup2, true);
+                    setPathState(10);
+                }
+                break;
+
+            case 10: // Move to score and wait for launcher
+                if (!follower.isBusy() && isLauncherReady()) {
+                    setFlickerState(FlickerState.FLICKING);
+                    setPathState(11);
+                }
+                break;
+
+            case 11: // Score pickup 2
+                if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    setFlickerState(FlickerState.RESET);
+                    follower.followPath(grabPickup3, true);
+                    setIntakeState(IntakeState.INTAKING); // Intake while driving
+                    setPathState(12);
+                }
+                break;
+
+            case 12: // Grab pickup 3
+                if (!follower.isBusy()) {
+                    setIntakeState(IntakeState.RESET);
+                    setSpindexerState(SpindexerState.INDEXING);
+                    setPathState(13);
+                }
+                break;
+
+            case 13: // Wait for spindexer to index
+                if (isSpindexerReady()) {
+                    follower.followPath(scorePickup3, true);
+                    setPathState(14);
+                }
+                break;
+
+            case 14: // Move to score and wait for launcher
+                if (!follower.isBusy() && isLauncherReady()) {
+                    setFlickerState(FlickerState.FLICKING);
+                    setPathState(15);
+                }
+                break;
+
+            case 15: // Score pickup 3 and finish
+                if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    setFlickerState(FlickerState.RESET);
+                    setLauncherState(LauncherState.RESET);
+                    setPathState(-1); // Complete
+                }
+                break;
+        }
+    }
+
+    // ========== MECHANISM CONTROL METHODS ==========
+
+    public void setSpindexerState(SpindexerState state) {
+        spindexerState = state;
+        switch (state) {
+            case IDLE:
+                // spindexerMotor.setPower(0);
+                break;
+            case INDEXING:
+                // spindexerMotor.setPower(0.6);
+                break;
+            case EJECTING:
+                // spindexerMotor.setPower(-0.5);
+                break;
+            case RESET:
+                // spindexerMotor.setPower(0);
+                break;
+        }
+    }
+
+    public void setIntakeState(IntakeState state) {
+        intakeState = state;
+        switch (state) {
+            case IDLE:
+            case RESET:
+                // intakeServo.setPower(0);
+                break;
+            case INTAKING:
+                // intakeServo.setPower(1.0);
+                break;
+            case OUTTAKING:
+                // intakeServo.setPower(-1.0);
+                break;
+        }
+    }
+
+    public void setFlickerState(FlickerState state) {
+        flickerState = state;
+        switch (state) {
+            case IDLE:
+            case FLICKING:
+                // flickerServo.setPosition(0.8);
+                break;
+            case RESET:
+                // flickerServo.setPosition(0.2);
+                break;
+        }
+    }
+
+    public void setLauncherState(LauncherState state) {
+        launcherState = state;
+        switch (state) {
+            case IDLE:
+            case RESET:
+                // launcherMotor.setPower(0);
+                break;
+            case SPINNING_UP:
+            case READY:
+            case LAUNCHING:
+                // launcherMotor.setPower(0.95);
+                break;
+        }
+    }
+
+    public void setShooterHoodState(ShooterHoodState state) {
+        shooterHoodState = state;
+        switch (state) {
+            case IDLE:
+                // shooterHoodServo.setPosition(0.5);
+                break;
+            case HIGH_GOAL:
+                // shooterHoodServo.setPosition(0.8);
+                shooterHoodState = ShooterHoodState.MOVING;
+                break;
+            case MID_GOAL:
+                // shooterHoodServo.setPosition(0.5);
+                shooterHoodState = ShooterHoodState.MOVING;
+                break;
+            case LOW_GOAL:
+                // shooterHoodServo.setPosition(0.2);
+                shooterHoodState = ShooterHoodState.MOVING;
+                break;
+            case MOVING:
+                // No action - waiting for servo to reach position
+                break;
+        }
+    }
+
+    // ========== MECHANISM READY CHECK METHODS ==========
+
+    public boolean isSpindexerReady() {
+        // Check if spindexer has completed indexing
+        // Example: check encoder position or use timer
+        if (spindexerState == SpindexerState.INDEXING) {
+            if (pathTimer.getElapsedTimeSeconds() > 0.8) {
+                setSpindexerState(SpindexerState.RESET);
+                return true;
+            }
+            return false;
+        }
+        return spindexerState == SpindexerState.RESET;
+    }
+
+    public boolean isLauncherReady() {
+        // Check if launcher is at target velocity
+        // Example: return Math.abs(launcherMotor.getVelocity() - targetVelocity) < tolerance;
+        if (launcherState == LauncherState.SPINNING_UP) {
+            if (pathTimer.getElapsedTimeSeconds() > 1.5) {
+                launcherState = LauncherState.READY;
+                return true;
+            }
+            return false;
+        }
+        return launcherState == LauncherState.READY || launcherState == LauncherState.LAUNCHING;
+    }
+
+    public boolean isShooterHoodReady() {
+        // Check if hood servo has reached target position
+        // Example: return Math.abs(shooterHoodServo.getPosition() - targetPosition) < 0.05;
+        if (shooterHoodState == ShooterHoodState.MOVING) {
+            if (pathTimer.getElapsedTimeSeconds() > 0.4) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /** Set path state and reset timer **/
+    public void setPathState(int pState) {
+        pathState = pState;
+        pathTimer.resetTimer();
+    }
+
+    // ========== OPMODE LIFECYCLE METHODS ==========
+
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void loop() {
+        follower.update();
+        autonomousPathUpdate();
 
-        initHardware();
-        resetSlots();
+        // Telemetry feedback
+        telemetry.addData("path state", pathState);
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("heading", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("---", "---");
+        telemetry.addData("Spindexer", spindexerState);
+        telemetry.addData("Intake", intakeState);
+        telemetry.addData("Flicker", flickerState);
+        telemetry.addData("Launcher", launcherState);
+        telemetry.addData("Shooter Hood", shooterHoodState);
+        telemetry.update();
+    }
 
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
+    @Override
+    public void init() {
+        pathTimer = new Timer();
+        actionTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlue.START_POSE);
-        paths = new GeneratedPathsBlue(follower);
-        hoodServo.setPosition(0.80);
 
+        // Initialize hardware here
+        // spindexerMotor = hardwareMap.get(DcMotor.class, "spindexer");
+        // intakeServo = hardwareMap.get(CRServo.class, "intake");
+        // flickerServo = hardwareMap.get(Servo.class, "flicker");
+        // launcherMotor = hardwareMap.get(DcMotor.class, "launcher");
+        // shooterHoodServo = hardwareMap.get(Servo.class, "shooterHood");
 
-        telemetry.addLine("Ready");
-        telemetry.update();
-
-        waitForStart();
-        if (isStopRequested()) return;
-
-        launchMotor.setPower(1);
-
-        // scan balls
-        //scanBallsInSlots(5000);
-
-        runPath(paths.scan(), 250, 1.0);
-
-        Ball[] pattern = getPatternFromTag();
-
-        aimClosest(pattern[0]);
-
-        runPath(paths.shoot(), 250, 0.725);
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-        intakeMotor.setPower(-0.6);
-        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
-
-        // ---- INTAKE 1–3 ----
-        intakeActive = true;
-        rotateToIndex(0);
-        runPath(paths.toIntake1(), 50, 1);
-        resetSlots();
-        runPathWithIntake(paths.intakeball1(), 250, 0.21);
-        runPathWithIntake(paths.intakeball2(), 250, 0.21);
-        double startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 1000) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-        runPathWithIntake(paths.intakeball3(), 250, 0.21);
-        startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 1000) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        aimClosest(pattern[0]);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        runPath(paths.shoot2(), 250, 0.75);
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-        intakeMotor.setPower(-0.6);
-        intakeActive = false;
-        rotateToIndex(0);
-        resetSlots();
-
-        // ---- INTAKE 4–6 ----
-        intakeActive = false;
-        rotateToIndex(0);
-//        runPath(paths.toIntake2(), 50, 1);
-//        runPathWithIntake(paths.intakeball6(), 250, 0.20);
-//
-//        runPath(paths.shoot3(), 50, 1);
-//        shoot(pattern);
-
-        telemetry.addLine("Finished");
-        telemetry.update();
+        buildPaths();
+        follower.setStartingPose(startPose);
     }
 
-    // ---------------- SPINDEXER ----------------
+    @Override
+    public void init_loop() {}
 
-    private void rotateToIndex(int target) {
-        index = target;
-        int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
-        int targetPos = closestModular(base, spinMotor.getCurrentPosition());
-
-        lastSpinTarget = targetPos; // store target
-
-        spinMotor.setTargetPosition(targetPos);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(spinMotorSpeed);
+    @Override
+    public void start() {
+        opmodeTimer.resetTimer();
+        setPathState(0);
     }
 
-    private int closestModular(int mod, int current) {
-        int best = mod;
-        int minDiff = Integer.MAX_VALUE;
-        for (int k = -2; k <= 2; k++) {
-            int candidate = mod + 750 * k;
-            int diff = Math.abs(candidate - current);
-            if (diff < minDiff) {
-                minDiff = diff;
-                best = candidate;
-            }
-        }
-        return best;
-    }
-
-    private void aimClosest(Ball target) {
-        intakeActive = false;
-        for (int i = 0; i < 3; i++) {
-            int idx = (index + i) % 3;
-            if (slots[idx] == target) {
-                rotateToIndex(idx);
-                return;
-            }
-        }
-    }
-
-    private int findNextEmpty() {
-        for (int i = 0; i < 3; i++) {
-            int idx = (index + i) % 3;
-            if (slots[idx] == Ball.EMPTY) return idx;
-        }
-        return -1;
-    }
-
-    private void shootOne(Ball target) {
-
-        List<Ball> targetAL = Arrays.asList(slots);
-        if (!targetAL.contains(target)) return; // check if has a ball
-
-        aimClosest(target);
-        waitForSpindexer();
-        sleep(400);
-
-        flickServo.setPosition(0.71);
-        sleep(500);
-        flickServo.setPosition(0.9);
-        sleep(300);
-
-        if (slots[index] == target) {
-            slots[index] = Ball.EMPTY;
-        }
-
-    }
-
-    private void shoot(Ball[] pattern) {
-
-        intakeActive = false;
-        intakeMotor.setPower(0);
-
-        for (Ball ball : pattern) {
-            //shootOne(ball);
-            if (ball != Ball.EMPTY) {
-                shootOne(ball);
-            }
-        }
-
-        intakeMotor.setPower(-0.6);
-
-    }
-
-    private void intake() {
-
-        // spindexer logic (COLOR-BASED DETECTION) with delay
-        if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
-            Ball detected = detectColor(intakeColor, intakeColor2);
-
-            if (detected != Ball.EMPTY) {
-                slots[index] = detected;
-                waitingForBall = false;
-
-                // compute next index, but don't rotate yet
-                int nextEmpty = findNextEmpty();
-                nextIndexAfterDelay = nextEmpty;
-                colorDetectedTime = System.currentTimeMillis();
-                waitingToRotate = true;
-                intakeMotor.setPower(0);
-            }
-        }
-
-        // after COLOR_DELAY_MS, rotate if needed
-        if (waitingToRotate) {
-            if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
-//                int nextEmpty = findNextEmpty();
-//                nextIndexAfterDelay = nextEmpty;
-                if (nextIndexAfterDelay != -1) {
-                    rotateToIndex(nextIndexAfterDelay);
-                    waitingForBall = true; // continue intake
-                    intakeMotor.setPower(-0.6);
-                } else {
-//                    intakeActive = false;
-//                    rotateToIndex(0); // back to home
-                    // Stay in intake position, keep waiting
-                    waitingForBall = true;
-                }
-                waitingToRotate = false; // reset
-            }
-        }
-    }
-
-    private void scanBallsInSlots(long timeoutMs) {
-
-        long start = System.currentTimeMillis();
-
-        int nextEmpty = findNextEmpty();
-
-        if (nextEmpty != -1) {
-            // normal intake
-            intakeActive = true;
-            waitingForBall = true;
-            rotateToIndex(nextEmpty);
-        } else {
-            // all full then go shoot
-            intakeActive = false;
-            waitingForBall = false;
-
-            int nextLoaded = findClosestLoaded();
-            if (nextLoaded != -1) {
-                rotateToIndex(nextLoaded);
-            }
-        }
-
-        intakeActive = true;
-        while (opModeIsActive()
-                && System.currentTimeMillis() - start < timeoutMs
-                && Arrays.asList(slots).contains(Ball.EMPTY)) {
-            intake();
-        }
-
-        int purpleCount = 0;
-        int greenCount = 0;
-        int emptyIndex = -1;
-
-        // 1. Scan the array to see what we have
-        for (int i = 0; i < slots.length; i++) {
-            if (slots[i] == Ball.PURPLE) purpleCount++;
-            else if (slots[i] == Ball.GREEN) greenCount++;
-            else if (slots[i] == Ball.EMPTY) emptyIndex = i;
-        }
-
-        // 2. If we found an empty slot, fill it based on what's missing
-        if (emptyIndex != -1) {
-            if (purpleCount < 2) {
-                slots[emptyIndex] = Ball.PURPLE;
-            } else if (greenCount < 1) {
-                slots[emptyIndex] = Ball.GREEN;
-            }
-        }
-
-        intakeActive = false;
-        waitingForBall = false;
-
-        rotateToIndex(0);
-
-    }
-
-    private int findClosestLoaded() {
-        for (int i = 0; i < 3; i++) {
-            int idx = (index + i) % 3;
-            if (slots[idx] != Ball.EMPTY) return idx;
-        }
-        return -1;
-    }
-
-    // ---------------- PATH HELPERS ----------------
-    private void runPath(PathChain path, int stopDelay, double speed) {
-        follower.setMaxPower(speed);
-        follower.followPath(path);
-        while (opModeIsActive() && follower.isBusy()) follower.update();
-        follower.breakFollowing();
-        if (stopDelay > 0) sleep(stopDelay);
-    }
-
-    private void runPathWithIntake(PathChain path, int stopDelay, double speed) {
-
-//        int nextEmpty = findNextEmpty();
-//
-//        if (nextEmpty != -1) {
-//            // normal intake
-//            intakeActive = true;
-//            waitingForBall = true;
-//            rotateToIndex(nextEmpty);
-//        } else {
-//            // all full then go shoot
-//            intakeActive = false;
-//            waitingForBall = false;
-//
-//            int nextLoaded = findClosestLoaded();
-//            if (nextLoaded != -1) {
-//                rotateToIndex(nextLoaded);
-//            }
-//        }
-
-        launchMotor.setPower(0);
-        intakeActive = true;
-        waitingForBall = true;
-
-        follower.setMaxPower(speed);
-        follower.followPath(path);
-        while (opModeIsActive() && follower.isBusy()) {
-            follower.update();
-
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-
-        }
-        follower.breakFollowing();
-        if (stopDelay > 0) sleep(stopDelay);
-
-        intakeActive = false;
-        waitingForBall = false;
-
-        launchMotor.setPower(1);
-
-    }
-
-    private void waitForSpindexer() {
-        long start = System.currentTimeMillis();
-
-        while (opModeIsActive()) {
-            int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
-
-            if (error <= SPIN_TOLERANCE_TICKS) {
-                break;
-            }
-
-            if (System.currentTimeMillis() - start > SPIN_TIMEOUT_MS) {
-                break; // safety exit
-            }
-
-            sleep(5); // yield to system
-        }
-    }
-
-    // ---------------- APRILTAG AND COLOR SENSORS ----------------
-    private Ball[] getPatternFromTag() {
-        int id = detectAprilTag(2000);
-        if (id == 21) return new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE};
-        if (id == 23) return new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
-        return new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
-    }
-
-    private int detectAprilTag(long timeoutMs) {
-        long start = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
-            LLResult r = limelight.getLatestResult();
-            if (r != null && r.isValid() && !r.getFiducialResults().isEmpty())
-                return r.getFiducialResults().get(0).getFiducialId();
-            sleep(15);
-        }
-        return 22;
-    }
-
-    private void enableLight(NormalizedColorSensor s) {
-        if (s instanceof SwitchableLight) {
-            ((SwitchableLight) s).enableLight(true);
-        }
-    }
-
-    private Ball detectColor(NormalizedColorSensor sensor1, NormalizedColorSensor sensor2) {
-        Ball ball1 = detectSingleSensor(sensor1);
-        Ball ball2 = detectSingleSensor(sensor2);
-
-        // Prioritize detected balls
-        if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
-        if (ball1 == Ball.GREEN  || ball2 == Ball.GREEN)  return Ball.GREEN;
-
-        return Ball.EMPTY;
-    }
-
-    // helper function for a single sensor
-    private Ball detectSingleSensor(NormalizedColorSensor sensor) {
-        NormalizedRGBA c = sensor.getNormalizedColors();
-        float r = c.red, g = c.green, b = c.blue;
-
-        // reject far / floor
-        float total = r + g + b;
-        if (total < 0.07f) return Ball.EMPTY;
-
-        // PURPLE: blue-dominant (keep strict)
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
-            return Ball.PURPLE;
-        }
-
-        // GREEN: looser dominance + absolute floor
-        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
-            return Ball.GREEN;
-        }
-
-        return Ball.EMPTY;
-    }
-
-    // ---------------- INIT ----------------
-    private void initHardware() {
-
-        drivetrain = new CustomMecanumDrive(hardwareMap);
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(3);  // APRILTAG PIPELINE
-        limelight.start();
-
-        spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
-        intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
-        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
-
-        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        spinMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        intakeColor.setGain(gain);
-        enableLight(intakeColor);
-
-        intakeColor2.setGain(gain);
-        enableLight(intakeColor2);
-
-        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
-        launchMotor.setPower(0);
-
-        hoodServo = hardwareMap.servo.get("hoodServo");
-        flickServo = hardwareMap.servo.get("flickServo");
-
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-    }
-
-    private void resetSlots() {
-        for (int i = 0; i < 3; i++) slots[i] = Ball.EMPTY;
+    @Override
+    public void stop() {
+        // Ensure all mechanisms are stopped
+        setSpindexerState(SpindexerState.IDLE);
+        setIntakeState(IntakeState.RESET);
+        setLauncherState(LauncherState.RESET);
     }
 }
