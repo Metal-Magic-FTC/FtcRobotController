@@ -32,7 +32,7 @@ public class SpindexerV2 extends LinearOpMode {
     private NormalizedColorSensor intakeColor;
     private NormalizedColorSensor intakeColor2;
 
-    private static final int[] OUTTAKE_POS = {504, 0, 252};
+    private static final int[] OUTTAKE_POS = {504, 2, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
     private enum Ball { EMPTY, PURPLE, GREEN }

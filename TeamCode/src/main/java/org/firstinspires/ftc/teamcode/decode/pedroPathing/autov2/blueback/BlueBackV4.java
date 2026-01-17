@@ -41,7 +41,7 @@ public class BlueBackV4 extends LinearOpMode {
     NormalizedColorSensor intakeColor;
     NormalizedColorSensor intakeColor2;
 
-    private static final int[] OUTTAKE_POS = {504, 0, 252};
+    private static final int[] OUTTAKE_POS = {504, 2, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
     private double spinMotorSpeed = 0.38;
@@ -125,7 +125,7 @@ public class BlueBackV4 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball1(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
+        slots[0] = Ball.PURPLE;
         while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
@@ -134,21 +134,23 @@ public class BlueBackV4 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball2(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
+
         while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
+        slots[0] = Ball.PURPLE;
 
         runPathWithIntake(paths.intakeball3(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        //slots[0] = Ball.GREEN;
+
         while (System.currentTimeMillis() < startTime + 250) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
+        slots[0] = Ball.GREEN;
 
         intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
@@ -187,12 +189,13 @@ public class BlueBackV4 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball4(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
+
         while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
+        slots[0] = Ball.PURPLE;
 
         runPathWithIntake(paths.intakeball5(), 0, 0.3);
         startTime = System.currentTimeMillis();
@@ -202,6 +205,7 @@ public class BlueBackV4 extends LinearOpMode {
             intakeActive = true;
             intake();
         }
+        slots[0] = Ball.GREEN;
 
         runPathWithIntake(paths.intakeball6(), 0, 0.3);
         startTime = System.currentTimeMillis();
@@ -211,6 +215,7 @@ public class BlueBackV4 extends LinearOpMode {
             intakeActive = true;
             intake();
         }
+        slots[0] = Ball.PURPLE;
 
         intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
