@@ -85,7 +85,7 @@ public class BlueBackV4 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.925);
 
         flickServo.setPosition(flickDown);
 
@@ -478,7 +478,7 @@ public class BlueBackV4 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.925);
 
     }
 
