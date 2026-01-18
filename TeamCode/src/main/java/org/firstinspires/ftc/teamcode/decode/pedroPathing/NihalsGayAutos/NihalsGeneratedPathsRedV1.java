@@ -59,7 +59,7 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(SHOOT_POSE, new Pose(100, 36))
+                        new BezierLine(SHOOT_POSE, new Pose(100, 44))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
                 .build();
@@ -68,7 +68,7 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain intakeball1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(100, 36), new Pose(110, 36))
+                        new BezierLine(new Pose(100, 44), new Pose(110, 44))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -77,7 +77,7 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain intakeball2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(110, 36), new Pose(116, 36))
+                        new BezierLine(new Pose(110, 44), new Pose(116, 44))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -86,27 +86,34 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain intakeball3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(116, 36), new Pose(128, 36))
+                        new BezierLine(new Pose(116, 44), new Pose(128, 44))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
     }
 
 
-
+    public PathChain midPointShoot() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(new Pose(128, 44), new Pose(85, 54))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
+                .build();
+    }
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(107, 89), SHOOT_POSE) // x used to be 116
+                        new BezierLine(new Pose(128, 44), SHOOT_POSE) // x used to be 116
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
+                .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(45))
                 .build();
     }
 
     public PathChain toIntake2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(93, 94), new Pose(101, 59))
+                        new BezierLine( SHOOT_POSE, new Pose(101, 70))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
                 .build();
@@ -115,7 +122,7 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain intakeball4() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(101, 59), new Pose(110,59))
+                        new BezierLine(new Pose(101, 70), new Pose(110,70))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -123,7 +130,7 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain intakeball5() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(110, 59), new Pose(114, 59))
+                        new BezierLine(new Pose(110, 70), new Pose(114, 70))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -131,7 +138,7 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain intakeball6() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(114, 59), new Pose(127, 59))
+                        new BezierLine(new Pose(114, 70), new Pose(127, 70))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -140,7 +147,7 @@ public class NihalsGeneratedPathsRedV1 {
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(84, 80), SHOOT_POSE)
+                        new BezierLine(new Pose(127, 70), SHOOT_POSE)
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
                 .build();

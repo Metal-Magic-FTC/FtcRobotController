@@ -164,7 +164,11 @@ public class NihalsRedV1 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 250, 0.75);
+
+        runPath(paths.midPointShoot(), 250, 0.75);
+
+
+        runPath(paths.shoot2(), 250, 1);
 
         // ---- SHOOT ----
         shoot(pattern);
