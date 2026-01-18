@@ -145,4 +145,13 @@ public class GeneratedPathsRedBackV5 {
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(41))
                 .build();
     }
+
+    public PathChain toGate() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(SHOOT_POSE, new Pose(85, 70))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(42), Math.toRadians(0))
+                .build();
+    }
 }

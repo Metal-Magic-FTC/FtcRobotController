@@ -73,7 +73,7 @@ import java.util.List;
  *   Red: 2
  */
 @TeleOp(name = "Sensor: Limelight3A", group = "Sensor")
-@Disabled
+//@Disabled
 public class limeLight extends LinearOpMode {
 
     private Limelight3A limelight;

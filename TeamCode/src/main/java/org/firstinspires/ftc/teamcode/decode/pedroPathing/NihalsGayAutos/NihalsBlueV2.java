@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.redback;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.NihalsGayAutos;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "!!Red Close V5 Qualy 2")
-public class RedCloseV5 extends LinearOpMode {
+@Autonomous(name = "!!!! Blue FAR 3 ball Qualy 2")
+public class NihalsBlueV2 extends LinearOpMode {
 
     private int index = 0;
 
@@ -27,7 +27,7 @@ public class RedCloseV5 extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsRedBackV5 paths;
+    private NihalsGeneratedPathsBlueV1 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -44,7 +44,7 @@ public class RedCloseV5 extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {504, 2, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.35;
+    private double spinMotorSpeed = 0.38;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -74,9 +74,9 @@ public class RedCloseV5 extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRedBackV5.START_POSE);
-        paths = new GeneratedPathsRedBackV5(follower);
-        hoodServo.setPosition(0.77);
+        follower.setPose(NihalsGeneratedPathsBlueV1.START_POSE);
+        paths = new NihalsGeneratedPathsBlueV1(follower);
+        hoodServo.setPosition(0.76);
 
 
         telemetry.addLine("Ready");
@@ -85,16 +85,16 @@ public class RedCloseV5 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(0.91); // 0.935
+        launchMotor.setPower(0.97);
 
         flickServo.setPosition(flickDown);
 
         // scan balls
         //scanBallsInSlots(5000);
 
-        runPath(paths.scan(), 0, 1.0);
-        telemetry.addData("X SCAN", follower.getPose().getX());
-        telemetry.addData("Y SCAN", follower.getPose().getY());
+//        runPath(paths.scan(), 0, 1.0);
+//        telemetry.addData("X SCAN", follower.getPose().getX());
+//        telemetry.addData("Y SCAN", follower.getPose().getY());
 
         Ball[] pattern = getPatternFromTag();
 
@@ -112,135 +112,149 @@ public class RedCloseV5 extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        // ---- INTAKE 1–3 ----
+        runPath(paths.returnToStart(), 20, 0.8);
+        runPath(paths.slide(), 20, 0.8);
 
-        double startTime;
-
-        intakeActive = true;
-        rotateToIndex(0);
-        runPath(paths.toIntake1(), 0, 1);
-        telemetry.addData("X intake1", follower.getPose().getX());
-        telemetry.addData("Y intake2", follower.getPose().getY());
-        resetSlots();
-
-        runPathWithIntake(paths.intakeball1(), 0, 0.3);
-        startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
-        while (System.currentTimeMillis() < startTime + 650) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-
-        runPathWithIntake(paths.intakeball2(), 0, 0.3);
-        startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
-        while (System.currentTimeMillis() < startTime + 650) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-
-        runPathWithIntake(paths.intakeball3(), 0, 0.3);
-        startTime = System.currentTimeMillis();
-        //slots[0] = Ball.GREEN;
-        while (System.currentTimeMillis() < startTime + 250) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-
-        intakeMotor.setPower(-0.8);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        aimClosest(pattern[0]);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        intakeMotor.setPower(0.6);
-        runPath(paths.shoot2(), 5, 1);
-        intakeMotor.setPower(-0.8);
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-//        intakeMotor.setPower(-0.6);
+//        // ---- INTAKE 1–3 ----
+//
+//        double startTime;
+//
 //        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
-
-        // ---- INTAKE 4–6 ----
+//        rotateToIndex(0);
+//        runPath(paths.toIntake1(), 0, 1);
+//        telemetry.addData("X intake1", follower.getPose().getX());
+//        telemetry.addData("Y intake2", follower.getPose().getY());
+//        resetSlots();
+//
+//        runPathWithIntake(paths.intakeball1(), 0, 0.3);
+//        startTime = System.currentTimeMillis();
+//
+//        while (System.currentTimeMillis() < startTime + 650) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//        //slots[0] = Ball.PURPLE;
+//
+//        runPathWithIntake(paths.intakeball2(), 0, 0.3);
+//        startTime = System.currentTimeMillis();
+//
+//        while (System.currentTimeMillis() < startTime + 650) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//        //slots[1] = Ball.PURPLE;
+//
+//
+//        runPathWithIntake(paths.intakeball3(), 0, 0.3);
+//        startTime = System.currentTimeMillis();
+//
+//        while (System.currentTimeMillis() < startTime + 250) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//        //slots[2] = Ball.GREEN;
+//
+//
+//        intakeMotor.setPower(-0.8);
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.PURPLE;
+//        slots[2] = Ball.GREEN;
+//
+//        aimClosest(pattern[0]);
+//
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.PURPLE;
+//        slots[2] = Ball.GREEN;
+//
+//        intakeMotor.setPower(-0.6);
+//        runPath(paths.midPointShoot(), 5, 1);
+//        runPath(paths.shoot2(), 5, 1);
+//        intakeMotor.setPower(-0.8);
+//
+//        // ---- SHOOT ----
+//        shoot(pattern);
+//
+////        intakeMotor.setPower(-0.6);
+////        intakeActive = true;
+//        rotateToIndex(0);
+//        resetSlots();
+//
+//        // ---- INTAKE 4–6 ----
+////        intakeActive = false;
+////        rotateToIndex(0);
+////        runPath(paths.toIntake2(), 50, 1);
+//
+//        intakeActive = true;
+//        rotateToIndex(0);
+//        runPath(paths.toIntake2(), 0, 1);
+//        telemetry.addData("X intake1", follower.getPose().getX());
+//        telemetry.addData("Y intake2", follower.getPose().getY());
+//        resetSlots();
+//
+//        runPathWithIntake(paths.intakeball4(), 0, 0.3);
+//        startTime = System.currentTimeMillis();
+//
+//        while (System.currentTimeMillis() < startTime + 650) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//        //slots[0] = Ball.PURPLE;
+//
+//
+//        runPathWithIntake(paths.intakeball5(), 0, 0.3);
+//        startTime = System.currentTimeMillis();
+//
+//        while (System.currentTimeMillis() < startTime + 650) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//        //slots[1] = Ball.GREEN;
+//
+//        runPathWithIntake(paths.intakeball6(), 0, 0.3);
+//        startTime = System.currentTimeMillis();
+//
+//        while (System.currentTimeMillis() < startTime + 250) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//        //slots[2] = Ball.PURPLE;
+//
+//
+//        intakeMotor.setPower(-0.8);
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.GREEN;
+//        slots[2] = Ball.PURPLE;
+//
+//        aimClosest(pattern[0]);
+//
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.GREEN;
+//        slots[2] = Ball.PURPLE;
+//
+//        intakeMotor.setPower(-0.6);
+//        runPath(paths.midPointShoot(), 5, 1);
+//        runPath(paths.shoot3(), 5, 1);
+//        intakeMotor.setPower(-0.8);
+//
+//        // ---- SHOOT ----
+//        shoot(pattern);
+//
+////        intakeMotor.setPower(-0.6);
+////        intakeActive = true;
+//        rotateToIndex(0);
+//        resetSlots();
+//
 //        intakeActive = false;
 //        rotateToIndex(0);
-//        runPath(paths.toIntake2(), 50, 1);
-
-        intakeActive = true;
-        rotateToIndex(0);
-        runPath(paths.toIntake2(), 0, 1);
-        telemetry.addData("X intake1", follower.getPose().getX());
-        telemetry.addData("Y intake2", follower.getPose().getY());
-        resetSlots();
-
-        runPathWithIntake(paths.intakeball4(), 0, 0.3);
-        startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
-        while (System.currentTimeMillis() < startTime + 650) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-
-        runPathWithIntake(paths.intakeball5(), 0, 0.3);
-        startTime = System.currentTimeMillis();
-        //slots[0] = Ball.GREEN;
-        while (System.currentTimeMillis() < startTime + 650) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-
-        runPathWithIntake(paths.intakeball6(), 0, 0.3);
-        startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
-        while (System.currentTimeMillis() < startTime + 250) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
-
-        intakeMotor.setPower(-0.8);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        aimClosest(pattern[0]);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        intakeMotor.setPower(0.6);
-        runPath(paths.shoot3(), 5, 1);
-        intakeMotor.setPower(-0.8);
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-//        intakeMotor.setPower(-0.6);
-//        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
-
-        intakeActive = false;
-        rotateToIndex(0);
-        runPath(paths.toGate(), 5, 1);
-
-
-        telemetry.addLine("Finished");
+////        runPath(paths.toGate(), 5, 1);
+//
+//        telemetry.addLine("Finished");
         telemetry.update();
     }
 
@@ -298,10 +312,10 @@ public class RedCloseV5 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(350); // 400
+        sleep(325); // 400
 
         flickServo.setPosition(flickUp);
-        sleep(400); // 500
+        sleep(375); // 500
         flickServo.setPosition(flickDown);
         sleep(250); // 300
 
@@ -479,7 +493,7 @@ public class RedCloseV5 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.91); // 0.935
+        launchMotor.setPower(0.95);
 
     }
 
@@ -504,8 +518,6 @@ public class RedCloseV5 extends LinearOpMode {
     // ---------------- APRILTAG AND COLOR SENSORS ----------------
     private Ball[] getPatternFromTag() {
         int id = detectAprilTag(2000);
-//        telemetry.addData("id", id);
-//        telemetry.update();
         if (id == 21) return new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE};
         if (id == 23) return new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
         return new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
@@ -513,26 +525,12 @@ public class RedCloseV5 extends LinearOpMode {
 
     private int detectAprilTag(long timeoutMs) {
         long start = System.currentTimeMillis();
-        //while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
-        int count = 0;
-        while (System.currentTimeMillis() - start < timeoutMs) {
-
+        while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
             LLResult r = limelight.getLatestResult();
-            if (r == null) {
-                count++;
-            }
-            if (r != null && r.isValid() && !r.getFiducialResults().isEmpty()) {
-                int id = r.getFiducialResults().get(0).getFiducialId();
-                if (21 <= id && id <= 23) {
-//                telemetry.addData("count", count);
-//                telemetry.update();
-                return id;
-                }
-            }
+            if (r != null && r.isValid() && !r.getFiducialResults().isEmpty())
+                return r.getFiducialResults().get(0).getFiducialId();
             sleep(15);
         }
-//        telemetry.addData("count", count);
-//        telemetry.update();
         return 22;
     }
 
@@ -582,8 +580,6 @@ public class RedCloseV5 extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(3);  // APRILTAG PIPELINE
         limelight.start();
-//        limelight.setPollRateHz(50);
-        limelight.pipelineSwitch(3);
 
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");

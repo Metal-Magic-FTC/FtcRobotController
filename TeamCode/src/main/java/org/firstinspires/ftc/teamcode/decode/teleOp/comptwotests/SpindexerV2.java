@@ -71,7 +71,7 @@ public class SpindexerV2 extends LinearOpMode {
     private long flickEndTime = 0;
     private static final long POST_FLICK_DELAY_MS = 250; // 100 ms delay after flick retract
 
-    private double spinMotorSpeed = 0.5;
+    private double spinMotorSpeed = 0.38;
 
     // ---- COLOR SENSOR DELAY ----
     private boolean waitingToRotate = false;
@@ -106,7 +106,7 @@ public class SpindexerV2 extends LinearOpMode {
 
         waitForStart();
 
-        hoodServo.setPosition(0.83);
+        hoodServo.setPosition(0.77);
         flickServo.setPosition(flickDown);
 
         while (opModeIsActive()) {

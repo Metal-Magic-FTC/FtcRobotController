@@ -2,27 +2,20 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.NihalsGayAutos;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
+import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.BlueBackV4;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.GeneratedPathsBlueBackV4;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.BlueBackV4;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "!Blue Far V1 Qualy 2")
+@Autonomous(name = "!!!! Blue FAR 9 ball Qualy 2")
 public class NihalsBlueV1 extends LinearOpMode {
 
     private int index = 0;
@@ -48,16 +41,16 @@ public class NihalsBlueV1 extends LinearOpMode {
     NormalizedColorSensor intakeColor;
     NormalizedColorSensor intakeColor2;
 
-    private static final int[] OUTTAKE_POS = {500, 0, 250};
+    private static final int[] OUTTAKE_POS = {504, 2, 252};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.4;
+    private double spinMotorSpeed = 0.38;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
     private boolean waitingForBall = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
@@ -83,7 +76,7 @@ public class NihalsBlueV1 extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(NihalsGeneratedPathsBlueV1.START_POSE);
         paths = new NihalsGeneratedPathsBlueV1(follower);
-        hoodServo.setPosition(0.80);
+        hoodServo.setPosition(0.77);
 
 
         telemetry.addLine("Ready");
@@ -92,12 +85,14 @@ public class NihalsBlueV1 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(1);
+        launchMotor.setPower(0.935);
+
+        flickServo.setPosition(flickDown);
 
         // scan balls
         //scanBallsInSlots(5000);
 
-//        runPath(paths.shoot(), 250, 1.0);
+//        runPath(paths.scan(), 0, 1.0);
 //        telemetry.addData("X SCAN", follower.getPose().getX());
 //        telemetry.addData("Y SCAN", follower.getPose().getY());
 
@@ -105,39 +100,62 @@ public class NihalsBlueV1 extends LinearOpMode {
 
         aimClosest(pattern[0]);
 
-        runPath(paths.shoot(), 5, 1);
+        runPath(paths.shoot(), 0, 1);
         telemetry.addData("X SHOOT", follower.getPose().getX());
         telemetry.addData("Y SHOOT", follower.getPose().getY());
 
         // ---- SHOOT ----
         shoot(pattern);
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(-0.8);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
 
         // ---- INTAKE 1–3 ----
+
+        double startTime;
+
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 50, 1);
+        runPath(paths.toIntake1(), 0, 1);
         telemetry.addData("X intake1", follower.getPose().getX());
         telemetry.addData("Y intake2", follower.getPose().getY());
         resetSlots();
-        runPathWithIntake(paths.intakeball1(), 0, 0.5);
-        double startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 600) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
+
+        runPathWithIntake(paths.intakeball1(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 600) {
+
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
-        intakeMotor.setPower(-0.6);
+        //slots[0] = Ball.PURPLE;
+
+        runPathWithIntake(paths.intakeball2(), 0, 0.3);
+        startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() < startTime + 650) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+        //slots[1] = Ball.PURPLE;
+
+
+        runPathWithIntake(paths.intakeball3(), 0, 0.3);
+        startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() < startTime + 250) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+        //slots[2] = Ball.GREEN;
+
+
+        intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
@@ -148,7 +166,10 @@ public class NihalsBlueV1 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 0, 1);
+        intakeMotor.setPower(-0.6);
+        runPath(paths.midPointShoot(), 5, 1);
+        runPath(paths.shoot2(), 5, 1);
+        intakeMotor.setPower(-0.8);
 
         // ---- SHOOT ----
         shoot(pattern);
@@ -159,36 +180,64 @@ public class NihalsBlueV1 extends LinearOpMode {
         resetSlots();
 
         // ---- INTAKE 4–6 ----
+//        intakeActive = false;
+//        rotateToIndex(0);
+//        runPath(paths.toIntake2(), 50, 1);
+
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake2(), 50, 1);
+        runPath(paths.toIntake2(), 0, 1);
         telemetry.addData("X intake1", follower.getPose().getX());
         telemetry.addData("Y intake2", follower.getPose().getY());
         resetSlots();
-        runPathWithIntake(paths.intakeball2(), 250, 0.5);
-        while (System.currentTimeMillis() < startTime + 600) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
+
+        runPathWithIntake(paths.intakeball4(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 600) {
+
+        while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
-        intakeMotor.setPower(-0.6);
+        //slots[0] = Ball.PURPLE;
+
+
+        runPathWithIntake(paths.intakeball5(), 0, 0.3);
+        startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() < startTime + 650) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+        //slots[1] = Ball.GREEN;
+
+        runPathWithIntake(paths.intakeball6(), 0, 0.3);
+        startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() < startTime + 250) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
+        //slots[2] = Ball.PURPLE;
+
+
+        intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
+        slots[1] = Ball.GREEN;
+        slots[2] = Ball.PURPLE;
 
         aimClosest(pattern[0]);
 
         slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
+        slots[1] = Ball.GREEN;
+        slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot2(), 250, 1);
+        intakeMotor.setPower(-0.6);
+        runPath(paths.midPointShoot(), 5, 1);
+        runPath(paths.shoot3(), 5, 1);
+        intakeMotor.setPower(-0.8);
 
         // ---- SHOOT ----
         shoot(pattern);
@@ -197,6 +246,10 @@ public class NihalsBlueV1 extends LinearOpMode {
 //        intakeActive = true;
         rotateToIndex(0);
         resetSlots();
+
+        intakeActive = false;
+        rotateToIndex(0);
+//        runPath(paths.toGate(), 5, 1);
 
         telemetry.addLine("Finished");
         telemetry.update();
@@ -256,10 +309,10 @@ public class NihalsBlueV1 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(350); // 400
+        sleep(325); // 400
 
         flickServo.setPosition(flickUp);
-        sleep(400); // 500
+        sleep(375); // 500
         flickServo.setPosition(flickDown);
         sleep(250); // 300
 
@@ -437,7 +490,7 @@ public class NihalsBlueV1 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.95);
+        launchMotor.setPower(0.935);
 
     }
 

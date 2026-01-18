@@ -76,7 +76,7 @@ public class BlueBackV4 extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsBlueBackV4.START_POSE);
         paths = new GeneratedPathsBlueBackV4(follower);
-        hoodServo.setPosition(0.80);
+        hoodServo.setPosition(0.77);
 
 
         telemetry.addLine("Ready");
@@ -85,7 +85,7 @@ public class BlueBackV4 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(0.925);
+        launchMotor.setPower(0.915);
 
         flickServo.setPosition(flickDown);
 
@@ -125,12 +125,13 @@ public class BlueBackV4 extends LinearOpMode {
 
         runPathWithIntake(paths.intakeball1(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        slots[0] = Ball.PURPLE;
+
         while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
+        //slots[0] = Ball.PURPLE;
 
         runPathWithIntake(paths.intakeball2(), 0, 0.3);
         startTime = System.currentTimeMillis();
@@ -140,7 +141,8 @@ public class BlueBackV4 extends LinearOpMode {
             intakeActive = true;
             intake();
         }
-        slots[0] = Ball.PURPLE;
+        //slots[1] = Ball.PURPLE;
+
 
         runPathWithIntake(paths.intakeball3(), 0, 0.3);
         startTime = System.currentTimeMillis();
@@ -150,7 +152,8 @@ public class BlueBackV4 extends LinearOpMode {
             intakeActive = true;
             intake();
         }
-        slots[0] = Ball.GREEN;
+        //slots[2] = Ball.GREEN;
+
 
         intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
@@ -195,27 +198,29 @@ public class BlueBackV4 extends LinearOpMode {
             intakeActive = true;
             intake();
         }
-        slots[0] = Ball.PURPLE;
+        //slots[0] = Ball.PURPLE;
+
 
         runPathWithIntake(paths.intakeball5(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        //slots[0] = Ball.GREEN;
+
         while (System.currentTimeMillis() < startTime + 650) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
-        slots[0] = Ball.GREEN;
+        //slots[1] = Ball.GREEN;
 
         runPathWithIntake(paths.intakeball6(), 0, 0.3);
         startTime = System.currentTimeMillis();
-        //slots[0] = Ball.PURPLE;
+
         while (System.currentTimeMillis() < startTime + 250) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
-        slots[0] = Ball.PURPLE;
+        //slots[2] = Ball.PURPLE;
+
 
         intakeMotor.setPower(-0.8);
         slots[0] = Ball.PURPLE;
@@ -483,7 +488,7 @@ public class BlueBackV4 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.925);
+        launchMotor.setPower(0.915);
 
     }
 
@@ -515,12 +520,26 @@ public class BlueBackV4 extends LinearOpMode {
 
     private int detectAprilTag(long timeoutMs) {
         long start = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
+        //while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
+        int count = 0;
+        while (System.currentTimeMillis() - start < timeoutMs) {
+
             LLResult r = limelight.getLatestResult();
-            if (r != null && r.isValid() && !r.getFiducialResults().isEmpty())
-                return r.getFiducialResults().get(0).getFiducialId();
+            if (r == null) {
+                count++;
+            }
+            if (r != null && r.isValid() && !r.getFiducialResults().isEmpty()) {
+                int id = r.getFiducialResults().get(0).getFiducialId();
+                if (21 <= id && id <= 23) {
+//                telemetry.addData("count", count);
+//                telemetry.update();
+                    return id;
+                }
+            }
             sleep(15);
         }
+//        telemetry.addData("count", count);
+//        telemetry.update();
         return 22;
     }
 
@@ -570,6 +589,8 @@ public class BlueBackV4 extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(3);  // APRILTAG PIPELINE
         limelight.start();
+        limelight.setPollRateHz(50);
+        limelight.pipelineSwitch(3);
 
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
