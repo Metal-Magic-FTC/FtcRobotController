@@ -10,6 +10,9 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @Autonomous(name = "! v1 Blue Far Auto", group = "Auto")
 public class BlueFront extends LinearOpMode {
 

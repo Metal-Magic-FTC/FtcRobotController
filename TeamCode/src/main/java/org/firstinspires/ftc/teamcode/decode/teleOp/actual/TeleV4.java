@@ -11,6 +11,9 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name="TeleV4")
 public class TeleV4 extends LinearOpMode {
 

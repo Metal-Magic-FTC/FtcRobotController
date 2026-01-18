@@ -44,6 +44,10 @@ import java.util.List;
  * IMPORTANT: This diagnostic helps verify the "odometry reset" fix where we
  * initialize Pinpoint heading using absolute heading from MegaTag2.
  */
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name = "Limelight Coordinate Diagnostic", group = "Diagnostic")
 //@Disabled
 public class LimelightCoordinateDiagnostic extends OpMode {

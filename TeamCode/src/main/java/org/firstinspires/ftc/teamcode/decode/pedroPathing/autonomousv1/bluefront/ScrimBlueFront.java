@@ -11,6 +11,9 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv1.redfront.
 import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @Autonomous(name = "! Blue Front Auto Pathing", group = "Auto")
 public class ScrimBlueFront extends LinearOpMode {
 

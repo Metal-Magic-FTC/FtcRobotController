@@ -15,6 +15,10 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @Autonomous(name = "Intake 3 in a row", group = "Examples")
 public class Intake3Concept extends OpMode {
 

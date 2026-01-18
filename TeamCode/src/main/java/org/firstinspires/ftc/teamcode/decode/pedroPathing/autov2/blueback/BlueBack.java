@@ -4,6 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
 
@@ -14,6 +15,7 @@ import java.util.List;
 
 import java.util.Arrays;
 
+@Disabled
 @Autonomous(name = "! Blue Close Auto V2 FINAL", group = "Auto")
 public class BlueBack extends LinearOpMode {
 

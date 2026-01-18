@@ -12,6 +12,9 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 
 import java.util.List;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name = "Sensor: Limelight AprilTag Telemetry", group = "Sensor")
 //@Disabled
 public class LimelightAprilTagTelemetry2 extends OpMode {

@@ -85,7 +85,7 @@ public class RedCloseV5 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(0.935);
+        launchMotor.setPower(0.9); // 0.935
 
         flickServo.setPosition(flickDown);
 
@@ -161,7 +161,7 @@ public class RedCloseV5 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(0.6);
         runPath(paths.shoot2(), 5, 1);
         intakeMotor.setPower(-0.8);
 
@@ -223,7 +223,7 @@ public class RedCloseV5 extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        intakeMotor.setPower(-0.6);
+        intakeMotor.setPower(0.6);
         runPath(paths.shoot3(), 5, 1);
         intakeMotor.setPower(-0.8);
 
@@ -297,10 +297,10 @@ public class RedCloseV5 extends LinearOpMode {
 
         aimClosest(target);
         waitForSpindexer();
-        sleep(400); // 400
+        sleep(350); // 400
 
         flickServo.setPosition(flickUp);
-        sleep(500); // 500
+        sleep(400); // 500
         flickServo.setPosition(flickDown);
         sleep(250); // 300
 
@@ -478,7 +478,7 @@ public class RedCloseV5 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(0.935);
+        launchMotor.setPower(0.9); // 0.935
 
     }
 

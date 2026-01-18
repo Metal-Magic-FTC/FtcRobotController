@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "!!!!! V4 V4 V4 V4 Blue Close Jan 10")
+@Autonomous(name = "!!!! Blue Close Qualy 2")
 public class BlueBackV4 extends LinearOpMode {
 
     private int index = 0;

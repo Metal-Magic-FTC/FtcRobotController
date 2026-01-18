@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-@TeleOp(name="!!! GURT ON YO AHH BECAUSE WE NEED TO FIND THE POSITION OF TS JAWN BECAUSE SPINDEXER IS FRIED")
+@TeleOp(name="!! Manual Spindexer Test")
 public class GetSpindexerPositions extends LinearOpMode {
 
     DcMotor spinMotor;

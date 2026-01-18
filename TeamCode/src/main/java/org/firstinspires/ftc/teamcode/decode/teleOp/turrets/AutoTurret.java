@@ -15,6 +15,9 @@ import java.util.List;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name = "!!!Auto Aim Turret")
 public class AutoTurret extends OpMode {
 

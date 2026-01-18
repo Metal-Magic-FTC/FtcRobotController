@@ -13,6 +13,9 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @Autonomous(name = "!! Red Close Jan 10", group = "Auto")
 public class RedBackV2 extends LinearOpMode {
 

@@ -15,6 +15,9 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @Autonomous(name = "!!!!! V5 V5 V5 V5 Blue Close Jan 10")
 public class BlueBackV5 extends LinearOpMode {
 

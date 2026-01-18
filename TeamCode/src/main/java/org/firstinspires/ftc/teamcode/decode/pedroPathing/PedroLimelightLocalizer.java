@@ -25,6 +25,10 @@ import org.firstinspires.ftc.teamcode.limeLight.RobotPose;
  * localizer.updateFollowerWithVision(); // Automatically corrects pose if vision is good
  * ```
  */
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 public class PedroLimelightLocalizer {
 
     private final LimelightLocalizer limelightLocalizer;

@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "!!!!! BLUEHALLLLL V6")
+@Autonomous(name = "!Blue Far V1 Qualy 2")
 public class NihalsBlueV1 extends LinearOpMode {
 
     private int index = 0;

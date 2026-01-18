@@ -24,6 +24,9 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 import java.util.List;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @Autonomous(name = "! Blue Close Auto", group = "Auto")
 public class BlueBack extends LinearOpMode {
 

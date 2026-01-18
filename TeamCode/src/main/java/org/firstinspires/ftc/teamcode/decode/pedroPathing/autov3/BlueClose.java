@@ -11,6 +11,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @Autonomous(name = "Mechanism Auto", group = "Autonomous")
 public class BlueClose extends OpMode {
 

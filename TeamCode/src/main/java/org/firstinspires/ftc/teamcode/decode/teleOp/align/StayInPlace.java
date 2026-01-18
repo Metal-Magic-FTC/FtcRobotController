@@ -23,6 +23,9 @@ import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+//
+//@Disabled
 @TeleOp
 public class StayInPlace extends LinearOpMode {
 
