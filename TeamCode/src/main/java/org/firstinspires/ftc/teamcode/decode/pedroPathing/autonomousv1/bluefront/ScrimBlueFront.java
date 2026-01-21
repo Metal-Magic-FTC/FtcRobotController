@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.autonomousv1.redfront.GeneratedPathsRedFront;
-import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;

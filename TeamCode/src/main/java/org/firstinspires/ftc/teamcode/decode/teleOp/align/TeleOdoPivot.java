@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
-import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;

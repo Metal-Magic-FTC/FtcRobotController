@@ -1,27 +1,13 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.align;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-import com.pedropathing.follower.Follower;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
-
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.follower.Follower;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
-import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TeleV3;
 import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
+
 @TeleOp(name = "Drive + Hold + Face Goal", group = "Drive")
 public class TeleOpFSM extends LinearOpMode {
 

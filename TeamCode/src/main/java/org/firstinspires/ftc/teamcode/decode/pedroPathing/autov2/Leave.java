@@ -2,18 +2,11 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.GeneratedPathsBlueBackV4;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.autov2.blueback.BlueBackV4;
-import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
-
-import java.util.Arrays;
-import java.util.List;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 @Autonomous(name = "!!! Leave Either Color")
 public class Leave extends LinearOpMode {
