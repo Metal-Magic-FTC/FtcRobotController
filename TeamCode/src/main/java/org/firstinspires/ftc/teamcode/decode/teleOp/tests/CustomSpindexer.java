@@ -1,10 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp;
-
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+package org.firstinspires.ftc.teamcode.decode.teleOp.tests;
 
 public class CustomSpindexer {
     private static final double TICKS_PER_SLOT = 250;

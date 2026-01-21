@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp;
+package org.firstinspires.ftc.teamcode.decode.teleOp.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
-
-import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TeleV4;
 
 @TeleOp(name = "!!!SpindexerTest")
 public class NewSpinTest extends LinearOpMode {

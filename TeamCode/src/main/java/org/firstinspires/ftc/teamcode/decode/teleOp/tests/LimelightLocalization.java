@@ -1,7 +1,5 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp;
+package org.firstinspires.ftc.teamcode.decode.teleOp.tests;
 
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,12 +8,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Disabled
-@TeleOp(name = "!Limelight * Pedro", group = "Test")
-public class FusedLocalization extends LinearOpMode {
+@TeleOp(name = "!Limelight Only Localization", group = "Test")
+public class LimelightLocalization extends LinearOpMode {
 
     private Limelight3A limelight;
 
@@ -25,33 +23,12 @@ public class FusedLocalization extends LinearOpMode {
     private double lastHeading = 0;
     private boolean hasEverSeenTag = false;
 
-    private static final double START_X = 116.6988847583643;
-    private static final double START_Y = 128.83271375464685;
-    private static final double START_HEADING =
-            Math.toRadians(225);
-
-    private Follower follower;
-
-    private Pose startPose = new Pose(
-            START_X,
-            START_Y,
-            START_HEADING
-    );
-
-    private CustomMecanumDrive drivetrain;
-
-    private CustomTurret turret;
-
-
     @Override
     public void runOpMode() {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(3);
         limelight.start();
-
-        follower = Constants.createFollower(hardwareMap);
-        follower.setPose(startPose);
 
         telemetry.addLine("Limelight Only Localization");
         telemetry.addLine("No odometry. No IMU.");
@@ -61,8 +38,6 @@ public class FusedLocalization extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
-            follower.update();
 
             LLResult result = limelight.getLatestResult();
 
@@ -87,11 +62,6 @@ public class FusedLocalization extends LinearOpMode {
                     telemetry.addData("Y", "%.3f m (%.1f in)", lastY, lastY * 39.3701);
                     telemetry.addData("Heading", "%.2f°", lastHeading);
 
-                    if (gamepad1.x) {
-                        Pose botpose2d = new Pose(botpose.getPosition().x, botpose.getPosition().y, botpose.getOrientation().getYaw());
-                        follower.setPose(botpose2d);
-                    }
-
                 } else {
                     displayLastKnownPose("Pose null");
                 }
@@ -99,11 +69,6 @@ public class FusedLocalization extends LinearOpMode {
             } else {
                 displayLastKnownPose("No tag visible");
             }
-
-            telemetry.addData("Robot X", follower.getPose().getX());
-            telemetry.addData("Robot Y", follower.getPose().getY());
-            telemetry.addData("Robot Heading (deg)",
-                    Math.toDegrees(follower.getPose().getHeading()));
 
             telemetry.update();
         }

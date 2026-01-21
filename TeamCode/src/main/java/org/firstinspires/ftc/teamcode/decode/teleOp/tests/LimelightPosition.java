@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp;
+package org.firstinspires.ftc.teamcode.decode.teleOp.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -6,16 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Disabled
 @TeleOp(name="!Limelight Manual Test")
