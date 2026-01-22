@@ -17,6 +17,7 @@ public class StayInPlace extends LinearOpMode {
         private Follower follower;
         private boolean oneTime;
 
+
         public enum HoldState {
             MANUAL,
             HOLD,
@@ -27,7 +28,6 @@ public class StayInPlace extends LinearOpMode {
 
         private boolean faceGoal;
         private Pose savePose;
-
         private Pose START_POSE = new Pose (
                 83,
                 135,
@@ -67,7 +67,7 @@ public class StayInPlace extends LinearOpMode {
                                 Math.abs(turn) < 0.05 && !(gamepad1.right_bumper);
 
 
-                telemetry.addData("Move: ", drive+strafe+turn);
+                telemetry.addData("Move: ", drive + strafe + turn);
                 if (idle) {
 
                     // HOLD POSITION
@@ -93,13 +93,6 @@ public class StayInPlace extends LinearOpMode {
                 telemetry.update();
 
             }
-        }
-
-        // Returns the correct heading to the goal
-        public double faceGoal(Pose curr, Pose goal) {
-            double yDiff = goal.getY()-curr.getY();
-            double xDiff = goal.getX()-curr.getX();
-            return Math.atan2(yDiff, xDiff);
         }
 
 
