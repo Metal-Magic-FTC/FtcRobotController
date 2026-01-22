@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 @TeleOp(name = "!!!!!SpindexerV2")
@@ -161,7 +162,7 @@ public class AntiTeleop extends LinearOpMode {
             boolean idle =
                     Math.abs(drive) < 0.05 &&
                             Math.abs(strafe) < 0.05 &&
-                            Math.abs(turn) < 0.05 && !(gamepad1.right_trigger>=0.3f);
+                            Math.abs(turn) < 0.05 && !(gamepad2.right_bumper);
 
 
             telemetry.addData("Move: ", drive + strafe + turn);
@@ -501,6 +502,7 @@ public class AntiTeleop extends LinearOpMode {
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
         intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
+        follower = Constants.createFollower(hardwareMap);
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
