@@ -162,7 +162,7 @@ public class AntiTeleop extends LinearOpMode {
             boolean idle =
                     Math.abs(drive) < 0.05 &&
                             Math.abs(strafe) < 0.05 &&
-                            Math.abs(turn) < 0.05 && !(gamepad2.right_bumper);
+                            Math.abs(turn) < 0.05 && (gamepad2.left_stick_button);
 
 
             telemetry.addData("Move: ", drive + strafe + turn);
