@@ -28,13 +28,21 @@ public class OdoDriveOnly extends LinearOpMode {
             Math.toRadians(225)
     );
 
+    // ---- TUNING (change if needed) ----
+    private static final double POS_TOLERANCE = 2.0;                 // inches
+    private static final double HEADING_TOLERANCE = Math.toRadians(3); // radians
+
     private Follower follower;
     private CustomMecanumDrive drivetrain;
 
     private boolean prevA = false;
     private boolean prevB = false;
+    private boolean prevY = false;
 
     private boolean autoRunning = false;
+
+    // Track what our auto target is so we can end early when close
+    private Pose autoTargetPose = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -57,11 +65,20 @@ public class OdoDriveOnly extends LinearOpMode {
 
             boolean aPressed = gamepad1.a && !prevA;
             boolean bPressed = gamepad1.b && !prevB;
+            boolean yPressed = gamepad1.y && !prevY;
 
             prevA = gamepad1.a;
             prevB = gamepad1.b;
+            prevY = gamepad1.y;
 
-            // Driver override cancels auto
+            // ---- Y: FORCE MANUAL MODE ----
+            if (yPressed) {
+                follower.breakFollowing();
+                autoRunning = false;
+                autoTargetPose = null;
+            }
+
+            // Driver override cancels auto (sticks)
             boolean driverOverride =
                     Math.abs(drive) > 0.05 ||
                             Math.abs(strafe) > 0.05 ||
@@ -70,6 +87,7 @@ public class OdoDriveOnly extends LinearOpMode {
             if (autoRunning && driverOverride) {
                 follower.breakFollowing();
                 autoRunning = false;
+                autoTargetPose = null;
             }
 
             // ---- A: FACE START (TURN ONLY) ----
@@ -80,16 +98,13 @@ public class OdoDriveOnly extends LinearOpMode {
                 double dy = START_POSE.getY() - current.getY();
                 double targetHeading = Math.atan2(dy, dx);
 
-                // Turn in place: same X/Y, only heading changes
-                Pose turnTarget = new Pose(current.getX(), current.getY(), targetHeading);
+                // Hold current position, change only heading
+                Pose turnOnlyTarget = new Pose(current.getX(), current.getY(), targetHeading);
 
-                PathChain turnChain = new PathBuilder(follower)
-                        .addPath(new com.pedropathing.geometry.BezierLine(current, turnTarget))
-                        .setLinearHeadingInterpolation(current.getHeading(), targetHeading)
-                        .build();
+                follower.holdPoint(turnOnlyTarget);
 
-                follower.followPath(turnChain);
                 autoRunning = true;
+                autoTargetPose = turnOnlyTarget;
             }
 
             // ---- B: GO TO SHOOT POSE ----
@@ -102,17 +117,28 @@ public class OdoDriveOnly extends LinearOpMode {
                         .build();
 
                 follower.followPath(shootChain);
+
                 autoRunning = true;
+                autoTargetPose = SHOOT_POSE;
+            }
+
+            // ---- AUTO END CONDITIONS ----
+            if (autoRunning) {
+                Pose current = follower.getPose();
+
+                boolean finished = !follower.isBusy();
+                boolean closeEnough = (autoTargetPose != null) && isCloseToTarget(current, autoTargetPose);
+
+                if (finished || closeEnough) {
+                    follower.breakFollowing();
+                    autoRunning = false;
+                    autoTargetPose = null;
+                }
             }
 
             // ---- MANUAL DRIVE ONLY IF NOT AUTO ----
             if (!autoRunning) {
                 drivetrain.driveMecanum(strafe, drive, turn);
-            }
-
-            // ---- auto finished? ----
-            if (autoRunning && !follower.isBusy()) {
-                autoRunning = false;
             }
 
             // ---- telemetry ----
@@ -121,7 +147,29 @@ public class OdoDriveOnly extends LinearOpMode {
             telemetry.addData("X", "%.2f", p.getX());
             telemetry.addData("Y", "%.2f", p.getY());
             telemetry.addData("Heading (deg)", "%.1f", Math.toDegrees(p.getHeading()));
+            telemetry.addData("Target", autoTargetPose == null ? "none" :
+                    String.format("(%.1f, %.1f, %.1f°)",
+                            autoTargetPose.getX(),
+                            autoTargetPose.getY(),
+                            Math.toDegrees(autoTargetPose.getHeading())));
             telemetry.update();
         }
+    }
+
+    // --- helper methods ---
+    private boolean isCloseToTarget(Pose current, Pose target) {
+        double dx = target.getX() - current.getX();
+        double dy = target.getY() - current.getY();
+        double dist = Math.hypot(dx, dy);
+
+        double headingError = angleWrap(target.getHeading() - current.getHeading());
+
+        return dist <= POS_TOLERANCE && Math.abs(headingError) <= HEADING_TOLERANCE;
+    }
+
+    private double angleWrap(double radians) {
+        while (radians > Math.PI) radians -= 2.0 * Math.PI;
+        while (radians < -Math.PI) radians += 2.0 * Math.PI;
+        return radians;
     }
 }
