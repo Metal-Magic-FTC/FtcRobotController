@@ -66,7 +66,7 @@ public class FlywheelTuningTest extends OpMode {
             P -= stepSizes[stepIndex];
         }
 
-        if (gamepad1.dpadLeftWasPressed()) {
+        if (gamepad1.dpadRightWasPressed()) {
             F += stepSizes[stepIndex];
         }
 

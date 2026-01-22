@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,11 +12,11 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
-
-@TeleOp(name = "!!!!!SpindexerV2")
-public class SpindexerV2 extends LinearOpMode {
+@TeleOp(name = "!!!!!!AntiTeleop")
+public class AntiTeleop extends LinearOpMode {
 
     //launch motor - left bumper
     //flick servo - right trigger
@@ -25,6 +27,9 @@ public class SpindexerV2 extends LinearOpMode {
     private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
 
+    private Follower follower;
+    private Pose savePose;
+    private boolean oneTime;
     private CustomMecanumDrive drivetrain;
 
     Servo hoodServo;
@@ -115,7 +120,7 @@ public class SpindexerV2 extends LinearOpMode {
             double drive = -gamepad1.left_stick_y;
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
-            drivetrain.driveMecanum(strafe, drive, turn);
+            //drivetrain.driveMecanum(strafe, drive, turn);
 
             //launch motor - left bumper
             //flick servo - right bumper
@@ -154,7 +159,33 @@ public class SpindexerV2 extends LinearOpMode {
 
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
+            boolean idle =
+                    Math.abs(drive) < 0.05 &&
+                            Math.abs(strafe) < 0.05 &&
+                            Math.abs(turn) < 0.05 && (gamepad2.left_stick_button);
 
+
+            telemetry.addData("Move: ", drive + strafe + turn);
+            if (idle) {
+
+                // HOLD POSITION
+                if (oneTime) {
+                    follower.update();
+                    savePose = follower.getPose();
+                    oneTime = false;
+                    follower.holdPoint(savePose);
+                }
+                telemetry.addLine("Holding Position");
+
+
+                follower.update();
+
+            } else {
+                drivetrain.driveMecanum(strafe, drive, turn);
+                oneTime = true;
+                telemetry.addLine("Manual Drive");
+
+            }
             if (nextIntake2 && !prevNextIntake2) {
                 index++;
                 index = index % 3;
@@ -471,6 +502,7 @@ public class SpindexerV2 extends LinearOpMode {
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
         intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
+        follower = Constants.createFollower(hardwareMap);
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
