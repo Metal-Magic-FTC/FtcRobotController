@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
-@TeleOp(name = "!!!!!SpindexerV2")
+@TeleOp(name = "!!!!!!AntiTeleop")
 public class AntiTeleop extends LinearOpMode {
 
     //launch motor - left bumper
