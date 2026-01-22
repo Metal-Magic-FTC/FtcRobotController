@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
+import org.firstinspires.ftc.teamcode.decode.teleOp.CustomMecanumDrive;
 
 //
 //@Disabled
