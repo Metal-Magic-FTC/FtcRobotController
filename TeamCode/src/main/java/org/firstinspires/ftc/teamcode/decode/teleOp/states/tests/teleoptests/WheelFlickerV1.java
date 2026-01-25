@@ -217,17 +217,18 @@ public class WheelFlickerV1 extends LinearOpMode {
             if (launchAllPressed && !autoLaunching) {
                 autoLaunching = true;
                 autoLaunchTarget = findClosestLoaded();
+                flickMotor.setPower(1);
                 launchMotor.setPower(1); // spin to shooting speed
             }
 
             if (autoLaunching) {
+                flickMotor.setPower(1);
 
                 // No balls left - stop everything
                 if (autoLaunchTarget == -1) {
                     autoLaunching = false;
                     launchMotor.setPower(0);
                     //flickServo.setPosition(flickDown);
-                    flickMotor.setPower(0);
                     waitingAfterFlick = false;
                 } else {
 
@@ -239,7 +240,6 @@ public class WheelFlickerV1 extends LinearOpMode {
                     // Once aligned and not flicking - flick servo out
                     if (!spinMotor.isBusy() && !flicking && !waitingAfterFlick) {
                         //flickServo.setPosition(flickUp);
-                        flickMotor.setPower(1);
                         flickStartTime = System.currentTimeMillis();
                         flicking = true;
                     }
@@ -247,7 +247,6 @@ public class WheelFlickerV1 extends LinearOpMode {
                     // Retract servo after FLICK_TIME_MS
                     if (flicking && System.currentTimeMillis() - flickStartTime >= FLICK_TIME_MS) {
                         //flickServo.setPosition(flickDown);
-                        flickMotor.setPower(0);
                         flicking = false;
 
                         // Clear the slot
@@ -499,6 +498,7 @@ public class WheelFlickerV1 extends LinearOpMode {
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         flickMotor = hardwareMap.get(DcMotorEx.class, "flickMotor");
+        flickMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
 
