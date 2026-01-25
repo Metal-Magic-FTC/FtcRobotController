@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests;
+package org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.teleoptests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
-@TeleOp(name = "!!!!!SpindexerV2")
-public class SpindexerV2 extends LinearOpMode {
+@TeleOp(name = "!!!!!WheelFlickerV1")
+public class WheelFlickerV1 extends LinearOpMode {
 
     //launch motor - left bumper
     //flick servo - right trigger
@@ -23,12 +23,12 @@ public class SpindexerV2 extends LinearOpMode {
     //spindexer shoot green - a
     private DcMotor spinMotor;
     private DcMotorEx launchMotor;
+    private DcMotorEx flickMotor;
     private DcMotor intakeMotor;
 
     private CustomMecanumDrive drivetrain;
 
     Servo hoodServo;
-    Servo flickServo;
 
     private NormalizedColorSensor intakeColor;
     private NormalizedColorSensor intakeColor2;
@@ -65,40 +65,40 @@ public class SpindexerV2 extends LinearOpMode {
     private long flickStartTime = 0;
     private boolean flicking = false;
 
-    private static final long FLICK_TIME_MS = 500; // 500 ms flick
+    private static final long FLICK_TIME_MS = 0; // 500 ms flick
 
     // ---- POST FLICK DELAY ----
     private boolean waitingAfterFlick = false;
     private long flickEndTime = 0;
-    private static final long POST_FLICK_DELAY_MS = 250; // 100 ms delay after flick retract
+    private static final long POST_FLICK_DELAY_MS = 0; // 100 ms delay after flick retra
 
     private double spinMotorSpeed = 0.38;
 
     // ---- COLOR SENSOR DELAY ----
     private boolean waitingToRotate = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 100; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
     private int nextIndexAfterDelay = -1;
 
     // ---- BUTTON STATES ----
 
     // ---- GAMEPAD 2 FAILSAFES ----
     private boolean prev2A, prev2B;
-    
+
     private double flickUp = 0.75;
     private double flickDown = 1;
 
     private boolean
-        intakePressed,
-        aimGreenPressed,
-        aimPurplePressed,
-        shootPressed,
-        runLaunch,
-        intakePower,
-        intakePowerReverse,
-        launchAllPressed,
-        nextIntake2,
-        prevNextIntake2;
+            intakePressed,
+            aimGreenPressed,
+            aimPurplePressed,
+            shootPressed,
+            runLaunch,
+            intakePower,
+            intakePowerReverse,
+            launchAllPressed,
+            nextIntake2,
+            prevNextIntake2;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -108,7 +108,7 @@ public class SpindexerV2 extends LinearOpMode {
         waitForStart();
 
         hoodServo.setPosition(0.77);
-        flickServo.setPosition(flickDown);
+        flickMotor.setPower(0);
 
         while (opModeIsActive()) {
 
@@ -226,7 +226,8 @@ public class SpindexerV2 extends LinearOpMode {
                 if (autoLaunchTarget == -1) {
                     autoLaunching = false;
                     launchMotor.setPower(0);
-                    flickServo.setPosition(flickDown);
+                    //flickServo.setPosition(flickDown);
+                    flickMotor.setPower(0);
                     waitingAfterFlick = false;
                 } else {
 
@@ -237,14 +238,16 @@ public class SpindexerV2 extends LinearOpMode {
 
                     // Once aligned and not flicking - flick servo out
                     if (!spinMotor.isBusy() && !flicking && !waitingAfterFlick) {
-                        flickServo.setPosition(flickUp);
+                        //flickServo.setPosition(flickUp);
+                        flickMotor.setPower(1);
                         flickStartTime = System.currentTimeMillis();
                         flicking = true;
                     }
 
                     // Retract servo after FLICK_TIME_MS
                     if (flicking && System.currentTimeMillis() - flickStartTime >= FLICK_TIME_MS) {
-                        flickServo.setPosition(flickDown);
+                        //flickServo.setPosition(flickDown);
+                        flickMotor.setPower(0);
                         flicking = false;
 
                         // Clear the slot
@@ -296,9 +299,11 @@ public class SpindexerV2 extends LinearOpMode {
             // shoot
 
             if (shootPressed && !autoLaunching) {
-                flickServo.setPosition(flickUp);
+                //flickServo.setPosition(flickUp);
+                flickMotor.setPower(1);
             } else if (!autoLaunching) {
-                flickServo.setPosition(flickDown);
+                //flickServo.setPosition(flickDown);
+                flickMotor.setPower(0);
             }
 
             if (shootPressed && !autoLaunching) {
@@ -487,11 +492,13 @@ public class SpindexerV2 extends LinearOpMode {
         launchMotor.setPower(0);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
-        flickServo = hardwareMap.servo.get("flickServo");
+        //flickServo = hardwareMap.servo.get("flickServo");
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        flickMotor = hardwareMap.get(DcMotorEx.class, "flickMotor");
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
 
