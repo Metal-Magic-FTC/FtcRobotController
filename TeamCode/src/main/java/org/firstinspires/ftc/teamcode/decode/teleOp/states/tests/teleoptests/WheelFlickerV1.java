@@ -72,7 +72,7 @@ public class WheelFlickerV1 extends LinearOpMode {
     private long flickEndTime = 0;
     private static final long POST_FLICK_DELAY_MS = 0; // 100 ms delay after flick retra
 
-    private double spinMotorSpeed = 0.38;
+    private double spinMotorSpeed = 0.35;
 
     // ---- COLOR SENSOR DELAY ----
     private boolean waitingToRotate = false;
@@ -171,6 +171,12 @@ public class WheelFlickerV1 extends LinearOpMode {
                 intakeMotor.setPower(0.8);
             } else {
                 intakeMotor.setPower(-0.6);
+            }
+
+            if (autoLaunching) {
+                spinMotorSpeed = 0.25;
+            } else {
+                spinMotorSpeed = 0.35;
             }
 
             if (waitingForBall && intakeActive && !spinMotor.isBusy()) {
