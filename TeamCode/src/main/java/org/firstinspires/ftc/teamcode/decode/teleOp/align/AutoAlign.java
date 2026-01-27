@@ -39,16 +39,15 @@ public class AutoAlign extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
-        follower.update();
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-
         // WHY DID I DEFINE THE STARTING POSE AFTER CREATING THE FOLLOWER??
         startingPose = new Pose(
                 116,
                 128,
                 Math.toRadians(225)
         );
+        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.update();
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(100, 100))))
@@ -99,7 +98,7 @@ public class AutoAlign extends OpMode {
             double dx = 136 - curr.getX();
             double dy = 136 - curr.getY();
             double targetAngle = Math.atan2(dy, dx)+Math.PI;
-            follower.followPath(new Path(new BezierCurve(follower::getPose, new Pose(curr.getX(), curr.getY(), targetAngle))));
+            follower.followPath(new Path(new BezierPoint(new Pose(curr.getX(), curr.getY(), targetAngle))));
             telemetry.addData("pose", follower::getPose);
             telemetry.addData("angle", targetAngle);
             telemetry.update();
