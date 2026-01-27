@@ -68,7 +68,7 @@ public class AutoAlign extends OpMode {
     public void loop() {
         //Call this once per loop
         follower.update();
-        telemetryM.update();
+        telemetry.update();
 
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
@@ -97,11 +97,9 @@ public class AutoAlign extends OpMode {
             Pose curr = follower.getPose();
             double dx = 136 - curr.getX();
             double dy = 136 - curr.getY();
-            double targetAngle = Math.atan2(dy, dx)+Math.PI;
-            follower.followPath(new Path(new BezierPoint(new Pose(curr.getX(), curr.getY(), targetAngle))));
-            telemetry.addData("pose", follower::getPose);
-            telemetry.addData("angle", targetAngle);
-            telemetry.update();
+            double targetAngle = Math.atan2(dy, dx);
+//            follower.followPath(new Path(new BezierPoint(new Pose(curr.getX(), curr.getY(), targetAngle))));
+            follower.turnTo(targetAngle);
             automatedDrive = true;
         }
 
@@ -126,8 +124,17 @@ public class AutoAlign extends OpMode {
             slowModeMultiplier -= 0.25;
         }
 
-        telemetryM.debug("position", follower.getPose());
-        telemetryM.debug("velocity", follower.getVelocity());
-        telemetryM.debug("automatedDrive", automatedDrive);
+        telemetry.addLine("--- Follower Pose ---");
+        telemetry.addData("  X", follower.getPose().getX());
+        telemetry.addData("  Y", follower.getPose().getY());
+        telemetry.addData("  Heading", Math.toDegrees(follower.getPose().getHeading()));
+        double dx = 136 - follower.getPose().getX();
+        double dy = 136 - follower.getPose().getY();
+        double targetAngle = Math.atan2(dy, dx);
+        telemetry.addData("angle", Math.toDegrees(targetAngle));
+        telemetry.addData("automatedDrive", automatedDrive);
+        if (automatedDrive) {
+            telemetry.addData("heading error", follower.getHeadingError());
+        }
     }
 }
