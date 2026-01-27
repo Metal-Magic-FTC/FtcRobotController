@@ -178,15 +178,16 @@ public class AntiTeleop extends LinearOpMode {
                     follower.update();
                     savePose = follower.getPose();
                     oneTime = false;
+                    //follower.holdPoint(savePose);
                     savePath = follower.pathBuilder()
-                            .addPath(new BezierPoint(savePose.getX(),savePose.getY()))
+                            .addPath(new BezierPoint(savePose))
                             .setConstantHeadingInterpolation(savePose.getHeading())
                             //.setBrakingStrength(5)
-                            .setNoDeceleration().build();
+                            .setNoDeceleration()
+                            .build();
                             //.build();
                 }
                 telemetry.addLine("Holding Position");
-
                 follower.followPath(savePath);
                 follower.update();
 
