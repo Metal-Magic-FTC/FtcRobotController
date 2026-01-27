@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
@@ -72,7 +73,7 @@ public class WheelFlickerV1 extends LinearOpMode {
     private long flickEndTime = 0;
     private static final long POST_FLICK_DELAY_MS = 0; // 100 ms delay after flick retra
 
-    private double spinMotorSpeed = 0.35;
+    private double spinMotorSpeed = 0.38;
 
     // ---- COLOR SENSOR DELAY ----
     private boolean waitingToRotate = false;
@@ -174,9 +175,9 @@ public class WheelFlickerV1 extends LinearOpMode {
             }
 
             if (autoLaunching) {
-                spinMotorSpeed = 0.25;
-            } else {
                 spinMotorSpeed = 0.35;
+            } else {
+                spinMotorSpeed = 0.38;
             }
 
             if (waitingForBall && intakeActive && !spinMotor.isBusy()) {
@@ -224,7 +225,8 @@ public class WheelFlickerV1 extends LinearOpMode {
                 autoLaunching = true;
                 autoLaunchTarget = findClosestLoaded();
                 flickMotor.setPower(1);
-                launchMotor.setPower(1); // spin to shooting speed
+                //launchMotor.setPower(1); // spin to shooting speed
+                launchMotor.setVelocity(2500);
             }
 
             if (autoLaunching) {
@@ -233,7 +235,8 @@ public class WheelFlickerV1 extends LinearOpMode {
                 // No balls left - stop everything
                 if (autoLaunchTarget == -1) {
                     autoLaunching = false;
-                    launchMotor.setPower(0);
+                    //launchMotor.setPower(0);
+                    launchMotor.setVelocity(0);
                     //flickServo.setPosition(flickDown);
                     waitingAfterFlick = false;
                 } else {
@@ -319,9 +322,11 @@ public class WheelFlickerV1 extends LinearOpMode {
             }
 
             if (runLaunch) {
-                launchMotor.setPower(1);
+                //launchMotor.setPower(1);
+                launchMotor.setVelocity(2500);
             } else {
-                launchMotor.setPower(0);
+                //launchMotor.setPower(0);
+                launchMotor.setVelocity(0);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
@@ -494,7 +499,11 @@ public class WheelFlickerV1 extends LinearOpMode {
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.REVERSE); // same as TeleOp_Flick_Launch
-        launchMotor.setPower(0);
+
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 17.8);
+        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
+        launchMotor.setVelocity(0);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
         //flickServo = hardwareMap.servo.get("flickServo");
