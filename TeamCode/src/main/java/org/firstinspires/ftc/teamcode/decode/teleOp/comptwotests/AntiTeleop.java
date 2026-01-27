@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierPoint;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -29,6 +31,7 @@ public class AntiTeleop extends LinearOpMode {
     private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
 
+    private PathChain savePath;
     private Follower follower;
     private Pose savePose;
      private boolean oneTime;
@@ -175,16 +178,15 @@ public class AntiTeleop extends LinearOpMode {
                     follower.update();
                     savePose = follower.getPose();
                     oneTime = false;
-                    PathChain savePath = follower.pathBuilder()
-                            .addPath(new BezierLine(savePose, savePose))
+                    savePath = follower.pathBuilder()
+                            .addPath(new BezierPoint(savePose.getX(),savePose.getY()))
+                            .setConstantHeadingInterpolation(savePose.getHeading())
                             .setBrakingStrength(1)
                             .build();
-
-                    follower.followPath(savePath);
                 }
                 telemetry.addLine("Holding Position");
 
-
+                follower.followPath(savePath);
                 follower.update();
 
             } else {

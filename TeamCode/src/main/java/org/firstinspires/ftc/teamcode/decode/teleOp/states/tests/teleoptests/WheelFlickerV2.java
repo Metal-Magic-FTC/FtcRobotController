@@ -183,9 +183,9 @@ public class WheelFlickerV2 extends LinearOpMode {
             }
 
             if (autoLaunching) {
-                spinMotorSpeed = 0.28;
-            } else {
                 spinMotorSpeed = 0.35;
+            } else {
+                spinMotorSpeed = 0.38;
             }
 
             if (waitingForBall && intakeActive && !spinMotor.isBusy()) {
@@ -246,13 +246,15 @@ public class WheelFlickerV2 extends LinearOpMode {
 
                 spinMotor.setTargetPosition(shootAllTargetPos);
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                spinMotor.setPower(0.28);
+                spinMotor.setPower(0.35);
 
                 flickMotor.setPower(1);
-                launchMotor.setVelocity(5999);
+                launchMotor.setVelocity(2000);
             }
 
             if (autoLaunching) {
+
+                launchMotor.setVelocity(2500);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
@@ -321,10 +323,10 @@ public class WheelFlickerV2 extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(5999);
+                launchMotor.setVelocity(2000);
             } else {
                 //launchMotor.setPower(0);
-                launchMotor.setVelocity(0);
+                launchMotor.setVelocity(900);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
@@ -500,8 +502,6 @@ public class WheelFlickerV2 extends LinearOpMode {
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(270, 0, 0, 14);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-
-        launchMotor.setVelocity(0);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
         //flickServo = hardwareMap.servo.get("flickServo");
