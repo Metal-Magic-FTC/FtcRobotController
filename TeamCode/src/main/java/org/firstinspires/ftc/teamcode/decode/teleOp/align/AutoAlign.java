@@ -3,6 +3,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierPoint;
 import com.pedropathing.geometry.Pose;
@@ -42,6 +43,7 @@ public class AutoAlign extends OpMode {
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
+        // WHY DID I DEFINE THE STARTING POSE AFTER CREATING THE FOLLOWER??
         startingPose = new Pose(
                 116,
                 128,
@@ -94,7 +96,13 @@ public class AutoAlign extends OpMode {
         if (gamepad1.aWasPressed()) {
 //            follower.followPath(pathChain.get());
             Pose curr = follower.getPose();
-            follower.holdPoint(new BezierPoint(curr.getX(), curr.getY()), Math.toRadians((int) (Math.random()*180)), false);
+            double dx = 136 - curr.getX();
+            double dy = 136 - curr.getY();
+            double targetAngle = Math.atan2(dy, dx)+Math.PI;
+            follower.followPath(new Path(new BezierCurve(follower::getPose, new Pose(curr.getX(), curr.getY(), targetAngle))));
+            telemetry.addData("pose", follower::getPose);
+            telemetry.addData("angle", targetAngle);
+            telemetry.update();
             automatedDrive = true;
         }
 
