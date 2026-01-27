@@ -129,20 +129,18 @@ public class FusedPose {
 
     // Fuse limelight estimation with follower data
     public Pose mergePoses(boolean estimate) {
-        boolean detected = false;
-        if (estimate) {
-            detected = (getRobotPose(false) != null);
-        }
-        if (detected) {
+        if (estimate)
+            getRobotPose(false);
+        if (limelightEstimation != null) {
             Pose convertedPose = limelightToPedroPathing(limelightEstimation);
             filterX.update(convertedPose.getX(), follower.getPose().getX());
             filterY.update(convertedPose.getY(), follower.getPose().getY());
             filterHeading.update(convertedPose.getHeading(), follower.getPose().getHeading());
-            follower.setPose(new Pose(
+            return new Pose(
                     filterX.getState(),
                     filterY.getState(),
                     filterHeading.getState()
-            ));
+            );
         }
         return follower.getPose();
     }

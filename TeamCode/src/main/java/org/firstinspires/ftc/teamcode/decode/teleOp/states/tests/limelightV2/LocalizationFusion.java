@@ -86,11 +86,11 @@ public class LocalizationFusion extends LinearOpMode {
             telemetry.addData("  Y", "%.3f in", (convertedPose != null) ? convertedPose.getPose().getY() : null);
             telemetry.addData("  H", "%.1f°", (convertedPose != null) ? Math.toDegrees(convertedPose.getPose().getHeading()) : null);
 
-//            Pose mergedPose = fusedPose.mergePoses(true);
-//            telemetry.addLine("--- Merged Pose ---");
-//            telemetry.addData("  X", "%.3f in", (mergedPose != null) ? mergedPose.getPose().getX() : null);
-//            telemetry.addData("  Y", "%.3f in", (mergedPose != null) ? mergedPose.getPose().getY() : null);
-//            telemetry.addData("  H", "%.1f°", (mergedPose != null) ? Math.toDegrees(mergedPose.getPose().getHeading()) : null);
+            Pose mergedPose = fusedPose.mergePoses(true);
+            telemetry.addLine("--- Merged Pose ---");
+            telemetry.addData("  X", "%.3f in", (mergedPose != null) ? mergedPose.getPose().getX() : null);
+            telemetry.addData("  Y", "%.3f in", (mergedPose != null) ? mergedPose.getPose().getY() : null);
+            telemetry.addData("  H", "%.1f°", (mergedPose != null) ? Math.toDegrees(mergedPose.getPose().getHeading()) : null);
 
             telemetry.update();
         }
