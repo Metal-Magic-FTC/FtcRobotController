@@ -35,9 +35,10 @@ public class GeneratedPathsRedBackStates {
             Math.toRadians(42)
     );
 
-    public GeneratedPathsRedBackV4(Follower follower) {
+    public GeneratedPathsRedBackStates(Follower follower) {
         this.follower = follower;
     }
+
     public PathChain scan(){
         return new PathBuilder(follower)
                 .addPath(

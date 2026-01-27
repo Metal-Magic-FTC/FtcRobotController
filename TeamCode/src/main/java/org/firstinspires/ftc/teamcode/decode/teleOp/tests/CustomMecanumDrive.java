@@ -18,7 +18,7 @@ public class CustomMecanumDrive {
 
         // Set motor directions as needed for your robot's configuration
 //        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.FORWARD);
