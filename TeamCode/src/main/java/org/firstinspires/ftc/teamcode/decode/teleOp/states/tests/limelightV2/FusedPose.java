@@ -56,9 +56,9 @@ public class FusedPose {
         limelight.start();
 
         follower = Constants.createFollower(hardwareMap);
-        filterX = new KalmanFilter(new KalmanFilterParameters(5, 2));
-        filterY = new KalmanFilter(new KalmanFilterParameters(5, 2));
-        filterHeading = new KalmanFilter(new KalmanFilterParameters(5, 2));
+        filterX = new KalmanFilter(new KalmanFilterParameters(6, 1), pose.getX(), 6, 1);
+        filterY = new KalmanFilter(new KalmanFilterParameters(6, 1), pose.getY(), 6, 1);
+        filterHeading = new KalmanFilter(new KalmanFilterParameters(6, 1), pose.getHeading(), 6, 1);
         startingPose = new Pose(
                 pose.getX(),
                 pose.getY(),
@@ -110,6 +110,12 @@ public class FusedPose {
                 72+39.3701*current.getY(),
                 72-39.3701*current.getX(),
                 Math.toRadians(current.getHeading()-90)
+        );
+    }
+
+    public Pose pedroPathingToLimelight(Pose current) {
+        return new Pose(
+
         );
     }
 
