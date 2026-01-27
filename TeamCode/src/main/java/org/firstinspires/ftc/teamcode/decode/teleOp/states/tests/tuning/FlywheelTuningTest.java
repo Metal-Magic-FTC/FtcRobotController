@@ -12,7 +12,7 @@ public class FlywheelTuningTest extends OpMode {
 
     public DcMotorEx launchMotor;
 
-    public double highVelocity = 1500;
+    public double highVelocity = 2000;
     public double lowVelocity = 900;
 
     double curTargetVelocity = highVelocity;
