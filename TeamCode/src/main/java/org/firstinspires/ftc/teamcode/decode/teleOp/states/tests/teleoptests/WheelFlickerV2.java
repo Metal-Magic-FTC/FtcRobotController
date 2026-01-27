@@ -233,19 +233,23 @@ public class WheelFlickerV2 extends LinearOpMode {
                 autoLaunching = true;
                 intakeActive = false;
 
-                // Force start at slot 0
-                index = 0;
+                // FULL sweep math (NO closestModular)
+                int current = spinMotor.getCurrentPosition();
+                int currentMod = ((current % 750) + 750) % 750;
 
-                // Compute ONE continuous target: slot 2
-                int base = OUTTAKE_POS[2];
-                shootAllTargetPos = closestModular(base, spinMotor.getCurrentPosition());
+                int targetInRev = OUTTAKE_POS[2];
+                if (targetInRev <= currentMod) {
+                    targetInRev += 750;
+                }
+
+                shootAllTargetPos = current - currentMod + targetInRev;
 
                 spinMotor.setTargetPosition(shootAllTargetPos);
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                spinMotor.setPower(0.3);
+                spinMotor.setPower(0.28);
 
                 flickMotor.setPower(1);
-                launchMotor.setVelocity(2500);
+                launchMotor.setVelocity(5999);
             }
 
             if (autoLaunching) {
@@ -317,7 +321,7 @@ public class WheelFlickerV2 extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(2500);
+                launchMotor.setVelocity(5999);
             } else {
                 //launchMotor.setPower(0);
                 launchMotor.setVelocity(0);
