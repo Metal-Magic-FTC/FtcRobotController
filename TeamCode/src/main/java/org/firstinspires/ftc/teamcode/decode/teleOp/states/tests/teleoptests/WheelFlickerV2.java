@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
-@TeleOp(name = "!!!!!WheelFlickerV1")
-public class WheelFlickerV1 extends LinearOpMode {
+@TeleOp(name = "!!!!!WheelFlickerV2 22 YUKI TSUNODA")
+public class WheelFlickerV2 extends LinearOpMode {
 
     //launch motor - left bumper
     //flick servo - right trigger
@@ -65,6 +65,9 @@ public class WheelFlickerV1 extends LinearOpMode {
 
     private long flickStartTime = 0;
     private boolean flicking = false;
+
+    // new auto launch
+    private int shootAllTargetPos = 0;
 
     private static final long FLICK_TIME_MS = 0; // 500 ms flick
 
@@ -137,7 +140,6 @@ public class WheelFlickerV1 extends LinearOpMode {
             nextIntake2 = gamepad2.dpad_down;
 
             prevA = gamepad1.a;
-            prevX = gamepad1.x;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
             prevLeftBumper = gamepad1.left_bumper;
@@ -155,6 +157,12 @@ public class WheelFlickerV1 extends LinearOpMode {
 
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
+
+            if (gamepad1.x) {
+                intakeActive = false;
+                waitingForBall = false;
+                rotateToIndex(0);
+            }
 
             if (nextIntake2 && !prevNextIntake2) {
                 index++;
@@ -175,7 +183,7 @@ public class WheelFlickerV1 extends LinearOpMode {
             }
 
             if (autoLaunching) {
-                spinMotorSpeed = 0.3;
+                spinMotorSpeed = 0.28;
             } else {
                 spinMotorSpeed = 0.35;
             }
@@ -223,54 +231,39 @@ public class WheelFlickerV1 extends LinearOpMode {
 
             if (launchAllPressed && !autoLaunching) {
                 autoLaunching = true;
-                autoLaunchTarget = findClosestLoaded();
+                intakeActive = false;
+
+                // Force start at slot 0
+                index = 0;
+
+                // Compute ONE continuous target: slot 2
+                int base = OUTTAKE_POS[2];
+                shootAllTargetPos = closestModular(base, spinMotor.getCurrentPosition());
+
+                spinMotor.setTargetPosition(shootAllTargetPos);
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.3);
+
                 flickMotor.setPower(1);
-                //launchMotor.setPower(1); // spin to shooting speed
                 launchMotor.setVelocity(2500);
             }
 
             if (autoLaunching) {
-                flickMotor.setPower(1);
 
-                // No balls left - stop everything
-                if (autoLaunchTarget == -1) {
+                // Wait until the sweep finishes
+                if (!spinMotor.isBusy()) {
+
+                    // Stop shooter systems
+                    flickMotor.setPower(0);
+
+                    // Clear ALL slots at once
+                    slots[0] = Ball.EMPTY;
+                    slots[1] = Ball.EMPTY;
+                    slots[2] = Ball.EMPTY;
+
+                    // Reset state
+                    index = 2;
                     autoLaunching = false;
-                    //launchMotor.setPower(0);
-                    launchMotor.setVelocity(0);
-                    //flickServo.setPosition(flickDown);
-                    waitingAfterFlick = false;
-                } else {
-
-                    // Rotate to the current ball if not aligned
-                    if (index != autoLaunchTarget && !spinMotor.isBusy() && !waitingAfterFlick) {
-                        rotateToIndex(autoLaunchTarget);
-                    }
-
-                    // Once aligned and not flicking - flick servo out
-                    if (!spinMotor.isBusy() && !flicking && !waitingAfterFlick) {
-                        //flickServo.setPosition(flickUp);
-                        flickStartTime = System.currentTimeMillis();
-                        flicking = true;
-                    }
-
-                    // Retract servo after FLICK_TIME_MS
-                    if (flicking && System.currentTimeMillis() - flickStartTime >= FLICK_TIME_MS) {
-                        //flickServo.setPosition(flickDown);
-                        flicking = false;
-
-                        // Clear the slot
-                        slots[index] = Ball.EMPTY;
-
-                        // Start post-flick delay
-                        waitingAfterFlick = true;
-                        flickEndTime = System.currentTimeMillis();
-                    }
-
-                    // Wait POST_FLICK_DELAY_MS before moving to next ball
-                    if (waitingAfterFlick && System.currentTimeMillis() - flickEndTime >= POST_FLICK_DELAY_MS) {
-                        autoLaunchTarget = findClosestLoaded();
-                        waitingAfterFlick = false;
-                    }
                 }
             }
 
@@ -288,10 +281,11 @@ public class WheelFlickerV1 extends LinearOpMode {
                     intakeActive = false;
                     waitingForBall = false;
 
-                    int nextLoaded = findClosestLoaded();
-                    if (nextLoaded != -1) {
-                        rotateToIndex(nextLoaded);
-                    }
+//                    int nextLoaded = findClosestLoaded();
+//                    if (nextLoaded != -1) {
+//                        rotateToIndex(nextLoaded);
+//                    }
+                    rotateToIndex(0);
                 }
             }
 
