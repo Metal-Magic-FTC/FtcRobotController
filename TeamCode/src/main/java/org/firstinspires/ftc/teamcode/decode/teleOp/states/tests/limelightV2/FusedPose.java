@@ -139,9 +139,9 @@ public class FusedPose {
             getRobotPose(false);
         if (limelightEstimation != null) {
             Pose convertedPose = limelightToPedroPathing(limelightEstimation);
-            filterX.update(convertedPose.getX(), follower.getPose().getX());
-            filterY.update(convertedPose.getY(), follower.getPose().getY());
-            filterHeading.update(convertedPose.getHeading(), follower.getPose().getHeading());
+            filterX.update(follower.getPose().getX()-filterX.getState(), convertedPose.getX());
+            filterY.update(follower.getPose().getY()-filterY.getState(), convertedPose.getY());
+            filterHeading.update(follower.getPose().getHeading()-filterHeading.getState(), convertedPose.getHeading());
             return new Pose(
                     filterX.getState(),
                     filterY.getState(),
