@@ -25,7 +25,9 @@ public class SpindexerTuningTest extends OpMode {
     public void init() {
 
         spinMotor = hardwareMap.get(DcMotorEx.class, "spinMotor");
+        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
@@ -85,7 +87,7 @@ public class SpindexerTuningTest extends OpMode {
 
         telemetry.addData("Target position", positions[current]);
         telemetry.addData("Current velocity", curVelocity);
-        //telemetry.addData("Error", "%.2f", error);
+        telemetry.addData("Pos", "%.2f", current);
         telemetry.addLine("-----------------------------");
         telemetry.addData("Tuning P", "%.4f (D-Pad U/D)", P);
         telemetry.addData("Tuning F", "%.4f (D-Pad L/R)", F);

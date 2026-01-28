@@ -16,7 +16,7 @@ import java.util.List;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 //@Disabled
-@Autonomous(name = "!!!!! STATES V0")
+@Autonomous(name = "!!!!! STATES RED BACK V0")
 public class RedBackStates extends LinearOpMode {
 
     private int index = 0;
@@ -110,21 +110,15 @@ public class RedBackStates extends LinearOpMode {
         rotateToIndex(0);
         runPath(paths.toIntake1(), 50, 1);
         resetSlots();
+
         runPathWithIntake(paths.intakeball1(), 250, 0.21);
-        runPathWithIntake(paths.intakeball2(), 250, 0.21);
         double startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() < startTime + 1000) {
             waitingForBall = true;
             intakeActive = true;
             intake();
         }
-        runPathWithIntake(paths.intakeball3(), 250, 0.21);
-        startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 1000) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
+
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
