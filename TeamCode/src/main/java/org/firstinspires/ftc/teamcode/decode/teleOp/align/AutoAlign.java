@@ -93,12 +93,10 @@ public class AutoAlign extends OpMode {
 
         //Automated PathFollowing
         if (gamepad1.aWasPressed()) {
-//            follower.followPath(pathChain.get());
             Pose curr = follower.getPose();
             double dx = 136 - curr.getX();
             double dy = 136 - curr.getY();
             double targetAngle = Math.atan2(dy, dx);
-//            follower.followPath(new Path(new BezierPoint(new Pose(curr.getX(), curr.getY(), targetAngle))));
             follower.turnTo(targetAngle);
             automatedDrive = true;
         }

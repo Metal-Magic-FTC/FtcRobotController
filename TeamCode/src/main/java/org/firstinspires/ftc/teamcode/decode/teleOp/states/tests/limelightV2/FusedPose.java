@@ -40,8 +40,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import com.pedropathing.control.*;
 public class FusedPose {
-    private Limelight3A limelight;
-    private Follower follower;
+    public Limelight3A limelight;
+    public Follower follower;
     private KalmanFilter filterX;
     private KalmanFilter filterY;
     private KalmanFilter filterHeading;
@@ -98,6 +98,20 @@ public class FusedPose {
             }
         }
         return null;
+    }
+
+    public int detectLimelightTag() {
+        result = limelight.getLatestResult();
+        if (result == null || !result.isValid())
+            return -1;
+        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        for (LLResultTypes.FiducialResult fiducial : fiducials) {
+            int id = fiducial.getFiducialId();
+            if (21 <= id && id <= 23) {
+                return id;
+            }
+        }
+        return -1;
     }
 
     /*
