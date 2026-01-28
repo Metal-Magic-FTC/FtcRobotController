@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.comptwotests;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierPoint;
@@ -178,17 +179,16 @@ public class AntiTeleop extends LinearOpMode {
                     follower.update();
                     savePose = follower.getPose();
                     oneTime = false;
-                    //follower.holdPoint(savePose);
-                    savePath = follower.pathBuilder()
-                            .addPath(new BezierPoint(savePose))
-                            .setConstantHeadingInterpolation(savePose.getHeading())
-                            //.setBrakingStrength(5)
-                            .setNoDeceleration()
-                            .build();
-                            //.build();
+                    follower.holdPoint(savePose);
+//                    savePath = follower.pathBuilder()
+//                            .addPath(new BezierPoint(savePose))
+//                            .setConstantHeadingInterpolation(savePose.getHeading())
+//                            //.setBrakingStrength(5)
+//                            .build();
+//                            //.build();
                 }
                 telemetry.addLine("Holding Position");
-                follower.followPath(savePath);
+                //follower.followPath(savePath);
                 follower.update();
 
             } else {
@@ -514,6 +514,7 @@ public class AntiTeleop extends LinearOpMode {
         intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
         follower = Constants.createFollower(hardwareMap);
+        follower.setDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.15, 0.001, 0.00001, 0.6, 0.003));
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
