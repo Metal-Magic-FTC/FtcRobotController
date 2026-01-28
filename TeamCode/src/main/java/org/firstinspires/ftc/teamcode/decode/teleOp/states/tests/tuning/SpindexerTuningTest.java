@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-@TeleOp(name="Tune the flywheel PIDF")
+@TeleOp(name="!!!!!Tune the spindexer PIDF")
 public class SpindexerTuningTest extends OpMode {
 
     public DcMotorEx spinMotor;
