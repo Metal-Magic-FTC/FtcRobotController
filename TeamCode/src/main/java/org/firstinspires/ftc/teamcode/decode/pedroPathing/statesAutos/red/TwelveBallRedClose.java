@@ -28,7 +28,7 @@ public class TwelveBallRedClose extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(72, 8, Math.toRadians(90)));
+        follower.setStartingPose(new Pose(118.157, 128.629, Math.toRadians(45)));
 
         paths = new Paths(follower);
 
@@ -103,7 +103,7 @@ public class TwelveBallRedClose extends OpMode {
                             new BezierLine(
                                     new Pose(99.899, 83.809),
 
-                                    new Pose(119.787, 83.596)
+                                    new Pose(119.787, 79)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -111,9 +111,9 @@ public class TwelveBallRedClose extends OpMode {
 
             gate = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(119.787, 83.596),
+                                    new Pose(119.787, 79),
 
-                                    new Pose(129.309, 70.343)
+                                    new Pose(126.5, 78)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
 
@@ -121,7 +121,7 @@ public class TwelveBallRedClose extends OpMode {
 
             shoot2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(129.309, 70.343),
+                                    new Pose(126, 79),
 
                                     new Pose(91.371, 102.034)
                             )
@@ -132,18 +132,18 @@ public class TwelveBallRedClose extends OpMode {
             tointake2 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(91.371, 102.034),
-                                    new Pose(76.242, 60.303),
-                                    new Pose(99.899, 60.000)
+                                    new Pose(68.8707865168539, 60.123595505617985),
+                                    new Pose(103.31460674157304, 55)
                             )
-                    ).setTangentHeadingInterpolation()
+                    ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
 
                     .build();
 
             intake2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(99.899, 60.000),
+                                    new Pose(99.899, 55),
 
-                                    new Pose(119.787, 60.000)
+                                    new Pose(119.787, 55)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -151,29 +151,28 @@ public class TwelveBallRedClose extends OpMode {
 
             shoot3 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(119.787, 60.000),
+                                    new Pose(119.787, 55),
 
                                     new Pose(91.371, 102.034)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
-                    .setReversed()
                     .build();
 
             tointake3 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(91.371, 102.034),
-                                    new Pose(68.590, 35.623),
-                                    new Pose(99.899, 35.400)
+                                    new Pose(68.58988764044946, 35.7),
+                                    new Pose(103.85393258426967, 30)
                             )
-                    ).setTangentHeadingInterpolation()
+                    ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
 
                     .build();
 
             intake3 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(99.899, 35.400),
+                                    new Pose(99.899, 30),
 
-                                    new Pose(119.787, 35.400)
+                                    new Pose(119.787, 30)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -181,7 +180,7 @@ public class TwelveBallRedClose extends OpMode {
 
             shoot4 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(119.787, 35.400),
+                                    new Pose(119.787, 30),
 
                                     new Pose(91.371, 102.034)
                             )
@@ -201,6 +200,11 @@ public class TwelveBallRedClose extends OpMode {
         }
     }
 
+//    @Override
+//    public void start() {
+//        pathState = 0;
+//        startedPath = false;
+//    }
 
     public int autonomousPathUpdate() {
 
@@ -208,6 +212,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 0: // Scan
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.scan);
                     startedPath = true;
                 }
@@ -219,6 +224,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 1: // Shoot
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.shoot);
                     startedPath = true;
                 }
@@ -230,6 +236,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 2: // To Intake 1
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.tointake1);
                     startedPath = true;
                 }
@@ -241,6 +248,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 3: // Intake 1
                 if (!startedPath) {
+                    follower.setMaxPower(0.35);
                     follower.followPath(paths.intake1);
                     startedPath = true;
                 }
@@ -252,6 +260,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 4: // Gate
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.gate);
                     startedPath = true;
                 }
@@ -263,6 +272,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 5: // Shoot 2
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.shoot2);
                     startedPath = true;
                 }
@@ -274,6 +284,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 6: // To Intake 2
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.tointake2);
                     startedPath = true;
                 }
@@ -285,6 +296,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 7: // Intake 2
                 if (!startedPath) {
+                    follower.setMaxPower(0.35);
                     follower.followPath(paths.intake2);
                     startedPath = true;
                 }
@@ -296,6 +308,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 8: // Shoot 3
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.shoot3);
                     startedPath = true;
                 }
@@ -307,6 +320,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 9: // To Intake 3
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.tointake3);
                     startedPath = true;
                 }
@@ -318,6 +332,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 10: // Intake 3
                 if (!startedPath) {
+                    follower.setMaxPower(0.35);
                     follower.followPath(paths.intake3);
                     startedPath = true;
                 }
@@ -329,6 +344,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 11: // Shoot 4
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.shoot4);
                     startedPath = true;
                 }
@@ -340,6 +356,7 @@ public class TwelveBallRedClose extends OpMode {
 
             case 12: // Leave
                 if (!startedPath) {
+                    follower.setMaxPower(1);
                     follower.followPath(paths.leave);
                     startedPath = true;
                 }
