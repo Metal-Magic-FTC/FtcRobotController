@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "!!Red Close V5 Qualy 2")
+@Autonomous(name = "!!Close 12 Auto")
 public class Close12Auto extends LinearOpMode {
 
     private int index = 0;
