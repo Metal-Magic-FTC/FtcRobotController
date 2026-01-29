@@ -96,7 +96,7 @@ public class BlueCloseStates extends LinearOpMode {
 
         runPath(paths.scan(), 250, 1.0);
 
-        Ball[] pattern = getPatternFromTag();
+        //Ball[] pattern = getPatternFromTag();
 
         //aimClosest(pattern[0]);
 
