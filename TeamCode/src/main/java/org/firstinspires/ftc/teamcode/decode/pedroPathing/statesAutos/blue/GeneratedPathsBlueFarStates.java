@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-public class GeneratedPathsBlueCloseStates {
+public class GeneratedPathsBlueFarStates {
 
     private final Follower follower;
 
@@ -25,8 +25,8 @@ public class GeneratedPathsBlueCloseStates {
     );
 
     public static final Pose SCAN_POSE = new Pose(
-            59,
-            17,
+            58.5,
+            15,
             Math.toRadians(80)
     );
 
@@ -36,7 +36,7 @@ public class GeneratedPathsBlueCloseStates {
             Math.toRadians(110)
     );
 
-    public GeneratedPathsBlueCloseStates(Follower follower) {
+    public GeneratedPathsBlueFarStates(Follower follower) {
         this.follower = follower;
     }
 

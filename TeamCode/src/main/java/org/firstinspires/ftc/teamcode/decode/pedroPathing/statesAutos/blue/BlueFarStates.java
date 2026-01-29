@@ -15,14 +15,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.blue.GeneratedPathsBlueCloseStates;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!! STATES BLUE CLOSE V0")
-public class BlueCloseStates extends LinearOpMode {
+@Autonomous(name = "!!!!! STATES BLUE Far V0")
+public class BlueFarStates extends LinearOpMode {
 
     private int index = 0;
 
@@ -33,7 +32,7 @@ public class BlueCloseStates extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsBlueCloseStates paths;
+    private GeneratedPathsBlueFarStates paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -78,8 +77,8 @@ public class BlueCloseStates extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlueCloseStates.START_POSE);
-        paths = new GeneratedPathsBlueCloseStates(follower);
+        follower.setPose(GeneratedPathsBlueFarStates.START_POSE);
+        paths = new GeneratedPathsBlueFarStates(follower);
         hoodServo.setPosition(0.80);
 
 
