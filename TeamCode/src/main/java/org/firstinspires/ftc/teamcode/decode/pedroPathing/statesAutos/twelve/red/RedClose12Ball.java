@@ -100,7 +100,7 @@ public class RedClose12Ball extends LinearOpMode {
         // ---- SHOOT ----
         shootAllPattern(pattern);
 
-        intakeMotor.setPower(-1);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -123,7 +123,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         runPathWithIntake(paths.gate(), 0, 1);
 
-        intakeMotor.setPower(-1);
+        intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
@@ -139,7 +139,7 @@ public class RedClose12Ball extends LinearOpMode {
         // ---- SHOOT ----
         shootAllPattern(pattern);
 
-        intakeMotor.setPower(-1);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -150,7 +150,7 @@ public class RedClose12Ball extends LinearOpMode {
         runPath(paths.toIntake2(), 0, 1);
         runPathWithIntake(paths.intake2(), 0, 0.21);
 
-        intakeMotor.setPower(-1);
+        intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
@@ -165,7 +165,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         shootAllPattern(pattern);
 
-        intakeMotor.setPower(-1);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -173,7 +173,7 @@ public class RedClose12Ball extends LinearOpMode {
         runPath(paths.toIntake3(), 0, 1);
         runPathWithIntake(paths.intake3(), 0, 0.25);
 
-        intakeMotor.setPower(-1);
+        intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.PURPLE;
@@ -189,7 +189,7 @@ public class RedClose12Ball extends LinearOpMode {
         shootAllPattern(pattern);
 
         runPath(paths.leave(), 0, 1);
-        intakeMotor.setPower(-1);
+        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
@@ -272,7 +272,7 @@ public class RedClose12Ball extends LinearOpMode {
                 if (nextIndexAfterDelay != -1) {
                     rotateToIndex(nextIndexAfterDelay);
                     waitingForBall = true; // continue intake
-                    intakeMotor.setPower(-1);
+                    intakeMotor.setPower(-0.6);
                 } else {
 //                    intakeActive = false;
 //                    rotateToIndex(0); // back to home
