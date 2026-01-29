@@ -1,643 +1,419 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.optStatesAutos;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.TelemetryManager;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.*;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.*;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
-import java.util.Arrays;
-import java.util.List;
+@Autonomous(name = "!!! Close12Auto")
+@Configurable // Panels
+public class Close12Auto extends OpMode {
+    private TelemetryManager panelsTelemetry; // Panels Telemetry instance
+    public Follower follower; // Pedro Pathing follower instance
+    private int pathState; // Current autonomous path state (state machine)
+    private Paths paths; // Paths defined in the Paths class
 
-@Autonomous(name = "!!Close 12 Auto")
-public class Close12Auto extends LinearOpMode {
+    private boolean startedPath = false;
 
-    private int index = 0;
-
-    private float gain = 20;
-
-    private enum Ball { EMPTY, PURPLE, GREEN }
-    private Ball[] slots = {Ball.EMPTY, Ball.EMPTY, Ball.EMPTY};
-
-    // ---------------- DRIVE ----------------
-    private Follower f;
-    private Close12Path p;
-    private CustomMecanumDrive drivetrain;
-    private Limelight3A limelight;
-
-    // ---------------- INTAKE, TRANSFER, SCORING ----------------
-
-    private DcMotor spinMotor;
-    private DcMotorEx launchMotor;
-    private DcMotor intakeMotor;
-    Servo hoodServo;
-    Servo flickServo;
-    NormalizedColorSensor intakeColor;
-    NormalizedColorSensor intakeColor2;
-
-    private static final int[] OUTTAKE_POS = {504, 2, 252};
-    private static final int[] INTAKE_POS  = {125, 375, 625};
-
-    private double spinMotorSpeed = 0.35;
-
-    private boolean intakeActive = false;
-    private boolean waitingToRotate = false;
-    private boolean waitingForBall = false;
-    private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
-    private int nextIndexAfterDelay = -1;
-
-    private static final int SPIN_TOLERANCE_TICKS = 5;
-    private static final long SPIN_TIMEOUT_MS = 10000;
-
-    private int lastSpinTarget = 0;
-
-    private double flickUp = 0.75;
-    private double flickDown = 1;
-
-    // ---------------- RUN ----------------
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void init() {
+        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(30.25, 132.75, Math.toRadians(90)));
 
-        initHardware();
-        resetSlots();
+        paths = new Paths(follower);
 
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
+        pathState = 0;
+        startedPath = false;
 
-        f = Constants.createFollower(hardwareMap);
-        p = new Close12Path(f);
-        f.setPose(p.start);
-        hoodServo.setPosition(0.77);
-
-
-        telemetry.addLine("Ready");
-        telemetry.update();
-
-        waitForStart();
-        if (isStopRequested()) return;
-
-        launchMotor.setPower(0.91); // 0.935
-
-        flickServo.setPosition(flickDown);
-
-        // scan balls
-        //scanBallsInSlots(5000);
-
-//        runPath(p.scan(), 0, 1.0);
-//        telemetry.addData("X SCAN", f.getPose().getX());
-//        telemetry.addData("Y SCAN", f.getPose().getY());
-
-        Ball[] pattern = getPatternFromTag();
-
-        aimClosest(pattern[0]);
-
-        runPath(p.scoreP(), 0, 1);
-        telemetry.addData("X SHOOT", f.getPose().getX());
-        telemetry.addData("Y SHOOT", f.getPose().getY());
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-        intakeMotor.setPower(-0.8);
-        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
-
-        // ---- INTAKE 1–3 ----
-
-        double startTime;
-
-        intakeActive = true;
-        rotateToIndex(0);
-//        runPath(p.intake1(), 0, 1);
-        telemetry.addData("X intake1", f.getPose().getX());
-        telemetry.addData("Y intake2", f.getPose().getY());
-        resetSlots();
-
-        runPathWithIntake(p.intake1(), 0, 0.3);
-//        startTime = System.currentTimeMillis();
-//        //slots[0] = Ball.PURPLE;
-//        while (System.currentTimeMillis() < startTime + 650) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-//
-//        runPathWithIntake(paths.intakeball2(), 0, 0.3);
-//        startTime = System.currentTimeMillis();
-//        //slots[0] = Ball.PURPLE;
-//        while (System.currentTimeMillis() < startTime + 650) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-//
-//        runPathWithIntake(paths.intakeball3(), 0, 0.3);
-//        startTime = System.currentTimeMillis();
-//        //slots[0] = Ball.GREEN;
-//        while (System.currentTimeMillis() < startTime + 250) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-
-        intakeMotor.setPower(-0.8);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        aimClosest(pattern[0]);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        intakeMotor.setPower(0.6);
-        runPath(p.score1(), 5, 1);
-        intakeMotor.setPower(-0.8);
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-//        intakeMotor.setPower(-0.6);
-//        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
-
-        // ---- INTAKE 4–6 ----
-//        intakeActive = false;
-//        rotateToIndex(0);
-//        runPath(paths.toIntake2(), 50, 1);
-
-        intakeActive = true;
-        rotateToIndex(0);
-//        runPath(p.toIntake2(), 0, 1);
-//        telemetry.addData("X intake1", f.getPose().getX());
-//        telemetry.addData("Y intake2", f.getPose().getY());
-        resetSlots();
-
-        runPathWithIntake(p.intake2(), 0, 0.3);
-
-        runPath(p.gate(), 5, 1);
-//        startTime = System.currentTimeMillis();
-//        //slots[0] = Ball.PURPLE;
-//        while (System.currentTimeMillis() < startTime + 650) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-//
-//        runPathWithIntake(paths.intakeball5(), 0, 0.3);
-//        startTime = System.currentTimeMillis();
-//        //slots[0] = Ball.GREEN;
-//        while (System.currentTimeMillis() < startTime + 650) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-//
-//        runPathWithIntake(paths.intakeball6(), 0, 0.3);
-//        startTime = System.currentTimeMillis();
-//        //slots[0] = Ball.PURPLE;
-//        while (System.currentTimeMillis() < startTime + 250) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-
-        intakeMotor.setPower(-0.8);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        aimClosest(pattern[0]);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        intakeMotor.setPower(0.6);
-        runPath(p.score2(), 5, 1);
-        intakeMotor.setPower(-0.8);
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-        intakeMotor.setPower(-0.8);
-        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
-
-        // ---- INTAKE 1–3 ----
-        
-        intakeActive = true;
-        rotateToIndex(0);
-//        runPath(p.intake1(), 0, 1);
-        telemetry.addData("X intake1", f.getPose().getX());
-        telemetry.addData("Y intake2", f.getPose().getY());
-        resetSlots();
-
-        runPathWithIntake(p.intake1(), 0, 0.3);
-
-        intakeMotor.setPower(-0.8);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        aimClosest(pattern[0]);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        intakeMotor.setPower(0.6);
-        runPath(p.score1(), 5, 1);
-        intakeMotor.setPower(-0.8);
-
-        // ---- SHOOT ----
-        shoot(pattern);
-
-        telemetry.addLine("Finished");
-        telemetry.update();
+        panelsTelemetry.debug("Status", "Initialized");
+        panelsTelemetry.update(telemetry);
     }
 
-    // ---------------- SPINDEXER ----------------
+    @Override
+    public void loop() {
+        follower.update(); // Update Pedro Pathing
+        pathState = autonomousPathUpdate(); // Update autonomous state machine
 
-    private void rotateToIndex(int target) {
-        index = target;
-        int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
-        int targetPos = closestModular(base, spinMotor.getCurrentPosition());
-
-        lastSpinTarget = targetPos; // store target
-
-        spinMotor.setTargetPosition(targetPos);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(spinMotorSpeed);
+        // Log values to Panels and Driver Station
+        panelsTelemetry.debug("Path State", pathState);
+        panelsTelemetry.debug("X", follower.getPose().getX());
+        panelsTelemetry.debug("Y", follower.getPose().getY());
+        panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.update(telemetry);
     }
 
-    private int closestModular(int mod, int current) {
-        int best = mod;
-        int minDiff = Integer.MAX_VALUE;
-        for (int k = -2; k <= 2; k++) {
-            int candidate = mod + 750 * k;
-            int diff = Math.abs(candidate - current);
-            if (diff < minDiff) {
-                minDiff = diff;
-                best = candidate;
-            }
-        }
-        return best;
-    }
 
-    private void aimClosest(Ball target) {
-        intakeActive = false;
-        for (int i = 0; i < 3; i++) {
-            int idx = (index + i) % 3;
-            if (slots[idx] == target) {
-                rotateToIndex(idx);
-                return;
-            }
+    public static class Paths {
+        public PathChain scan;
+        public PathChain shoot;
+        public PathChain tointake1;
+        public PathChain intake1;
+        public PathChain gate;
+        public PathChain shoot2;
+        public PathChain tointake2;
+        public PathChain intake2;
+        public PathChain shoot3;
+        public PathChain tointake3;
+        public PathChain intake3;
+        public PathChain shoot4;
+        public PathChain leave;
+
+        // Start position
+        public Pose startPose = new Pose(30.25, 132.75, Math.toRadians(90));
+        // Initial scoring position
+        public Pose scanPose = new Pose(41, 105, Math.toRadians(50)); // score
+        public Pose scorePose = new Pose(48, 96, Math.toRadians(135)); // score
+        // Intaking first row
+        public Pose tointake1Pose = new Pose(40,85, Math.toRadians(180)); // to intake
+        public Pose tointake1ControlPose = new Pose(51,84, Math.toRadians(180)); // to intake
+        public Pose intake1Pose = new Pose(17,83.5, Math.toRadians(180)); // intake
+//        public Pose score2ControlPose = new Pose(56, 66);
+        // Opening the gate
+        public Pose gatePose = new Pose(19, 72.500, Math.toRadians(90)); //new Pose(144-132.781509, 61, Math.toRadians(28+90)); // gate
+        public Pose gateControlPose = new Pose(55, 73); //62);
+        // Intaking second row
+        public Pose tointake2Pose = new Pose(34,60, Math.toRadians(180)); // to intake
+        public Pose tointake2ControlPose = new Pose(80,53, Math.toRadians(180)); // to intake
+        public Pose intake2Pose = new Pose(13, 60, Math.toRadians(180)); // intake
+//        public Pose score3ControlPose = new Pose(56, 66);
+        // Intaking the third row
+        public Pose tointake3Pose = new Pose(13,35, Math.toRadians(180)); // to intake
+        public Pose tointake3ControlPose = new Pose(70,33, Math.toRadians(180)); // to intake
+        public Pose intake3Pose = new Pose(12, 35, Math.toRadians(180));
+        public Pose score4ControlPose = new Pose(43, 78);
+
+        // idk
+        public Pose intakeCornerPose = new Pose(6.5,10 , Math.toRadians(270));
+        public Pose intakeCornerControlPose = intakeCornerPose.withY(50);
+        public Pose scoreToCornerPose = scorePose.withHeading(Math.toRadians(-135));
+        public Pose scoreCornerPose = scorePose; //new Pose(56, 20, Math.toRadians(180));
+
+        // leave
+        public Pose leavePose = new Pose(48, 72, Math.toRadians(90));//new Pose(36, 12, Math.toRadians(180));
+
+        public Paths(Follower follower) {
+            // Start -> Scan
+            scan = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    startPose,
+                                    scanPose
+                            )
+                    )
+                    .setNoDeceleration()
+                    .setLinearHeadingInterpolation(startPose.getHeading(), scanPose.getHeading())
+                    .build();
+
+            // Scan -> Score (control)
+            shoot = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    scanPose,
+                                    scorePose
+                            )
+                    )
+                    .setNoDeceleration()
+                    .setLinearHeadingInterpolation(scanPose.getHeading(), scorePose.getHeading())
+                    .build();
+
+            // Score -> toIntake (control)
+            tointake1 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    scorePose,
+                                    tointake1ControlPose,
+                                    tointake1Pose
+                            )
+                    )
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), tointake1Pose.getHeading(), 0.3)
+                    .build();
+
+            // toIntake -> intake
+            intake1 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    tointake1Pose,
+                                    intake1Pose
+                            )
+                    )
+                    .setBrakingStrength(5)
+                    .setBrakingStart(20)
+                    .setLinearHeadingInterpolation(tointake1Pose.getHeading(), intake1Pose.getHeading(), 0.3)
+                    .build();
+
+            // intake -> gate (control)
+            gate = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    intake1Pose,
+                                    gateControlPose,
+                                    gatePose
+                            )
+                    )
+                    .setBrakingStrength(3)
+                    .setLinearHeadingInterpolation(intake1Pose.getHeading(), gatePose.getHeading(), 0.3)
+                    .build();
+
+            // gate -> score (score2 control)
+            shoot2 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    gatePose,
+                                    scorePose
+                            )
+                    )
+                    .setLinearHeadingInterpolation(gatePose.getHeading(), scorePose.getHeading(), 0.3)
+                    .build();
+
+            // score -> toIntake (control)
+            tointake2 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    scorePose,
+                                    tointake2ControlPose,
+                                    tointake2Pose
+                            )
+                    )
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), tointake2Pose.getHeading(), 0.3)
+                    .build();
+
+            // toIntake -> intake
+            intake2 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    tointake2Pose,
+                                    intake2Pose
+                            )
+                    )
+                    .setBrakingStrength(4)
+                    .setBrakingStart(20)
+                    .setLinearHeadingInterpolation(tointake2Pose.getHeading(), intake2Pose.getHeading(), 0.3)
+                    .build();
+
+            // intake -> shoot (shoot3 control)
+            shoot3 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    intake2Pose,
+                                    scorePose
+                            )
+                    )
+                    .setLinearHeadingInterpolation(intake2Pose.getHeading(), scorePose.getHeading(), 0.3)
+                    .build();
+
+            // shoot -> toIntake (control)
+            tointake3 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    scorePose,
+                                    tointake3ControlPose,
+                                    tointake3Pose
+                            )
+                    )
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), tointake3Pose.getHeading(), 0.3)
+                    .build();
+
+            // toIntake -> intake
+            intake3 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    tointake3Pose,
+                                    intake3Pose
+                            )
+                    )
+                    .setBrakingStrength(4)
+                    .setBrakingStart(20)
+                    .setLinearHeadingInterpolation(tointake3Pose.getHeading(), intake3Pose.getHeading(), 0.3)
+                    .build();
+
+            // intake -> shoot (shoot4 control)
+            shoot4 = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    intake3Pose,
+                                    score4ControlPose,
+                                    scorePose
+                            )
+                    )
+                    .setLinearHeadingInterpolation(intake3Pose.getHeading(), scorePose.getHeading(), 0.3)
+                    .build();
+
+            // shoot -> leave
+            leave = follower.pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    scorePose,
+                                    leavePose
+                            )
+                    )
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), leavePose.getHeading(), 0.3)
+                    .build();
         }
     }
 
-    private int findNextEmpty() {
-        for (int i = 0; i < 3; i++) {
-            int idx = (index + i) % 3;
-            if (slots[idx] == Ball.EMPTY) return idx;
-        }
-        return -1;
-    }
 
-    private void shootOne(Ball target) {
+    public int autonomousPathUpdate() {
 
-        List<Ball> targetAL = Arrays.asList(slots);
-        if (!targetAL.contains(target)) return; // check if has a ball
+        switch (pathState) {
 
-        aimClosest(target);
-        waitForSpindexer();
-        sleep(350); // 400
-
-        flickServo.setPosition(flickUp);
-        sleep(400); // 500
-        flickServo.setPosition(flickDown);
-        sleep(250); // 300
-
-        if (slots[index] == target) {
-            slots[index] = Ball.EMPTY;
-        }
-
-    }
-
-    private void shoot(Ball[] pattern) {
-
-        intakeActive = false;
-        intakeMotor.setPower(0);
-
-        for (Ball ball : pattern) {
-            //shootOne(ball);
-            if (ball != Ball.EMPTY) {
-                shootOne(ball);
-            }
-        }
-
-        intakeMotor.setPower(-0.8);
-
-    }
-
-    private void intake() {
-
-        // spindexer logic (COLOR-BASED DETECTION) with delay
-        if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
-            Ball detected = detectColor(intakeColor, intakeColor2);
-
-            if (detected != Ball.EMPTY) {
-                slots[index] = detected;
-                waitingForBall = false;
-
-                // compute next index, but don't rotate yet
-                int nextEmpty = findNextEmpty();
-                nextIndexAfterDelay = nextEmpty;
-                colorDetectedTime = System.currentTimeMillis();
-                waitingToRotate = true;
-                intakeMotor.setPower(0);
-            }
-        }
-
-        // after COLOR_DELAY_MS, rotate if needed
-        if (waitingToRotate) {
-            if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
-//                int nextEmpty = findNextEmpty();
-//                nextIndexAfterDelay = nextEmpty;
-                if (nextIndexAfterDelay != -1) {
-                    rotateToIndex(nextIndexAfterDelay);
-                    waitingForBall = true; // continue intake
-                    intakeMotor.setPower(-0.6);
-                } else {
-//                    intakeActive = false;
-//                    rotateToIndex(0); // back to home
-                    // Stay in intake position, keep waiting
-                    waitingForBall = true;
+            case 0: // Scan
+                if (!startedPath) {
+                    follower.followPath(paths.scan);
+                    startedPath = true;
                 }
-                waitingToRotate = false; // reset
-            }
-        }
-    }
-
-    private void scanBallsInSlots(long timeoutMs) {
-
-        long start = System.currentTimeMillis();
-
-        int nextEmpty = findNextEmpty();
-
-        if (nextEmpty != -1) {
-            // normal intake
-            intakeActive = true;
-            waitingForBall = true;
-            rotateToIndex(nextEmpty);
-        } else {
-            // all full then go shoot
-            intakeActive = false;
-            waitingForBall = false;
-
-            int nextLoaded = findClosestLoaded();
-            if (nextLoaded != -1) {
-                rotateToIndex(nextLoaded);
-            }
-        }
-
-        intakeActive = true;
-        while (opModeIsActive()
-                && System.currentTimeMillis() - start < timeoutMs
-                && Arrays.asList(slots).contains(Ball.EMPTY)) {
-            intake();
-        }
-
-        int purpleCount = 0;
-        int greenCount = 0;
-        int emptyIndex = -1;
-
-        // 1. Scan the array to see what we have
-        for (int i = 0; i < slots.length; i++) {
-            if (slots[i] == Ball.PURPLE) purpleCount++;
-            else if (slots[i] == Ball.GREEN) greenCount++;
-            else if (slots[i] == Ball.EMPTY) emptyIndex = i;
-        }
-
-        // 2. If we found an empty slot, fill it based on what's missing
-        if (emptyIndex != -1) {
-            if (purpleCount < 2) {
-                slots[emptyIndex] = Ball.PURPLE;
-            } else if (greenCount < 1) {
-                slots[emptyIndex] = Ball.GREEN;
-            }
-        }
-
-        intakeActive = false;
-        waitingForBall = false;
-
-        rotateToIndex(0);
-
-    }
-
-    private int findClosestLoaded() {
-        for (int i = 0; i < 3; i++) {
-            int idx = (index + i) % 3;
-            if (slots[idx] != Ball.EMPTY) return idx;
-        }
-        return -1;
-    }
-
-    // ---------------- PATH HELPERS ----------------
-    private void runPath(PathChain path, int stopDelay, double speed) {
-        f.setMaxPower(speed);
-        f.followPath(path);
-        while (opModeIsActive() && f.isBusy()) f.update();
-        f.breakFollowing();
-        if (stopDelay > 0) sleep(stopDelay);
-    }
-
-    private void runPathWithIntake(PathChain path, int stopDelay, double speed) {
-
-//        int nextEmpty = findNextEmpty();
-//
-//        if (nextEmpty != -1) {
-//            // normal intake
-//            intakeActive = true;
-//            waitingForBall = true;
-//            rotateToIndex(nextEmpty);
-//        } else {
-//            // all full then go shoot
-//            intakeActive = false;
-//            waitingForBall = false;
-//
-//            int nextLoaded = findClosestLoaded();
-//            if (nextLoaded != -1) {
-//                rotateToIndex(nextLoaded);
-//            }
-//        }
-
-        launchMotor.setPower(0);
-        intakeActive = true;
-        waitingForBall = true;
-
-        f.setMaxPower(speed);
-        f.followPath(path);
-        while (opModeIsActive() && f.isBusy()) {
-            f.update();
-
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-
-        }
-        f.breakFollowing();
-        if (stopDelay > 0) sleep(stopDelay);
-
-        intakeActive = false;
-        waitingForBall = false;
-
-        launchMotor.setPower(0.91); // 0.935
-
-    }
-
-    private void waitForSpindexer() {
-        long start = System.currentTimeMillis();
-
-        while (opModeIsActive()) {
-            int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
-
-            if (error <= SPIN_TOLERANCE_TICKS) {
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
                 break;
-            }
 
-            if (System.currentTimeMillis() - start > SPIN_TIMEOUT_MS) {
-                break; // safety exit
-            }
-
-            sleep(5); // yield to system
-        }
-    }
-
-    // ---------------- APRILTAG AND COLOR SENSORS ----------------
-    private Ball[] getPatternFromTag() {
-        int id = detectAprilTag(2000);
-//        telemetry.addData("id", id);
-//        telemetry.update();
-        if (id == 21) return new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE};
-        if (id == 23) return new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
-        return new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
-    }
-
-    private int detectAprilTag(long timeoutMs) {
-        long start = System.currentTimeMillis();
-        //while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
-        int count = 0;
-        while (System.currentTimeMillis() - start < timeoutMs) {
-
-            LLResult r = limelight.getLatestResult();
-            if (r == null) {
-                count++;
-            }
-            if (r != null && r.isValid() && !r.getFiducialResults().isEmpty()) {
-                int id = r.getFiducialResults().get(0).getFiducialId();
-                if (21 <= id && id <= 23) {
-//                telemetry.addData("count", count);
-//                telemetry.update();
-                    return id;
+            case 1: // Shoot
+                if (!startedPath) {
+                    follower.followPath(paths.shoot);
+                    startedPath = true;
                 }
-            }
-            sleep(15);
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 2: // To Intake 1
+                if (!startedPath) {
+                    follower.followPath(paths.tointake1);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 3: // Intake 1
+                if (!startedPath) {
+                    follower.followPath(paths.intake1);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 4: // Gate
+                if (!startedPath) {
+                    follower.followPath(paths.gate);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 5: // Shoot 2
+                if (!startedPath) {
+                    follower.followPath(paths.shoot2);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 6: // To Intake 2
+                if (!startedPath) {
+                    follower.followPath(paths.tointake2);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 7: // Intake 2
+                if (!startedPath) {
+                    follower.followPath(paths.intake2);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 8: // Shoot 3
+                if (!startedPath) {
+                    follower.followPath(paths.shoot3);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 9: // To Intake 3
+                if (!startedPath) {
+                    follower.followPath(paths.tointake3);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 10: // Intake 3
+                if (!startedPath) {
+                    follower.followPath(paths.intake3);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 11: // Shoot 4
+                if (!startedPath) {
+                    follower.followPath(paths.shoot4);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            case 12: // Leave
+                if (!startedPath) {
+                    follower.followPath(paths.leave);
+                    startedPath = true;
+                }
+                if (!follower.isBusy()) {
+                    pathState++;
+                    startedPath = false;
+                }
+                break;
+
+            default:
+                // Auto complete — do nothing
+                break;
         }
-//        telemetry.addData("count", count);
-//        telemetry.update();
-        return 22;
-    }
 
-    private void enableLight(NormalizedColorSensor s) {
-        if (s instanceof SwitchableLight) {
-            ((SwitchableLight) s).enableLight(true);
-        }
-    }
-
-    private Ball detectColor(NormalizedColorSensor sensor1, NormalizedColorSensor sensor2) {
-        Ball ball1 = detectSingleSensor(sensor1);
-        Ball ball2 = detectSingleSensor(sensor2);
-
-        // Prioritize detected balls
-        if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
-        if (ball1 == Ball.GREEN  || ball2 == Ball.GREEN)  return Ball.GREEN;
-
-        return Ball.EMPTY;
-    }
-
-    // helper function for a single sensor
-    private Ball detectSingleSensor(NormalizedColorSensor sensor) {
-        NormalizedRGBA c = sensor.getNormalizedColors();
-        float r = c.red, g = c.green, b = c.blue;
-
-        // reject far / floor
-        float total = r + g + b;
-        if (total < 0.07f) return Ball.EMPTY;
-
-        // PURPLE: blue-dominant (keep strict)
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
-            return Ball.PURPLE;
-        }
-
-        // GREEN: looser dominance + absolute floor
-        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
-            return Ball.GREEN;
-        }
-
-        return Ball.EMPTY;
-    }
-
-    // ---------------- INIT ----------------
-    private void initHardware() {
-
-        drivetrain = new CustomMecanumDrive(hardwareMap);
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(3);  // APRILTAG PIPELINE
-        limelight.start();
-//        limelight.setPollRateHz(50);
-        limelight.pipelineSwitch(3);
-
-        spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
-        intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
-        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
-
-        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        spinMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        intakeColor.setGain(gain);
-        enableLight(intakeColor);
-
-        intakeColor2.setGain(gain);
-        enableLight(intakeColor2);
-
-        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
-        launchMotor.setPower(0);
-
-        hoodServo = hardwareMap.servo.get("hoodServo");
-        flickServo = hardwareMap.servo.get("flickServo");
-
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-    }
-
-    private void resetSlots() {
-        for (int i = 0; i < 3; i++) slots[i] = Ball.EMPTY;
+        return pathState;
     }
 }
