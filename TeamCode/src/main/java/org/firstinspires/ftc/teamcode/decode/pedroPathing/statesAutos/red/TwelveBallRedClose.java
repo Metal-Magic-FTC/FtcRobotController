@@ -113,7 +113,7 @@ public class TwelveBallRedClose extends OpMode {
                             new BezierLine(
                                     new Pose(119.787, 79),
 
-                                    new Pose(126.5, 78)
+                                    new Pose(127.5, 78)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
 
@@ -121,7 +121,7 @@ public class TwelveBallRedClose extends OpMode {
 
             shoot2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(126, 79),
+                                    new Pose(127.5, 79),
 
                                     new Pose(91.371, 102.034)
                             )
