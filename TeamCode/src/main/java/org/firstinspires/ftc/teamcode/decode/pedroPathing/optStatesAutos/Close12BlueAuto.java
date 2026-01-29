@@ -6,16 +6,15 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.TelemetryManager;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.BezierCurve;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-@Autonomous(name = "!!! Close12Auto")
+@Autonomous(name = "!!! Close12BlueAuto")
 @Configurable // Panels
-public class Close12Auto extends OpMode {
+public class Close12BlueAuto extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
     private int pathState; // Current autonomous path state (state machine)
@@ -74,22 +73,22 @@ public class Close12Auto extends OpMode {
         public Pose scanPose = new Pose(41, 105, Math.toRadians(50)); // score
         public Pose scorePose = new Pose(48, 96, Math.toRadians(135)); // score
         // Intaking first row
-        public Pose tointake1Pose = new Pose(40,85, Math.toRadians(180)); // to intake
+        public Pose tointake1Pose = new Pose(40,84, Math.toRadians(180)); // to intake
         public Pose tointake1ControlPose = new Pose(51,84, Math.toRadians(180)); // to intake
-        public Pose intake1Pose = new Pose(17,83.5, Math.toRadians(180)); // intake
+        public Pose intake1Pose = new Pose(24,84, Math.toRadians(180)); // intake
 //        public Pose score2ControlPose = new Pose(56, 66);
         // Opening the gate
-        public Pose gatePose = new Pose(19, 72.500, Math.toRadians(90)); //new Pose(144-132.781509, 61, Math.toRadians(28+90)); // gate
+        public Pose gatePose = new Pose(17, 72.500, Math.toRadians(90)); //new Pose(144-132.781509, 61, Math.toRadians(28+90)); // gate
         public Pose gateControlPose = new Pose(55, 73); //62);
         // Intaking second row
-        public Pose tointake2Pose = new Pose(34,60, Math.toRadians(180)); // to intake
-        public Pose tointake2ControlPose = new Pose(80,53, Math.toRadians(180)); // to intake
-        public Pose intake2Pose = new Pose(13, 60, Math.toRadians(180)); // intake
+        public Pose tointake2Pose = new Pose(40,60, Math.toRadians(180)); // to intake
+        public Pose tointake2ControlPose = new Pose(55,56, Math.toRadians(180)); // to intake
+        public Pose intake2Pose = new Pose(24, 60, Math.toRadians(180)); // intake
 //        public Pose score3ControlPose = new Pose(56, 66);
         // Intaking the third row
-        public Pose tointake3Pose = new Pose(13,35, Math.toRadians(180)); // to intake
-        public Pose tointake3ControlPose = new Pose(70,33, Math.toRadians(180)); // to intake
-        public Pose intake3Pose = new Pose(12, 35, Math.toRadians(180));
+        public Pose tointake3Pose = new Pose(40,35, Math.toRadians(180)); // to intake
+        public Pose tointake3ControlPose = new Pose(55,31, Math.toRadians(180)); // to intake
+        public Pose intake3Pose = new Pose(24, 35, Math.toRadians(180));
         public Pose score4ControlPose = new Pose(43, 78);
 
         // idk
@@ -268,6 +267,7 @@ public class Close12Auto extends OpMode {
 
             case 0: // Scan
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(1);
                     follower.followPath(paths.scan);
                     startedPath = true;
                 }
@@ -279,6 +279,7 @@ public class Close12Auto extends OpMode {
 
             case 1: // Shoot
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(1);
                     follower.followPath(paths.shoot);
                     startedPath = true;
                 }
@@ -290,6 +291,7 @@ public class Close12Auto extends OpMode {
 
             case 2: // To Intake 1
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(0.9);
                     follower.followPath(paths.tointake1);
                     startedPath = true;
                 }
@@ -301,6 +303,7 @@ public class Close12Auto extends OpMode {
 
             case 3: // Intake 1
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(0.5);
                     follower.followPath(paths.intake1);
                     startedPath = true;
                 }
@@ -312,6 +315,7 @@ public class Close12Auto extends OpMode {
 
             case 4: // Gate
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(0.7);
                     follower.followPath(paths.gate);
                     startedPath = true;
                 }
@@ -323,6 +327,7 @@ public class Close12Auto extends OpMode {
 
             case 5: // Shoot 2
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(1);
                     follower.followPath(paths.shoot2);
                     startedPath = true;
                 }
@@ -334,6 +339,7 @@ public class Close12Auto extends OpMode {
 
             case 6: // To Intake 2
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(0.9);
                     follower.followPath(paths.tointake2);
                     startedPath = true;
                 }
@@ -345,6 +351,7 @@ public class Close12Auto extends OpMode {
 
             case 7: // Intake 2
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(0.5);
                     follower.followPath(paths.intake2);
                     startedPath = true;
                 }
@@ -356,6 +363,7 @@ public class Close12Auto extends OpMode {
 
             case 8: // Shoot 3
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(1);
                     follower.followPath(paths.shoot3);
                     startedPath = true;
                 }
@@ -367,6 +375,7 @@ public class Close12Auto extends OpMode {
 
             case 9: // To Intake 3
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(1);
                     follower.followPath(paths.tointake3);
                     startedPath = true;
                 }
@@ -378,6 +387,7 @@ public class Close12Auto extends OpMode {
 
             case 10: // Intake 3
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(0.5);
                     follower.followPath(paths.intake3);
                     startedPath = true;
                 }
@@ -389,6 +399,7 @@ public class Close12Auto extends OpMode {
 
             case 11: // Shoot 4
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(1);
                     follower.followPath(paths.shoot4);
                     startedPath = true;
                 }
@@ -400,6 +411,7 @@ public class Close12Auto extends OpMode {
 
             case 12: // Leave
                 if (!startedPath) {
+                    follower.setMaxPowerScaling(1);
                     follower.followPath(paths.leave);
                     startedPath = true;
                 }
