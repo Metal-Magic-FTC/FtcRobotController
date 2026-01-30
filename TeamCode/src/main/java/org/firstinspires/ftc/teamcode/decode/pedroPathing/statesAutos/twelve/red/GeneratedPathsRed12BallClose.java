@@ -15,7 +15,7 @@ public class GeneratedPathsRed12BallClose {
 
     //public static final Pose START_POSE = new Pose(118.157, 128.629, Math.toRadians(45));
     public static final Pose START_POSE =
-            new Pose(111.6, 130.2926713735558, Math.toRadians(180));
+            new Pose(108, 130.2926713735558, Math.toRadians(180));
 
     public GeneratedPathsRed12BallClose(Follower follower) {
         this.follower = follower;

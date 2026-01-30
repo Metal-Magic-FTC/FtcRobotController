@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -85,7 +86,7 @@ public class RedClose12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(1);
+        launchMotor.setVelocity(2000);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -94,7 +95,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         Ball[] pattern = getPatternFromTag();
 
-        aimClosest(pattern[0]);
+        aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
@@ -131,7 +132,7 @@ public class RedClose12Ball extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        aimClosest(pattern[0]);
+        aimToPattern(pattern);
 
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
@@ -158,7 +159,7 @@ public class RedClose12Ball extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        aimClosest(pattern[0]);
+        aimToPattern(pattern);
 
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.GREEN;
@@ -181,7 +182,7 @@ public class RedClose12Ball extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.PURPLE;
 
-        aimClosest(pattern[0]);
+        aimToPattern(pattern);
 
         slots[0] = Ball.GREEN;
         slots[1] = Ball.PURPLE;
@@ -241,14 +242,25 @@ public class RedClose12Ball extends LinearOpMode {
     }
 
     private void aimToPattern(Ball[] pattern) {
-//        intakeActive = false;
-//        for (int i = 0; i < 3; i++) {
-//            int idx = (index + i) % 3;
-//            if (slots[idx] == target) {
-//                rotateToIndex(idx);
-//                return;
-//            }
-//        }
+
+        int idx = indexAimToPattern(pattern);
+
+        rotateToIndex(idx);
+    }
+
+    private int indexAimToPattern(Ball[] pattern) {
+        int greenInPattern = findGreen(pattern);
+        int greenInSlots = findGreen(slots);
+
+        int idx = greenInSlots - greenInPattern;
+
+        idx %= 3;
+
+        return idx;
+    }
+
+    private int findGreen(Ball[] pattern) {
+        return Arrays.asList(pattern).indexOf(Ball.GREEN);
     }
 
     private int findNextEmpty() {
@@ -391,7 +403,7 @@ public class RedClose12Ball extends LinearOpMode {
 //            }
 //        }
 
-        launchMotor.setPower(0);
+        launchMotor.setVelocity(900);
         intakeActive = true;
         waitingForBall = true;
 
@@ -411,7 +423,7 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(1);
+        launchMotor.setVelocity(2000);
 
     }
 
@@ -554,7 +566,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setPower(1);
+        launchMotor.setVelocity(2000);
         sleep(100);
 
         // Compute end sweep position (clockwise through 3 slots)
@@ -579,7 +591,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         // ---- STOP ----
         flickMotor.setPower(0);
-        launchMotor.setPower(0);
+        launchMotor.setVelocity(900);
 
         // Clear slots in pattern order
         slots[0] = Ball.EMPTY;
