@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.sun.source.doctree.StartElementTree;
 
 //@Disabled
 @Autonomous(name = "!!!!! STATES RED BACK 12 BALL TESTING TESTING DUDUDUDU")
@@ -89,11 +90,13 @@ public class RedClose12Ball extends LinearOpMode {
         // scan balls
         //scanBallsInSlots(5000);
 
-        runPath(paths.scan(), 0, 1.0);
+        //runPath(paths.scan(), 0, 1.0);
 
         Ball[] pattern = getPatternFromTag();
 
         aimClosest(pattern[0]);
+        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
+        telemetry.update();
 
         runPath(paths.shoot(), 0, 1);
 
@@ -121,7 +124,7 @@ public class RedClose12Ball extends LinearOpMode {
 
 
 
-        runPathWithIntake(paths.gate(), 0, 1);
+        runPathWithIntake(paths.gate(), 2, 1);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -235,6 +238,17 @@ public class RedClose12Ball extends LinearOpMode {
                 return;
             }
         }
+    }
+
+    private void aimToPattern(Ball[] pattern) {
+//        intakeActive = false;
+//        for (int i = 0; i < 3; i++) {
+//            int idx = (index + i) % 3;
+//            if (slots[idx] == target) {
+//                rotateToIndex(idx);
+//                return;
+//            }
+//        }
     }
 
     private int findNextEmpty() {
@@ -534,13 +548,14 @@ public class RedClose12Ball extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.4);
 
         waitForSpindexer();
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
         launchMotor.setPower(1);
+        sleep(100);
 
         // Compute end sweep position (clockwise through 3 slots)
         int endSlot = (startIndex + 2) % 3;
@@ -550,11 +565,17 @@ public class RedClose12Ball extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.3);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
         }
+
+        spinMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        sleep(100);
+        flickMotor.setPower(0);
 
         // ---- STOP ----
         flickMotor.setPower(0);
@@ -593,7 +614,10 @@ public class RedClose12Ball extends LinearOpMode {
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
-        launchMotor.setPower(0);
+
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(350, 0, 0, 17.4);
+        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        launchMotor.setVelocity(0);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
 
