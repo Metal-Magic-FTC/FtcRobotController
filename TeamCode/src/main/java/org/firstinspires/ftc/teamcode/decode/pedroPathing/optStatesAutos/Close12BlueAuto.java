@@ -88,7 +88,7 @@ public class Close12BlueAuto extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(1850);
+        launchMotor.setVelocity(2000);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -122,8 +122,6 @@ public class Close12BlueAuto extends LinearOpMode {
 //            intakeActive = true;
 //            intake();
 //        }
-
-
 
         runPathWithIntake(paths.gate(), 0, 1);
 
@@ -401,7 +399,7 @@ public class Close12BlueAuto extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(1850);
+        launchMotor.setVelocity(2000);
 
     }
 
@@ -544,7 +542,7 @@ public class Close12BlueAuto extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(1750);
+        launchMotor.setVelocity(2500);
 
         // Compute end sweep position (clockwise through 3 slots)
         int endSlot = (startIndex + 2) % 3;
@@ -554,7 +552,7 @@ public class Close12BlueAuto extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.1);
+        spinMotor.setPower(0.2);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally

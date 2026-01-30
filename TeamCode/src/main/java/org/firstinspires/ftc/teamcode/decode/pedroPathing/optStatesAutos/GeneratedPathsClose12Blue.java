@@ -14,7 +14,7 @@ public class GeneratedPathsClose12Blue {
     private final Follower follower;
 
     // Poses
-    public static final Pose startPose = new Pose(30, 128, Math.toRadians(0));
+    public static final Pose startPose = new Pose(30, 122, Math.toRadians(0));
 //    public Pose scanPose = new Pose(41, 105, Math.toRadians(50));
     public Pose scorePose = new Pose(30, 115, Math.toRadians(135));
     public Pose tointake1Pose = new Pose(33.5, 84, Math.toRadians(180));
