@@ -10,12 +10,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.sun.source.doctree.StartElementTree;
 
 //@Disabled
 @Autonomous(name = "!!!!! STATES RED BACK 12 BALL TESTING TESTING DUDUDUDU")
@@ -49,7 +44,7 @@ public class RedClose12Ball extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.4;
+    private double spinMotorSpeed = 0.45;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -86,7 +81,7 @@ public class RedClose12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2000);
+        launchMotor.setVelocity(2100);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -99,10 +94,11 @@ public class RedClose12Ball extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 0, 1);
+        runPath(paths.shoot(), 50, 1);
 
         // ---- SHOOT ----
-        shootAllPattern(pattern);
+        //shootAllPattern(pattern);
+        shootAll();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -125,7 +121,7 @@ public class RedClose12Ball extends LinearOpMode {
 
 
 
-        runPathWithIntake(paths.gate(), 2, 1);
+        runPathWithIntake(paths.gate(), 50, 1);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -141,7 +137,8 @@ public class RedClose12Ball extends LinearOpMode {
         runPath(paths.shoot2(), 0, 1);
 
         // ---- SHOOT ----
-        shootAllPattern(pattern);
+        //shootAllPattern(pattern);
+        shootAll();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -167,7 +164,8 @@ public class RedClose12Ball extends LinearOpMode {
 
         runPath(paths.shoot3(), 0, 1);
 
-        shootAllPattern(pattern);
+        //shootAllPattern(pattern);
+        shootAll();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -175,7 +173,7 @@ public class RedClose12Ball extends LinearOpMode {
         resetSlots();
 
         runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.intake3(), 0, 0.25);
+        runPathWithIntake(paths.intake3(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
@@ -190,7 +188,8 @@ public class RedClose12Ball extends LinearOpMode {
 
         runPath(paths.shoot4(), 0, 1);
 
-        shootAllPattern(pattern);
+        //shootAllPattern(pattern);
+        shootAll();
 
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);
@@ -243,8 +242,9 @@ public class RedClose12Ball extends LinearOpMode {
 
     private void aimToPattern(Ball[] pattern) {
 
-        int idx = indexAimToPattern(pattern);
-
+        intakeActive = false;
+        int idx = findBestStartIndex(pattern);
+        index = idx;
         rotateToIndex(idx);
     }
 
@@ -403,7 +403,7 @@ public class RedClose12Ball extends LinearOpMode {
 //            }
 //        }
 
-        launchMotor.setVelocity(900);
+        //launchMotor.setVelocity(900);
         intakeActive = true;
         waitingForBall = true;
 
@@ -423,7 +423,7 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(2000);
+        launchMotor.setVelocity(2100);
 
     }
 
@@ -560,13 +560,16 @@ public class RedClose12Ball extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.4);
+        spinMotor.setPower(0.35);
 
         waitForSpindexer();
 
+        sleep(100);
+
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(2000);
+        launchMotor.setVelocity(2100);
+
         sleep(100);
 
         // Compute end sweep position (clockwise through 3 slots)
@@ -577,7 +580,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.3);
+        spinMotor.setPower(0.35);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
@@ -591,7 +594,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         // ---- STOP ----
         flickMotor.setPower(0);
-        launchMotor.setVelocity(900);
+        //launchMotor.setVelocity(900);
 
         // Clear slots in pattern order
         slots[0] = Ball.EMPTY;
@@ -599,6 +602,39 @@ public class RedClose12Ball extends LinearOpMode {
         slots[2] = Ball.EMPTY;
 
         index = endSlot;
+    }
+
+    private void shootAll() {
+
+        intakeMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        launchMotor.setVelocity(2000);
+        sleep(200);
+
+        int endPosition = spinMotor.getCurrentPosition() + 750;
+        spinMotor.setTargetPosition(endPosition);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(0.25);
+
+        while (opModeIsActive() && spinMotor.isBusy()) {
+            // let balls fire naturally
+        }
+
+        spinMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        sleep(100);
+        flickMotor.setPower(0);
+
+        slots[0] = Ball.EMPTY;
+        slots[1] = Ball.EMPTY;
+        slots[2] = Ball.EMPTY;
+
+        index = (index + 2) % 3;
+
+        intakeMotor.setPower(-0.6);
+
     }
 
     // ---------------- INIT ----------------
@@ -627,7 +663,7 @@ public class RedClose12Ball extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(350, 0, 0, 17.4);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 
