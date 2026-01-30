@@ -14,20 +14,20 @@ public class GeneratedPathsClose12Blue {
     private final Follower follower;
 
     // Poses
-    public static final Pose startPose = new Pose(30.25, 132.75, Math.toRadians(90));
-    public Pose scanPose = new Pose(41, 105, Math.toRadians(50));
-    public Pose scorePose = new Pose(48, 96, Math.toRadians(135));
+    public static final Pose startPose = new Pose(30, 128, Math.toRadians(0));
+//    public Pose scanPose = new Pose(41, 105, Math.toRadians(50));
+    public Pose scorePose = new Pose(30, 115, Math.toRadians(135));
     public Pose tointake1Pose = new Pose(33.5, 84, Math.toRadians(180));
     public Pose tointake1ControlPose = new Pose(48, 84, Math.toRadians(180));
-    public Pose intake1Pose = new Pose(18.5, 84, Math.toRadians(180));
-    public Pose gatePose = new Pose(17, 72.500, Math.toRadians(90));
+    public Pose intake1Pose = new Pose(16, 84, Math.toRadians(180));
+    public Pose gatePose = new Pose(17, 75, Math.toRadians(90));
     public Pose gateControlPose = new Pose(55, 73);
     public Pose tointake2Pose = new Pose(33.5, 60, Math.toRadians(180));
     public Pose tointake2ControlPose = new Pose(45, 56, Math.toRadians(180));
-    public Pose intake2Pose = new Pose(18.5, 60, Math.toRadians(180));
+    public Pose intake2Pose = new Pose(16, 60, Math.toRadians(180));
     public Pose tointake3Pose = new Pose(33.5, 35, Math.toRadians(180));
     public Pose tointake3ControlPose = new Pose(45, 31, Math.toRadians(180));
-    public Pose intake3Pose = new Pose(18.5, 35, Math.toRadians(180));
+    public Pose intake3Pose = new Pose(14, 34, Math.toRadians(180));
     public Pose score4ControlPose = new Pose(43, 78);
     public Pose leavePose = new Pose(48, 72, Math.toRadians(90));
 
@@ -36,17 +36,17 @@ public class GeneratedPathsClose12Blue {
         this.follower = follower;
     }
 
-    public PathChain scan(){
-        return new PathBuilder(follower)
-                .addPath(new BezierCurve(startPose, scanPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), scanPose.getHeading())
-                .build();
-    }
+//    public PathChain scan(){
+//        return new PathBuilder(follower)
+//                .addPath(new BezierCurve(startPose, scanPose))
+//                .setLinearHeadingInterpolation(startPose.getHeading(), scanPose.getHeading())
+//                .build();
+//    }
 
     public PathChain shoot() {
         return new PathBuilder(follower)
-                .addPath(new BezierCurve(scanPose, scorePose))
-                .setLinearHeadingInterpolation(scanPose.getHeading(), scorePose.getHeading())
+                .addPath(new BezierCurve(startPose, scorePose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
                 .build();
     }
 

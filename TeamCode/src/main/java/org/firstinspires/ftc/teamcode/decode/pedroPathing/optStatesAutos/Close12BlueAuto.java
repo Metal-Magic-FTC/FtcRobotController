@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.optStatesAutos.LoopTimer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +62,10 @@ public class Close12BlueAuto extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
+    // Loop timing
+    private LoopTimer loopTimer;
+
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -77,19 +82,18 @@ public class Close12BlueAuto extends LinearOpMode {
         paths = new GeneratedPathsClose12Blue(follower);
         hoodServo.setPosition(0.80);
 
-
         telemetry.addLine("Ready");
         telemetry.update();
 
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(1);
+        launchMotor.setVelocity(1850);
 
         // scan balls
         //scanBallsInSlots(5000);
 
-        runPath(paths.scan(), 0, 1.0);
+//        runPath(paths.scan(), 0, 1.0);
 
         Ball[] pattern = getPatternFromTag();
 
@@ -111,7 +115,7 @@ public class Close12BlueAuto extends LinearOpMode {
         runPath(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intake1(), 0, 0.21);
+        runPathWithIntake(paths.intake1(), 0, 0.3);
         double startTime = System.currentTimeMillis();
 //        while (System.currentTimeMillis() < startTime + 500) {
 //            waitingForBall = true;
@@ -148,7 +152,7 @@ public class Close12BlueAuto extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intake2(), 0, 0.21);
+        runPathWithIntake(paths.intake2(), 0, 0.3);
 
         intakeMotor.setPower(-1);
         slots[0] = Ball.PURPLE;
@@ -171,7 +175,7 @@ public class Close12BlueAuto extends LinearOpMode {
         resetSlots();
 
         runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.intake3(), 0, 0.25);
+        runPathWithIntake(paths.intake3(), 0, 0.3);
 
         intakeMotor.setPower(-1);
         slots[0] = Ball.GREEN;
@@ -377,7 +381,7 @@ public class Close12BlueAuto extends LinearOpMode {
 //            }
 //        }
 
-        launchMotor.setPower(0);
+        launchMotor.setVelocity(50);
         intakeActive = true;
         waitingForBall = true;
 
@@ -397,7 +401,7 @@ public class Close12BlueAuto extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setPower(1);
+        launchMotor.setVelocity(1850);
 
     }
 
@@ -534,13 +538,13 @@ public class Close12BlueAuto extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.25);
 
         waitForSpindexer();
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setPower(1);
+        launchMotor.setVelocity(1750);
 
         // Compute end sweep position (clockwise through 3 slots)
         int endSlot = (startIndex + 2) % 3;
@@ -550,7 +554,7 @@ public class Close12BlueAuto extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.1);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
@@ -558,7 +562,7 @@ public class Close12BlueAuto extends LinearOpMode {
 
         // ---- STOP ----
         flickMotor.setPower(0);
-        launchMotor.setPower(0);
+        launchMotor.setVelocity(50);
 
         // Clear slots in pattern order
         slots[0] = Ball.EMPTY;
@@ -593,7 +597,9 @@ public class Close12BlueAuto extends LinearOpMode {
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
-        launchMotor.setPower(0);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 17.4);
+        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
 
         hoodServo = hardwareMap.servo.get("hoodServo");
 
@@ -604,6 +610,8 @@ public class Close12BlueAuto extends LinearOpMode {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        loopTimer = new LoopTimer();
 
     }
 
