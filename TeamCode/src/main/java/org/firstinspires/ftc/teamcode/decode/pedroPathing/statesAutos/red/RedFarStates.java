@@ -94,15 +94,14 @@ public class RedFarStates extends LinearOpMode {
         //scanBallsInSlots(5000);
 
         //runPath(paths.scan(), 250, 1.0);
+        Ball[] pattern = new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
 
-        //Ball[] pattern = getPatternFromTag();
-
-        //aimClosest(pattern[0]);
+        aimClosest(pattern[0]);
 
         runPath(paths.shoot(), 250, 0.725);
 
         // ---- SHOOT ----
-        //shootAllPattern(pattern);
+        shootAllPattern(pattern);
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -128,16 +127,16 @@ public class RedFarStates extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        //aimClosest(pattern[0]);
+        aimClosest(pattern[0]);
 
-//        slots[0] = Ball.PURPLE;
-//        slots[1] = Ball.PURPLE;
-//        slots[2] = Ball.GREEN;
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.GREEN;
 
         runPath(paths.shoot2(), 250, 0.75);
 
         // ---- SHOOT ----
-        //shootAllPattern(pattern);
+        shootAllPattern(pattern);
 
         intakeMotor.setPower(-0.6);
         intakeActive = false;
@@ -149,7 +148,7 @@ public class RedFarStates extends LinearOpMode {
         runPathWithIntake(paths.intakeball4(), 250, 0.20);
 
         runPath(paths.shoot3(), 50, 1);
-        //shootAllPattern(pattern);
+        shootAllPattern(pattern);
         runPath(paths.leave(),50, 1);
 
         telemetry.addLine("Finished");
