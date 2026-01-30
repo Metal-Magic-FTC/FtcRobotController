@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!! STATES BLUE Far V0")
+@Autonomous(name = "!!!!!! STATES Red Far V0")
 public class RedFarStates extends LinearOpMode {
 
     private int index = 0;
