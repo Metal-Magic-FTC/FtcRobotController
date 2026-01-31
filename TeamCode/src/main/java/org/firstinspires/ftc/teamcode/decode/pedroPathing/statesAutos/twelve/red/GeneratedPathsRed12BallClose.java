@@ -72,7 +72,7 @@ public class GeneratedPathsRed12BallClose {
                 .addPath(
                         new BezierCurve(
                                 new Pose(126, 79, Math.toRadians(0)),
-                                new Pose(111.86034912718205, 80.07980049875314),
+                                //new Pose(111.86034912718205, 80.07980049875314),
                                 new Pose(128, 78, Math.toRadians(90))
                         )
                 )
