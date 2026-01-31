@@ -80,7 +80,7 @@ public class RedFarStates extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsRedFarStates.START_POSE);
         paths = new GeneratedPathsRedFarStates(follower);
-        hoodServo.setPosition(0.75);
+        hoodServo.setPosition(0.77);
 
 
         telemetry.addLine("Ready");
@@ -492,7 +492,7 @@ public class RedFarStates extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.33);
 
         waitForSpindexer();
 
@@ -508,7 +508,7 @@ public class RedFarStates extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.33);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
@@ -551,7 +551,7 @@ public class RedFarStates extends LinearOpMode {
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
- 
+
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
