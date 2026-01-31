@@ -97,7 +97,7 @@ public class RedFarStates extends LinearOpMode {
 
         //runPath(paths.scan(), 0, 1.0);
 
-        Ball[] pattern = getPatternFromTag();
+        Ball[] pattern = new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
 
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
