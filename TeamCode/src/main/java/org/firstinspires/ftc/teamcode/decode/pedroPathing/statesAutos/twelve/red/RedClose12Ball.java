@@ -646,7 +646,7 @@ public class RedClose12Ball extends LinearOpMode {
         launchMotor.setVelocity(2000);
         sleep(200);
 
-        int endPosition = spinMotor.getCurrentPosition() + 750;
+        int endPosition = spinMotor.getCurrentPosition() + 500;
         spinMotor.setTargetPosition(endPosition);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(0.25);
