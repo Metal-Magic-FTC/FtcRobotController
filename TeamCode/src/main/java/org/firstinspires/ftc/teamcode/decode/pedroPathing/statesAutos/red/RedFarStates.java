@@ -16,6 +16,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelve.red.GeneratedPathsRed12BallClose;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelve.red.RedClose12Ball;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
@@ -69,7 +71,6 @@ public class RedFarStates extends LinearOpMode {
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
-
         initHardware();
         resetSlots();
 
@@ -89,20 +90,24 @@ public class RedFarStates extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setPower(1);
+        launchMotor.setVelocity(2500);
 
         // scan balls
         //scanBallsInSlots(5000);
 
-        //runPath(paths.scan(), 250, 1.0);
-        Ball[] pattern = new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
+        //runPath(paths.scan(), 0, 1.0);
 
-        aimClosest(pattern[0]);
+        Ball[] pattern = getPatternFromTag();
 
-        runPath(paths.shoot(), 250, 0.725);
+        aimToPattern(pattern);
+        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
+        telemetry.update();
+
+        runPath(paths.shoot(), 50, 1);
 
         // ---- SHOOT ----
-        shootAllPattern(pattern);
+        //shootAllPattern(pattern);
+        shootAll();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -112,45 +117,73 @@ public class RedFarStates extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 50, 1);
+        runPath(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intakeball1(), 250, 0.21);
+        runPathWithIntake(paths.intakeball1(), 0, 0.21);
         double startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 1000) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
+//        while (System.currentTimeMillis() < startTime + 500) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        aimClosest(pattern[0]);
+        aimToPattern(pattern);
 
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 250, 0.75);
+        runPath(paths.shoot2(), 0, 1);
 
         // ---- SHOOT ----
-        shootAllPattern(pattern);
+        //shootAllPattern(pattern);
+        shootAll();
 
         intakeMotor.setPower(-0.6);
-        intakeActive = false;
+        intakeActive = true;
         rotateToIndex(0);
         resetSlots();
 
         // ---- INTAKE 4–6 ----
-        runPath(paths.toIntake2(), 50, 1);
-        runPathWithIntake(paths.intakeball4(), 250, 0.20);
+        intakeActive = true;
+        rotateToIndex(0);
+        runPath(paths.toIntake2(), 0, 1);
+        runPathWithIntake(paths.intakeball4(), 0, 0.21);
 
-        runPath(paths.shoot3(), 50, 1);
-        shootAllPattern(pattern);
-        runPath(paths.leave(),50, 1);
+        intakeMotor.setPower(-0.6);
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.GREEN;
+        slots[2] = Ball.PURPLE;
+
+        aimToPattern(pattern);
+
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.GREEN;
+        slots[2] = Ball.PURPLE;
+
+        runPath(paths.shoot3(), 0, 1);
+
+        //shootAllPattern(pattern);
+        shootAll();
+
+        intakeMotor.setPower(-0.6);
+        intakeActive = true;
+        rotateToIndex(0);
+        resetSlots();
+
+
+        runPath(paths.leave(), 0, 1);
+        intakeMotor.setPower(-0.6);
+        intakeActive = true;
+        rotateToIndex(0);
+        resetSlots();
 
         telemetry.addLine("Finished");
         telemetry.update();
@@ -376,7 +409,13 @@ public class RedFarStates extends LinearOpMode {
             sleep(5); // yield to system
         }
     }
+    private void aimToPattern(Ball[] pattern) {
 
+        intakeActive = false;
+        int idx = findBestStartIndex(pattern);
+        index = idx;
+        rotateToIndex(idx);
+    }
     // ---------------- APRILTAG AND COLOR SENSORS ----------------
     private Ball[] getPatternFromTag() {
         int id = detectAprilTag(2000);
@@ -473,7 +512,8 @@ public class RedFarStates extends LinearOpMode {
 
         intakeActive = false;
         intakeMotor.setPower(0);
-
+        launchMotor.setVelocity(2500);
+        
         int startIndex = findBestStartIndex(pattern);
         if (startIndex == -1) return; // nothing valid to shoot
 
@@ -492,13 +532,12 @@ public class RedFarStates extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.33);
+        spinMotor.setPower(0.25);
 
         waitForSpindexer();
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(2500);
 
         // Compute end sweep position (clockwise through 3 slots)
         int endSlot = (startIndex + 2) % 3;
@@ -508,7 +547,7 @@ public class RedFarStates extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.33);
+        spinMotor.setPower(0.25);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
@@ -524,6 +563,38 @@ public class RedFarStates extends LinearOpMode {
         slots[2] = Ball.EMPTY;
 
         index = endSlot;
+    }
+    private void shootAll() {
+
+        intakeMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        launchMotor.setVelocity(2500);
+        sleep(200);
+
+        int endPosition = spinMotor.getCurrentPosition() + 750;
+        spinMotor.setTargetPosition(endPosition);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(0.25);
+
+        while (opModeIsActive() && spinMotor.isBusy()) {
+            // let balls fire naturally
+        }
+
+        spinMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        sleep(100);
+        flickMotor.setPower(0);
+
+        slots[0] = Ball.EMPTY;
+        slots[1] = Ball.EMPTY;
+        slots[2] = Ball.EMPTY;
+
+        index = (index + 2) % 3;
+
+        intakeMotor.setPower(-0.6);
+
     }
 
     // ---------------- INIT ----------------
