@@ -111,7 +111,7 @@ public class RedClose12Ball extends LinearOpMode {
         runPath(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intake1(), 0, 0.21);
+        runPathWithIntake(paths.intake1(), 0, 0.23);
         double startTime = System.currentTimeMillis();
 //        while (System.currentTimeMillis() < startTime + 500) {
 //            waitingForBall = true;
@@ -121,7 +121,7 @@ public class RedClose12Ball extends LinearOpMode {
 
 
 
-        runPathWithIntake(paths.gate(), 50, 1);
+        runPathWithIntake(paths.gate(), 250, 1);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -149,7 +149,7 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intake2(), 0, 0.21);
+        runPathWithIntake(paths.intake2(), 0, 0.23);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -173,7 +173,7 @@ public class RedClose12Ball extends LinearOpMode {
         resetSlots();
 
         runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.intake3(), 0, 0.21);
+        runPathWithIntake(paths.intake3(), 0, 0.23);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
@@ -482,21 +482,55 @@ public class RedClose12Ball extends LinearOpMode {
     }
 
     // helper function for a single sensor
+//    private Ball detectSingleSensor(NormalizedColorSensor sensor) {
+//        NormalizedRGBA c = sensor.getNormalizedColors();
+//        float r = c.red, g = c.green, b = c.blue;
+//
+//        // reject far / floor
+//        float total = r + g + b;
+//        if (total < 0.07f) return Ball.EMPTY;
+//
+//        // PURPLE: blue-dominant (keep strict)
+//        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
+//            return Ball.PURPLE;
+//        }
+//
+//        // GREEN: looser dominance + absolute floor
+//        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
+//            return Ball.GREEN;
+//        }
+//
+//        return Ball.EMPTY;
+//    }
+
     private Ball detectSingleSensor(NormalizedColorSensor sensor) {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        // reject far / floor
+        // Reject very far / floor readings
         float total = r + g + b;
-        if (total < 0.07f) return Ball.EMPTY;
+        if (total < 0.05f) return Ball.EMPTY;
 
-        // PURPLE: blue-dominant (keep strict)
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
+        // Small dominance margin (helps under bad lighting)
+        float margin = 0.02f;
+
+        // PURPLE (blue-dominant, slightly relaxed)
+        if (
+                b > r * 1.20f &&
+                        b > g * 1.15f &&
+                        (b - Math.max(r, g)) > margin &&
+                        b > 0.09f
+        ) {
             return Ball.PURPLE;
         }
 
-        // GREEN: looser dominance + absolute floor
-        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
+        // GREEN (more tolerant)
+        if (
+                g > r * 1.10f &&
+                        g > b * 1.10f &&
+                        (g - Math.max(r, b)) > margin &&
+                        g > 0.11f
+        ) {
             return Ball.GREEN;
         }
 
@@ -624,7 +658,7 @@ public class RedClose12Ball extends LinearOpMode {
         spinMotor.setPower(0);
 
         flickMotor.setPower(1);
-        sleep(100);
+        sleep(200);
         flickMotor.setPower(0);
 
         slots[0] = Ball.EMPTY;
