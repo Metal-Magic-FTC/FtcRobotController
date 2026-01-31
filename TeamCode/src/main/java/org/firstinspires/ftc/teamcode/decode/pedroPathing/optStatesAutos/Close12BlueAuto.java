@@ -13,7 +13,10 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.optStatesAutos.LoopTim
 
 import java.util.Arrays;
 import java.util.List;
-
+// 1 5 3 8 2
+// 1 3 5 2 8
+// 1 3 2 5 8
+// 1 2 3 5 8
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 //@Disabled
