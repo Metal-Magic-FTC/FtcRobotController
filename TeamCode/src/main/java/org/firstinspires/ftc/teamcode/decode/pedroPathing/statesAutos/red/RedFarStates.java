@@ -103,7 +103,7 @@ public class RedFarStates extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 50, 1);
+        runPath(paths.shoot(), 2500, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
