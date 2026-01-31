@@ -90,14 +90,14 @@ public class RedFarStates extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2500);
+        launchMotor.setVelocity(2100);
 
         // scan balls
         //scanBallsInSlots(5000);
 
-        //runPath(paths.scan(), 0, 1.0);
+        runPath(paths.scan(), 0, 1.0);
 
-        Ball[] pattern = new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
+        Ball[] pattern = getPatternFromTag();
 
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
