@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
@@ -79,7 +80,7 @@ public class RedFarStates extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsRedFarStates.START_POSE);
         paths = new GeneratedPathsRedFarStates(follower);
-        hoodServo.setPosition(0.80);
+        hoodServo.setPosition(0.75);
 
 
         telemetry.addLine("Ready");
@@ -550,7 +551,10 @@ public class RedFarStates extends LinearOpMode {
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
-        launchMotor.setPower(0);
+ 
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
+        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        launchMotor.setVelocity(0);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
 
