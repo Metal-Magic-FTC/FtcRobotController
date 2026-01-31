@@ -81,7 +81,7 @@ public class RedFarStates extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(GeneratedPathsRedFarStates.START_POSE);
         paths = new GeneratedPathsRedFarStates(follower);
-        hoodServo.setPosition(0.77);
+        hoodServo.setPosition(0.79);
 
 
         telemetry.addLine("Ready");
@@ -117,10 +117,10 @@ public class RedFarStates extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 0, 1);
+        runPath(paths.toIntake2(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intakeball1(), 0, 0.21);
+        runPathWithIntake(paths.intakeball4(), 0, 0.21);
         double startTime = System.currentTimeMillis();
 //        while (System.currentTimeMillis() < startTime + 500) {
 //            waitingForBall = true;
@@ -154,8 +154,8 @@ public class RedFarStates extends LinearOpMode {
         // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intakeball4(), 0, 0.21);
+        runPath(paths.toIntake1(), 0, 1);
+        runPathWithIntake(paths.intakeball1(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
