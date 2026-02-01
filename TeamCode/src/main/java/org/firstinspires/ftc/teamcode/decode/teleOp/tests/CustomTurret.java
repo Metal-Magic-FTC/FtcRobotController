@@ -9,8 +9,8 @@ import java.lang.Math;
 public class CustomTurret {
     private DcMotor turretMotor;
 
-    private static final int TURRET_MIN = 0;
-    private static final int TURRET_MAX = 555;
+    private static final int TURRET_MIN = -225;
+    private static final int TURRET_MAX = 100;
     private static final double TICKS_PER_RADIAN =
             TURRET_MAX / (2 * Math.PI);
 
@@ -38,7 +38,7 @@ public class CustomTurret {
     public void rotateTurret(int targetTurretPosition) {
         turretMotor.setTargetPosition(targetTurretPosition);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.5);
+        turretMotor.setPower(0.1);
     }
 
     public void updateTurretAim(Pose robotPose, Pose targetPose) {
@@ -62,6 +62,14 @@ public class CustomTurret {
         turretMotor.setTargetPosition(targetTicks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.9);
+    }
+
+    public int getTurretPosition() {
+        return turretMotor.getCurrentPosition();
+    }
+
+    public int getTargetTurretPosition() {
+        return turretMotor.getTargetPosition();
     }
 
 }

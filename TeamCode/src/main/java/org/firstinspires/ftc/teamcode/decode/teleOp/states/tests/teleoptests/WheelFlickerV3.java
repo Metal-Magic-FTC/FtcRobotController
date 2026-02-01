@@ -26,6 +26,8 @@ public class WheelFlickerV3 extends LinearOpMode {
     private DcMotor spinMotor;
     private DcMotorEx launchMotor;
     private CRServo flickServo;
+    private CRServo flickServo2;
+
     private DcMotor intakeMotor;
 
     private CustomMecanumDrive drivetrain;
@@ -114,6 +116,7 @@ public class WheelFlickerV3 extends LinearOpMode {
 
         hoodServo.setPosition(0.77);
         flickServo.setPower(0);
+        flickServo2.setPower(0);
 
         while (opModeIsActive()) {
 
@@ -250,6 +253,7 @@ public class WheelFlickerV3 extends LinearOpMode {
                 spinMotor.setPower(0.35);
 
                 flickServo.setPower(1);
+                flickServo2.setPower(1);
                 launchMotor.setVelocity(2000);
             }
 
@@ -262,6 +266,7 @@ public class WheelFlickerV3 extends LinearOpMode {
 
                     // Stop shooter systems
                     flickServo.setPower(0);
+                    flickServo2.setPower(0);
 
                     // Clear ALL slots at once
                     slots[0] = Ball.EMPTY;
@@ -310,9 +315,12 @@ public class WheelFlickerV3 extends LinearOpMode {
             if (shootPressed && !autoLaunching) {
                 //flickServo.setPosition(flickUp);
                 flickServo.setPower(1);
+                flickServo2.setPower(1);
             } else if (!autoLaunching) {
                 //flickServo.setPosition(flickDown);
                 flickServo.setPower(0);
+                flickServo2.setPower(0);
+
             }
 
             if (shootPressed && !autoLaunching) {
@@ -327,7 +335,7 @@ public class WheelFlickerV3 extends LinearOpMode {
                 launchMotor.setVelocity(2000);
             } else {
                 //launchMotor.setPower(0);
-                launchMotor.setVelocity(900);
+                launchMotor.setVelocity(0);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
@@ -512,7 +520,10 @@ public class WheelFlickerV3 extends LinearOpMode {
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         flickServo = hardwareMap.get(CRServo.class, "flickServo");
-        flickServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        flickServo.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        flickServo2 = hardwareMap.get(CRServo.class, "flickServo2");
+        flickServo2.setDirection(DcMotorSimple.Direction.FORWARD);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
 
