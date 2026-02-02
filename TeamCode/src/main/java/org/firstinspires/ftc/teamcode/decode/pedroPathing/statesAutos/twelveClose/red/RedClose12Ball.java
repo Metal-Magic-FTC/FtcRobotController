@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelve.red;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;

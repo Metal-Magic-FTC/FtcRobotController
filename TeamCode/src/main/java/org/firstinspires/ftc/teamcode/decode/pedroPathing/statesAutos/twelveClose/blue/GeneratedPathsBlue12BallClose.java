@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelve.blue;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.blue;
 
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
