@@ -44,7 +44,7 @@ public class RedClose12Ball extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.45;
+    private double spinMotorSpeed = 0.38;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -121,7 +121,7 @@ public class RedClose12Ball extends LinearOpMode {
 
 
 
-        runPathWithIntake(paths.gate(), 250, 1);
+        runPathWithIntake(paths.gate(), 750, 1);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -507,29 +507,30 @@ public class RedClose12Ball extends LinearOpMode {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        // Reject very far / floor readings
+        // Reject extreme noise / very far
         float total = r + g + b;
-        if (total < 0.05f) return Ball.EMPTY;
+        if (total < 0.04f) return Ball.EMPTY;
 
-        // Small dominance margin (helps under bad lighting)
-        float margin = 0.02f;
+        float margin = 0.015f;
 
-        // PURPLE (blue-dominant, slightly relaxed)
+        // PURPLE (blue-heavy)
         if (
-                b > r * 1.20f &&
-                        b > g * 1.15f &&
-                        (b - Math.max(r, g)) > margin &&
-                        b > 0.09f
+                b > 0.07f && (
+                        b > r * 1.10f ||
+                                b > g * 1.05f ||
+                                (b - Math.max(r, g)) > margin
+                )
         ) {
             return Ball.PURPLE;
         }
 
-        // GREEN (more tolerant)
+        // GREEN (green-heavy)
         if (
-                g > r * 1.10f &&
-                        g > b * 1.10f &&
-                        (g - Math.max(r, b)) > margin &&
-                        g > 0.11f
+                g > 0.09f && (
+                        g > r * 1.05f ||
+                                g > b * 1.05f ||
+                                (g - Math.max(r, b)) > margin
+                )
         ) {
             return Ball.GREEN;
         }
@@ -646,7 +647,7 @@ public class RedClose12Ball extends LinearOpMode {
         launchMotor.setVelocity(2000);
         sleep(200);
 
-        int endPosition = spinMotor.getCurrentPosition() + 750;
+        int endPosition = spinMotor.getCurrentPosition() + 500;
         spinMotor.setTargetPosition(endPosition);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(0.25);

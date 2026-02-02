@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp.tests;
+package org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.turretTests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,10 +10,12 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomTurret;
 
-//@Disabled
+@Disabled
 @TeleOp(name="!Turret Manual Test")
-public class RotateTurret extends LinearOpMode {
+public class ManualTurret extends LinearOpMode {
 
 
     // ts constants
@@ -59,20 +61,12 @@ public class RotateTurret extends LinearOpMode {
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
 
-            drivetrain.driveMecanum(strafe, drive, turn);
+//            drivetrain.driveMecanum(strafe, drive, turn);
 
             follower.update();
 
-            if (!gamepad1.x) {
-                turret.updateTurretAim(follower.getPose(), target);
-            }
 
-            if (gamepad1.y) {
-                turret.rotateTurret(0);
-            }
 
-            telemetry.addData("turret", turret.getTurretPosition());
-            telemetry.addData("turret", turret.getTargetTurretPosition());
             telemetry.update();
         }
     }

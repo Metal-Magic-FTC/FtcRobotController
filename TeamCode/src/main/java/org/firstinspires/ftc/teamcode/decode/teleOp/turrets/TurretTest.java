@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@Disabled
+//@Disabled
 @TeleOp(name="!TEST TS TURRET")
 public class TurretTest extends LinearOpMode {
 
@@ -36,14 +36,14 @@ public class TurretTest extends LinearOpMode {
 
             turretMotor.setPower(power);
 
-            if (gamepad1.a) {
-                turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            }
-
-            if (gamepad1.b) {
-                turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-
+//            if (gamepad1.a) {
+//                turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//            }
+//
+//            if (gamepad1.b) {
+//                turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            }
+//
             telemetry.addData("encoder for turret", turretMotor.getCurrentPosition());
             telemetry.addData("speed", power);
             telemetry.update();
@@ -57,7 +57,8 @@ public class TurretTest extends LinearOpMode {
         turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
     }
 
