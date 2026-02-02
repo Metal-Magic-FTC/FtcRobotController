@@ -27,6 +27,7 @@ public class WheelFlickerV3 extends LinearOpMode {
     private DcMotorEx launchMotor;
     private CRServo flickServo;
     private CRServo flickServo2;
+    private Servo flickServo3;
 
     private DcMotor intakeMotor;
 
@@ -519,11 +520,14 @@ public class WheelFlickerV3 extends LinearOpMode {
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        flickServo = hardwareMap.get(CRServo.class, "flickServo");
+        flickServo = hardwareMap.get(CRServo.class, "backFlick");
         flickServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        flickServo2 = hardwareMap.get(CRServo.class, "flickServo2");
+        flickServo2 = hardwareMap.get(CRServo.class, "frontFlick");
         flickServo2.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        flickServo3 = hardwareMap.get(Servo.class, "linearFlick");
+        flickServo3.setDirection(Servo.Direction.FORWARD);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
 
