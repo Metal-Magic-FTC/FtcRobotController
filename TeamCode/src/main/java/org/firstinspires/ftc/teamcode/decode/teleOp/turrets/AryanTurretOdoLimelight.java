@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.Fus
 @TeleOp(name = "Aryan Turret Face Red Corner (Limelight + Odo)", group = "Test")
 public class AryanTurretOdoLimelight extends LinearOpMode {
 
-    private static final double TARGET_X = 144.0;
-    private static final double TARGET_Y = 144.0;
+    private static final double TARGET_X = 160.0;
+    private static final double TARGET_Y = 137.0;
 
     private static final int TURRET_MIN = -275;
     private static final int TURRET_MAX = 275;

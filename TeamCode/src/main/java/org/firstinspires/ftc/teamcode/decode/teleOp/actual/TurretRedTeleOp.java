@@ -1,5 +1,7 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.teleoptests;
+package org.firstinspires.ftc.teamcode.decode.teleOp.actual;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -12,11 +14,13 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
-@TeleOp(name = "!!!!!WheelFlickerV3 33 MAX VERSTAPPEN")
-public class WheelFlickerV3 extends LinearOpMode {
+@TeleOp(name = "!!!!!TS TURRET RED SIDE")
+public class TurretRedTeleOp extends LinearOpMode {
 
     //launch motor - left bumper
     //flick servo - right trigger
@@ -108,6 +112,22 @@ public class WheelFlickerV3 extends LinearOpMode {
             nextIntake2,
             prevNextIntake2;
 
+    // TURRET
+
+    private static final double TARGET_X = 160.0;
+    private static final double TARGET_Y = 137.0;
+
+    private static final int TURRET_MIN = -275;
+    private static final int TURRET_MAX = 275;
+    private static final double TICKS_PER_RAD = 275.0 / Math.PI;
+
+    DcMotor turretMotor;
+    Follower follower;
+    FusedPose fusedPose;
+
+    public static final Pose START_POSE =
+            new Pose(108, 130.29, Math.toRadians(180));
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -163,6 +183,8 @@ public class WheelFlickerV3 extends LinearOpMode {
 
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
+
+            runTurret();
 
             if (gamepad1.x) {
                 intakeActive = false;
@@ -257,7 +279,7 @@ public class WheelFlickerV3 extends LinearOpMode {
 //                flickServo.setPower(1);
 //                flickServo2.setPower(1);
                 flickServo3.setPosition(0.85);
-                launchMotor.setVelocity(2000);
+                launchMotor.setVelocity(1500);
             }
 
             if (autoLaunching) {
@@ -337,7 +359,7 @@ public class WheelFlickerV3 extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(2000);
+                launchMotor.setVelocity(1500);
                 flickServo.setPower(1);
                 flickServo2.setPower(1);
             } else {
@@ -499,6 +521,53 @@ public class WheelFlickerV3 extends LinearOpMode {
         }
     }
 
+    private void runTurret() {
+        // Update fusion + odometry
+        fusedPose.update();
+        follower.update();
+
+        // === Inject Limelight pose into Pedro ===
+        Pose limelightPose = fusedPose.getRobotPose(true); // CONVERTED pose
+        if (limelightPose != null) {
+            follower.setPose(limelightPose);
+        }
+
+        // === Current robot pose ===
+        Pose robotPose = follower.getPose();
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotHeading = robotPose.getHeading();
+
+        // === Turret math ===
+        double angleToTarget = Math.atan2(
+                TARGET_Y - robotY,
+                TARGET_X - robotX
+        );
+
+        double turretAngle = angleWrap(angleToTarget - robotHeading);
+        int turretTarget = (int) Math.round(turretAngle * TICKS_PER_RAD);
+        turretTarget = clamp(turretTarget, TURRET_MIN, TURRET_MAX);
+
+        turretMotor.setTargetPosition(turretTarget);
+
+        // === Telemetry ===
+        telemetry.addData("Pose X", "%.1f", robotX);
+        telemetry.addData("Pose Y", "%.1f", robotY);
+        telemetry.addData("Heading", "%.1f°", Math.toDegrees(robotHeading));
+        telemetry.addData("Turret Target", turretTarget);
+        telemetry.update();
+    }
+
+    private double angleWrap(double angle) {
+        while (angle > Math.PI) angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
+    }
+
+    private int clamp(int val, int min, int max) {
+        return Math.max(min, Math.min(max, val));
+    }
+
     public void initialize() {
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
@@ -536,6 +605,22 @@ public class WheelFlickerV3 extends LinearOpMode {
 
         flickServo3 = hardwareMap.get(Servo.class, "linearFlick");
         flickServo3.setDirection(Servo.Direction.FORWARD);
+
+        // ===== Turret =====
+        turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setTargetPosition(0);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        turretMotor.setPower(0.8);
+
+        // ===== Pedro =====
+        follower = Constants.createFollower(hardwareMap);
+        follower.setPose(START_POSE);
+
+        // ===== Limelight Fusion =====
+        fusedPose = new FusedPose(hardwareMap, START_POSE);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
 
