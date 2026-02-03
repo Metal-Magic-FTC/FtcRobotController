@@ -320,7 +320,7 @@ public class WheelFlickerV3 extends LinearOpMode {
                 //flickServo.setPosition(flickUp);
 //                flickServo.setPower(1);
 //                flickServo2.setPower(1);
-                flickServo3.setPosition(0.80); // 0.85
+                flickServo3.setPosition(0.88); // 0.85
             } else if (!autoLaunching) {
                 //flickServo.setPosition(flickDown);
 //                flickServo.setPower(0);
