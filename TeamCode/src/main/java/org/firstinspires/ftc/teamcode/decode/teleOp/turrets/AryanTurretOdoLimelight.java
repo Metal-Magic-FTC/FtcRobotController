@@ -13,11 +13,11 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.Fus
 @TeleOp(name = "Aryan Turret Face Red Corner (Limelight + Odo)", group = "Test")
 public class AryanTurretOdoLimelight extends LinearOpMode {
 
-    private static final double TARGET_X = 140.0;
+    private static final double TARGET_X = 144.0;
     private static final double TARGET_Y = 144.0;
 
     private static final int TURRET_MIN = -275;
-    private static final int TURRET_MAX = 100;
+    private static final int TURRET_MAX = 275;
     private static final double TICKS_PER_RAD = 275.0 / Math.PI;
 
     DcMotor turretMotor;
@@ -37,7 +37,7 @@ public class AryanTurretOdoLimelight extends LinearOpMode {
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        turretMotor.setPower(0.6);
+        turretMotor.setPower(0.8);
 
         // ===== Pedro =====
         follower = Constants.createFollower(hardwareMap);
