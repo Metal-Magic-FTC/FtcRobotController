@@ -118,6 +118,7 @@ public class WheelFlickerV3 extends LinearOpMode {
         hoodServo.setPosition(0.77);
         flickServo.setPower(0);
         flickServo2.setPower(0);
+        flickServo3.setPosition(0.96);
 
         while (opModeIsActive()) {
 
@@ -253,8 +254,9 @@ public class WheelFlickerV3 extends LinearOpMode {
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 spinMotor.setPower(0.35);
 
-                flickServo.setPower(1);
-                flickServo2.setPower(1);
+//                flickServo.setPower(1);
+//                flickServo2.setPower(1);
+                flickServo3.setPosition(0.85);
                 launchMotor.setVelocity(2000);
             }
 
@@ -266,8 +268,9 @@ public class WheelFlickerV3 extends LinearOpMode {
                 if (!spinMotor.isBusy()) {
 
                     // Stop shooter systems
-                    flickServo.setPower(0);
-                    flickServo2.setPower(0);
+//                    flickServo.setPower(0);
+//                    flickServo2.setPower(0);
+                    flickServo3.setPosition(0.96);
 
                     // Clear ALL slots at once
                     slots[0] = Ball.EMPTY;
@@ -315,13 +318,14 @@ public class WheelFlickerV3 extends LinearOpMode {
 
             if (shootPressed && !autoLaunching) {
                 //flickServo.setPosition(flickUp);
-                flickServo.setPower(1);
-                flickServo2.setPower(1);
+//                flickServo.setPower(1);
+//                flickServo2.setPower(1);
+                flickServo3.setPosition(0.85);
             } else if (!autoLaunching) {
                 //flickServo.setPosition(flickDown);
-                flickServo.setPower(0);
-                flickServo2.setPower(0);
-
+//                flickServo.setPower(0);
+//                flickServo2.setPower(0);
+                flickServo3.setPosition(0.96);
             }
 
             if (shootPressed && !autoLaunching) {
@@ -334,9 +338,13 @@ public class WheelFlickerV3 extends LinearOpMode {
             if (runLaunch) {
                 //launchMotor.setPower(1);
                 launchMotor.setVelocity(2000);
+                flickServo.setPower(1);
+                flickServo2.setPower(1);
             } else {
                 //launchMotor.setPower(0);
                 launchMotor.setVelocity(0);
+                flickServo.setPower(0);
+                flickServo2.setPower(0);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
