@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.red;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedFar;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
@@ -61,9 +60,9 @@ public class GeneratedPathsRedFarStates {
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierCurve(SHOOT_POSE, new Pose(90,31), new Pose(100, 30))
+                        new BezierLine(SHOOT_POSE, new Pose(100, 30))
                 )
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(90, 0)
                 .build();
     }
 
@@ -108,10 +107,10 @@ public class GeneratedPathsRedFarStates {
     public PathChain toIntake2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierCurve(SHOOT_POSE, new Pose(84, 55),
+                        new BezierLine(SHOOT_POSE,
                                  new Pose(103,55))
                 )
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(25.5, 0)
                 .build();
     }
 
