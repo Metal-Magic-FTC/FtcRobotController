@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.red;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedFar.RedFar6;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
@@ -16,13 +16,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedFar.GeneratedPathsRedFarStates;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!! STATES Red Far V0")
-public class RedFarStates extends LinearOpMode {
+@Autonomous(name = "!!!!!! STATES Red Far 6 ball")
+public class RedFarStates6 extends LinearOpMode {
 
     private int index = 0;
 
@@ -149,32 +150,32 @@ public class RedFarStates extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        // ---- INTAKE 4–6 ----
-        intakeActive = true;
-        rotateToIndex(0);
-        runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intakeball4(), 0, 0.21);
-
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        aimToPattern(pattern);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        runPath(paths.shoot3(), 0, 1);
-
-        //shootAllPattern(pattern);
-        shootAll();
-
-        intakeMotor.setPower(-0.6);
-        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
+//        // ---- INTAKE 4–6 ----
+//        intakeActive = true;
+//        rotateToIndex(0);
+//        runPath(paths.toIntake2(), 0, 1);
+//        runPathWithIntake(paths.intakeball4(), 0, 0.21);
+//
+//        intakeMotor.setPower(-0.6);
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.GREEN;
+//        slots[2] = Ball.PURPLE;
+//
+//        aimToPattern(pattern);
+//
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.GREEN;
+//        slots[2] = Ball.PURPLE;
+//
+//        runPath(paths.shoot3(), 0, 1);
+//
+//        //shootAllPattern(pattern);
+//        shootAll();
+//
+//        intakeMotor.setPower(-0.6);
+//        intakeActive = true;
+//        rotateToIndex(0);
+//        resetSlots();
 
 
         runPath(paths.leave(), 0, 1);
