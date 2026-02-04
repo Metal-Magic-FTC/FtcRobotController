@@ -6,6 +6,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -43,7 +44,9 @@ public class RedClose12Ball extends LinearOpMode {
     private DcMotor spinMotor;
     private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
-    private DcMotorEx flickMotor;
+
+    private CRServo spinFlickServo;
+    private Servo flickerServo;
 
     Servo hoodServo;
 
@@ -66,6 +69,9 @@ public class RedClose12Ball extends LinearOpMode {
     private static final long SPIN_TIMEOUT_MS = 10000;
 
     private int lastSpinTarget = 0;
+
+    private final double flickPositionUp = 0.88;
+    private final double flickPositionDown = 0.96;
 
     // ---------------- RUN ----------------
     @Override
@@ -581,95 +587,36 @@ public class RedClose12Ball extends LinearOpMode {
         return -1;
     }
 
-    private void shootAllPattern(Ball[] pattern) {
-
-        intakeActive = false;
-        intakeMotor.setPower(0);
-
-        int startIndex = findBestStartIndex(pattern);
-        if (startIndex == -1) return; // nothing valid to shoot
-
-        // Move spindexer to correct start slot
-        index = startIndex;
-
-        int current = spinMotor.getCurrentPosition();
-        int currentMod = ((current % 750) + 750) % 750;
-
-        int startPos = OUTTAKE_POS[startIndex];
-        if (startPos <= currentMod) {
-            startPos += 750;
-        }
-
-        int startTarget = current - currentMod + startPos;
-
-        spinMotor.setTargetPosition(startTarget);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
-
-        waitForSpindexer();
-
-        sleep(100);
-
-        // ---- START SHOOTING ----
-        flickMotor.setPower(1);
-        launchMotor.setVelocity(2100);
-
-        sleep(100);
-
-        // Compute end sweep position (clockwise through 3 slots)
-        int endSlot = (startIndex + 2) % 3;
-        int endPos = OUTTAKE_POS[endSlot] + 750;
-
-        int sweepTarget = startTarget + (endPos - startPos);
-
-        spinMotor.setTargetPosition(sweepTarget);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
-
-        while (opModeIsActive() && spinMotor.isBusy()) {
-            // let balls fire naturally
-        }
-
-        spinMotor.setPower(0);
-
-        flickMotor.setPower(1);
-        sleep(100);
-        flickMotor.setPower(0);
-
-        // ---- STOP ----
-        flickMotor.setPower(0);
-        //launchMotor.setVelocity(900);
-
-        // Clear slots in pattern order
-        slots[0] = Ball.EMPTY;
-        slots[1] = Ball.EMPTY;
-        slots[2] = Ball.EMPTY;
-
-        index = endSlot;
-    }
-
     private void shootAll() {
 
         intakeMotor.setPower(0);
 
-        flickMotor.setPower(1);
+        spinFlickServo.setPower(1);
+        flickerServo.setPosition(flickPositionDown);
         launchMotor.setVelocity(2000);
-        sleep(200);
+        sleep(400);
 
-        int endPosition = spinMotor.getCurrentPosition() + 500;
-        spinMotor.setTargetPosition(endPosition);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.25);
+        flickerServo.setPosition(flickPositionUp);
+        sleep(250);
+        flickerServo.setPosition(flickPositionDown);
+        sleep(250);
 
-        while (opModeIsActive() && spinMotor.isBusy()) {
-            // let balls fire naturally
-        }
+        moveSpindexer(250, 0.25);
 
-        spinMotor.setPower(0);
+        flickerServo.setPosition(flickPositionUp);
+        sleep(250);
+        flickerServo.setPosition(flickPositionDown);
+        sleep(250);
 
-        flickMotor.setPower(1);
-        sleep(200);
-        flickMotor.setPower(0);
+        moveSpindexer(250, 0.25);
+
+        flickerServo.setPosition(flickPositionUp);
+        sleep(250);
+        flickerServo.setPosition(flickPositionDown);
+        sleep(250);
+
+
+        spinFlickServo.setPower(0);
 
         slots[0] = Ball.EMPTY;
         slots[1] = Ball.EMPTY;
@@ -679,6 +626,17 @@ public class RedClose12Ball extends LinearOpMode {
 
         intakeMotor.setPower(-0.6);
 
+    }
+
+    private void moveSpindexer(int ticks, double power) {
+        int endPosition = spinMotor.getCurrentPosition() + ticks;
+        spinMotor.setTargetPosition(endPosition);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(power);
+
+        while (opModeIsActive() && spinMotor.isBusy()) {
+            // let balls fire naturally
+        }
     }
 
     // ---------------- INIT ----------------
@@ -713,13 +671,17 @@ public class RedClose12Ball extends LinearOpMode {
 
         hoodServo = hardwareMap.servo.get("hoodServo");
 
-        flickMotor = hardwareMap.get(DcMotorEx.class, "flickMotor");
-        flickMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        flickMotor.setPower(0);
-
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        spinFlickServo = hardwareMap.get(CRServo.class, "backFlick");
+        spinFlickServo.setDirection(DcMotorSimple.Direction.FORWARD);
+        spinFlickServo.setPower(0);
+
+        flickerServo = hardwareMap.get(Servo.class, "linearFlick");
+        flickerServo.setDirection(Servo.Direction.FORWARD);
+        flickerServo.setPosition(0.96);
 
     }
 
