@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesPaths.RedPaths;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedClose.RedClose12;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-public class RedClosePaths {
+public class GeneratedPathsRed12BallClose {
 
     private final Follower follower;
 
@@ -17,7 +17,7 @@ public class RedClosePaths {
     public static final Pose START_POSE =
             new Pose(108, 130.2926713735558, Math.toRadians(180));
 
-    public RedClosePaths(Follower follower) {
+    public GeneratedPathsRed12BallClose(Follower follower) {
         this.follower = follower;
     }
 
