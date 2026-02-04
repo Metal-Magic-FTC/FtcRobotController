@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedClose.RedClose12;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedClose.RedClose9;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-public class GeneratedPathsRed12BallClose {
+public class GeneratedPathsRed9BallClose {
 
     private final Follower follower;
 
@@ -15,9 +15,9 @@ public class GeneratedPathsRed12BallClose {
 
     //public static final Pose START_POSE = new Pose(118.157, 128.629, Math.toRadians(45));
     public static final Pose START_POSE =
-            new Pose(108, 130, Math.toRadians(180));
+            new Pose(108, 130.2926713735558, Math.toRadians(180));
 
-    public GeneratedPathsRed12BallClose(Follower follower) {
+    public GeneratedPathsRed9BallClose(Follower follower) {
         this.follower = follower;
     }
 
@@ -29,7 +29,7 @@ public class GeneratedPathsRed12BallClose {
                         new BezierLine(
                                 START_POSE,
                                 //new Pose(91.371, 102.034, Math.toRadians(45))
-                                new Pose(107, 105, Math.toRadians(45))
+                                new Pose(107.26022704129466, 104.66047300630309, Math.toRadians(45))
                         )
                 )
                 .setLinearHeadingInterpolation(
