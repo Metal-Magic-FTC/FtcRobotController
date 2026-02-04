@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -30,7 +31,7 @@ public class FlywheelTuningTest extends OpMode {
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launchMotor.setDirection(DcMotor.Direction.REVERSE);
+        launchMotor.setDirection(DcMotor.Direction.FORWARD);
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
