@@ -45,6 +45,8 @@ public class RedClose12Ball extends LinearOpMode {
     private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
 
+    DcMotor turretMotor;
+
     private CRServo spinFlickServo;
     private Servo flickerServo;
 
@@ -73,6 +75,14 @@ public class RedClose12Ball extends LinearOpMode {
     private final double flickPositionUp = 0.88;
     private final double flickPositionDown = 0.96;
 
+    // ---------------- TURRET ----------------
+    private static final int TURRET_TOLERANCE_TICKS = 5;
+    private static final long TURRET_TIMEOUT_MS = 1500;
+
+    private int lastTurretTarget = 0;
+    private double turretPower = 0.5;
+
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -97,6 +107,8 @@ public class RedClose12Ball extends LinearOpMode {
         if (isStopRequested()) return;
 
         launchMotor.setVelocity(2100);
+
+        turretRunToPosition(45); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -125,6 +137,8 @@ public class RedClose12Ball extends LinearOpMode {
         rotateToIndex(0);
         runPath(paths.toIntake1(), 0, 1);
         resetSlots();
+
+        turretRunToPosition(-365);
 
         runPathWithIntake(paths.intake1(), 0, 0.23);
         double startTime = System.currentTimeMillis();
@@ -206,6 +220,7 @@ public class RedClose12Ball extends LinearOpMode {
         //shootAllPattern(pattern);
         shootAll();
 
+        turretRunToPosition(0);
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -639,6 +654,16 @@ public class RedClose12Ball extends LinearOpMode {
         }
     }
 
+    private void turretRunToPosition(int targetTicks) {
+
+        lastTurretTarget = targetTicks;
+
+        turretMotor.setTargetPosition(targetTicks);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(turretPower);
+    }
+
+
     // ---------------- INIT ----------------
     private void initHardware() {
 
@@ -682,6 +707,15 @@ public class RedClose12Ball extends LinearOpMode {
         flickerServo = hardwareMap.get(Servo.class, "linearFlick");
         flickerServo.setDirection(Servo.Direction.FORWARD);
         flickerServo.setPosition(0.96);
+
+        // ===== Turret =====
+        turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setTargetPosition(0);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        turretMotor.setPower(0);
 
     }
 
