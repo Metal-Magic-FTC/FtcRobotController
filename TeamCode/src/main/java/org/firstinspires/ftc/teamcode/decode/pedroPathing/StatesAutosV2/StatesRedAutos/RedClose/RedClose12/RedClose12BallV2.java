@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!! States Red Close 12 Ball")
+@Autonomous(name = "!!!!! LEBRON States Red Close 12 Ball")
 public class RedClose12BallV2 extends LinearOpMode {
 
     private int index = 0;
@@ -72,7 +72,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
-    private final double flickPositionUp = 0.88;
+    private final double flickPositionUp = 0.84;
     private final double flickPositionDown = 0.96;
 
     // ---------------- TURRET ----------------
@@ -135,7 +135,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 0, 1);
+        runPathWithIntake(paths.toIntake1(), 0, 1);
         resetSlots();
 
         turretRunToPosition(-365);
@@ -150,7 +150,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
 
 
-        runPathWithIntake(paths.gate(), 750, 1);
+        //runPathWithIntake(paths.gate(), 750, 1);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -163,7 +163,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 0, 1);
+        runPath(paths.intake1ToShoot2(), 0, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -177,7 +177,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake2(), 0, 1);
+        runPathWithIntake(paths.toIntake2(), 0, 1);
         runPathWithIntake(paths.intake2(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
@@ -201,7 +201,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        runPath(paths.toIntake3(), 0, 1);
+        runPathWithIntake(paths.toIntake3(), 0, 1);
         runPathWithIntake(paths.intake3(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
@@ -409,7 +409,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         follower.setMaxPower(speed);
         follower.followPath(path);
         while (opModeIsActive() && follower.isBusy()) follower.update();
-        follower.breakFollowing();
+        //follower.breakFollowing();
         if (stopDelay > 0) sleep(stopDelay);
     }
 
@@ -614,7 +614,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         flickerServo.setPosition(flickPositionUp);
         sleep(250);
         flickerServo.setPosition(flickPositionDown);
-        sleep(400);
+        sleep(1000);
 
 
         spinFlickServo.setPower(0);
