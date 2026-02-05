@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!! States Red Close 12 Ball")
+@Autonomous(name = "!!!!! States Red Far 9 Ball")
 public class RedFarStates9 extends LinearOpMode {
 
     private int index = 0;
@@ -72,7 +72,7 @@ public class RedFarStates9 extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
-    private final double flickPositionUp = 0.88;
+    private final double flickPositionUp = 0.8;
     private final double flickPositionDown = 0.96;
 
     // ---------------- TURRET ----------------
@@ -106,9 +106,9 @@ public class RedFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(2500);
 
-        turretRunToPosition(17); // TURRRRREETTTT
+        turretRunToPosition(-40); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -196,7 +196,7 @@ public class RedFarStates9 extends LinearOpMode {
         //shootAllPattern(pattern);
         shootAll();
 
-        turretRunToPosition(0);
+        turretRunToPosition(-40);
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);
         intakeActive = true;
