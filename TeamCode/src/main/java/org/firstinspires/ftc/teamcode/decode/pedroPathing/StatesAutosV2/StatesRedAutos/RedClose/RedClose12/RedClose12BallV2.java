@@ -17,14 +17,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red.GeneratedPathsRed12BallClose;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
 @Autonomous(name = "!!!!! States Red Close 12 Ball")
-public class RedClose12Ball extends LinearOpMode {
+public class RedClose12BallV2 extends LinearOpMode {
 
     private int index = 0;
 
@@ -35,7 +34,7 @@ public class RedClose12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsRed12BallClose paths;
+    private GeneratedPathsRed12BallCloseV2 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -95,8 +94,8 @@ public class RedClose12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRed12BallClose.START_POSE);
-        paths = new GeneratedPathsRed12BallClose(follower);
+        follower.setPose(GeneratedPathsRed12BallCloseV2.START_POSE);
+        paths = new GeneratedPathsRed12BallCloseV2(follower);
         hoodServo.setPosition(0.80);
 
 
@@ -688,9 +687,9 @@ public class RedClose12Ball extends LinearOpMode {
         enableLight(intakeColor2);
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
+        launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300.0, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 

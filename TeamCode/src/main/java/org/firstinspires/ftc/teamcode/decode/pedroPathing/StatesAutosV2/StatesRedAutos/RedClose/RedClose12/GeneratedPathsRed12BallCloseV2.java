@@ -7,15 +7,15 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-public class GeneratedPathsRed12BallClose {
+public class GeneratedPathsRed12BallCloseV2 {
 
     private final Follower follower;
 
     // ---------------- START POSE ----------------
     public static final Pose START_POSE =
-            new Pose(113.8154613466334, 129.5561097256858, Math.toRadians(90));
+            new Pose(113.8154613466334, 129.5561097256858, Math.toRadians(180));
 
-    public GeneratedPathsRed12BallClose(Follower follower) {
+    public GeneratedPathsRed12BallCloseV2(Follower follower) {
         this.follower = follower;
     }
 
