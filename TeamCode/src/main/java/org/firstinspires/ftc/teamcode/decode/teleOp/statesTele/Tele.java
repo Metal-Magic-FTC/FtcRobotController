@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp.actual;
+package org.firstinspires.ftc.teamcode.decode.teleOp.statesTele;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -14,13 +14,14 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Alliance;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
-@TeleOp(name = "!!!!!TS TURRET RED SIDE")
-public class TurretRedTeleOp extends LinearOpMode {
+@TeleOp
+public class Tele extends LinearOpMode {
 
     //launch motor - left bumper
     //flick servo - right trigger
@@ -114,19 +115,28 @@ public class TurretRedTeleOp extends LinearOpMode {
 
     // TURRET
 
-    private static final double TARGET_X = 150.0;
-    private static final double TARGET_Y = 132.0;
+    private static double TARGET_X = 150.0; // default is red side
+    private static double TARGET_Y = 137.0; // same here
 
-    private static final int TURRET_MIN = -275;
-    private static final int TURRET_MAX = 275;
+    private static final int TURRET_MIN = -275; // always this
+    private static final int TURRET_MAX = 275; // also this
     private static final double TICKS_PER_RAD = 275.0 / Math.PI;
 
     DcMotor turretMotor;
     Follower follower;
     FusedPose fusedPose;
 
-    public static final Pose START_POSE =
-            new Pose(108, 130.29, Math.toRadians(180));
+    public static Alliance alliance = null; // YOU HAVE TO CALL THIS TELE SPECIFICALLY
+    public Tele(Alliance a) {
+        alliance = a;
+    }
+
+//    public static final Pose START_POSE =
+//            new Pose(108, 130.29, Math.toRadians(180)); // Change start pos to pos at end of auto (BEFORE COMP)
+
+    public static Pose START_POSE;
+
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -546,7 +556,7 @@ public class TurretRedTeleOp extends LinearOpMode {
 
         double turretAngle = angleWrap(angleToTarget - robotHeading);
         int turretTarget = (int) Math.round(turretAngle * TICKS_PER_RAD);
-        turretTarget = clamp(turretTarget, TURRET_MIN, TURRET_MAX);
+        turretTarget = clamp(turretTarget, TURRET_MIN, TURRET_MAX); // WIRE SAFETY, DO NOT REMOVE
 
         turretMotor.setTargetPosition(turretTarget);
 
@@ -607,15 +617,29 @@ public class TurretRedTeleOp extends LinearOpMode {
         flickServo3.setDirection(Servo.Direction.FORWARD);
 
         // ===== Turret =====
+        if (alliance == Alliance.RED) {
+            TARGET_X = 150;
+            TARGET_Y = 137;
+        } else {
+            TARGET_X = -6;
+            TARGET_Y = 137;
+        }
+
         turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setTargetPosition(0);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        turretMotor.setPower(1);
+        turretMotor.setPower(0.8);
 
         // ===== Pedro =====
+        if (alliance == Alliance.RED) {
+            START_POSE = new Pose(0, 0, 45); // end of red pathing
+        } else {
+            START_POSE = new Pose(0, 0, 135); // end of blue pathing
+        }
+
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(START_POSE);
 
