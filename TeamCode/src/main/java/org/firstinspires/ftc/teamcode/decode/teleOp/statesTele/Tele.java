@@ -112,7 +112,6 @@ public class Tele extends LinearOpMode {
             launchAllPressed,
             nextIntake2,
             prevNextIntake2;
-
     // TURRET
 
     private static double TARGET_X = 150.0; // default is red side
@@ -171,7 +170,7 @@ public class Tele extends LinearOpMode {
             runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
-            launchAllPressed = gamepad1.dpad_left;
+            launchAllPressed   = gamepad1.dpad_left;
 
             nextIntake2 = gamepad2.dpad_down;
 
@@ -194,7 +193,11 @@ public class Tele extends LinearOpMode {
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
 
-            runTurret();
+            if (Math.abs(gamepad2.right_stick_x) > 0.05) {
+                turretMotor.setPower(gamepad2.right_stick_x);
+            } else {
+                runTurret();
+            }
 
             if (gamepad1.x) {
                 intakeActive = false;
