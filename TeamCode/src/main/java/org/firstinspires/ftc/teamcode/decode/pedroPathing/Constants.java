@@ -23,7 +23,7 @@ public class Constants {
             .lateralZeroPowerAcceleration(-72.208)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.015))
             .headingPIDFCoefficients(new PIDFCoefficients(1.05,0, 0.05, 0.01))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.08, 0, 0.02, 0.6, 0.003));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03, 0.05, 0.0008, 0.6, 0.003));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName("frontLeft")
@@ -48,7 +48,7 @@ public class Constants {
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1.8);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.4, 1.8);
 
     public static DriveEncoderConstants driveEncoderConstants = new DriveEncoderConstants()
             .robotWidth(18)
