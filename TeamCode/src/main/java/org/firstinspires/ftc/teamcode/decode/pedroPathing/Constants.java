@@ -19,11 +19,11 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13.61)
-            .forwardZeroPowerAcceleration(64.12)
-            .lateralZeroPowerAcceleration(-64.312)
+            .forwardZeroPowerAcceleration(-43)
+            .lateralZeroPowerAcceleration(-72.208)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.015))
             .headingPIDFCoefficients(new PIDFCoefficients(1.05,0, 0.05, 0.01))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.06, 0, 0.0015, 0.6, 0.003));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.08, 0, 0.02, 0.6, 0.003));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName("frontLeft")
@@ -35,11 +35,11 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .xVelocity(64.448)
-            .yVelocity(49.253);
+            .yVelocity(56);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(0)
-            .strafePodX(5)
+            .strafePodX(-4.5)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("odo")
             .encoderResolution(
@@ -48,7 +48,7 @@ public class Constants {
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 0.67, 5);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1.8);
 
     public static DriveEncoderConstants driveEncoderConstants = new DriveEncoderConstants()
             .robotWidth(18)

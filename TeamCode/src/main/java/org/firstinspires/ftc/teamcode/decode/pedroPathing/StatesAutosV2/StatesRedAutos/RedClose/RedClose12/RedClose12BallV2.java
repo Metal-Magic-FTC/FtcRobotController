@@ -611,21 +611,21 @@ public class RedClose12BallV2 extends LinearOpMode {
         sleep(400);
 
         flickerServo.setPosition(flickPositionUp);
-        sleep(150);
+        sleep(250);
         flickerServo.setPosition(flickPositionDown);
-        sleep(150);
+        sleep(250);
 
         moveSpindexer(250, 0.25);
 
         flickerServo.setPosition(flickPositionUp);
-        sleep(150);
+        sleep(250);
         flickerServo.setPosition(flickPositionDown);
-        sleep(150);
+        sleep(250);
 
         moveSpindexer(250, 0.25);
 
         flickerServo.setPosition(flickPositionUp);
-        sleep(150);
+        sleep(250);
         flickerServo.setPosition(flickPositionDown);
         sleep(400);
 
