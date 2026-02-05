@@ -13,7 +13,7 @@ public class GeneratedPathsRed12BallCloseV2 {
 
     // ---------------- START POSE ----------------
     public static final Pose START_POSE =
-            new Pose(113.8154613466334, 129.5561097256858, Math.toRadians(180));
+            new Pose(113.8154613466334, 135.5561097256858, Math.toRadians(180));
 
     public GeneratedPathsRed12BallCloseV2(Follower follower) {
         this.follower = follower;
@@ -40,7 +40,7 @@ public class GeneratedPathsRed12BallCloseV2 {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
                         new Pose(96.75810473815463, 84, Math.toRadians(0)),
-                        new Pose(102.8, 84, Math.toRadians(0))
+                        new Pose(100.8, 84, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(0, 0)
                 .build();
@@ -50,8 +50,8 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain intake1() {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
-                        new Pose(102.8, 84, Math.toRadians(0)),
-                        new Pose(121.1, 84, Math.toRadians(0))
+                        new Pose(100.8, 84, Math.toRadians(0)),
+                        new Pose(125.1, 84, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(0, 0)
                 .build();
@@ -61,8 +61,8 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain gate() {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
-                        new Pose(121.1, 84, Math.toRadians(0)),
-                        new Pose(128.24688279301748, 76.42394014962593, Math.toRadians(-90))
+                        new Pose(125.1, 84, Math.toRadians(0)),
+                        new Pose(128.24688279301748, 70.42394014962593, Math.toRadians(-90))
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
@@ -72,7 +72,7 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
-                        new Pose(128.24688279301748, 76.42394014962593, Math.toRadians(-90)),
+                        new Pose(128.24688279301748, 70.42394014962593, Math.toRadians(-90)),
                         new Pose(96.75810473815463, 84, Math.toRadians(-90))
                 ))
                 .setLinearHeadingInterpolation(
@@ -88,7 +88,7 @@ public class GeneratedPathsRed12BallCloseV2 {
                 .addPath(new BezierCurve(
                         new Pose(96.75810473815463, 84, Math.toRadians(0)),
                         new Pose(87.69675810473817, 59.87032418952615),
-                        new Pose(102.8, 59.6, Math.toRadians(0))
+                        new Pose(100.8, 59.6, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(
                         Math.toRadians(-90),
@@ -101,8 +101,8 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain intake2() {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
-                        new Pose(102.8, 59.6, Math.toRadians(0)),
-                        new Pose(121.1, 59.6, Math.toRadians(0))
+                        new Pose(100.8, 59.6, Math.toRadians(0)),
+                        new Pose(125.1, 59.6, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(0, 0)
                 .build();
@@ -112,7 +112,7 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(new BezierCurve(
-                        new Pose(121.1, 59.6, Math.toRadians(0)),
+                        new Pose(125.1, 59.6, Math.toRadians(0)),
                         new Pose(96.33553615960099, 59.10174563591022),
                         new Pose(96.75810473815463, 84, Math.toRadians(0))
                 ))
@@ -131,7 +131,7 @@ public class GeneratedPathsRed12BallCloseV2 {
                 .addPath(new BezierCurve(
                         new Pose(96.75810473815463, 84, Math.toRadians(-90)),
                         new Pose(83.57481296758105, 35.693266832917686),
-                        new Pose(102.8, 35.5, Math.toRadians(0))
+                        new Pose(100.8, 35.5, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(
                         Math.toRadians(-90),
@@ -144,8 +144,8 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain intake3() {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
-                        new Pose(102.8, 35.5, Math.toRadians(0)),
-                        new Pose(121.1, 35.5, Math.toRadians(0))
+                        new Pose(100.8, 35.5, Math.toRadians(0)),
+                        new Pose(125.1, 35.5, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(0, 0)
                 .build();
@@ -155,7 +155,7 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain shoot4() {
         return new PathBuilder(follower)
                 .addPath(new BezierCurve(
-                        new Pose(121.1, 35.5, Math.toRadians(0)),
+                        new Pose(125.1, 35.5, Math.toRadians(0)),
                         new Pose(96.64226932668332, 34.40835411471322),
                         new Pose(96.75810473815463, 84, Math.toRadians(0))
                 ))

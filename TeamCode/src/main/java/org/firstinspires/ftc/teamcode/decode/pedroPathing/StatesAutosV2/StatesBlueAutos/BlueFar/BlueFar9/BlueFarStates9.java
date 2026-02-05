@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedFar.GeneratedPathsRedFarStates;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;

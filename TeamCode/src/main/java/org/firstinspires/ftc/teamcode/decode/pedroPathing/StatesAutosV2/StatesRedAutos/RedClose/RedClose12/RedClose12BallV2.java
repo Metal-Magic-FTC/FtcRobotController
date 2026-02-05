@@ -139,7 +139,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
         turretRunToPosition(-365);
 
-        runPathWithIntake(paths.intake1(), 0, 0.23);
+        runPathWithIntake(paths.intake1(), 0, 0.21);
         double startTime = System.currentTimeMillis();
 //        while (System.currentTimeMillis() < startTime + 500) {
 //            waitingForBall = true;
@@ -177,7 +177,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intake2(), 0, 0.23);
+        runPathWithIntake(paths.intake2(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -201,7 +201,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         resetSlots();
 
         runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.intake3(), 0, 0.23);
+        runPathWithIntake(paths.intake3(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
