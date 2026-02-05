@@ -257,12 +257,12 @@ public class WheelFlickerV3 extends LinearOpMode {
 //                flickServo.setPower(1);
 //                flickServo2.setPower(1);
                 flickServo3.setPosition(0.85);
-                launchMotor.setVelocity(2000);
+                launchMotor.setVelocity(2300);
             }
 
             if (autoLaunching) {
 
-                launchMotor.setVelocity(2500);
+                launchMotor.setVelocity(2300);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
@@ -337,7 +337,7 @@ public class WheelFlickerV3 extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(2000);
+                launchMotor.setVelocity(2300);
                 flickServo.setPower(1);
                 flickServo2.setPower(1);
             } else {
@@ -516,9 +516,9 @@ public class WheelFlickerV3 extends LinearOpMode {
         enableLight(intakeColor2);
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotor.Direction.REVERSE); // same as TeleOp_Flick_Launch
+        launchMotor.setDirection(DcMotor.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 17.4);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300.0, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
