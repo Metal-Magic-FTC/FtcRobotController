@@ -90,7 +90,10 @@ public class GeneratedPathsRed12BallCloseV2 {
                         new Pose(87.69675810473817, 59.87032418952615),
                         new Pose(102.8, 59.6, Math.toRadians(0))
                 ))
-                .setLinearHeadingInterpolation(-90, 0)
+                .setLinearHeadingInterpolation(
+                        Math.toRadians(-90),
+                        Math.toRadians(0)
+                )
                 .build();
     }
 
@@ -114,7 +117,10 @@ public class GeneratedPathsRed12BallCloseV2 {
                         new Pose(96.75810473815463, 84, Math.toRadians(0))
                 ))
                 //.setTangentHeadingInterpolation()
-                .setLinearHeadingInterpolation(0, -90)
+                .setLinearHeadingInterpolation(
+                        Math.toRadians(0),
+                        Math.toRadians(-90)
+                )
                 .setReversed()
                 .build();
     }
@@ -154,7 +160,11 @@ public class GeneratedPathsRed12BallCloseV2 {
                         new Pose(96.75810473815463, 84, Math.toRadians(0))
                 ))
                 //.setTangentHeadingInterpolation()
-                .setLinearHeadingInterpolation(0, -90)
+                //.setLinearHeadingInterpolation(0, -90)
+                .setLinearHeadingInterpolation(
+                        Math.toRadians(0),
+                        Math.toRadians(-90)
+                )
                 .setReversed()
                 .build();
     }
