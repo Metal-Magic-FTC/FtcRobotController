@@ -5,7 +5,9 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
@@ -19,6 +21,10 @@ public class AryanTurretOdoLimelight extends LinearOpMode {
     private static final int TURRET_MIN = -275;
     private static final int TURRET_MAX = 275;
     private static final double TICKS_PER_RAD = 275.0 / Math.PI;
+    public DcMotorEx launchMotor;
+
+    public double velocity = 2000;
+    public double distance = 0;
 
     DcMotor turretMotor;
     Follower follower;
@@ -38,6 +44,12 @@ public class AryanTurretOdoLimelight extends LinearOpMode {
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         turretMotor.setPower(0.8);
+        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
+        launchMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launchMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300.0, 0, 0, 12.9);
+        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         // ===== Pedro =====
         follower = Constants.createFollower(hardwareMap);
@@ -71,7 +83,15 @@ public class AryanTurretOdoLimelight extends LinearOpMode {
                     TARGET_Y - robotY,
                     TARGET_X - robotX
             );
+            distance = Math.pow(Math.pow(Math.abs(TARGET_Y - robotY),2)+Math.pow(Math.abs(TARGET_X - robotX),2), 0.5);
 
+            if (gamepad1.yWasPressed()) {
+                velocity+=100;
+            }
+
+            if (gamepad1.bWasPressed()) {
+                velocity-=100;
+            }
             double turretAngle = angleWrap(angleToTarget - robotHeading);
             int turretTarget = (int) Math.round(turretAngle * TICKS_PER_RAD);
             turretTarget = clamp(turretTarget, TURRET_MIN, TURRET_MAX);
