@@ -115,7 +115,7 @@ public class TurretRedTeleOp extends LinearOpMode {
     // TURRET
 
     private static final double TARGET_X = 150.0;
-    private static final double TARGET_Y = 137.0;
+    private static final double TARGET_Y = 132.0;
 
     private static final int TURRET_MIN = -275;
     private static final int TURRET_MAX = 275;
@@ -613,7 +613,7 @@ public class TurretRedTeleOp extends LinearOpMode {
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        turretMotor.setPower(0.8);
+        turretMotor.setPower(1);
 
         // ===== Pedro =====
         follower = Constants.createFollower(hardwareMap);
