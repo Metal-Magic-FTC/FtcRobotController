@@ -106,7 +106,7 @@ public class RedFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2500);
+        launchMotor.setVelocity(4500);
 
         turretRunToPosition(-40); // TURRRRREETTTT
 
@@ -429,7 +429,7 @@ public class RedFarStates9 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(4100);
 
     }
 
@@ -584,7 +584,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         spinFlickServo.setPower(1);
         flickerServo.setPosition(flickPositionDown);
-        launchMotor.setVelocity(2000);
+        launchMotor.setVelocity(4000);
         sleep(400);
 
         flickerServo.setPosition(flickPositionUp);
