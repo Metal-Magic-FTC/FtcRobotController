@@ -92,6 +92,9 @@ public class AryanTurretOdoLimelight extends LinearOpMode {
             if (gamepad1.bWasPressed()) {
                 velocity-=100;
             }
+
+            launchMotor.setVelocity(velocity);
+
             double turretAngle = angleWrap(angleToTarget - robotHeading);
             int turretTarget = (int) Math.round(turretAngle * TICKS_PER_RAD);
             turretTarget = clamp(turretTarget, TURRET_MIN, TURRET_MAX);
