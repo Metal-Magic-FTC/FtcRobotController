@@ -72,7 +72,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
-    private final double flickPositionUp = 0.84;
+    private final double flickPositionUp = 0.80;
     private final double flickPositionDown = 0.96;
 
     // ---------------- TURRET ----------------
