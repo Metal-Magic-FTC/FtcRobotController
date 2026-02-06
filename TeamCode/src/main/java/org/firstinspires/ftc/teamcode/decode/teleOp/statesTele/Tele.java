@@ -193,9 +193,8 @@ public class Tele extends LinearOpMode {
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
 
-            if (!gamepad2.y)
-                runTurret();
-            else {
+
+            if (gamepad2.y) {
                 turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 double manualPower = 0.2 * (gamepad2.right_trigger - gamepad2.left_trigger);
                 turretMotor.setPower(manualPower);
@@ -206,6 +205,8 @@ public class Tele extends LinearOpMode {
                 }
                 continue;
             }
+
+            runTurret();
 
             if (gamepad1.x) {
                 intakeActive = false;
@@ -569,8 +570,8 @@ public class Tele extends LinearOpMode {
         int turretTarget = (int) Math.round(turretAngle * TICKS_PER_RAD);
         turretTarget = clamp(turretTarget, TURRET_MIN, TURRET_MAX); // WIRE SAFETY, DO NOT REMOVE
 
-        turretMotor.setTargetPosition(turretTarget);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setTargetPosition(turretTarget);
 
         // === Telemetry ===
         telemetry.addData("Pose X", "%.1f", robotX);
