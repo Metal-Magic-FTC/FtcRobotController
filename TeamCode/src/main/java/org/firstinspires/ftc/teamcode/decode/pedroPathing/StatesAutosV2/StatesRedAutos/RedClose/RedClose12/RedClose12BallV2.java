@@ -107,9 +107,9 @@ public class RedClose12BallV2 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(1800);
 
-        turretRunToPosition(72); // TURRRRREETTTT
+        turretRunToPosition(76); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -455,7 +455,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(1800);
 
     }
 
@@ -611,7 +611,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
         spinFlickServo.setPower(1);
         flickerServo.setPosition(flickPositionDown);
-        launchMotor.setVelocity(2000);
+        launchMotor.setVelocity(1800);
         sleep(400);
 
         flickerServo.setPosition(flickPositionUp);
