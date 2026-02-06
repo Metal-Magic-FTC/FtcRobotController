@@ -73,7 +73,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
-    private final double flickPositionUp = 0.88;
+    private final double flickPositionUp = 0.8;
     private final double flickPositionDown = 0.96;
 
     // ---------------- TURRET ----------------
@@ -105,6 +105,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+        spinFlickServo.setPower(1);
         if (isStopRequested()) return;
 
         launchMotor.setVelocity(1800);
@@ -147,7 +148,7 @@ public class RedClose12BallV2 extends LinearOpMode {
             intake();
         }
 
-
+        spinFlickServo.setPower(1);
 
         //runPathWithIntake(paths.gate(), 750, 1);
 
@@ -179,6 +180,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         runPathWithIntake(paths.toIntake2(), 0, 1);
         runPathWithIntake(paths.intake2(), 0, 0.21);
 
+        spinFlickServo.setPower(1);
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.GREEN;
