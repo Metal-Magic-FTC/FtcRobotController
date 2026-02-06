@@ -302,7 +302,8 @@ public class Tele extends LinearOpMode {
 
 //                flickServo.setPower(1);
 //                flickServo2.setPower(1);
-                flickServo3.setPosition(0.9);
+                if (!spinMotor.isBusy())
+                    flickServo3.setPosition(0.9);
                 launchMotor.setVelocity(1800);
             }
 
@@ -361,12 +362,12 @@ public class Tele extends LinearOpMode {
             }
 
             // shoot
-
             if (shootPressed && !autoLaunching) {
                 //flickServo.setPosition(flickUp);
 //                flickServo.setPower(1);
 //                flickServo2.setPower(1);
-                flickServo3.setPosition(0.9); // 0.85
+                if (!spinMotor.isBusy())
+                    flickServo3.setPosition(0.9); // 0.85
             } else if (!autoLaunching) {
                 //flickServo.setPosition(flickDown);
 //                flickServo.setPower(0);
