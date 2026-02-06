@@ -17,14 +17,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueFar.BlueFar9.BlueFarStates9;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueFar.GeneratedPathsBlueFarStates;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red.RedClose12Ball;
+import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TurretRedTeleOp;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = " Blue Far States 9 ")
+@Autonomous(name = "!!!!! States Blue Far 9 Ball")
 public class BlueFarStates9 extends LinearOpMode {
 
     private int index = 0;
@@ -107,9 +108,9 @@ public class BlueFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(4100);
+        launchMotor.setPower(1);
 
-        turretRunToPosition(40); // TURRRRREETTTT
+        turretRunToPosition(-40); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -122,7 +123,7 @@ public class BlueFarStates9 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 50, 1);
+        runPath(paths.shoot(), 50, 0.8);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -136,22 +137,16 @@ public class BlueFarStates9 extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        //runPathWithIntake(paths.toIntake1(), 0, 1);
+        runPathWithIntake(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        //turretRunToPosition(-365);
-
-        runPathWithIntake(paths.toIntake1(), 0, 0.21);
         runPathWithIntake(paths.intakeball1(), 0, 0.21);
-
-
-
         double startTime = System.currentTimeMillis();
-//        while (System.currentTimeMillis() < startTime + 500) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
+        while (System.currentTimeMillis() < startTime + 500) {
+            waitingForBall = true;
+            intakeActive = true;
+            intake();
+        }
 
 
 
@@ -168,7 +163,7 @@ public class BlueFarStates9 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 0, 1);
+        runPath(paths.shoot2(), 0, 0.5);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -196,15 +191,18 @@ public class BlueFarStates9 extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot3(), 0, 1);
+        runPath(paths.shoot3(), 0, 0.8);
 
         //shootAllPattern(pattern);
         shootAll();
 
         intakeMotor.setPower(-0.6);
-        intakeActive = true;
+        intakeActive = false;
         rotateToIndex(0);
         resetSlots();
+
+        turretRunToPosition(0);
+        runPath(paths.leave(), 0, 1);
 
 //        runPathWithIntake(paths.toIntake3(), 0, 1);
 //        runPathWithIntake(paths.intake3(), 0, 0.21);
@@ -220,16 +218,16 @@ public class BlueFarStates9 extends LinearOpMode {
 //        slots[1] = Ball.PURPLE;
 //        slots[2] = Ball.PURPLE;
 //
-//        runPath(paths. shoot4(), 0, 1);
+//        runPath(paths.shoot4(), 0, 1);
 //
 //        //shootAllPattern(pattern);
 //        shootAll();
-
-        turretRunToPosition(0);
-        runPath(paths.leave(), 0, 1);
-        intakeMotor.setPower(-0.6);
-        intakeActive = true;
-        rotateToIndex(0);
+//
+//        turretRunToPosition(0);
+//        runPath(paths.leave(), 0, 1);
+//        intakeMotor.setPower(-0.6);
+//        intakeActive = true;
+//        rotateToIndex(0);
         resetSlots();
 
         telemetry.addLine("Finished");
@@ -458,7 +456,7 @@ public class BlueFarStates9 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(1800);
 
     }
 
@@ -542,17 +540,30 @@ public class BlueFarStates9 extends LinearOpMode {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        // reject far / floor
         float total = r + g + b;
-        if (total < 0.07f) return Ball.EMPTY;
 
-        // PURPLE: blue-dominant (keep strict)
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
+        // HARD gate: no ball unless enough reflected light
+        if (total < 0.08f) return Ball.EMPTY;
+
+        // Require strong dominance to avoid air/ambient
+        float dominanceRatio = 1.15f;
+        float minChannel = 0.06f;
+
+        // PURPLE (blue-dominant)
+        if (
+                b > minChannel &&
+                        b > r * dominanceRatio &&
+                        b > g * dominanceRatio
+        ) {
             return Ball.PURPLE;
         }
 
-        // GREEN: looser dominance + absolute floor
-        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
+        // GREEN (green-dominant)
+        if (
+                g > minChannel &&
+                        g > r * dominanceRatio &&
+                        g > b * dominanceRatio
+        ) {
             return Ball.GREEN;
         }
 
@@ -597,9 +608,11 @@ public class BlueFarStates9 extends LinearOpMode {
 
         intakeMotor.setPower(0);
 
+        int startPosition = spinMotor.getCurrentPosition();
+
         spinFlickServo.setPower(1);
         flickerServo.setPosition(flickPositionDown);
-        launchMotor.setVelocity(2000);
+        launchMotor.setPower(1);
         sleep(400);
 
         flickerServo.setPosition(flickPositionUp);
@@ -607,14 +620,14 @@ public class BlueFarStates9 extends LinearOpMode {
         flickerServo.setPosition(flickPositionDown);
         sleep(250);
 
-        moveSpindexer(250, 0.25);
+        moveSpindexerTo(startPosition+250, 0.38);
 
         flickerServo.setPosition(flickPositionUp);
-        sleep(250);
+        sleep(240);
         flickerServo.setPosition(flickPositionDown);
-        sleep(250);
+        sleep(240);
 
-        moveSpindexer(250, 0.25);
+        moveSpindexerTo(startPosition+500, 0.38);
 
         flickerServo.setPosition(flickPositionUp);
         sleep(250);
@@ -634,9 +647,8 @@ public class BlueFarStates9 extends LinearOpMode {
 
     }
 
-    private void moveSpindexer(int ticks, double power) {
-        int endPosition = spinMotor.getCurrentPosition() + ticks;
-        spinMotor.setTargetPosition(endPosition);
+    private void moveSpindexerTo(int ticks, double power) {
+        spinMotor.setTargetPosition(ticks);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(power);
 
