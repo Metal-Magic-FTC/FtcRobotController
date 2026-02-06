@@ -107,9 +107,9 @@ public class BlueFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(4100);
 
-        turretRunToPosition(45); // TURRRRREETTTT
+        turretRunToPosition(40); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -136,10 +136,10 @@ public class BlueFarStates9 extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPathWithIntake(paths.toIntake1(), 0, 1);
+        //runPathWithIntake(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        turretRunToPosition(-365);
+        //turretRunToPosition(-365);
 
         runPathWithIntake(paths.toIntake1(), 0, 0.21);
         runPathWithIntake(paths.intakeball1(), 0, 0.21);
