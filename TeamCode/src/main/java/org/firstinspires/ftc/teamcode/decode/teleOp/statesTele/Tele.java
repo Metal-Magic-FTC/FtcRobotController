@@ -66,7 +66,8 @@ public class Tele extends LinearOpMode {
             prevRightBumper,
             prevLeftTrigger,
             prevRightTrigger,
-            prev2RightBumper;
+            prev2RightBumper,
+            prevFarMode;
 
     // ---- AUTO LAUNCH ALL ----
     private boolean autoLaunching = false;
@@ -177,7 +178,7 @@ public class Tele extends LinearOpMode {
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
             launchAllPressed   = gamepad1.dpad_left;
-            farMode            = gamepad2.y && (gamepad2.a && !prev2A);
+            farMode            = (gamepad1.dpad_right && prevFarMode) != farMode;
 
             nextIntake2 = gamepad2.dpad_down;
 
@@ -190,6 +191,7 @@ public class Tele extends LinearOpMode {
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
             prev2RightBumper = gamepad2.right_bumper;
+            prevFarMode = gamepad1.dpad_right;
 
             prevNextIntake2 = gamepad2.dpad_down;
 
@@ -472,6 +474,7 @@ public class Tele extends LinearOpMode {
 
             telemetry.addData("Launch Velocity", launchMotor.getVelocity());
             telemetry.addData("Launch Power", launchMotor.getPower());
+            telemetry.addData("Far mode", farMode);
 
             telemetry.update();
         }
