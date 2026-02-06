@@ -51,7 +51,7 @@ public class GeneratedPathsRed12BallCloseV2 {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
                         new Pose(102.8, 84, Math.toRadians(0)),
-                        new Pose(129, 84, Math.toRadians(0))
+                        new Pose(135, 84, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(0, 0)
                 .build();
@@ -61,7 +61,7 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain gate() {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
-                        new Pose(129, 84, Math.toRadians(0)),
+                        new Pose(135, 84, Math.toRadians(0)),
                         new Pose(128.24688279301748, 70.42394014962593, Math.toRadians(-90))
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
@@ -72,11 +72,11 @@ public class GeneratedPathsRed12BallCloseV2 {
         return new PathBuilder(follower)
                 .addPath(new BezierCurve(
                         new Pose(129, 84, Math.toRadians(0)),
-                        new Pose(96.75810473815463, 84, Math.toRadians(-90))
+                        new Pose(96.75810473815463, 84, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(
                         Math.toRadians(0),
-                        Math.toRadians(-90)
+                        Math.toRadians(0)
                 )
                 .build();
     }
@@ -85,12 +85,12 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(new BezierLine(
-                        new Pose(128.24688279301748, 70.42394014962593, Math.toRadians(-90)),
-                        new Pose(96.75810473815463, 84, Math.toRadians(-90))
+                        new Pose(128.24688279301748, 70.42394014962593, Math.toRadians(0)),
+                        new Pose(96.75810473815463, 84, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(-90),
-                        Math.toRadians(-90)
+                        Math.toRadians(0),
+                        Math.toRadians(0)
                 )
                 .build();
     }
@@ -104,7 +104,7 @@ public class GeneratedPathsRed12BallCloseV2 {
                         new Pose(102.8, 59.6, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(-90),
+                        Math.toRadians(0),
                         Math.toRadians(0)
                 )
                 .build();
@@ -132,7 +132,7 @@ public class GeneratedPathsRed12BallCloseV2 {
                 //.setTangentHeadingInterpolation()
                 .setLinearHeadingInterpolation(
                         Math.toRadians(0),
-                        Math.toRadians(-90)
+                        Math.toRadians(0)
                 )
                 .setReversed()
                 .build();
@@ -147,7 +147,7 @@ public class GeneratedPathsRed12BallCloseV2 {
                         new Pose(102.8, 35.5, Math.toRadians(0))
                 ))
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(-90),
+                        Math.toRadians(0),
                         Math.toRadians(0)
                 )
                 .build();
@@ -176,7 +176,7 @@ public class GeneratedPathsRed12BallCloseV2 {
                 //.setLinearHeadingInterpolation(0, -90)
                 .setLinearHeadingInterpolation(
                         Math.toRadians(0),
-                        Math.toRadians(-90)
+                        Math.toRadians(0)
                 )
                 .setReversed()
                 .build();
@@ -190,7 +190,7 @@ public class GeneratedPathsRed12BallCloseV2 {
                         new Pose(96.75810473815463, 72.44389027431421, Math.toRadians(-90))
                 ))
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(-90),
+                        Math.toRadians(0),
                         Math.toRadians(-90)
                 )
                 .build();
