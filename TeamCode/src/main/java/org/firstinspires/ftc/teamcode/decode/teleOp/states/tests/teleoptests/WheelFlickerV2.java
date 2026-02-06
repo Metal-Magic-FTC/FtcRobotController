@@ -92,6 +92,8 @@ public class WheelFlickerV2 extends LinearOpMode {
     private double flickUp = 0.75;
     private double flickDown = 1;
 
+    private double targetVelocity = 1800;
+
     private boolean
             intakePressed,
             aimGreenPressed,
@@ -137,8 +139,6 @@ public class WheelFlickerV2 extends LinearOpMode {
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
 
-            nextIntake2 = gamepad2.dpad_down;
-
             prevA = gamepad1.a;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
@@ -149,7 +149,15 @@ public class WheelFlickerV2 extends LinearOpMode {
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
             prev2RightBumper = gamepad2.right_bumper;
 
-            prevNextIntake2 = gamepad2.dpad_down;
+            if (gamepad2.dpad_left) {
+                targetVelocity = 1600;
+            }
+            if (gamepad2.dpad_down) {
+                targetVelocity = 1800;
+            }
+            if (gamepad2.dpad_right) {
+                targetVelocity = 2500;
+            }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
             boolean manualGreen  = gamepad2.a && !prev2A;
@@ -380,8 +388,10 @@ public class WheelFlickerV2 extends LinearOpMode {
             telemetry.addData("B", "%.2f", c2.blue);
             telemetry.addData("Sum", "%.2f", c2.red + c2.green + c2.blue);
 
+            telemetry.addLine("----------------------------");
             telemetry.addData("Launch Velocity", launchMotor.getVelocity());
             telemetry.addData("Launch Power", launchMotor.getPower());
+            telemetry.addData("launch target velocity", targetVelocity);
 
             telemetry.update();
         }
