@@ -109,7 +109,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
         launchMotor.setVelocity(1800);
 
-        turretRunToPosition(76); // TURRRRREETTTT
+        turretRunToPosition(80); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -162,7 +162,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.intake1ToShoot2(), 0, 0.5);
+        runPath(paths.intake1ToShoot2(), 250, 0.5);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -190,7 +190,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot3(), 0, 0.8);
+        runPath(paths.shoot3(), 250, 0.8);
 
         //shootAllPattern(pattern);
         shootAll();
@@ -615,7 +615,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         sleep(400);
 
         flickerServo.setPosition(flickPositionUp);
-        sleep(250);
+        sleep(400);
         flickerServo.setPosition(flickPositionDown);
         sleep(250);
 
@@ -692,7 +692,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300.0, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 
