@@ -112,7 +112,8 @@ public class Tele extends LinearOpMode {
             launchAllPressed,
             nextIntake2,
             prevNextIntake2,
-            flickActive;
+            flickActive,
+            farMode;
     // TURRET
 
     private static double TARGET_X = 150.0; // default is red side
@@ -121,6 +122,9 @@ public class Tele extends LinearOpMode {
     private static final int TURRET_MIN = -275; // always this
     private static final int TURRET_MAX = 275; // also this
     private static final double TICKS_PER_RAD = 275.0 / Math.PI;
+
+    private static final double CLOSE_VELOCITY = 1800;
+    private static final double FAR_VELOCITY = 4000;
 
     DcMotor turretMotor;
     Follower follower;
@@ -173,6 +177,7 @@ public class Tele extends LinearOpMode {
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
             launchAllPressed   = gamepad1.dpad_left;
+            farMode            = gamepad2.y && (gamepad2.a && !prev2A);
 
             nextIntake2 = gamepad2.dpad_down;
 
@@ -304,12 +309,18 @@ public class Tele extends LinearOpMode {
 //                flickServo2.setPower(1);
                 if (!spinMotor.isBusy())
                     flickServo3.setPosition(0.9);
-                launchMotor.setVelocity(1800);
+                if (!farMode)
+                    launchMotor.setVelocity(CLOSE_VELOCITY);
+                else
+                    launchMotor.setVelocity(FAR_VELOCITY);
             }
 
             if (autoLaunching) {
 
-                launchMotor.setVelocity(1800);
+                if (!farMode)
+                    launchMotor.setVelocity(CLOSE_VELOCITY);
+                else
+                    launchMotor.setVelocity(FAR_VELOCITY);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
@@ -384,7 +395,10 @@ public class Tele extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(1800);
+                if (!farMode)
+                    launchMotor.setVelocity(CLOSE_VELOCITY);
+                else
+                    launchMotor.setVelocity(FAR_VELOCITY);
 //                flickServo.setPower(1);
                 flickActive = true;
                 flickServo2.setPower(1);
