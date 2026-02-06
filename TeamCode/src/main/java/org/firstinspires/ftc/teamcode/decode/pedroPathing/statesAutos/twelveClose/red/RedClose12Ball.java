@@ -696,7 +696,7 @@ public class RedClose12Ball extends LinearOpMode {
         enableLight(intakeColor2);
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotorEx.Direction.REVERSE); // same as TeleOp_Flick_Launch
+        launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
