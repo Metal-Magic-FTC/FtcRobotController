@@ -121,7 +121,7 @@ public class RedFarStates9 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 50, 1);
+        runPath(paths.shoot(), 400, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -581,7 +581,7 @@ public class RedFarStates9 extends LinearOpMode {
     private void shootAll() {
 
         intakeMotor.setPower(0);
-
+        int startPosition = spinMotor.getCurrentPosition();
         spinFlickServo.setPower(1);
         flickerServo.setPosition(flickPositionDown);
         launchMotor.setVelocity(4000);
@@ -592,14 +592,14 @@ public class RedFarStates9 extends LinearOpMode {
         flickerServo.setPosition(flickPositionDown);
         sleep(250);
 
-        moveSpindexer(250, 0.25);
+        moveSpindexerTo(startPosition+250, 0.38);
 
         flickerServo.setPosition(flickPositionUp);
-        sleep(250);
+        sleep(240);
         flickerServo.setPosition(flickPositionDown);
-        sleep(250);
+        sleep(240);
 
-        moveSpindexer(250, 0.25);
+        moveSpindexerTo(startPosition+500, 0.38);
 
         flickerServo.setPosition(flickPositionUp);
         sleep(250);
@@ -628,6 +628,11 @@ public class RedFarStates9 extends LinearOpMode {
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
         }
+    }
+    private void moveSpindexerTo(int ticks, double power) {
+        spinMotor.setTargetPosition(ticks);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(power);
     }
 
     private void turretRunToPosition(int targetTicks) {
