@@ -498,7 +498,7 @@ public class WheelFlickerV2 extends LinearOpMode {
         enableLight(intakeColor2);
 
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotor.Direction.REVERSE); // same as TeleOp_Flick_Launch
+        launchMotor.setDirection(DcMotor.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
