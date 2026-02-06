@@ -109,7 +109,7 @@ public class RedClose12BallV2 extends LinearOpMode {
 
         launchMotor.setVelocity(2100);
 
-        turretRunToPosition(64); // TURRRRREETTTT
+        turretRunToPosition(72); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -122,7 +122,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 50, 0.7);
+        runPath(paths.shoot(), 50, 0.8);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -190,7 +190,7 @@ public class RedClose12BallV2 extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot3(), 0, 1);
+        runPath(paths.shoot3(), 0, 0.8);
 
         //shootAllPattern(pattern);
         shootAll();
