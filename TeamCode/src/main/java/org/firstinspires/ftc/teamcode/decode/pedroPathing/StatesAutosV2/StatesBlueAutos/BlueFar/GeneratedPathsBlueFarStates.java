@@ -32,7 +32,7 @@ public class GeneratedPathsBlueFarStates {
 
     public static final Pose SHOOT_POSE = new Pose(
             59,
-            15,
+            12,
             Math.toRadians(90)
     );
 
@@ -70,7 +70,7 @@ public class GeneratedPathsBlueFarStates {
     public PathChain intakeball1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(41, 30), new Pose(23, 30))
+                        new BezierLine(new Pose(41, 25), new Pose(23, 25))
                 )
                 .setTangentHeadingInterpolation()
                 .build();
@@ -99,7 +99,7 @@ public class GeneratedPathsBlueFarStates {
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(23, 30), SHOOT_POSE) // x used to be 116
+                        new BezierLine(new Pose(23, 25), SHOOT_POSE) // x used to be 116
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
                 .build();
@@ -108,7 +108,7 @@ public class GeneratedPathsBlueFarStates {
     public PathChain toIntake2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(SHOOT_POSE, new Pose(42,55))
+                        new BezierLine(SHOOT_POSE, new Pose(42,50))
                 )
                 .setTangentHeadingInterpolation()
                 .build();
@@ -117,7 +117,7 @@ public class GeneratedPathsBlueFarStates {
     public PathChain intakeball4() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(42, 55), new Pose(25, 55))
+                        new BezierLine(new Pose(42, 50), new Pose(25, 50))
                 )
                 .setTangentHeadingInterpolation()
                 .build();
@@ -142,7 +142,7 @@ public class GeneratedPathsBlueFarStates {
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(25, 55), SHOOT_POSE)
+                        new BezierLine(new Pose(25, 50), SHOOT_POSE)
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
                 .build();
