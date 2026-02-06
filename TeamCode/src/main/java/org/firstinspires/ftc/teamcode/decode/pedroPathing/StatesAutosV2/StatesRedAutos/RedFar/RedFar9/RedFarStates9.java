@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedClose.RedClose12.RedClose12BallV2;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedFar.GeneratedPathsRedFarStates;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
@@ -106,7 +107,7 @@ public class RedFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(4500);
+        launchMotor.setPower(1);
 
         turretRunToPosition(-40); // TURRRRREETTTT
 
@@ -121,7 +122,7 @@ public class RedFarStates9 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 400, 1);
+        runPath(paths.shoot(), 1000, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -578,13 +579,16 @@ public class RedFarStates9 extends LinearOpMode {
         return -1;
     }
 
+
     private void shootAll() {
 
         intakeMotor.setPower(0);
+
         int startPosition = spinMotor.getCurrentPosition();
+
         spinFlickServo.setPower(1);
         flickerServo.setPosition(flickPositionDown);
-        launchMotor.setVelocity(4000);
+        //launchMotor.setV(2000);
         sleep(400);
 
         flickerServo.setPosition(flickPositionUp);
@@ -604,7 +608,7 @@ public class RedFarStates9 extends LinearOpMode {
         flickerServo.setPosition(flickPositionUp);
         sleep(250);
         flickerServo.setPosition(flickPositionDown);
-        sleep(400);
+        sleep(1000);
 
 
         spinFlickServo.setPower(0);
