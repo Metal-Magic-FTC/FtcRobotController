@@ -111,7 +111,8 @@ public class Tele extends LinearOpMode {
             intakePowerReverse,
             launchAllPressed,
             nextIntake2,
-            prevNextIntake2;
+            prevNextIntake2,
+            flickActive;
     // TURRET
 
     private static double TARGET_X = 150.0; // default is red side
@@ -146,6 +147,7 @@ public class Tele extends LinearOpMode {
 
         hoodServo.setPosition(0.77);
         flickServo.setPower(0);
+        flickActive = false;
         flickServo2.setPower(0);
         flickServo3.setPosition(1);
 
@@ -300,13 +302,13 @@ public class Tele extends LinearOpMode {
 
 //                flickServo.setPower(1);
 //                flickServo2.setPower(1);
-                flickServo3.setPosition(0.85);
-                launchMotor.setVelocity(2300);
+                flickServo3.setPosition(0.9);
+                launchMotor.setVelocity(1800);
             }
 
             if (autoLaunching) {
 
-                launchMotor.setVelocity(2300);
+                launchMotor.setVelocity(1800);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
@@ -364,7 +366,7 @@ public class Tele extends LinearOpMode {
                 //flickServo.setPosition(flickUp);
 //                flickServo.setPower(1);
 //                flickServo2.setPower(1);
-                flickServo3.setPosition(0.80); // 0.85
+                flickServo3.setPosition(0.9); // 0.85
             } else if (!autoLaunching) {
                 //flickServo.setPosition(flickDown);
 //                flickServo.setPower(0);
@@ -381,13 +383,15 @@ public class Tele extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(2300);
-                flickServo.setPower(1);
+                launchMotor.setVelocity(1800);
+//                flickServo.setPower(1);
+                flickActive = true;
                 flickServo2.setPower(1);
             } else {
                 //launchMotor.setPower(0);
                 launchMotor.setVelocity(0);
-                flickServo.setPower(0);
+//                flickServo.setPower(0);
+                flickActive = false;
                 flickServo2.setPower(0);
             }
 
@@ -421,6 +425,15 @@ public class Tele extends LinearOpMode {
                     }
                     waitingToRotate = false; // reset
                 }
+            }
+
+            if (!spinMotor.isBusy()) {
+                if (flickActive)
+                    flickServo.setPower(1);
+                else
+                    flickServo.setPower(0);
+            } else {
+                flickServo.setPower(0);
             }
 
             telemetry.addData("Index", index);
