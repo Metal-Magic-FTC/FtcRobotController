@@ -134,7 +134,6 @@ public class GeneratedPathsRed12BallCloseV2 {
                         Math.toRadians(0),
                         Math.toRadians(0)
                 )
-                .setReversed()
                 .build();
     }
 
@@ -142,7 +141,7 @@ public class GeneratedPathsRed12BallCloseV2 {
     public PathChain toIntake3() {
         return new PathBuilder(follower)
                 .addPath(new BezierCurve(
-                        new Pose(96.75810473815463, 84, Math.toRadians(-90)),
+                        new Pose(96.75810473815463, 84, Math.toRadians(0)),
                         new Pose(83.57481296758105, 35.693266832917686),
                         new Pose(102.8, 35.5, Math.toRadians(0))
                 ))
