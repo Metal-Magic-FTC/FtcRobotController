@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedClose.RedClose12.RedClose12BallV2;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
@@ -81,7 +82,7 @@ public class RedClose12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(1500);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -149,7 +150,7 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intake2(), 0, 0.23);
+        runPathWithIntake(paths.intake2(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -173,7 +174,7 @@ public class RedClose12Ball extends LinearOpMode {
         resetSlots();
 
         runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.intake3(), 0, 0.23);
+        runPathWithIntake(paths.intake3(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
@@ -286,7 +287,7 @@ public class RedClose12Ball extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                //intakeMotor.setPower(0);
+                intakeMotor.setPower(0);
             }
         }
 
@@ -427,7 +428,7 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(1500);
 
     }
 
@@ -511,29 +512,30 @@ public class RedClose12Ball extends LinearOpMode {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
+        // Reject extreme noise / very far
         float total = r + g + b;
+        if (total < 0.04f) return Ball.EMPTY;
 
-        // HARD gate: no ball unless enough reflected light
-        if (total < 0.08f) return Ball.EMPTY;
+        float margin = 0.015f;
 
-        // Require strong dominance to avoid air/ambient
-        float dominanceRatio = 1.15f;
-        float minChannel = 0.06f;
-
-        // PURPLE (blue-dominant)
+        // PURPLE (blue-heavy)
         if (
-                b > minChannel &&
-                        b > r * dominanceRatio &&
-                        b > g * dominanceRatio
+                b > 0.07f && (
+                        b > r * 1.10f ||
+                                b > g * 1.05f ||
+                                (b - Math.max(r, g)) > margin
+                )
         ) {
             return Ball.PURPLE;
         }
 
-        // GREEN (green-dominant)
+        // GREEN (green-heavy)
         if (
-                g > minChannel &&
-                        g > r * dominanceRatio &&
-                        g > b * dominanceRatio
+                g > 0.09f && (
+                        g > r * 1.05f ||
+                                g > b * 1.05f ||
+                                (g - Math.max(r, b)) > margin
+                )
         ) {
             return Ball.GREEN;
         }
@@ -598,7 +600,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.38);
 
         waitForSpindexer();
 
@@ -618,7 +620,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.38);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
@@ -653,7 +655,7 @@ public class RedClose12Ball extends LinearOpMode {
         int endPosition = spinMotor.getCurrentPosition() + 500;
         spinMotor.setTargetPosition(endPosition);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.25);
+        spinMotor.setPower(0.3);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally

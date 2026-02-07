@@ -140,7 +140,7 @@ public class RedFarStates9 extends LinearOpMode {
         runPath(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intakeball1(), 0, 0.21);
+        runPathWithIntake(paths.intakeball1(), 0, 0.18);
         double startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() < startTime + 500) {
             waitingForBall = true;
@@ -178,7 +178,7 @@ public class RedFarStates9 extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intakeball4(), 0, 0.21);
+        runPathWithIntake(paths.intakeball4(), 0, 0.18);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
