@@ -95,7 +95,7 @@ public class RedClose12Ball extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 50, 1);
+        runPath(paths.shoot(), 400, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -668,7 +668,7 @@ public class RedClose12Ball extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(500, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 

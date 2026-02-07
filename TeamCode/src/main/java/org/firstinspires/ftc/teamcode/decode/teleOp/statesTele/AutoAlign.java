@@ -43,21 +43,30 @@ public class AutoAlign extends LinearOpMode {
             headingLock = gamepad1.x;
 
             controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
-            controller.updateError(getHeadingError());
-
-            if (headingLock)
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, controller.run(), true);
-            else
+            double v = getHeadingError();
+            controller.updateError(v);
+            telemetry.update();
+            
+            double otherV = 0;
+            
+            if (headingLock) {
+                otherV = controller.run();
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
+            } else
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
+            telemetry.addData("poseX", follower.getPose().getX());
+            telemetry.addData("headingLock", headingLock);
+            telemetry.addData("error", v);
+            telemetry.addData("otherV", otherV);
             telemetry.update();
         }
     }
 
     public double getHeadingError() {
-        if (follower.getCurrentPath() == null) {
-            return 0;
-        }
+//        if (follower.getCurrentPath() == null) {
+//            return 0;
+//        }
 
         double headingError = MathFunctions.getTurnDirection(follower.getPose().getHeading(), targetHeading) * MathFunctions.getSmallestAngleDifference(follower.getPose().getHeading(), targetHeading);
         return headingError;

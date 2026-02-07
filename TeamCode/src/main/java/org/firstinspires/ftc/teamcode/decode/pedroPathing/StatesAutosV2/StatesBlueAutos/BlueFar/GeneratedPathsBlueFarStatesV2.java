@@ -32,7 +32,7 @@ public class GeneratedPathsBlueFarStatesV2 {
     public static final Pose SHOOT_POSE = new Pose(
             59,
             12,
-            Math.toRadians(75)
+            Math.toRadians(105)
     );
 
     public GeneratedPathsBlueFarStatesV2(Follower follower) {
@@ -53,7 +53,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(START_POSE, SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(75))
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(105))
                 .build();
     }
 
@@ -62,7 +62,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(41, 35))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(105), Math.toRadians(180))
                 .build();
     }
 
@@ -100,7 +100,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(new Pose(23, 35), SHOOT_POSE) // x used to be 116
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(105))
                 .build();
     }
 
@@ -109,7 +109,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(42,60))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(80))
+                .setLinearHeadingInterpolation(Math.toRadians(105), Math.toRadians(180))
                 .build();
     }
 
@@ -143,7 +143,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(new Pose(25, 60), SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(105))
                 .build();
     }
 
@@ -152,7 +152,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(42,84))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(105), Math.toRadians(180))
                 .build();
     }
 
@@ -162,7 +162,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(new Pose(42, 84), new Pose(25, 84))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(105))
                 .build();
     }
 
@@ -171,7 +171,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(new Pose(25, 84), SHOOT_POSE) // x used to be 116
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(105))
                 .build();
     }
 
@@ -180,7 +180,7 @@ public class GeneratedPathsBlueFarStatesV2 {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(59,33))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(90))
+                .setLinearHeadingInterpolation(Math.toRadians(105), Math.toRadians(90))
                 .build();
     }
 }
