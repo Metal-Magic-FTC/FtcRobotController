@@ -111,7 +111,7 @@ public class RedClose12Ball extends LinearOpMode {
         runPath(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intake1(), 0, 0.23);
+        runPathWithIntake(paths.intake1(), 0, 0.21);
         double startTime = System.currentTimeMillis();
 //        while (System.currentTimeMillis() < startTime + 500) {
 //            waitingForBall = true;
@@ -286,7 +286,7 @@ public class RedClose12Ball extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                intakeMotor.setPower(0);
+                //intakeMotor.setPower(0);
             }
         }
 
@@ -407,6 +407,8 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = true;
         waitingForBall = true;
 
+        intakeMotor.setPower(-0.6);
+
         follower.setMaxPower(speed);
         follower.followPath(path);
         while (opModeIsActive() && follower.isBusy()) {
@@ -419,6 +421,8 @@ public class RedClose12Ball extends LinearOpMode {
         }
         follower.breakFollowing();
         if (stopDelay > 0) sleep(stopDelay);
+
+        intakeMotor.setPower(0);
 
         intakeActive = false;
         waitingForBall = false;
@@ -507,30 +511,29 @@ public class RedClose12Ball extends LinearOpMode {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        // Reject extreme noise / very far
         float total = r + g + b;
-        if (total < 0.04f) return Ball.EMPTY;
 
-        float margin = 0.015f;
+        // HARD gate: no ball unless enough reflected light
+        if (total < 0.08f) return Ball.EMPTY;
 
-        // PURPLE (blue-heavy)
+        // Require strong dominance to avoid air/ambient
+        float dominanceRatio = 1.15f;
+        float minChannel = 0.06f;
+
+        // PURPLE (blue-dominant)
         if (
-                b > 0.07f && (
-                        b > r * 1.10f ||
-                                b > g * 1.05f ||
-                                (b - Math.max(r, g)) > margin
-                )
+                b > minChannel &&
+                        b > r * dominanceRatio &&
+                        b > g * dominanceRatio
         ) {
             return Ball.PURPLE;
         }
 
-        // GREEN (green-heavy)
+        // GREEN (green-dominant)
         if (
-                g > 0.09f && (
-                        g > r * 1.05f ||
-                                g > b * 1.05f ||
-                                (g - Math.max(r, b)) > margin
-                )
+                g > minChannel &&
+                        g > r * dominanceRatio &&
+                        g > b * dominanceRatio
         ) {
             return Ball.GREEN;
         }

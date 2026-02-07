@@ -151,15 +151,21 @@ public class GeneratedPathsBlueFarStates {
     public PathChain toIntake3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(SHOOT_POSE, new Pose(42,60))
+                        new BezierLine(SHOOT_POSE, new Pose(42,84))
                 )
                 .setTangentHeadingInterpolation()
                 .build();
     }
 
 
-
-
+    public PathChain intakeball9() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(new Pose(42, 84), new Pose(25, 84))
+                )
+                .setTangentHeadingInterpolation()
+                .build();
+    }
 
     public PathChain leave() {
         return new PathBuilder(follower)
