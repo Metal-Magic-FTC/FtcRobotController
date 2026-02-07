@@ -624,7 +624,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(3000);
+        //launchMotor.setVelocity(3000);
 
         // Compute end sweep position (clockwise through 3 slots)
         int endSlot = (startIndex + 2) % 3;
@@ -642,7 +642,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         // ---- STOP ----
         flickMotor.setPower(0);
-        launchMotor.setVelocity(0);
+        //launchMotor.setVelocity(0);
 
         // Clear slots in pattern order
         slots[0] = Ball.EMPTY;
