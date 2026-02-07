@@ -40,6 +40,7 @@ public class AutoAlign extends LinearOpMode {
 
         while (opModeIsActive()) {
             follower.update();
+            updateGoalHeading();
             headingLock = gamepad1.x;
 
             controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
@@ -70,6 +71,15 @@ public class AutoAlign extends LinearOpMode {
 
         double headingError = MathFunctions.getTurnDirection(follower.getPose().getHeading(), targetHeading) * MathFunctions.getSmallestAngleDifference(follower.getPose().getHeading(), targetHeading);
         return headingError;
+    }
+
+    public void updateGoalHeading() {
+        Pose robotPos = follower.getPose();
+        double angleToTarget = MathFunctions.normalizeAngle(Math.atan2(
+                TARGET_Y - robotPos.getY(),
+                TARGET_X - robotPos.getX()
+        ));
+        targetHeading = angleToTarget;
     }
 
     public void initialize() {

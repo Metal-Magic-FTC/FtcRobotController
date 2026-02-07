@@ -26,7 +26,7 @@ public class GeneratedPathsRedFarStates {
     public static final Pose SHOOT_POSE = new Pose(
             86,
             11,
-            Math.toRadians(60)
+            Math.toRadians(64.5)
     );
 
     public GeneratedPathsRedFarStates(Follower follower) {
@@ -39,7 +39,7 @@ public class GeneratedPathsRedFarStates {
                 .addPath(
                         new BezierLine(START_POSE, SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(60))
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(64.5))
                 .build();
     }
 
@@ -48,7 +48,7 @@ public class GeneratedPathsRedFarStates {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(102, 28))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(60), 0)
+                .setLinearHeadingInterpolation(Math.toRadians(64.5), 0)
                 .build();
     }
 
@@ -86,7 +86,7 @@ public class GeneratedPathsRedFarStates {
                 .addPath(
                         new BezierLine(new Pose(125, 28), SHOOT_POSE) // x used to be 116
                 )
-                .setLinearHeadingInterpolation(0,Math.toRadians(60))
+                .setLinearHeadingInterpolation(0,Math.toRadians(64.5))
                 .build();
     }
 
@@ -96,7 +96,7 @@ public class GeneratedPathsRedFarStates {
                         new BezierLine(SHOOT_POSE,
                                  new Pose(102,53))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(60), 0)
+                .setLinearHeadingInterpolation(Math.toRadians(64.5), 0)
                 .build();
     }
 
@@ -130,7 +130,7 @@ public class GeneratedPathsRedFarStates {
                 .addPath(
                         new BezierLine(new Pose(125, 53), SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(0,Math.toRadians(60))
+                .setLinearHeadingInterpolation(0,Math.toRadians(64.5))
                 .build();
     }
     public PathChain leave() {
