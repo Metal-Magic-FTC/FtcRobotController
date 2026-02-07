@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueFar.GeneratedPathsBlueFarStates;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueFar.GeneratedPathsBlueFarStatesV2;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class BlueFarStates9 extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsBlueFarStates paths;
+    private GeneratedPathsBlueFarStatesV2 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -71,8 +71,8 @@ public class BlueFarStates9 extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlueFarStates.START_POSE);
-        paths = new GeneratedPathsBlueFarStates(follower);
+        follower.setPose(GeneratedPathsBlueFarStatesV2.START_POSE);
+        paths = new GeneratedPathsBlueFarStatesV2(follower);
         hoodServo.setPosition(0.80);
 
 

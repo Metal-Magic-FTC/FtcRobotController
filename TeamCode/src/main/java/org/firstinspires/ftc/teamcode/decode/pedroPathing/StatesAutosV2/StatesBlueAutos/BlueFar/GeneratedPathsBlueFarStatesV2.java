@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueFar;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-public class GeneratedPathsBlueFarStates {
+public class GeneratedPathsBlueFarStatesV2 {
 
     private final Follower follower;
 
@@ -36,7 +35,7 @@ public class GeneratedPathsBlueFarStates {
             Math.toRadians(75)
     );
 
-    public GeneratedPathsBlueFarStates(Follower follower) {
+    public GeneratedPathsBlueFarStatesV2(Follower follower) {
         this.follower = follower;
     }
 
@@ -163,7 +162,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(new Pose(42, 84), new Pose(25, 84))
                 )
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
                 .build();
     }
 
