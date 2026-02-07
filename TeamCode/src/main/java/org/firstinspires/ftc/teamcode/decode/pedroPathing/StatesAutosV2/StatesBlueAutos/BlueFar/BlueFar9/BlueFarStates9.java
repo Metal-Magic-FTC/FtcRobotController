@@ -96,8 +96,8 @@ public class BlueFarStates9 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 50, 1);
-        wait(1500);
+        runPath(paths.shoot(), 1500, 1);
+//        wait(1500);
         // ---- SHOOT ----
         //shootAllPattern(pattern);
         shootAll();
