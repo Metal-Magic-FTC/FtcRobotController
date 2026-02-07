@@ -137,7 +137,7 @@ public class RedFarStates9 extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 0, 1);
+        runPathWithIntake(paths.toIntake1(), 0, 1);
         resetSlots();
 
         runPathWithIntake(paths.intakeball1(), 0, 0.18);
@@ -177,7 +177,7 @@ public class RedFarStates9 extends LinearOpMode {
         // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake2(), 0, 1);
+        runPathWithIntake(paths.toIntake2(), 0, 1);
         runPathWithIntake(paths.intakeball4(), 0, 0.18);
 
         intakeMotor.setPower(-0.6);
@@ -455,7 +455,7 @@ public class RedFarStates9 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(1800);
+        //launchMotor.setVelocity(1800);
 
     }
 
@@ -542,27 +542,20 @@ public class RedFarStates9 extends LinearOpMode {
         float total = r + g + b;
 
         // HARD gate: no ball unless enough reflected light
-        if (total < 0.08f) return Ball.EMPTY;
+       // if (total < 0.08f) return Ball.EMPTY;
 
         // Require strong dominance to avoid air/ambient
         float dominanceRatio = 1.15f;
         float minChannel = 0.06f;
 
-        // PURPLE (Red-dominant)
-        if (
-                b > minChannel &&
-                        b > r * dominanceRatio &&
-                        b > g * dominanceRatio
-        ) {
+        if (total < 0.07f) return Ball.EMPTY;
+
+        // PURPLE: blue-dominant (keep strict)
+        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
             return Ball.PURPLE;
         }
-
         // GREEN (green-dominant)
-        if (
-                g > minChannel &&
-                        g > r * dominanceRatio &&
-                        g > b * dominanceRatio
-        ) {
+        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
             return Ball.GREEN;
         }
 
