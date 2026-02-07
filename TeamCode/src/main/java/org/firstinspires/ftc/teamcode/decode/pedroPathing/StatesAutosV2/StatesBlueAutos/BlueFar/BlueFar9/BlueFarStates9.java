@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueFar.GeneratedPathsBlueFarStatesV2;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red.RedClose12Ball;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
@@ -484,56 +485,21 @@ public class BlueFarStates9 extends LinearOpMode {
     }
 
     // helper function for a single sensor
-//    private Ball detectSingleSensor(NormalizedColorSensor sensor) {
-//        NormalizedRGBA c = sensor.getNormalizedColors();
-//        float r = c.red, g = c.green, b = c.blue;
-//
-//        // reject far / floor
-//        float total = r + g + b;
-//        if (total < 0.07f) return Ball.EMPTY;
-//
-//        // PURPLE: blue-dominant (keep strict)
-//        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
-//            return Ball.PURPLE;
-//        }
-//
-//        // GREEN: looser dominance + absolute floor
-//        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
-//            return Ball.GREEN;
-//        }
-//
-//        return Ball.EMPTY;
-//    }
-
     private Ball detectSingleSensor(NormalizedColorSensor sensor) {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        // Reject extreme noise / very far
+        // reject far / floor
         float total = r + g + b;
-        if (total < 0.04f) return Ball.EMPTY;
+        if (total < 0.07f) return Ball.EMPTY;
 
-        float margin = 0.015f;
-
-        // PURPLE (blue-heavy)
-        if (
-                b > 0.07f && (
-                        b > r * 1.10f ||
-                                b > g * 1.05f ||
-                                (b - Math.max(r, g)) > margin
-                )
-        ) {
+        // PURPLE: blue-dominant (keep strict)
+        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
             return Ball.PURPLE;
         }
 
-        // GREEN (green-heavy)
-        if (
-                g > 0.09f && (
-                        g > r * 1.05f ||
-                                g > b * 1.05f ||
-                                (g - Math.max(r, b)) > margin
-                )
-        ) {
+        // GREEN: looser dominance + absolute floor
+        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
             return Ball.GREEN;
         }
 
