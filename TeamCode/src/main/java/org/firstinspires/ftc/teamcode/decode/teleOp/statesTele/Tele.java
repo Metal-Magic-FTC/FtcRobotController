@@ -1,10 +1,7 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.statesTele;
 
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -14,13 +11,10 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.Alliance;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
-@TeleOp
+@TeleOp(name = "!!!!!!!!! STATES TELEOP")
 public class Tele extends LinearOpMode {
 
     //launch motor - left bumper
@@ -30,10 +24,7 @@ public class Tele extends LinearOpMode {
     //spindexer shoot green - a
     private DcMotor spinMotor;
     private DcMotorEx launchMotor;
-    private CRServo flickServo;
-    private CRServo flickServo2;
-    private Servo flickServo3;
-
+    private DcMotorEx flickMotor;
     private DcMotor intakeMotor;
 
     private CustomMecanumDrive drivetrain;
@@ -66,8 +57,7 @@ public class Tele extends LinearOpMode {
             prevRightBumper,
             prevLeftTrigger,
             prevRightTrigger,
-            prev2RightBumper,
-            prevFarMode;
+            prev2RightBumper;
 
     // ---- AUTO LAUNCH ALL ----
     private boolean autoLaunching = false;
@@ -112,36 +102,7 @@ public class Tele extends LinearOpMode {
             intakePowerReverse,
             launchAllPressed,
             nextIntake2,
-            prevNextIntake2,
-            flickActive,
-            farMode;
-    // TURRET
-
-    private static double TARGET_X = 150.0; // default is red side
-    private static double TARGET_Y = 137.0; // same here
-
-    private static final int TURRET_MIN = -275; // always this
-    private static final int TURRET_MAX = 275; // also this
-    private static final double TICKS_PER_RAD = 275.0 / Math.PI;
-
-    private static final double CLOSE_VELOCITY = 1800;
-    private static final double FAR_VELOCITY = 4000;
-
-    DcMotor turretMotor;
-    Follower follower;
-    FusedPose fusedPose;
-
-    public static Alliance alliance = null; // YOU HAVE TO CALL THIS TELE SPECIFICALLY
-    public Tele(Alliance a) {
-        alliance = a;
-    }
-
-//    public static final Pose START_POSE =
-//            new Pose(108, 130.29, Math.toRadians(180)); // Change start pos to pos at end of auto (BEFORE COMP)
-
-    public static Pose START_POSE;
-
-
+            prevNextIntake2;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -151,10 +112,7 @@ public class Tele extends LinearOpMode {
         waitForStart();
 
         hoodServo.setPosition(0.77);
-        flickServo.setPower(0);
-        flickActive = false;
-        flickServo2.setPower(0);
-        flickServo3.setPosition(1);
+        flickMotor.setPower(0);
 
         while (opModeIsActive()) {
 
@@ -177,8 +135,7 @@ public class Tele extends LinearOpMode {
             runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
-            launchAllPressed   = gamepad1.dpad_left;
-            farMode            = (gamepad1.dpad_right && prevFarMode) != farMode;
+            launchAllPressed = gamepad1.dpad_left;
 
             nextIntake2 = gamepad2.dpad_down;
 
@@ -191,7 +148,6 @@ public class Tele extends LinearOpMode {
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
             prev2RightBumper = gamepad2.right_bumper;
-            prevFarMode = gamepad1.dpad_right;
 
             prevNextIntake2 = gamepad2.dpad_down;
 
@@ -201,21 +157,6 @@ public class Tele extends LinearOpMode {
 
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
-
-
-            if (gamepad2.y) {
-                turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                double manualPower = 0.2 * (gamepad2.right_trigger - gamepad2.left_trigger);
-                turretMotor.setPower(manualPower);
-                if (gamepad2.dpad_up) {
-                    turretMotor.setPower(0);
-                    turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                }
-                continue;
-            }
-
-            runTurret();
 
             if (gamepad1.x) {
                 intakeActive = false;
@@ -267,7 +208,7 @@ public class Tele extends LinearOpMode {
 
                 spinMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-                double manualPower = -0.2*(gamepad2.right_trigger - gamepad2.left_trigger);
+                double manualPower = 0.2*(gamepad2.right_trigger - gamepad2.left_trigger);
 
                 spinMotor.setPower(manualPower);
 
@@ -307,30 +248,19 @@ public class Tele extends LinearOpMode {
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 spinMotor.setPower(0.35);
 
-//                flickServo.setPower(1);
-//                flickServo2.setPower(1);
-                if (!spinMotor.isBusy())
-                    flickServo3.setPosition(0.9);
-                if (!farMode)
-                    launchMotor.setVelocity(CLOSE_VELOCITY);
-                else
-                    launchMotor.setVelocity(FAR_VELOCITY);
+                flickMotor.setPower(1);
+                launchMotor.setVelocity(1600);
             }
 
             if (autoLaunching) {
 
-                if (!farMode)
-                    launchMotor.setVelocity(CLOSE_VELOCITY);
-                else
-                    launchMotor.setVelocity(FAR_VELOCITY);
+                launchMotor.setVelocity(2250);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
 
                     // Stop shooter systems
-//                    flickServo.setPower(0);
-//                    flickServo2.setPower(0);
-                    flickServo3.setPosition(1);
+                    flickMotor.setPower(0);
 
                     // Clear ALL slots at once
                     slots[0] = Ball.EMPTY;
@@ -375,17 +305,13 @@ public class Tele extends LinearOpMode {
             }
 
             // shoot
+
             if (shootPressed && !autoLaunching) {
                 //flickServo.setPosition(flickUp);
-//                flickServo.setPower(1);
-//                flickServo2.setPower(1);
-                if (!spinMotor.isBusy())
-                    flickServo3.setPosition(0.9); // 0.85
+                flickMotor.setPower(1);
             } else if (!autoLaunching) {
                 //flickServo.setPosition(flickDown);
-//                flickServo.setPower(0);
-//                flickServo2.setPower(0);
-                flickServo3.setPosition(1);
+                flickMotor.setPower(0);
             }
 
             if (shootPressed && !autoLaunching) {
@@ -397,19 +323,10 @@ public class Tele extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                if (!farMode)
-                    launchMotor.setVelocity(CLOSE_VELOCITY);
-                else
-                    launchMotor.setVelocity(FAR_VELOCITY);
-//                flickServo.setPower(1);
-                flickActive = true;
-                flickServo2.setPower(1);
+                launchMotor.setVelocity(1800);
             } else {
                 //launchMotor.setPower(0);
-                launchMotor.setVelocity(0);
-//                flickServo.setPower(0);
-                flickActive = false;
-                flickServo2.setPower(0);
+                launchMotor.setVelocity(900);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
@@ -444,15 +361,6 @@ public class Tele extends LinearOpMode {
                 }
             }
 
-            if (!spinMotor.isBusy()) {
-                if (flickActive)
-                    flickServo.setPower(1);
-                else
-                    flickServo.setPower(0);
-            } else {
-                flickServo.setPower(0);
-            }
-
             telemetry.addData("Index", index);
             telemetry.addData("Position", spinMotor.getCurrentPosition());
             telemetry.addLine("Slots:");
@@ -474,7 +382,6 @@ public class Tele extends LinearOpMode {
 
             telemetry.addData("Launch Velocity", launchMotor.getVelocity());
             telemetry.addData("Launch Power", launchMotor.getPower());
-            telemetry.addData("Far mode", farMode);
 
             telemetry.update();
         }
@@ -574,55 +481,6 @@ public class Tele extends LinearOpMode {
         }
     }
 
-    private void runTurret() {
-        // Update fusion + odometry
-        fusedPose.update();
-        follower.update();
-
-        // === Inject Limelight pose into Pedro ===
-        Pose limelightPose = fusedPose.getRobotPose(true); // CONVERTED pose
-        if (limelightPose != null) {
-            follower.setPose(limelightPose);
-        }
-
-        // === Current robot pose ===
-        Pose robotPose = follower.getPose();
-        double robotX = robotPose.getX();
-        double robotY = robotPose.getY();
-        double robotHeading = robotPose.getHeading();
-
-        // === Turret math ===
-        double angleToTarget = Math.atan2(
-                TARGET_Y - robotY,
-                TARGET_X - robotX
-        );
-
-        double turretAngle = angleWrap(angleToTarget - robotHeading);
-        int turretTarget = (int) Math.round(turretAngle * TICKS_PER_RAD);
-        turretTarget = clamp(turretTarget, TURRET_MIN, TURRET_MAX); // WIRE SAFETY, DO NOT REMOVE
-
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setTargetPosition(turretTarget);
-        turretMotor.setPower(0.8);
-
-        // === Telemetry ===
-        telemetry.addData("Pose X", "%.1f", robotX);
-        telemetry.addData("Pose Y", "%.1f", robotY);
-        telemetry.addData("Heading", "%.1f°", Math.toDegrees(robotHeading));
-        telemetry.addData("Turret Target", turretTarget);
-        telemetry.update();
-    }
-
-    private double angleWrap(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle < -Math.PI) angle += 2 * Math.PI;
-        return angle;
-    }
-
-    private int clamp(int val, int min, int max) {
-        return Math.max(min, Math.min(max, val));
-    }
-
     public void initialize() {
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
@@ -642,7 +500,7 @@ public class Tele extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300.0, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
@@ -652,44 +510,8 @@ public class Tele extends LinearOpMode {
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        flickServo = hardwareMap.get(CRServo.class, "backFlick");
-        flickServo.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        flickServo2 = hardwareMap.get(CRServo.class, "frontFlick");
-        flickServo2.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        flickServo3 = hardwareMap.get(Servo.class, "linearFlick");
-        flickServo3.setDirection(Servo.Direction.FORWARD);
-
-        // ===== Turret =====
-        if (alliance == Alliance.RED) {
-            TARGET_X = 150;
-            TARGET_Y = 137;
-        } else {
-            TARGET_X = -6;
-            TARGET_Y = 137;
-        }
-
-        turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        turretMotor.setPower(0.8);
-
-        // ===== Pedro =====
-        if (alliance == Alliance.RED) {
-            START_POSE = new Pose(0, 0, 45); // end of red pathing
-        } else {
-            START_POSE = new Pose(0, 0, 135); // end of blue pathing
-        }
-
-        follower = Constants.createFollower(hardwareMap);
-        follower.setPose(START_POSE);
-
-        // ===== Limelight Fusion =====
-        fusedPose = new FusedPose(hardwareMap, START_POSE);
+        flickMotor = hardwareMap.get(DcMotorEx.class, "flickMotor");
+        flickMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
 

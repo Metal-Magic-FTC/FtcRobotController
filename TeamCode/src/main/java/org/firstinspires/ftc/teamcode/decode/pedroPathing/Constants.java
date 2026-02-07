@@ -19,11 +19,11 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(11.78)
-            .forwardZeroPowerAcceleration(48.319)
-            .lateralZeroPowerAcceleration(-72.208)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.4, 0.01, 0.01, 0.0003))
-            .headingPIDFCoefficients(new PIDFCoefficients(1.06,0, 0.05, 0.02))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.09, 0.01, 0.008, 0.6, 0.003));
+            .forwardZeroPowerAcceleration(-37.52)
+            .lateralZeroPowerAcceleration(-71.17)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.075, 0.0001, 0.0115, 0.015))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.75,0, 0.003, 0.025))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.8, 0.05, 0.01, 0.6, 0.03));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName("frontLeft")
@@ -34,8 +34,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(64.448)
-            .yVelocity(56);
+            .xVelocity(70.75)
+            .yVelocity(59.43);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(-4.5)
@@ -48,7 +48,7 @@ public class Constants {
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.4, 1.8);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 0.8, 1);
 
     public static DriveEncoderConstants driveEncoderConstants = new DriveEncoderConstants()
             .robotWidth(18)
