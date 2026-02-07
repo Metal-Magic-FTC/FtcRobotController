@@ -39,7 +39,7 @@ public class AutoAlign extends LinearOpMode {
         waitForStart(); // waiting until driver clicks play button
 
         while (opModeIsActive()) {
-
+            follower.update();
             headingLock = gamepad1.x;
 
             controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
@@ -50,7 +50,6 @@ public class AutoAlign extends LinearOpMode {
             else
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
-            follower.update();
             telemetry.update();
         }
     }
