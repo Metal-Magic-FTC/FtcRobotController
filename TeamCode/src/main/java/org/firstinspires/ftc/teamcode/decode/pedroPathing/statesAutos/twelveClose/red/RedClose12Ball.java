@@ -286,7 +286,7 @@ public class RedClose12Ball extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                intakeMotor.setPower(0);
+                //intakeMotor.setPower(0);
             }
         }
 
@@ -407,6 +407,8 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = true;
         waitingForBall = true;
 
+        intakeMotor.setPower(-0.6);
+
         follower.setMaxPower(speed);
         follower.followPath(path);
         while (opModeIsActive() && follower.isBusy()) {
@@ -419,6 +421,8 @@ public class RedClose12Ball extends LinearOpMode {
         }
         follower.breakFollowing();
         if (stopDelay > 0) sleep(stopDelay);
+
+        intakeMotor.setPower(0);
 
         intakeActive = false;
         waitingForBall = false;

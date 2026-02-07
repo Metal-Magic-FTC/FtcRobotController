@@ -123,7 +123,7 @@ public class RedFarStates9 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 1000, 0.8);
+        runPath(paths.shoot(), 1500, 0.8);
 
         // ---- SHOOT ----
         shootAllPattern(pattern);
@@ -631,7 +631,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(2500);
+        launchMotor.setVelocity(3000);
 
         // Compute end sweep position (clockwise through 3 slots)
         int endSlot = (startIndex + 2) % 3;
