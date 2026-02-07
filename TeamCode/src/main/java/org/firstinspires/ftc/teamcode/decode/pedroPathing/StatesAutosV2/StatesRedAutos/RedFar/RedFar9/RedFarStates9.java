@@ -137,7 +137,7 @@ public class RedFarStates9 extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPathWithIntake(paths.toIntake1(), 0, 1);
+        runPath(paths.toIntake1(), 0, 1);
         resetSlots();
 
         runPathWithIntake(paths.intakeball1(), 0, 0.21);
@@ -177,7 +177,7 @@ public class RedFarStates9 extends LinearOpMode {
         // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPathWithIntake(paths.toIntake2(), 0, 1);
+        runPath(paths.toIntake2(), 0, 1);
         runPathWithIntake(paths.intakeball4(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
