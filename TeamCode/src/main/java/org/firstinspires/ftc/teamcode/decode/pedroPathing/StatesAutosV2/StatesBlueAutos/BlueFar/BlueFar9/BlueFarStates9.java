@@ -110,7 +110,6 @@ public class BlueFarStates9 extends LinearOpMode {
 
         launchMotor.setPower(1);
 
-        turretRunToPosition(-40); // TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
