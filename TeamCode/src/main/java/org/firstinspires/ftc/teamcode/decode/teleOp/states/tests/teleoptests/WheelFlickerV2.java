@@ -257,12 +257,12 @@ public class WheelFlickerV2 extends LinearOpMode {
                 spinMotor.setPower(0.35);
 
                 flickMotor.setPower(1);
-                launchMotor.setVelocity(2000);
+                launchMotor.setVelocity(targetVelocity);
             }
 
             if (autoLaunching) {
 
-                launchMotor.setVelocity(2500);
+                launchMotor.setVelocity(targetVelocity);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
@@ -331,7 +331,7 @@ public class WheelFlickerV2 extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(2000);
+                launchMotor.setVelocity(targetVelocity);
             } else {
                 //launchMotor.setPower(0);
                 launchMotor.setVelocity(900);
