@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 @TeleOp(name="!!!!! Auto Align")
@@ -17,6 +18,7 @@ public class AutoAlign extends LinearOpMode {
 
     private CustomMecanumDrive drivetrain;
     private Follower follower;
+    FusedPose fusedPose;
 
     private static double TARGET_X = 150;
     private static double TARGET_Y = 137;
@@ -40,14 +42,19 @@ public class AutoAlign extends LinearOpMode {
 
         while (opModeIsActive()) {
             follower.update();
+            fusedPose.update();
+            Pose limelightPose = fusedPose.getRobotPose(true); // CONVERTED pose
+            if (limelightPose != null) {
+                follower.setPose(limelightPose);
+            }
             updateGoalHeading();
+
             headingLock = gamepad1.x;
 
             controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
             double v = getHeadingError();
             controller.updateError(v);
-            telemetry.update();
-            
+
             double otherV = 0;
             
             if (headingLock) {
@@ -65,10 +72,6 @@ public class AutoAlign extends LinearOpMode {
     }
 
     public double getHeadingError() {
-//        if (follower.getCurrentPath() == null) {
-//            return 0;
-//        }
-
         double headingError = MathFunctions.getTurnDirection(follower.getPose().getHeading(), targetHeading) * MathFunctions.getSmallestAngleDifference(follower.getPose().getHeading(), targetHeading);
         return headingError;
     }
@@ -96,6 +99,8 @@ public class AutoAlign extends LinearOpMode {
         headingLock = false;
 
         follower.startTeleopDrive();
+
+        fusedPose = new FusedPose(hardwareMap, startPose);
     }
 
 }
