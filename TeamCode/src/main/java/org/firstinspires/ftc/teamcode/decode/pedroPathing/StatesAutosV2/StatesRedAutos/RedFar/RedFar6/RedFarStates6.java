@@ -95,7 +95,7 @@ public class RedFarStates6 extends LinearOpMode {
         // scan balls
         //scanBallsInSlots(5000);
 
-        runPath(paths.scan(), 0, 1.0);
+        //runPath(paths.scan(), 0, 1.0);
 
         Ball[] pattern = getPatternFromTag();
 
