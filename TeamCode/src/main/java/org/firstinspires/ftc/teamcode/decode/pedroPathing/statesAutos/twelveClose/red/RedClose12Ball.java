@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!! STATES RED BACK 12 BALL TESTING TESTING DUDUDUDU")
+@Autonomous(name = "!!!!!!!! STATES Red Close 12 Ball")
 public class RedClose12Ball extends LinearOpMode {
 
     private int index = 0;

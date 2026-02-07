@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.blue;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.temp;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
@@ -25,7 +25,7 @@ public class BlueClose12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsBlue12BallCloseV3 paths;
+    private GeneratedPathsBlue12BallClose paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -70,8 +70,8 @@ public class BlueClose12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlue12BallCloseV3.START_POSE);
-        paths = new GeneratedPathsBlue12BallCloseV3(follower);
+        follower.setPose(GeneratedPathsBlue12BallClose.START_POSE);
+        paths = new GeneratedPathsBlue12BallClose(follower);
         hoodServo.setPosition(0.80);
 
 

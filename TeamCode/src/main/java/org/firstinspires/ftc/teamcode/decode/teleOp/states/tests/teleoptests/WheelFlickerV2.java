@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.teleoptests;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,6 +14,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
@@ -26,6 +30,10 @@ public class WheelFlickerV2 extends LinearOpMode {
     private DcMotorEx launchMotor;
     private DcMotorEx flickMotor;
     private DcMotor intakeMotor;
+
+    private Follower follower;
+    private Pose savePose;
+    private boolean oneTime;
 
     private CustomMecanumDrive drivetrain;
 
@@ -153,7 +161,7 @@ public class WheelFlickerV2 extends LinearOpMode {
                 targetVelocity = 1600;
             }
             if (gamepad2.dpad_down) {
-                targetVelocity = 1800;
+                targetVelocity = 1900;
             }
             if (gamepad2.dpad_right) {
                 targetVelocity = 2500;
@@ -165,6 +173,40 @@ public class WheelFlickerV2 extends LinearOpMode {
 
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
+
+            boolean idle =
+                    Math.abs(drive) < 0.05 &&
+                            Math.abs(strafe) < 0.05 &&
+                            Math.abs(turn) < 0.05 && (gamepad1.left_bumper || gamepad2.left_stick_button);
+
+
+            telemetry.addData("Move: ", drive + strafe + turn);
+            if (idle) {
+
+                // HOLD POSITION
+                if (oneTime) {
+                    follower.update();
+                    savePose = follower.getPose();
+                    oneTime = false;
+                    follower.holdPoint(savePose);
+//                    savePath = follower.pathBuilder()
+//                            .addPath(new BezierPoint(savePose))
+//                            .setConstantHeadingInterpolation(savePose.getHeading())
+//                            //.setBrakingStrength(5)
+//                            .build();
+//                            //.build();
+                }
+                telemetry.addLine("Holding Position");
+                //follower.followPath(savePath);
+                follower.update();
+
+            } else {
+                drivetrain.driveMecanum(strafe, drive, turn);
+                oneTime = true;
+                telemetry.addLine("Manual Drive");
+
+            }
+
 
             if (gamepad1.x) {
                 intakeActive = false;
@@ -334,7 +376,7 @@ public class WheelFlickerV2 extends LinearOpMode {
                 launchMotor.setVelocity(targetVelocity);
             } else {
                 //launchMotor.setPower(0);
-                launchMotor.setVelocity(900);
+                launchMotor.setVelocity(targetVelocity);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
@@ -495,6 +537,9 @@ public class WheelFlickerV2 extends LinearOpMode {
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
         intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
+
+        follower = Constants.createFollower(hardwareMap);
+        follower.setDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.15, 0.001, 0.00001, 0.6, 0.003));
 
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.decode.teleOp.statesTele;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.teleoptests.WheelFlickerV2;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import com.pedropathing.control.PIDFController;
@@ -39,26 +41,11 @@ public class Tele extends LinearOpMode {
     private DcMotorEx flickMotor;
     private DcMotor intakeMotor;
 
-    private CustomMecanumDrive drivetrain;
-
-    // Auto Align
     private Follower follower;
-    FusedPose fusedPose;
+    private Pose savePose;
+    private boolean oneTime;
 
-    private static double TARGET_X = 140.75;
-    private static double TARGET_Y = 137;
-
-    public static Pose startPose = new Pose(
-            109,
-            130,
-            Math.toRadians(180)
-    );
-
-    double targetHeading;
-    PIDFController controller;
-    boolean headingLock;
-
-    // End Auto Align
+    private CustomMecanumDrive drivetrain;
 
     Servo hoodServo;
 
@@ -152,36 +139,7 @@ public class Tele extends LinearOpMode {
             double drive = -gamepad1.left_stick_y;
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
-//            drivetrain.driveMecanum(strafe, drive, turn);
-
-            follower.update();
-            fusedPose.update();
-            Pose limelightPose = fusedPose.getRobotPose(true); // CONVERTED pose
-            if (limelightPose != null) {
-                follower.setPose(limelightPose);
-            }
-            updateGoalHeading();
-
-            headingLock = gamepad2.y;
-
-            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
-            double v = getHeadingError();
-            controller.updateError(v);
-
-            double otherV = turn;
-            if (headingLock)
-                otherV = -controller.run();
-
-            drivetrain.driveMecanum(strafe, drive, otherV);
-
-
-//            if (headingLock) {
-//                otherV = controller.run();
-//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
-//            } else
-////                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
-//                drivetrain.driveMecanum(strafe, drive, turn);
-////                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            drivetrain.driveMecanum(strafe, drive, turn);
 
             //launch motor - left bumper
             //flick servo - right bumper
@@ -199,8 +157,6 @@ public class Tele extends LinearOpMode {
             intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
 
-            nextIntake2 = gamepad2.dpad_down;
-
             prevA = gamepad1.a;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
@@ -215,10 +171,10 @@ public class Tele extends LinearOpMode {
                 targetVelocity = 1600;
             }
             if (gamepad2.dpad_down) {
-                targetVelocity = 1800;
+                targetVelocity = 1900;
             }
             if (gamepad2.dpad_right) {
-                targetVelocity = 2400;
+                targetVelocity = 2500;
             }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
@@ -228,11 +184,45 @@ public class Tele extends LinearOpMode {
             prev2A = gamepad2.a;
             prev2B = gamepad2.b;
 
-//            if (gamepad2.y) {
-//                intakeActive = false;
-//                waitingForBall = false;
-//                rotateToIndex(0);
-//            }
+            boolean idle =
+                    Math.abs(drive) < 0.05 &&
+                            Math.abs(strafe) < 0.05 &&
+                            Math.abs(turn) < 0.05 && (gamepad1.left_bumper || gamepad2.left_stick_button);
+
+
+            telemetry.addData("Move: ", drive + strafe + turn);
+            if (idle) {
+
+                // HOLD POSITION
+                if (oneTime) {
+                    follower.update();
+                    savePose = follower.getPose();
+                    oneTime = false;
+                    follower.holdPoint(savePose);
+//                    savePath = follower.pathBuilder()
+//                            .addPath(new BezierPoint(savePose))
+//                            .setConstantHeadingInterpolation(savePose.getHeading())
+//                            //.setBrakingStrength(5)
+//                            .build();
+//                            //.build();
+                }
+                telemetry.addLine("Holding Position");
+                //follower.followPath(savePath);
+                follower.update();
+
+            } else {
+                drivetrain.driveMecanum(strafe, drive, turn);
+                oneTime = true;
+                telemetry.addLine("Manual Drive");
+
+            }
+
+
+            if (gamepad1.x) {
+                intakeActive = false;
+                waitingForBall = false;
+                rotateToIndex(0);
+            }
 
             if (nextIntake2 && !prevNextIntake2) {
                 index++;
@@ -396,7 +386,7 @@ public class Tele extends LinearOpMode {
                 launchMotor.setVelocity(targetVelocity);
             } else {
                 //launchMotor.setPower(0);
-                launchMotor.setVelocity(900);
+                launchMotor.setVelocity(targetVelocity);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
@@ -450,8 +440,10 @@ public class Tele extends LinearOpMode {
             telemetry.addData("B", "%.2f", c2.blue);
             telemetry.addData("Sum", "%.2f", c2.red + c2.green + c2.blue);
 
+            telemetry.addLine("----------------------------");
             telemetry.addData("Launch Velocity", launchMotor.getVelocity());
             telemetry.addData("Launch Power", launchMotor.getPower());
+            telemetry.addData("launch target velocity", targetVelocity);
 
             telemetry.update();
         }
@@ -551,25 +543,13 @@ public class Tele extends LinearOpMode {
         }
     }
 
-    // Auto align methods
-    public double getHeadingError() {
-        double headingError = MathFunctions.getTurnDirection(follower.getPose().getHeading(), targetHeading) * MathFunctions.getSmallestAngleDifference(follower.getPose().getHeading(), targetHeading);
-        return headingError;
-    }
-
-    public void updateGoalHeading() {
-        Pose robotPos = follower.getPose();
-        double angleToTarget = MathFunctions.normalizeAngle(Math.atan2(
-                TARGET_Y - robotPos.getY(),
-                TARGET_X - robotPos.getX()
-        ));
-        targetHeading = angleToTarget;
-    }
-
     public void initialize() {
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
         intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
+
+        follower = Constants.createFollower(hardwareMap);
+        follower.setDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.15, 0.001, 0.00001, 0.6, 0.003));
 
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -585,7 +565,7 @@ public class Tele extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.93);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
@@ -599,18 +579,6 @@ public class Tele extends LinearOpMode {
         flickMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
-
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose == null ? new Pose() : startPose);
-        follower.update();
-
-        targetHeading = Math.toRadians(180); // Radians
-        controller = new PIDFController(follower.constants.coefficientsHeadingPIDF);
-        headingLock = false;
-
-//        follower.startTeleopDrive(true);
-
-        fusedPose = new FusedPose(hardwareMap, startPose);
 
     }
 
