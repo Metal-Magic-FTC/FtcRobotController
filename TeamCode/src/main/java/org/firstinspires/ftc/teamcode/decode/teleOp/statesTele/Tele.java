@@ -45,7 +45,7 @@ public class Tele extends LinearOpMode {
     private Follower follower;
     FusedPose fusedPose;
 
-    private static double TARGET_X = 135;
+    private static double TARGET_X = 140.75;
     private static double TARGET_Y = 137;
 
     public static Pose startPose = new Pose(
@@ -563,7 +563,7 @@ public class Tele extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 17.4);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
