@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueFar;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-public class GeneratedPathsBlueFarStates {
+public class GeneratedPathsBlueFarStatesV2 {
 
     private final Follower follower;
 
@@ -36,7 +35,7 @@ public class GeneratedPathsBlueFarStates {
             Math.toRadians(75)
     );
 
-    public GeneratedPathsBlueFarStates(Follower follower) {
+    public GeneratedPathsBlueFarStatesV2(Follower follower) {
         this.follower = follower;
     }
 
@@ -54,7 +53,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(START_POSE, SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(75))
                 .build();
     }
 
@@ -63,7 +62,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(41, 35))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(180))
                 .build();
     }
 
@@ -101,7 +100,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(new Pose(23, 35), SHOOT_POSE) // x used to be 116
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
                 .build();
     }
 
@@ -110,7 +109,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(42,60))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(80))
+                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(80))
                 .build();
     }
 
@@ -144,7 +143,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(new Pose(25, 60), SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
                 .build();
     }
 
@@ -153,7 +152,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(42,84))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(180))
                 .build();
     }
 
@@ -163,7 +162,16 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(new Pose(42, 84), new Pose(25, 84))
                 )
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
+                .build();
+    }
+
+    public PathChain shoot4() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(new Pose(25, 84), SHOOT_POSE) // x used to be 116
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(75))
                 .build();
     }
 
@@ -172,7 +180,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(59,33))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
+                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(90))
                 .build();
     }
 }
