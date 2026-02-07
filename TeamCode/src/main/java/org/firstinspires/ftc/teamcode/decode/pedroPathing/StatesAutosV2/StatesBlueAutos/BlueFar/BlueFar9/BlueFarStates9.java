@@ -165,7 +165,7 @@ public class BlueFarStates9 extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot3(), 0, 1);
+        runPath(paths.shoot2(), 0, 1);
 
         //shootAllPattern(pattern);
         shootAll();
@@ -176,7 +176,7 @@ public class BlueFarStates9 extends LinearOpMode {
         resetSlots();
 
         runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.toIntake3(), 0, 0.23);
+        runPathWithIntake(paths.intakeball9(), 0, 0.23);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
@@ -189,7 +189,7 @@ public class BlueFarStates9 extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot2(), 0, 1);
+        runPath(paths.shoot3(), 0, 1);
 
         //shootAllPattern(pattern);
         shootAll();

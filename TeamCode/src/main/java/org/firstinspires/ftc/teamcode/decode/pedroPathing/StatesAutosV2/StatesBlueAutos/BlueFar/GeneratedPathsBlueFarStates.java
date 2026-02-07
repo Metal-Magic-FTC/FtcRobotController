@@ -33,7 +33,7 @@ public class GeneratedPathsBlueFarStates {
     public static final Pose SHOOT_POSE = new Pose(
             59,
             12,
-            Math.toRadians(90)
+            Math.toRadians(75)
     );
 
     public GeneratedPathsBlueFarStates(Follower follower) {
@@ -110,7 +110,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(42,60))
                 )
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(80))
                 .build();
     }
 
@@ -119,7 +119,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(new Pose(42, 60), new Pose(25, 60))
                 )
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
     }
 //    public PathChain intakeball5() {
@@ -153,7 +153,7 @@ public class GeneratedPathsBlueFarStates {
                 .addPath(
                         new BezierLine(SHOOT_POSE, new Pose(42,84))
                 )
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
     }
 
