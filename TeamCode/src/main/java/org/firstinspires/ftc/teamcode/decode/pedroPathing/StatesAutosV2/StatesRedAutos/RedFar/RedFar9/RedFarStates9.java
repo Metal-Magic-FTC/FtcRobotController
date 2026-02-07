@@ -110,7 +110,7 @@ public class RedFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(4000);// TURRRRREETTTT
+        launchMotor.setVelocity(3000);// TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -123,7 +123,7 @@ public class RedFarStates9 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 3000, 0.8);
+        runPath(paths.shoot(), 4000, 0.8);
 
         // ---- SHOOT ----
         shootAllPattern(pattern);
@@ -740,7 +740,7 @@ public class RedFarStates9 extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300.0, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(350.0, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 
