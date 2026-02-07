@@ -147,6 +147,20 @@ public class GeneratedPathsBlueFarStates {
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
                 .build();
     }
+
+    public PathChain toIntake3() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(SHOOT_POSE, new Pose(42,60))
+                )
+                .setTangentHeadingInterpolation()
+                .build();
+    }
+
+
+
+
+
     public PathChain leave() {
         return new PathBuilder(follower)
                 .addPath(
