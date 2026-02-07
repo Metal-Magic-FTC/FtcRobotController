@@ -168,15 +168,20 @@ public class Tele extends LinearOpMode {
             double v = getHeadingError();
             controller.updateError(v);
 
-            double otherV = 0;
+            double otherV = turn;
+            if (headingLock)
+                otherV = -controller.run();
 
-            if (headingLock) {
-                otherV = controller.run();
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
-            } else
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            drivetrain.driveMecanum(strafe, drive, otherV);
+
+
+//            if (headingLock) {
+//                otherV = controller.run();
+//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
+//            } else
+////                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 //                drivetrain.driveMecanum(strafe, drive, turn);
-//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+////                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
             //launch motor - left bumper
             //flick servo - right bumper
@@ -603,7 +608,7 @@ public class Tele extends LinearOpMode {
         controller = new PIDFController(follower.constants.coefficientsHeadingPIDF);
         headingLock = false;
 
-        follower.startTeleopDrive(true);
+//        follower.startTeleopDrive(true);
 
         fusedPose = new FusedPose(hardwareMap, startPose);
 

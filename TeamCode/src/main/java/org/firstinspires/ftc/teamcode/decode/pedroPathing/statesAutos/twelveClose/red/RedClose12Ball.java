@@ -271,10 +271,16 @@ public class RedClose12Ball extends LinearOpMode {
         return -1;
     }
 
+    private boolean spinAtTarget() {
+        return Math.abs(
+                spinMotor.getTargetPosition() - spinMotor.getCurrentPosition()
+        ) <= 8;
+    }
+
     private void intake() {
 
         // spindexer logic (COLOR-BASED DETECTION) with delay
-        if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
+        if (waitingForBall && intakeActive && spinAtTarget() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
             if (detected != Ball.EMPTY) {
@@ -492,10 +498,10 @@ public class RedClose12Ball extends LinearOpMode {
 
         // reject far / floor
         float total = r + g + b;
-        if (total < 0.045f) return Ball.EMPTY;
+        if (total < 0.03f) return Ball.EMPTY;
 
         // PURPLE: blue-dominant (keep strict)
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
+        if (b > r * 1.2f && b > g * 1.1f && b > 0.12f) {
             return Ball.PURPLE;
         }
 

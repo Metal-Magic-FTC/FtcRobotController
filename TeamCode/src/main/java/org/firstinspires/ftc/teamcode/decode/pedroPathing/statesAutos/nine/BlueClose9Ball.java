@@ -16,7 +16,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.blue.GeneratedPathsBlue12BallClose;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueClose.GeneratedPathsBlue12BallCloseV2;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.blue.GeneratedPathsBlue12BallCloseV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class BlueClose9Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsBlue12BallClose paths;
+    private GeneratedPathsBlue12BallCloseV3 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -79,8 +80,8 @@ public class BlueClose9Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlue12BallClose.START_POSE);
-        paths = new GeneratedPathsBlue12BallClose(follower);
+        follower.setPose(GeneratedPathsBlue12BallCloseV3.START_POSE);
+        paths = new GeneratedPathsBlue12BallCloseV3(follower);
         hoodServo.setPosition(0.80);
 
 
