@@ -46,7 +46,7 @@ public class GeneratedPathsRedFarStates {
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(SHOOT_POSE, new Pose(102, 28))
+                        new BezierLine(SHOOT_POSE, new Pose(101, 28))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(64.5), 0)
                 .build();
@@ -55,7 +55,7 @@ public class GeneratedPathsRedFarStates {
     public PathChain intakeball1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(102, 28), new Pose(125, 28))
+                        new BezierLine(new Pose(101, 28), new Pose(125, 28))
                 )
                 .setTangentHeadingInterpolation()
                 .build();
@@ -86,7 +86,7 @@ public class GeneratedPathsRedFarStates {
                 .addPath(
                         new BezierLine(new Pose(125, 28), SHOOT_POSE) // x used to be 116
                 )
-                .setLinearHeadingInterpolation(0,Math.toRadians(62))
+                .setLinearHeadingInterpolation(0,Math.toRadians(55))
                 .build();
     }
 
@@ -94,16 +94,16 @@ public class GeneratedPathsRedFarStates {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(SHOOT_POSE,
-                                 new Pose(102,53))
+                                 new Pose(101,53))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(62), 0)
+                .setLinearHeadingInterpolation(Math.toRadians(55), 0)
                 .build();
     }
 
     public PathChain intakeball4() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(new Pose(102, 53), new Pose(125, 53))
+                        new BezierLine(new Pose(101, 53), new Pose(125, 53))
                 )
                 .setTangentHeadingInterpolation()
                 .build();
@@ -130,7 +130,7 @@ public class GeneratedPathsRedFarStates {
                 .addPath(
                         new BezierLine(new Pose(125, 53), SHOOT_POSE)
                 )
-                .setLinearHeadingInterpolation(0,Math.toRadians(62))
+                .setLinearHeadingInterpolation(0,Math.toRadians(55))
                 .build();
     }
     public PathChain leave() {

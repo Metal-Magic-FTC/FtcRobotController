@@ -45,7 +45,7 @@ public class Tele extends LinearOpMode {
     private Follower follower;
     FusedPose fusedPose;
 
-    private static double TARGET_X = 135;
+    private static double TARGET_X = 140.75;
     private static double TARGET_Y = 137;
 
     public static Pose startPose = new Pose(
@@ -123,6 +123,8 @@ public class Tele extends LinearOpMode {
     private double flickUp = 0.75;
     private double flickDown = 1;
 
+    private double targetVelocity = 1800;
+
     private boolean
             intakePressed,
             aimGreenPressed,
@@ -197,7 +199,15 @@ public class Tele extends LinearOpMode {
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
             prev2RightBumper = gamepad2.right_bumper;
 
-            prevNextIntake2 = gamepad2.dpad_down;
+            if (gamepad2.dpad_left) {
+                targetVelocity = 1600;
+            }
+            if (gamepad2.dpad_down) {
+                targetVelocity = 1800;
+            }
+            if (gamepad2.dpad_right) {
+                targetVelocity = 2500;
+            }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
             boolean manualGreen  = gamepad2.a && !prev2A;
@@ -297,12 +307,12 @@ public class Tele extends LinearOpMode {
                 spinMotor.setPower(0.35);
 
                 flickMotor.setPower(1);
-                launchMotor.setVelocity(1600);
+                launchMotor.setVelocity(targetVelocity);
             }
 
             if (autoLaunching) {
 
-                launchMotor.setVelocity(2250);
+                launchMotor.setVelocity(targetVelocity);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
@@ -371,7 +381,7 @@ public class Tele extends LinearOpMode {
 
             if (runLaunch) {
                 //launchMotor.setPower(1);
-                launchMotor.setVelocity(1800);
+                launchMotor.setVelocity(targetVelocity);
             } else {
                 //launchMotor.setPower(0);
                 launchMotor.setVelocity(900);
@@ -563,7 +573,7 @@ public class Tele extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotor.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 17.4);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         hoodServo = hardwareMap.servo.get("hoodServo");
@@ -586,7 +596,7 @@ public class Tele extends LinearOpMode {
         controller = new PIDFController(follower.constants.coefficientsHeadingPIDF);
         headingLock = false;
 
-        follower.startTeleopDrive();
+        follower.startTeleopDrive(true);
 
         fusedPose = new FusedPose(hardwareMap, startPose);
 

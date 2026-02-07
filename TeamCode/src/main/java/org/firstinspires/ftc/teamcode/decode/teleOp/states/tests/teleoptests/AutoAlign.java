@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.decode.teleOp.statesTele;
+package org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.teleoptests;
 
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.follower.Follower;
@@ -6,7 +6,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
