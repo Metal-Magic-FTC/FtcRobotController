@@ -110,7 +110,7 @@ public class RedFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(3000);// TURRRRREETTTT
+        launchMotor.setVelocity(3500);// TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -618,7 +618,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.23);
 
         waitForSpindexer();
 
@@ -634,7 +634,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.35);
+        spinMotor.setPower(0.23);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
