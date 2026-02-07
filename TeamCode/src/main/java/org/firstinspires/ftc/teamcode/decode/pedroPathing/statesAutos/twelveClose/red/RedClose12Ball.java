@@ -82,7 +82,7 @@ public class RedClose12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(1500);
+        launchMotor.setVelocity(1700);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -428,7 +428,7 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(1500);
+        launchMotor.setVelocity(1700);
 
     }
 
@@ -573,7 +573,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(1700);
 
         sleep(100);
 
@@ -614,7 +614,7 @@ public class RedClose12Ball extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(2000);
+        launchMotor.setVelocity(1700);
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;
@@ -668,7 +668,7 @@ public class RedClose12Ball extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(500, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 
