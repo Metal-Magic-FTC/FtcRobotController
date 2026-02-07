@@ -15,8 +15,9 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
-
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueClose.BlueClosePaths;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBlueAutos.BlueClose.GeneratedPathsBlue12BallCloseV2;
 
 import java.util.Arrays;
 
@@ -113,7 +114,7 @@ public class BlueClose12BallV2 extends LinearOpMode {
         slots[2] = Ball.GREEN;
 
         aimToPattern(pattern);
-        runPath(paths.intake1ToShoot2(), 0, 0.5);
+        runPath(paths.shoot2(), 0, 0.5);
         shootAll();
 
         intakeMotor.setPower(-0.6);
