@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesRedAutos.RedClose.RedClose12.RedClose12BallV2;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
@@ -26,7 +25,7 @@ public class RedClose12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsRed12BallClose paths;
+    private GeneratedPathsRed12BallCloseV3 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -71,8 +70,8 @@ public class RedClose12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRed12BallClose.START_POSE);
-        paths = new GeneratedPathsRed12BallClose(follower);
+        follower.setPose(GeneratedPathsRed12BallCloseV3.START_POSE);
+        paths = new GeneratedPathsRed12BallCloseV3(follower);
         hoodServo.setPosition(0.80);
 
 
@@ -493,7 +492,7 @@ public class RedClose12Ball extends LinearOpMode {
 
         // reject far / floor
         float total = r + g + b;
-        if (total < 0.07f) return Ball.EMPTY;
+        if (total < 0.045f) return Ball.EMPTY;
 
         // PURPLE: blue-dominant (keep strict)
         if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
