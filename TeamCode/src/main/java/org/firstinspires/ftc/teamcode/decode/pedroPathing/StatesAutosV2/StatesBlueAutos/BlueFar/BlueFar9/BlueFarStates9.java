@@ -97,7 +97,7 @@ public class BlueFarStates9 extends LinearOpMode {
         telemetry.update();
 
         runPath(paths.shoot(), 50, 1);
-
+        wait(1500);
         // ---- SHOOT ----
         //shootAllPattern(pattern);
         shootAll();
@@ -426,7 +426,7 @@ public class BlueFarStates9 extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(3000);
 
     }
 
@@ -571,7 +571,7 @@ public class BlueFarStates9 extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(3000);
 
         sleep(100);
 
@@ -612,7 +612,7 @@ public class BlueFarStates9 extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(2000);
+        launchMotor.setVelocity(3000);
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;
