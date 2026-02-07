@@ -174,7 +174,8 @@ public class Tele extends LinearOpMode {
                 otherV = controller.run();
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
             } else
-                drivetrain.driveMecanum(strafe, drive, turn);
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+//                drivetrain.driveMecanum(strafe, drive, turn);
 //                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
             //launch motor - left bumper
