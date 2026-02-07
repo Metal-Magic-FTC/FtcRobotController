@@ -110,7 +110,7 @@ public class RedFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(3000);// TURRRRREETTTT
+        launchMotor.setVelocity(4000);// TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -123,7 +123,7 @@ public class RedFarStates9 extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 1500, 0.8);
+        runPath(paths.shoot(), 2000, 0.8);
 
         // ---- SHOOT ----
         shootAllPattern(pattern);
