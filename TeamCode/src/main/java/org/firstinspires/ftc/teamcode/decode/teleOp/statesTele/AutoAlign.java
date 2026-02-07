@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
-@TeleOp(name="!Drivetrain Manual Test")
+@TeleOp(name="!!!!! Auto Align")
 
 public class AutoAlign extends LinearOpMode {
 
