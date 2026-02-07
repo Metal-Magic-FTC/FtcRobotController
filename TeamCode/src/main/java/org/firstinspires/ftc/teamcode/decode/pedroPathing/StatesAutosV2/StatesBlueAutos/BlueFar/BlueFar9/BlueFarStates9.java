@@ -83,7 +83,7 @@ public class BlueFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(2100);
+        launchMotor.setVelocity(3000);
 
         // scan balls
         //scanBallsInSlots(5000);
