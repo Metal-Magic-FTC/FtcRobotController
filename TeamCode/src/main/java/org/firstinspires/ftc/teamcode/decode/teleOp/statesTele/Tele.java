@@ -149,6 +149,11 @@ public class Tele extends LinearOpMode {
 
         while (opModeIsActive()) {
 
+            double drive = -gamepad1.left_stick_y;
+            double strafe = gamepad1.left_stick_x;
+            double turn = gamepad1.right_stick_x;
+//            drivetrain.driveMecanum(strafe, drive, turn);
+
             follower.update();
             fusedPose.update();
             Pose limelightPose = fusedPose.getRobotPose(true); // CONVERTED pose
@@ -169,7 +174,8 @@ public class Tele extends LinearOpMode {
                 otherV = controller.run();
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
             } else
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+                drivetrain.driveMecanum(strafe, drive, turn);
+//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
             //launch motor - left bumper
             //flick servo - right bumper
