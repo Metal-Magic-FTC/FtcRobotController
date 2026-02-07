@@ -170,7 +170,7 @@ public class Tele extends LinearOpMode {
 
             double otherV = turn;
             if (headingLock)
-                otherV = controller.run();
+                otherV = -controller.run();
 
             drivetrain.driveMecanum(strafe, drive, otherV);
 
