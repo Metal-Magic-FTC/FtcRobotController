@@ -72,8 +72,9 @@ import java.util.List;
  *   Yellow: 1
  *   Red: 2
  */
-@TeleOp(name = "Sensor: Limelight3A", group = "Sensor")
-//@Disabled
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 public class limeLight extends LinearOpMode {
 
     private Limelight3A limelight;

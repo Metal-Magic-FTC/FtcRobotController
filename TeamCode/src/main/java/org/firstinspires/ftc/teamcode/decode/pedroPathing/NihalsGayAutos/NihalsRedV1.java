@@ -20,7 +20,9 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "!!Nihals red qualy 3")
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 public class NihalsRedV1 extends LinearOpMode {
 
     private int index = 0;

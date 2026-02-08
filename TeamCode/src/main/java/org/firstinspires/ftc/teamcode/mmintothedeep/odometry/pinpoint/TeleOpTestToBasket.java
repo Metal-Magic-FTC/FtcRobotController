@@ -26,14 +26,15 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.Locale;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name = "TeleOp To Basket")
-//@Disabled
 
 /*
  * Try to go to the basket in teleop using odo
  */
 
-@Disabled
 public class TeleOpTestToBasket extends LinearOpMode {
 
     DcMotor leftFrontDrive;

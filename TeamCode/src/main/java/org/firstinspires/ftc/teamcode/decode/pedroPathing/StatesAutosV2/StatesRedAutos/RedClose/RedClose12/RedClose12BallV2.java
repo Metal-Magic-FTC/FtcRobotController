@@ -22,9 +22,9 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.actual.TurretRedTeleOp;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-//@Disabled
-@Autonomous(name = "!!!!! LEBRON States Red Close 12 Ball")
+@Disabled
 public class RedClose12BallV2 extends LinearOpMode {
 
     private int index = 0;

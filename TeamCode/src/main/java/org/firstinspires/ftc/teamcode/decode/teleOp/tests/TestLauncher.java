@@ -5,8 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-//@Disabled
-@TeleOp
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled@TeleOp
 public class TestLauncher extends LinearOpMode {
 
     DcMotorEx launchMotor = null;

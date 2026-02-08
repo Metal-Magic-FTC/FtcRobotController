@@ -22,8 +22,9 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
-//@Disabled
-@Autonomous(name = "!!!!! STATES BLUE CLOSE 9 BAlL")
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 public class BlueClose9Ball extends LinearOpMode {
 
     private int index = 0;

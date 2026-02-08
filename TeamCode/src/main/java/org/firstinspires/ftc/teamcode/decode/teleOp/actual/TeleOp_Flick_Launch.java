@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 @Disabled
 @TeleOp(name="Drive, Flick, Launch")
-//@Disabled
 public class TeleOp_Flick_Launch extends LinearOpMode {
 
     Servo hoodServo;

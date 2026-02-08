@@ -13,6 +13,10 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 import java.util.List;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
+
 @Autonomous(name = "!!!! Blue Close Qualy 2")
 public class BlueBackV4 extends LinearOpMode {
 

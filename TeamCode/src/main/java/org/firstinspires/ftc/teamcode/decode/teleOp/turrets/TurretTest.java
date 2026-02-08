@@ -6,9 +6,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-//@Disabled
-@TeleOp(name="!TEST TS TURRET")
+@Disabled@TeleOp(name="!TEST TS TURRET")
 public class TurretTest extends LinearOpMode {
 
     DcMotor turretMotor = null;

@@ -15,8 +15,11 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPin
 
 import java.util.Locale;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name = "TeleOp Odo Hold")
-//@Disabled
+
 public class TeleOdoHold extends LinearOpMode {
 
     DcMotor leftFront;

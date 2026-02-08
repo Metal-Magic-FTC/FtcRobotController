@@ -28,8 +28,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
  * - Visible AprilTags
  * - Success rate and statistics
  */
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 @TeleOp(name = "Limelight Localization Demo", group = "Limelight")
-//@Disabled
 public class LimelightLocalizationDemo extends OpMode {
 
     // Localization

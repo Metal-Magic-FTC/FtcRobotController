@@ -18,7 +18,8 @@ import java.util.List;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-//@Disabled
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @Autonomous(name = "!!! intake3")
 public class intake3 extends LinearOpMode {
 

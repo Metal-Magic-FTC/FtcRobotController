@@ -47,9 +47,9 @@ import java.util.List;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 @Disabled
-@TeleOp(name = "Limelight Coordinate Diagnostic", group = "Diagnostic")
-//@Disabled
 public class LimelightCoordinateDiagnostic extends OpMode {
 
     private Limelight3A limelight;

@@ -21,8 +21,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.Date;
 import java.util.Objects;
 
-@TeleOp//(name="Tag Self Align TeleOp", group="AprilTag")
-//@Disabled.
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 @Disabled
 public class TeleOpAprilTag extends LinearOpMode{
     /* Declare all motors as null */

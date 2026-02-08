@@ -14,8 +14,9 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
-//@Disabled
-@Autonomous(name = " Blue Far States 9")
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 public class BlueFarStates9 extends LinearOpMode {
 
     private int index = 0;

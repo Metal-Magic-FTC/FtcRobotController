@@ -9,8 +9,9 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 //
-//@Disabled
-@TeleOp
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
 public class StayInPlace extends LinearOpMode {
 
         private CustomMecanumDrive drivetrain;

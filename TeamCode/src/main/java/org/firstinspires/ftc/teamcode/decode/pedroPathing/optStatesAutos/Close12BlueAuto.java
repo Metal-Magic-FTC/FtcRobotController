@@ -19,7 +19,7 @@ import java.util.List;
 // 1 2 3 5 8
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-//@Disabled
+@Disabled
 @Autonomous(name = "!!! baron")
 public class Close12BlueAuto extends LinearOpMode {
 

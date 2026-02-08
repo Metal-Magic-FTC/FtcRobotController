@@ -64,9 +64,8 @@ import java.util.concurrent.TimeUnit;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-// @Disabled
-@Autonomous
-//@Disabled
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 @Disabled
 public class WorldsCVTest extends LinearOpMode
 {

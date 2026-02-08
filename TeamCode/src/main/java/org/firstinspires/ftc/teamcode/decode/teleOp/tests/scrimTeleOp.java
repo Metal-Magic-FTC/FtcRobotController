@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Disabled
 @TeleOp(name="!Teleop for the scrimm")
-//@Disabled
 public class scrimTeleOp extends LinearOpMode {
 
     private CustomMecanumDrive drivetrain;

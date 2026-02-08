@@ -22,7 +22,8 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
-//@Disabled
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @Autonomous(name = "!!!!!! STATES Red Far 3 ball")
 public class BlueFarStates3 extends LinearOpMode {
 
