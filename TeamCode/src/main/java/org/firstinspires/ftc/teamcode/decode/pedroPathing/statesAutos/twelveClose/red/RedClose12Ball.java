@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! STATES Red Close 12 Ball")
+@Autonomous(name = "!!!!!!!! MM STATES Red Close 12 Ball")
 public class RedClose12Ball extends LinearOpMode {
 
     private int index = 0;
@@ -88,7 +88,8 @@ public class RedClose12Ball extends LinearOpMode {
 
         //runPath(paths.scan(), 0, 1.0);
 
-        Ball[] pattern = getPatternFromTag();
+        Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
+        pattern = getPatternFromTag();
 
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
@@ -457,7 +458,7 @@ public class RedClose12Ball extends LinearOpMode {
 
     // ---------------- APRILTAG AND COLOR SENSORS ----------------
     private Ball[] getPatternFromTag() {
-        int id = detectAprilTag(2000);
+        int id = detectAprilTag(500);
         if (id == 21) return new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE};
         if (id == 23) return new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
         return new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
@@ -465,10 +466,15 @@ public class RedClose12Ball extends LinearOpMode {
 
     private int detectAprilTag(long timeoutMs) {
         long start = System.currentTimeMillis();
+        int id = 0;
         while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
             LLResult r = limelight.getLatestResult();
             if (r != null && r.isValid() && !r.getFiducialResults().isEmpty())
-                return r.getFiducialResults().get(0).getFiducialId();
+                for (LLResultTypes.FiducialResult res : r.getFiducialResults()) {
+                    id = res.getFiducialId();
+                    if (21 <= id && id <= 23)
+                        return id;
+                }
             sleep(15);
         }
         return 22;

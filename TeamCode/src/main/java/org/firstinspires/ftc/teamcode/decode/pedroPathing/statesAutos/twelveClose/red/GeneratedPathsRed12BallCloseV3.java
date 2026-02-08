@@ -73,7 +73,7 @@ public class GeneratedPathsRed12BallCloseV3 {
                         new BezierCurve(
                                 new Pose(128, 79, Math.toRadians(0)),
                                 //new Pose(111.86034912718205, 80.07980049875314),
-                                new Pose(129, 76, Math.toRadians(90))
+                                new Pose(129, 77, Math.toRadians(90))
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(90))
@@ -151,7 +151,7 @@ public class GeneratedPathsRed12BallCloseV3 {
                 .addPath(
                         new BezierCurve(
                                 new Pose(96, 94, Math.toRadians(39)),
-                                new Pose(68.58988764044946, 35.7),
+                                new Pose(63-.58988764044946, 35.7),
                                 // new Pose(83.56293000245203, 52.706418485237485),
                                 new Pose(104.2, 30, Math.toRadians(0))
                         )

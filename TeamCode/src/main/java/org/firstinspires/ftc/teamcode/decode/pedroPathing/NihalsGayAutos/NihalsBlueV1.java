@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 import java.util.List;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 
 @Autonomous(name = "!!!! Blue FAR 9 ball Qualy 2")
 public class NihalsBlueV1 extends LinearOpMode {

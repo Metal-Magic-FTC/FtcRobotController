@@ -12,7 +12,8 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @Autonomous(name = "!!!!!! !!!!!!! TwelveBallRedClose")
 @Configurable // Panels
 public class TwelveBallRedClose extends OpMode {

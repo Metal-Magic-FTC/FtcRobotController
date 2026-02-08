@@ -21,7 +21,8 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.StatesAutosV2.StatesBl
 
 import java.util.Arrays;
 
-//@Disabled
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @Autonomous(name = "!!!!! LEBRON States Blue Close 12 Ball")
 public class BlueClose12BallV2 extends LinearOpMode {
 

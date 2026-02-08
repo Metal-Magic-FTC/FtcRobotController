@@ -11,7 +11,8 @@ import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
-//@Disabled
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name="!Turret Manual Test")
 public class RotateTurret extends LinearOpMode {
 

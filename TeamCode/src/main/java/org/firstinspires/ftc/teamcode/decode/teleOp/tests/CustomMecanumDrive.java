@@ -31,6 +31,17 @@ public class CustomMecanumDrive {
 
     }
 
+    public void setMode(DcMotor.ZeroPowerBehavior mode) {
+        frontLeft.setZeroPowerBehavior(mode);
+        frontRight.setZeroPowerBehavior(mode);
+        backLeft.setZeroPowerBehavior(mode);
+        backRight.setZeroPowerBehavior(mode);
+    }
+
+    public DcMotor.ZeroPowerBehavior getMode() {
+        return frontLeft.getZeroPowerBehavior();
+    }
+
 
     public void updateFrontLeft(boolean isForward) {
         if (isForward) {

@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! STATES Blue Close 12 Ball")
+@Autonomous(name = "!!!!!!!! MM STATES Blue Close 12 Ball")
 public class BlueClose12Ball extends LinearOpMode {
 
     private int index = 0;
@@ -88,7 +88,7 @@ public class BlueClose12Ball extends LinearOpMode {
 
         //runPath(paths.scan(), 0, 1.0);
 
-        runPath(paths.scan(), 0, 1);
+        runPath(paths.scan(), 0, 0.9);
         Ball[] pattern = getPatternFromTag();
 
         aimToPattern(pattern);
@@ -293,7 +293,7 @@ public class BlueClose12Ball extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                intakeMotor.setPower(0);
+                //intakeMotor.setPower(0);
             }
         }
 
@@ -458,7 +458,7 @@ public class BlueClose12Ball extends LinearOpMode {
 
     // ---------------- APRILTAG AND COLOR SENSORS ----------------
     private Ball[] getPatternFromTag() {
-        int id = detectAprilTag(2000);
+        int id = detectAprilTag(500);
         if (id == 21) return new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE};
         if (id == 23) return new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
         return new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
@@ -466,10 +466,15 @@ public class BlueClose12Ball extends LinearOpMode {
 
     private int detectAprilTag(long timeoutMs) {
         long start = System.currentTimeMillis();
+        int id = 0;
         while (opModeIsActive() && System.currentTimeMillis() - start < timeoutMs) {
             LLResult r = limelight.getLatestResult();
             if (r != null && r.isValid() && !r.getFiducialResults().isEmpty())
-                return r.getFiducialResults().get(0).getFiducialId();
+                for (LLResultTypes.FiducialResult res : r.getFiducialResults()) {
+                    id = res.getFiducialId();
+                    if (21 <= id && id <= 23)
+                        return id;
+                }
             sleep(15);
         }
         return 22;

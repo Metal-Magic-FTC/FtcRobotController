@@ -112,6 +112,21 @@ public class Tele extends LinearOpMode {
 
     private double targetVelocity = 1800;
 
+    private static double TARGET_X = 150;
+    private static double TARGET_Y = 137;
+
+    public static Pose startPose = new Pose(
+            109,
+            130,
+            Math.toRadians(180)
+    );
+
+    double targetHeading;
+    PIDFController controller;
+    boolean headingLock;
+
+    FusedPose fusedPose;
+
     private boolean
             intakePressed,
             aimGreenPressed,
@@ -135,11 +150,16 @@ public class Tele extends LinearOpMode {
         flickMotor.setPower(0);
 
         while (opModeIsActive()) {
+            follower.update();
+            fusedPose.update();
+            Pose limelightPose = fusedPose.getRobotPose(true); // CONVERTED pose
+            if (limelightPose != null) {
+                follower.setPose(limelightPose);
+            }
 
             double drive = -gamepad1.left_stick_y;
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
-            drivetrain.driveMecanum(strafe, drive, turn);
 
             //launch motor - left bumper
             //flick servo - right bumper
@@ -148,18 +168,19 @@ public class Tele extends LinearOpMode {
             //spindexer shoot green - a
             //launch all three - left arrow (dpad)
             //reverse intake - left trigger
-            intakePressed      = gamepad1.dpad_up && !prevX;
+            intakePressed      = gamepad1.dpad_up;
             aimGreenPressed    = gamepad1.a && !prevA;
             aimPurplePressed   = gamepad1.b && !prevB;
             shootPressed       = gamepad1.right_bumper; // && !prevB;
             runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
-            intakePowerReverse = (gamepad1.left_trigger >= 0.3f && !prevLeftTrigger) != intakePowerReverse;
+            intakePowerReverse = (gamepad1.x && !prevX) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
 
             prevA = gamepad1.a;
             prevY = gamepad1.y;
             prevB = gamepad1.b;
+            prevX = gamepad1.x;
             prevLeftBumper = gamepad1.left_bumper;
             prev2LeftBumper = gamepad2.left_bumper;
             prevRightBumper = gamepad1.right_bumper;
@@ -217,12 +238,50 @@ public class Tele extends LinearOpMode {
 
             }
 
+            updateGoalHeading();
 
-            if (gamepad1.x) {
-                intakeActive = false;
-                waitingForBall = false;
-                rotateToIndex(0);
-            }
+            headingLock = gamepad1.left_bumper;
+
+            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
+            double v = getHeadingError();
+            controller.updateError(v);
+
+            double otherV = 0;
+
+            if (headingLock) {
+                otherV = controller.run();
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
+            } else
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+
+
+//            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
+//            double v = getHeadingError();
+//            controller.updateError(v);
+//
+//            double otherV = turn;
+//            if (headingLock) {
+//                otherV = controller.run();
+//                otherV = -1*otherV;
+//                drivetrain.setMode(DcMotor.ZeroPowerBehavior.FLOAT);
+//            } else {
+//                drivetrain.setMode(DcMotor.ZeroPowerBehavior.BRAKE);
+//            }
+//            telemetry.addData("otherV", otherV);
+//
+//            drivetrain.driveMecanum(strafe, drive, otherV);
+
+
+//            if (gamepad1.x) {
+//                headingLock = true;
+//            }
+
+
+//            if (gamepad1.x) {
+//                intakeActive = false;
+//                waitingForBall = false;
+//                rotateToIndex(0);
+//            }
 
             if (nextIntake2 && !prevNextIntake2) {
                 index++;
@@ -449,6 +508,20 @@ public class Tele extends LinearOpMode {
         }
     }
 
+    public double getHeadingError() {
+        double headingError = MathFunctions.getTurnDirection(follower.getPose().getHeading(), targetHeading) * MathFunctions.getSmallestAngleDifference(follower.getPose().getHeading(), targetHeading);
+        return headingError;
+    }
+
+    public void updateGoalHeading() {
+        Pose robotPos = follower.getPose();
+        double angleToTarget = MathFunctions.normalizeAngle(Math.atan2(
+                TARGET_Y - robotPos.getY(),
+                TARGET_X - robotPos.getX()
+        ));
+        targetHeading = angleToTarget;
+    }
+
     // ROTATION
 
     private void rotateToIndex(int target) {
@@ -550,6 +623,19 @@ public class Tele extends LinearOpMode {
 
         follower = Constants.createFollower(hardwareMap);
         follower.setDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.15, 0.001, 0.00001, 0.6, 0.003));
+        follower.setStartingPose(startPose == null ? new Pose() : startPose);
+        follower.update();
+
+        follower.startTeleopDrive(true);
+        follower.update();
+
+        follower.updateDrivetrain();
+
+        fusedPose = new FusedPose(hardwareMap, startPose);
+
+        targetHeading = Math.toRadians(180); // Radians
+        controller = new PIDFController(follower.constants.coefficientsHeadingPIDF);
+        headingLock = false;
 
         spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

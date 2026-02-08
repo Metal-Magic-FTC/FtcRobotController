@@ -26,7 +26,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!! States Red Far 9 Ball")
+@Autonomous(name = "!!!!! MM States Red Far 9 Ball")
 public class RedFarStates9 extends LinearOpMode {
 
     private int index = 0;
@@ -110,7 +110,7 @@ public class RedFarStates9 extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(3500);// TURRRRREETTTT
+        launchMotor.setVelocity(2300);// TURRRRREETTTT
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -119,89 +119,91 @@ public class RedFarStates9 extends LinearOpMode {
 
         Ball[] pattern = new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};
 
-        //aimToPattern(pattern);
+        aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 4000, 0.8);
+        runPath(paths.shoot(), 4000, 0.5);
 
         // ---- SHOOT ----
-        shootAllPattern(pattern);
-        //shootAll();
+        //shootAllPattern(pattern);
+        shootAll();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
         resetSlots();
 
-        // ---- INTAKE 1–3 ----
-        intakeActive = true;
-        rotateToIndex(0);
-        runPathWithIntake(paths.toIntake1(), 0, 1);
-        resetSlots();
+//        // ---- INTAKE 1–3 ----
+//        intakeActive = true;
+//        rotateToIndex(0);
+//        runPathWithIntake(paths.toIntake1(), 0, 1);
+//        resetSlots();
+//
+//        runPathWithIntake(paths.intakeball1(), 0, 0.21);
+//        double startTime = System.currentTimeMillis();
+//        while (System.currentTimeMillis() < startTime + 500) {
+//            waitingForBall = true;
+//            intakeActive = true;
+//            intake();
+//        }
+//
+//
+//
+//        //runPathWithIntake(paths.gate(), 750, 1);
+//
+//        intakeMotor.setPower(-0.6);
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.PURPLE;
+//        slots[2] = Ball.GREEN;
+//
+//        //aimToPattern(pattern);
+//
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.PURPLE;
+//        slots[2] = Ball.GREEN;
+//
+//        runPath(paths.shoot2(), 0, 0.5);
+//
+//        // ---- SHOOT ----
+//        shootAllPattern(pattern);
+//        //shootAll();
+//
+//        intakeMotor.setPower(-0.6);
+//        intakeActive = false;
+//        rotateToIndex(0);
+//        resetSlots();
 
-        runPathWithIntake(paths.intakeball1(), 0, 0.21);
-        double startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + 500) {
-            waitingForBall = true;
-            intakeActive = true;
-            intake();
-        }
+        runPath(paths.leaveNew(), 0, 1);
 
-
-
-        //runPathWithIntake(paths.gate(), 750, 1);
-
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        //aimToPattern(pattern);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        runPath(paths.shoot2(), 0, 0.5);
-
-        // ---- SHOOT ----
-        shootAllPattern(pattern);
-        //shootAll();
-
-        intakeMotor.setPower(-0.6);
-        intakeActive = true;
-        rotateToIndex(0);
-        resetSlots();
-
-        // ---- INTAKE 4–6 ----
-        intakeActive = true;
-        rotateToIndex(0);
-        runPathWithIntake(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intakeball4(), 0, 0.21);
-
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        //aimToPattern(pattern);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        runPath(paths.shoot3(), 0, 0.8);
-
-        shootAllPattern(pattern);
-        //shootAll();
-
-        intakeMotor.setPower(-0.6);
-        intakeActive = false;
-        rotateToIndex(0);
-        resetSlots();
-
-        runPath(paths.leave(), 0, 1);
+//        // ---- INTAKE 4–6 ----
+//        intakeActive = true;
+//        rotateToIndex(0);
+//        runPathWithIntake(paths.toIntake2(), 0, 1);
+//        runPathWithIntake(paths.intakeball4(), 0, 0.21);
+//
+//        intakeMotor.setPower(-0.6);
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.GREEN;
+//        slots[2] = Ball.PURPLE;
+//
+//        //aimToPattern(pattern);
+//
+//        slots[0] = Ball.PURPLE;
+//        slots[1] = Ball.GREEN;
+//        slots[2] = Ball.PURPLE;
+//
+//        runPath(paths.shoot3(), 0, 0.8);
+//
+//        shootAllPattern(pattern);
+//        //shootAll();
+//
+//        intakeMotor.setPower(-0.6);
+//        intakeActive = false;
+//        rotateToIndex(0);
+//        resetSlots();
+//
+//        runPath(paths.leave(), 0, 1);
 
 //        runPathWithIntake(paths.toIntake3(), 0, 1);
 //        runPathWithIntake(paths.intake3(), 0, 0.21);
@@ -303,10 +305,16 @@ public class RedFarStates9 extends LinearOpMode {
         return -1;
     }
 
+    private boolean spinAtTarget() {
+        return Math.abs(
+                spinMotor.getTargetPosition() - spinMotor.getCurrentPosition()
+        ) <= 8;
+    }
+
     private void intake() {
 
         // spindexer logic (COLOR-BASED DETECTION) with delay
-        if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
+        if (waitingForBall && intakeActive && spinAtTarget() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
             if (detected != Ball.EMPTY) {
@@ -539,22 +547,16 @@ public class RedFarStates9 extends LinearOpMode {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
+        // reject far / floor
         float total = r + g + b;
-
-        // HARD gate: no ball unless enough reflected light
-       // if (total < 0.08f) return Ball.EMPTY;
-
-        // Require strong dominance to avoid air/ambient
-        float dominanceRatio = 1.15f;
-        float minChannel = 0.06f;
-
-        if (total < 0.07f) return Ball.EMPTY;
+        if (total < 0.03f) return Ball.EMPTY;
 
         // PURPLE: blue-dominant (keep strict)
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
+        if (b > r * 1.2f && b > g * 1.1f && b > 0.12f) {
             return Ball.PURPLE;
         }
-        // GREEN (green-dominant)
+
+        // GREEN: looser dominance + absolute floor
         if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
             return Ball.GREEN;
         }
@@ -618,7 +620,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         spinMotor.setTargetPosition(startTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.23);
+        spinMotor.setPower(0.2);
 
         waitForSpindexer();
 
@@ -634,7 +636,7 @@ public class RedFarStates9 extends LinearOpMode {
 
         spinMotor.setTargetPosition(sweepTarget);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.23);
+        spinMotor.setPower(0.20);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             // let balls fire naturally
@@ -651,48 +653,38 @@ public class RedFarStates9 extends LinearOpMode {
 
         index = endSlot;
     }
-//    private void shootAll() {
-//
-//        intakeMotor.setPower(0);
-//
-//        int startPosition = spinMotor.getCurrentPosition();
-//
-//        spinFlickServo.setPower(1);
-//        flickerServo.setPosition(flickPositionDown);
-//        launchMotor.setPower(1);
-//        sleep(400);
-//
-//        flickerServo.setPosition(flickPositionUp);
-//        sleep(250);
-//        flickerServo.setPosition(flickPositionDown);
-//        sleep(250);
-//
-//        moveSpindexerTo(startPosition+250, 0.38);
-//
-//        flickerServo.setPosition(flickPositionUp);
-//        sleep(240);
-//        flickerServo.setPosition(flickPositionDown);
-//        sleep(240);
-//
-//        moveSpindexerTo(startPosition+500, 0.38);
-//
-//        flickerServo.setPosition(flickPositionUp);
-//        sleep(250);
-//        flickerServo.setPosition(flickPositionDown);
-//        sleep(1000);
-//
-//
-//        spinFlickServo.setPower(0);
-//
-//        slots[0] = Ball.EMPTY;
-//        slots[1] = Ball.EMPTY;
-//        slots[2] = Ball.EMPTY;
-//
-//        index = (index + 2) % 3;
-//
-//        intakeMotor.setPower(-0.6);
-//
-//    }
+    private void shootAll() {
+
+        intakeMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        //launchMotor.setVelocity(3000);
+        sleep(200);
+
+        int endPosition = spinMotor.getCurrentPosition() + 500;
+        spinMotor.setTargetPosition(endPosition);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(0.07);
+
+        while (opModeIsActive() && spinMotor.isBusy()) {
+            // let balls fire naturally
+        }
+
+        spinMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        sleep(200);
+        flickMotor.setPower(0);
+
+        slots[0] = Ball.EMPTY;
+        slots[1] = Ball.EMPTY;
+        slots[2] = Ball.EMPTY;
+
+        index = (index + 2) % 3;
+
+        intakeMotor.setPower(-0.6);
+
+    }
 
     private void moveSpindexerTo(int ticks, double power) {
         spinMotor.setTargetPosition(ticks);
@@ -740,7 +732,7 @@ public class RedFarStates9 extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(350.0, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(500, 0, 0, 12.9);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 
