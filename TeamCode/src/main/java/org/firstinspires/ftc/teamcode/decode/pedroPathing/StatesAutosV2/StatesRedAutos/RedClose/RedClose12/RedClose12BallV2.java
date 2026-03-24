@@ -27,6 +27,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Disabled
 public class RedClose12BallV2 extends LinearOpMode {
 
+    // test
     private int index = 0;
 
     private float gain = 20;
