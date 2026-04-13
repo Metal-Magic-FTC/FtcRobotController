@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.summer26.testAuto;
+package org.firstinspires.ftc.teamcode.summer26.aarushTests.tests;
 
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
