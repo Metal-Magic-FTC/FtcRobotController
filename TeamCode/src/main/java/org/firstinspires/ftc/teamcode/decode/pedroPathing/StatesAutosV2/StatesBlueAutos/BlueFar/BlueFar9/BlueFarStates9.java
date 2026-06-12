@@ -34,6 +34,7 @@ public class BlueFarStates9 extends LinearOpMode {
 
     // ---------------- INTAKE, TRANSFER, SCORING ----------------
 
+        
     private DcMotor spinMotor;
     private DcMotorEx launchMotor;
     private DcMotor intakeMotor;
