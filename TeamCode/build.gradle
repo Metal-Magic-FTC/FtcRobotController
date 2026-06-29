@@ -42,4 +42,6 @@ dependencies {
 
     implementation project(':FtcRobotController')
     implementation 'androidx.xr.runtime:runtime:1.0.0-alpha07'
+    implementation 'org.tensorflow:tensorflow-lite:2.13.0'
+
 }
