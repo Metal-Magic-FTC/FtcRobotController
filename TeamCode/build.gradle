@@ -42,4 +42,10 @@ dependencies {
 
     implementation project(':FtcRobotController')
     implementation 'androidx.xr.runtime:runtime:1.0.0-alpha07'
+    // NOTE: must stay below 2.12.0 — tensorflow-lite 2.12+ references the
+    // strtod_l libc symbol, which doesn't exist on Android 7.1.1 (API 25),
+    // the OS on REV Control Hub v1.0. Using 2.12+ throws UnsatisfiedLinkError
+    // at Interpreter construction and crashes the OpMode on INIT.
+    implementation 'org.tensorflow:tensorflow-lite:2.9.0'
+
 }
