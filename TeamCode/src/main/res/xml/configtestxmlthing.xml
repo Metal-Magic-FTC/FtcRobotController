@@ -14,7 +14,7 @@
     on a label somewhere visible on the hub - to make it straightforward
     to swap in case one becomes damaged.
 
-    If you need to use two REV expansion hubs, you will need to change
+    If you need to use two REV expansion hubs, you will need to changea
     the port number of at least one to something other than the default
     value of ‘2’, see the documentation from FIRST on how to do this at
 
