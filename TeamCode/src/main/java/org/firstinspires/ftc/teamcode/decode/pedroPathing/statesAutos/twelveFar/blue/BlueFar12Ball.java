@@ -1,20 +1,30 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.blue;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.*;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.blue.GeneratedPathsBlue12BallCloseV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! MM STATES Red Close 12 Ball")
-public class RedClose12Ball extends LinearOpMode {
+@Autonomous(name = "!!!!!!!! MM STATES Blue Close 12 Ball")
+public class BlueFar12Ball extends LinearOpMode {
 
     private int index = 0;
 
@@ -25,7 +35,7 @@ public class RedClose12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsRed12BallCloseV3 paths;
+    private GeneratedPathsBlue12BallCloseV3 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -58,11 +68,6 @@ public class RedClose12Ball extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
-    private boolean sensorCleared = true; // sensor has read empty since the last accepted ball
-
-    private static final long BALL_DEBOUNCE_MS = 250; // min gap between two accepted ball detections
-    private long lastAcceptedTime = 0;
-
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -75,8 +80,8 @@ public class RedClose12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsRed12BallCloseV3.START_POSE);
-        paths = new GeneratedPathsRed12BallCloseV3(follower);
+        follower.setPose(GeneratedPathsBlue12BallCloseV3.START_POSE);
+        paths = new GeneratedPathsBlue12BallCloseV3(follower);
         hoodServo.setPosition(0.80);
 
 
@@ -93,8 +98,8 @@ public class RedClose12Ball extends LinearOpMode {
 
         //runPath(paths.scan(), 0, 1.0);
 
-        Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
-        pattern = getPatternFromTag();
+        runPath(paths.scan(), 0, 0.9);
+        Ball[] pattern = getPatternFromTag();
 
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
@@ -284,37 +289,41 @@ public class RedClose12Ball extends LinearOpMode {
     }
 
     private void intake() {
-        if (!intakeActive) return;
 
-        // ---- DETECT ----
-        if (waitingForBall && spinAtTarget() && !waitingToRotate) {
+        // spindexer logic (COLOR-BASED DETECTION) with delay
+        if (waitingForBall && intakeActive && spinAtTarget() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
-            boolean debounceOk = System.currentTimeMillis() - lastAcceptedTime > BALL_DEBOUNCE_MS;
-
-            if (detected != Ball.EMPTY && debounceOk) {
+            if (detected != Ball.EMPTY) {
                 slots[index] = detected;
                 waitingForBall = false;
-                lastAcceptedTime = System.currentTimeMillis();
 
-                nextIndexAfterDelay = findNextEmpty();
+                // compute next index, but don't rotate yet
+                int nextEmpty = findNextEmpty();
+                nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                // NOTE: intake motor stays ON here — don't cut power, keep the ball moving
+                //intakeMotor.setPower(0);
             }
         }
 
-        // ---- INDEX + KEEP INTAKING ----
-        if (waitingToRotate
-                && System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
-
-            if (nextIndexAfterDelay != -1) {
-                rotateToIndex(nextIndexAfterDelay);
+        // after COLOR_DELAY_MS, rotate if needed
+        if (waitingToRotate) {
+            if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+//                int nextEmpty = findNextEmpty();
+//                nextIndexAfterDelay = nextEmpty;
+                if (nextIndexAfterDelay != -1) {
+                    rotateToIndex(nextIndexAfterDelay);
+                    waitingForBall = true; // continue intake
+                    intakeMotor.setPower(-0.6);
+                } else {
+//                    intakeActive = false;
+//                    rotateToIndex(0); // back to home
+                    // Stay in intake position, keep waiting
+                    waitingForBall = true;
+                }
+                waitingToRotate = false; // reset
             }
-
-            waitingForBall = true;
-            intakeMotor.setPower(-0.6); // always resume, even if slots temporarily look full
-            waitingToRotate = false;
         }
     }
 
@@ -414,9 +423,7 @@ public class RedClose12Ball extends LinearOpMode {
         //launchMotor.setVelocity(900);
         intakeActive = true;
         waitingForBall = true;
-        waitingToRotate = false;
-        sensorCleared = true;
-        lastAcceptedTime = 0;
+
         intakeMotor.setPower(-0.6);
 
         follower.setMaxPower(speed);
