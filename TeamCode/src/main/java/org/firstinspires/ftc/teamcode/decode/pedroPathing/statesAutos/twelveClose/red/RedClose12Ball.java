@@ -60,6 +60,9 @@ public class RedClose12Ball extends LinearOpMode {
 
     private boolean sensorCleared = true; // sensor has read empty since the last accepted ball
 
+    private static final long BALL_DEBOUNCE_MS = 250; // min gap between two accepted ball detections
+    private long lastAcceptedTime = 0;
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -281,26 +284,23 @@ public class RedClose12Ball extends LinearOpMode {
     }
 
     private void intake() {
-
         if (!intakeActive) return;
 
-        // ---- DETECT (edge-triggered: only count a NEW ball after the sensor has cleared) ----
+        // ---- DETECT ----
         if (waitingForBall && spinAtTarget() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
-            if (detected == Ball.EMPTY) {
-                // sensor is clear -> ready to accept the next ball
-                sensorCleared = true;
-            } else if (sensorCleared) {
-                // a genuinely new ball has arrived
+            boolean debounceOk = System.currentTimeMillis() - lastAcceptedTime > BALL_DEBOUNCE_MS;
+
+            if (detected != Ball.EMPTY && debounceOk) {
                 slots[index] = detected;
                 waitingForBall = false;
-                sensorCleared = false;
+                lastAcceptedTime = System.currentTimeMillis();
 
                 nextIndexAfterDelay = findNextEmpty();
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                intakeMotor.setPower(0); // brief pause so the ball seats while we index
+                // NOTE: intake motor stays ON here — don't cut power, keep the ball moving
             }
         }
 
@@ -312,11 +312,8 @@ public class RedClose12Ball extends LinearOpMode {
                 rotateToIndex(nextIndexAfterDelay);
             }
 
-            // ALWAYS resume the intake and keep waiting for the next ball,
-            // even if every slot currently looks full, so a ball in the
-            // throat is never stranded.
             waitingForBall = true;
-            intakeMotor.setPower(-0.6);
+            intakeMotor.setPower(-0.6); // always resume, even if slots temporarily look full
             waitingToRotate = false;
         }
     }
@@ -419,6 +416,7 @@ public class RedClose12Ball extends LinearOpMode {
         waitingForBall = true;
         waitingToRotate = false;
         sensorCleared = true;
+        lastAcceptedTime = 0;
         intakeMotor.setPower(-0.6);
 
         follower.setMaxPower(speed);
