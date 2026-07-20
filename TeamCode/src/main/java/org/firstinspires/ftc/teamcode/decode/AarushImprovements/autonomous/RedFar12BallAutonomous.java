@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
-import org.firstinspires.ftc.teamcode.decode.AarushImprovements.paths.RedClose12Paths;
+import org.firstinspires.ftc.teamcode.decode.AarushImprovements.paths.RedFar12Paths;
 import org.firstinspires.ftc.teamcode.decode.AarushImprovements.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.decode.AarushImprovements.subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.decode.AarushImprovements.util.MotifDecoder;
@@ -25,30 +25,12 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import java.util.Arrays;
 
 /**
- * Red close 12-ball sorted autonomous (AarushImprovements copy).
- *
- * <p>This is the cleanup of the auto that placed 9th in the Blue Crab division
- * at the Chesapeake Championship. The on-robot behavior is preserved 1:1;
- * cleanup targets readability and reuse only.</p>
- *
- * <h2>Sequence</h2>
- * <ol>
- *     <li>Preload [PURPLE, GREEN, PURPLE], aim at motif, shoot 3.</li>
- *     <li>Intake 3 from human player station, shoot 3.</li>
- *     <li>Intake 3 from far spike mark, shoot 3.</li>
- *     <li>Park in the leave zone for leave points.</li>
- * </ol>
- *
- * <h2>Notes</h2>
- * <ul>
- *     <li>Auto-detects the motif from the obelisk AprilTag (Limelight pipeline 3).</li>
- *     <li>Color sensor gain / thresholds are tuned for the V4 Magic Machine's
- *         REV color sensors — see {@link #detectColor()}.</li>
- *     <li>The turret is driven to a fixed angle for the close-side shoot.</li>
- * </ul>
+ * Red far 12-ball sorted autonomous for the DECODE game (AarushImprovements copy).
+ * 
+ * <p>Starts at the far wall (opposite the Red alliance station) and traverses the full field.</p>
  */
-@Autonomous(name = "Aarush Red Close 12 Ball", group = "AarushImprovements")
-public class RedClose12BallAutonomous extends LinearOpMode {
+@Autonomous(name = "Aarush Red Far 12 Ball", group = "AarushImprovements")
+public class RedFar12BallAutonomous extends LinearOpMode {
 
     // ---------------- TUNABLE CONSTANTS ----------------
 
@@ -64,10 +46,9 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     private static final double FLICK_UP_POS = 0.80;
     private static final double HOOD_DEFAULT_POS = 0.80;
 
-    /** Per-ball flick: pause after drop, then lift. */
     private static final long FLICK_LIFT_MS = 240;
     private static final long FLICK_PAUSE_MS = 250;
-    private static final long FLICK_END_MS = 1_000;
+    private static final long FLICK_END_MS = 1000;
     private static final long FLICK_FIRST_DROP_MS = 400;
 
     private static final float COLOR_SENSOR_GAIN = 20.0f;
@@ -78,7 +59,7 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     private static final int TURRET_SHOOT_TICKS = 80;
     private static final int TURRET_LEAVE_TICKS = 0;
     private static final int LIMELIGHT_MOTIF_PIPELINE = 3;
-    private static final long APRILTAG_TIMEOUT_MS = 2_000;
+    private static final long APRILTAG_TIMEOUT_MS = 2000;
     private static final int SPINDEXER_TICKS_PER_REV = 750;
 
     // ---------------- STATE ----------------
@@ -97,7 +78,7 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     // ---------------- HARDWARE ----------------
 
     private Follower follower;
-    private RedClose12Paths paths;
+    private RedFar12Paths paths;
     private Limelight3A limelight;
     private MecanumDrive drivetrain;
 
@@ -119,15 +100,14 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         preloadSlots();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(RedClose12Paths.START_POSE);
-        paths = new RedClose12Paths(follower);
+        follower.setPose(RedFar12Paths.START_POSE);
+        paths = new RedFar12Paths(follower);
 
         hoodServo.setPosition(HOOD_DEFAULT_POS);
-        telemetry.addLine("Ready");
+        telemetry.addLine("Ready - Red Far 12 Ball");
         telemetry.update();
 
         waitForStart();
-        spinFlickServo.setPower(1);
         if (isStopRequested()) return;
 
         runAutonomous();
@@ -146,24 +126,26 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         reportMotif(motif);
         applyMotifToSpindexer(motif);
 
+        runPath(paths.scan(), 0, 0.9);
         runPath(paths.shoot(), 50, 0.8);
         shootAll();
 
         startIntakeAt(0);
 
-        // ---- INTAKE 1–3 (human player station) ----
+        // ---- INTAKE 1-3 (human player station) ----
         runPathWithIntake(paths.toIntake1(), 0, 1.0);
         runPathWithIntake(paths.intake1(), 0, 0.21);
         pauseIntaking(500);
 
         forceLoadSlots(Spindexer.Ball.PURPLE, Spindexer.Ball.PURPLE, Spindexer.Ball.GREEN);
         applyMotifToSpindexer(motif);
-        runPath(paths.intake1ToShoot2(), 250, 0.5);
+        runPath(paths.gate(), 750, 0.5);
+        runPath(paths.shoot2(), 250, 0.5);
         shootAll();
 
         startIntakeAt(0);
 
-        // ---- INTAKE 4–6 (far spike mark) ----
+        // ---- INTAKE 4-6 (far spike mark) ----
         runPathWithIntake(paths.toIntake2(), 0, 1.0);
         runPathWithIntake(paths.intake2(), 0, 0.21);
 
@@ -173,6 +155,15 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         shootAll();
 
         startIntakeAt(0);
+
+        // ---- INTAKE 7-9 (far spike mark continued) ----
+        runPathWithIntake(paths.toIntake3(), 0, 1.0);
+        runPathWithIntake(paths.intake3(), 0, 0.21);
+
+        forceLoadSlots(Spindexer.Ball.GREEN, Spindexer.Ball.PURPLE, Spindexer.Ball.PURPLE);
+        applyMotifToSpindexer(motif);
+        runPath(paths.shoot4(), 250, 0.8);
+        shootAll();
 
         // ---- LEAVE ----
         turretRunToPosition(TURRET_LEAVE_TICKS);
@@ -225,7 +216,7 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         telemetry.update();
     }
 
-    // ---------------- SPINDEXER (POSITION) ----------------
+    // ---------------- SPINDEXER ----------------
 
     private void rotateToIndex(int target) {
         spindexerIndex = target;
@@ -288,10 +279,6 @@ public class RedClose12BallAutonomous extends LinearOpMode {
 
     // ---------------- SHOOTING ----------------
 
-    /**
-     * Launches all 3 balls in order, advancing the spindexer 250 ticks
-     * after each shot. After the third ball, resets slots and re-arms intake.
-     */
     private void shootAll() {
         intakeMotor.setPower(0);
         int startPosition = spinMotor.getCurrentPosition();
@@ -326,7 +313,7 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(power);
         while (opModeIsActive() && spinMotor.isBusy()) {
-            // balls fire naturally as the spindexer rotates
+            // balls fire as spindexer rotates
         }
     }
 
@@ -380,7 +367,7 @@ public class RedClose12BallAutonomous extends LinearOpMode {
             }
             sleep(15);
         }
-        return 22; // default motif (PPG)
+        return 22;
     }
 
     // ---------------- COLOR DETECTION ----------------

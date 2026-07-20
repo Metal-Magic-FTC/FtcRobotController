@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
-import org.firstinspires.ftc.teamcode.decode.AarushImprovements.paths.RedClose12Paths;
+import org.firstinspires.ftc.teamcode.decode.AarushImprovements.paths.BlueFar12Paths;
 import org.firstinspires.ftc.teamcode.decode.AarushImprovements.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.decode.AarushImprovements.subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.decode.AarushImprovements.util.MotifDecoder;
@@ -25,30 +25,13 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import java.util.Arrays;
 
 /**
- * Red close 12-ball sorted autonomous (AarushImprovements copy).
- *
- * <p>This is the cleanup of the auto that placed 9th in the Blue Crab division
- * at the Chesapeake Championship. The on-robot behavior is preserved 1:1;
- * cleanup targets readability and reuse only.</p>
- *
- * <h2>Sequence</h2>
- * <ol>
- *     <li>Preload [PURPLE, GREEN, PURPLE], aim at motif, shoot 3.</li>
- *     <li>Intake 3 from human player station, shoot 3.</li>
- *     <li>Intake 3 from far spike mark, shoot 3.</li>
- *     <li>Park in the leave zone for leave points.</li>
- * </ol>
- *
- * <h2>Notes</h2>
- * <ul>
- *     <li>Auto-detects the motif from the obelisk AprilTag (Limelight pipeline 3).</li>
- *     <li>Color sensor gain / thresholds are tuned for the V4 Magic Machine's
- *         REV color sensors — see {@link #detectColor()}.</li>
- *     <li>The turret is driven to a fixed angle for the close-side shoot.</li>
- * </ul>
+ * Blue far 12-ball sorted autonomous for the DECODE game (AarushImprovements copy).
+ * 
+ * <p>Starts at the far wall (opposite the Blue alliance station) and traverses the full field.
+ * Mirrors the Red far auto across the X-axis.</p>
  */
-@Autonomous(name = "Aarush Red Close 12 Ball", group = "AarushImprovements")
-public class RedClose12BallAutonomous extends LinearOpMode {
+@Autonomous(name = "Aarush Blue Far 12 Ball", group = "AarushImprovements")
+public class BlueFar12BallAutonomous extends LinearOpMode {
 
     // ---------------- TUNABLE CONSTANTS ----------------
 
@@ -64,10 +47,9 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     private static final double FLICK_UP_POS = 0.80;
     private static final double HOOD_DEFAULT_POS = 0.80;
 
-    /** Per-ball flick: pause after drop, then lift. */
     private static final long FLICK_LIFT_MS = 240;
     private static final long FLICK_PAUSE_MS = 250;
-    private static final long FLICK_END_MS = 1_000;
+    private static final long FLICK_END_MS = 1000;
     private static final long FLICK_FIRST_DROP_MS = 400;
 
     private static final float COLOR_SENSOR_GAIN = 20.0f;
@@ -75,20 +57,16 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     private static final float COLOR_DOMINANCE = 1.15f;
     private static final float COLOR_MIN_TOTAL = 0.08f;
 
-    private static final int TURRET_SHOOT_TICKS = 80;
+    private static final int TURRET_SHOOT_TICKS = -76;   // flipped for Blue
     private static final int TURRET_LEAVE_TICKS = 0;
     private static final int LIMELIGHT_MOTIF_PIPELINE = 3;
-    private static final long APRILTAG_TIMEOUT_MS = 2_000;
-    private static final int SPINDEXER_TICKS_PER_REV = 750;
+    private static final long APRILTAG_TIMEOUT_MS = 2000;
 
     // ---------------- STATE ----------------
 
     private int spindexerIndex = 0;
     private boolean intakeActive = false;
     private boolean waitingForBall = false;
-    private boolean waitingToRotate = false;
-    private long colorDetectedTime = 0;
-    private int nextIndexAfterDelay = -1;
 
     private final Spindexer.Ball[] slots = {
             Spindexer.Ball.EMPTY, Spindexer.Ball.EMPTY, Spindexer.Ball.EMPTY
@@ -97,7 +75,7 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     // ---------------- HARDWARE ----------------
 
     private Follower follower;
-    private RedClose12Paths paths;
+    private BlueFar12Paths paths;
     private Limelight3A limelight;
     private MecanumDrive drivetrain;
 
@@ -119,15 +97,14 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         preloadSlots();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(RedClose12Paths.START_POSE);
-        paths = new RedClose12Paths(follower);
+        follower.setPose(BlueFar12Paths.START_POSE);
+        paths = new BlueFar12Paths(follower);
 
         hoodServo.setPosition(HOOD_DEFAULT_POS);
-        telemetry.addLine("Ready");
+        telemetry.addLine("Ready - Blue Far 12 Ball");
         telemetry.update();
 
         waitForStart();
-        spinFlickServo.setPower(1);
         if (isStopRequested()) return;
 
         runAutonomous();
@@ -146,24 +123,26 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         reportMotif(motif);
         applyMotifToSpindexer(motif);
 
+        runPath(paths.scan(), 0, 0.9);
         runPath(paths.shoot(), 50, 0.8);
         shootAll();
 
         startIntakeAt(0);
 
-        // ---- INTAKE 1–3 (human player station) ----
+        // ---- INTAKE 1-3 (human player station) ----
         runPathWithIntake(paths.toIntake1(), 0, 1.0);
         runPathWithIntake(paths.intake1(), 0, 0.21);
         pauseIntaking(500);
 
         forceLoadSlots(Spindexer.Ball.PURPLE, Spindexer.Ball.PURPLE, Spindexer.Ball.GREEN);
         applyMotifToSpindexer(motif);
-        runPath(paths.intake1ToShoot2(), 250, 0.5);
+        runPath(paths.gate(), 750, 0.5);
+        runPath(paths.shoot2(), 250, 0.5);
         shootAll();
 
         startIntakeAt(0);
 
-        // ---- INTAKE 4–6 (far spike mark) ----
+        // ---- INTAKE 4-6 (far spike mark) ----
         runPathWithIntake(paths.toIntake2(), 0, 1.0);
         runPathWithIntake(paths.intake2(), 0, 0.21);
 
@@ -173,6 +152,15 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         shootAll();
 
         startIntakeAt(0);
+
+        // ---- INTAKE 7-9 (far spike mark continued) ----
+        runPathWithIntake(paths.toIntake3(), 0, 1.0);
+        runPathWithIntake(paths.intake3(), 0, 0.21);
+
+        forceLoadSlots(Spindexer.Ball.GREEN, Spindexer.Ball.PURPLE, Spindexer.Ball.PURPLE);
+        applyMotifToSpindexer(motif);
+        runPath(paths.shoot4(), 250, 0.8);
+        shootAll();
 
         // ---- LEAVE ----
         turretRunToPosition(TURRET_LEAVE_TICKS);
@@ -225,29 +213,14 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         telemetry.update();
     }
 
-    // ---------------- SPINDEXER (POSITION) ----------------
+    // ---------------- SPINDEXER ----------------
 
     private void rotateToIndex(int target) {
         spindexerIndex = target;
         int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
-        int targetPos = closestModular(base, spinMotor.getCurrentPosition());
-        spinMotor.setTargetPosition(targetPos);
+        spinMotor.setTargetPosition(base);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(SPIN_MOTOR_SPEED);
-    }
-
-    private int closestModular(int mod, int current) {
-        int best = mod;
-        int minDiff = Integer.MAX_VALUE;
-        for (int k = -2; k <= 2; k++) {
-            int candidate = mod + SPINDEXER_TICKS_PER_REV * k;
-            int diff = Math.abs(candidate - current);
-            if (diff < minDiff) {
-                minDiff = diff;
-                best = candidate;
-            }
-        }
-        return best;
+        spinMotor.setPower(0.38);
     }
 
     private int findNextEmpty() {
@@ -261,73 +234,42 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     // ---------------- INTAKE LOOP ----------------
 
     private void tickIntake() {
-        if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
+        if (waitingForBall && intakeActive && !spinMotor.isBusy()) {
             Spindexer.Ball detected = detectColor();
             if (detected != Spindexer.Ball.EMPTY) {
                 slots[spindexerIndex] = detected;
                 waitingForBall = false;
-                nextIndexAfterDelay = findNextEmpty();
-                colorDetectedTime = System.currentTimeMillis();
-                waitingToRotate = true;
-                intakeMotor.setPower(0);
+                int nextEmpty = findNextEmpty();
+                if (nextEmpty != -1) {
+                    rotateToIndex(nextEmpty);
+                    waitingForBall = true;
+                    intakeMotor.setPower(INTAKE_POWER);
+                } else {
+                    waitingForBall = true;
+                }
             }
-        }
-
-        if (waitingToRotate
-                && System.currentTimeMillis() - colorDetectedTime >= FLICK_PAUSE_MS) {
-            if (nextIndexAfterDelay != -1) {
-                rotateToIndex(nextIndexAfterDelay);
-                waitingForBall = true;
-                intakeMotor.setPower(INTAKE_POWER);
-            } else {
-                waitingForBall = true;
-            }
-            waitingToRotate = false;
         }
     }
 
     // ---------------- SHOOTING ----------------
 
-    /**
-     * Launches all 3 balls in order, advancing the spindexer 250 ticks
-     * after each shot. After the third ball, resets slots and re-arms intake.
-     */
     private void shootAll() {
         intakeMotor.setPower(0);
         int startPosition = spinMotor.getCurrentPosition();
 
         spinFlickServo.setPower(1);
         launchMotor.setVelocity(LAUNCH_VELOCITY);
-        fireOneBall(FLICK_FIRST_DROP_MS);
-
-        moveSpindexerTo(startPosition + 250, SPIN_MOTOR_SPEED);
-        fireOneBall(FLICK_PAUSE_MS);
-
-        moveSpindexerTo(startPosition + 500, SPIN_MOTOR_SPEED);
-        fireOneBall(FLICK_END_MS);
+        flickerServo.setPosition(FLICK_DOWN_POS);
+        sleep(400);
+        flickerServo.setPosition(FLICK_UP_POS);
+        sleep(250);
+        flickerServo.setPosition(FLICK_DOWN_POS);
+        sleep(1000);
 
         spinFlickServo.setPower(0);
         resetSlots();
         spindexerIndex = (spindexerIndex + 2) % 3;
         intakeMotor.setPower(INTAKE_POWER);
-    }
-
-    private void fireOneBall(long endPauseMs) {
-        flickerServo.setPosition(FLICK_DOWN_POS);
-        sleep(FLICK_FIRST_DROP_MS);
-        flickerServo.setPosition(FLICK_UP_POS);
-        sleep(FLICK_LIFT_MS);
-        flickerServo.setPosition(FLICK_DOWN_POS);
-        sleep(endPauseMs);
-    }
-
-    private void moveSpindexerTo(int ticks, double power) {
-        spinMotor.setTargetPosition(ticks);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(power);
-        while (opModeIsActive() && spinMotor.isBusy()) {
-            // balls fire naturally as the spindexer rotates
-        }
     }
 
     // ---------------- TURRET ----------------
@@ -354,21 +296,16 @@ public class RedClose12BallAutonomous extends LinearOpMode {
         follower.followPath(path);
         while (opModeIsActive() && follower.isBusy()) {
             follower.update();
-            waitingForBall = true;
-            intakeActive = true;
             tickIntake();
         }
         follower.breakFollowing();
-        if (stopDelayMs > 0) sleep(stopDelayMs);
         intakeActive = false;
-        waitingForBall = false;
-        launchMotor.setVelocity(LAUNCH_VELOCITY);
     }
 
     // ---------------- VISION ----------------
 
     private MotifDecoder.Motif readMotifFromLimelight() {
-        return MotifDecoder.fromAprilTagId(detectAprilTag(APRILTAG_TIMEOUT_MS));
+        return MotifDecoder.fromAprilTagId(detectAprilTag(2000));
     }
 
     private int detectAprilTag(long timeoutMs) {
@@ -380,7 +317,7 @@ public class RedClose12BallAutonomous extends LinearOpMode {
             }
             sleep(15);
         }
-        return 22; // default motif (PPG)
+        return 22;
     }
 
     // ---------------- COLOR DETECTION ----------------
@@ -396,13 +333,9 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     private Spindexer.Ball detectSingleSensor(NormalizedColorSensor sensor) {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
-        if (r + g + b < COLOR_MIN_TOTAL) return Spindexer.Ball.EMPTY;
-        if (b > COLOR_MIN_CHANNEL && b > r * COLOR_DOMINANCE && b > g * COLOR_DOMINANCE) {
-            return Spindexer.Ball.PURPLE;
-        }
-        if (g > COLOR_MIN_CHANNEL && g > r * COLOR_DOMINANCE && g > b * COLOR_DOMINANCE) {
-            return Spindexer.Ball.GREEN;
-        }
+        if (r + g + b < 0.08f) return Spindexer.Ball.EMPTY;
+        if (b > 0.06f && b > r * 1.15f && b > g * 1.15f) return Spindexer.Ball.PURPLE;
+        if (g > 0.06f && g > r * 1.15f && g > b * 1.15f) return Spindexer.Ball.GREEN;
         return Spindexer.Ball.EMPTY;
     }
 
@@ -411,51 +344,37 @@ public class RedClose12BallAutonomous extends LinearOpMode {
     private void initHardware() {
         drivetrain = new MecanumDrive(hardwareMap);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(LIMELIGHT_MOTIF_PIPELINE);
+        limelight.pipelineSwitch(3);
         limelight.start();
 
         spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
+        spinMotor.setDirection(DcMotor.Direction.REVERSE);
+        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
         intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
 
-        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        spinMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        intakeColor.setGain(COLOR_SENSOR_GAIN);
-        enableLight(intakeColor);
-        intakeColor2.setGain(COLOR_SENSOR_GAIN);
-        enableLight(intakeColor2);
-
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(DcMotorEx.Direction.FORWARD);
         launchMotor.setPIDFCoefficients(
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                new PIDFCoefficients(400, 0, 0, 12.9));
-        launchMotor.setVelocity(0);
-
-        hoodServo = hardwareMap.servo.get("hoodServo");
+                new PIDFCoefficients(300, 0, 0, 12.9));
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         spinFlickServo = hardwareMap.get(CRServo.class, "backFlick");
-        spinFlickServo.setDirection(DcMotorSimple.Direction.FORWARD);
-        spinFlickServo.setPower(0);
-
-        flickerServo = hardwareMap.servo.get("linearFlick");
-        flickerServo.setDirection(Servo.Direction.FORWARD);
-        flickerServo.setPosition(FLICK_DOWN_POS);
+        flickerServo = hardwareMap.get(Servo.class, "linearFlick");
+        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
 
         turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
+        turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        turretMotor.setPower(0);
+
+        intakeColor.setGain(20.0f);
+        enableLight(intakeColor);
+        intakeColor2.setGain(20.0f);
+        enableLight(intakeColor2);
     }
 
     private void enableLight(NormalizedColorSensor s) {
