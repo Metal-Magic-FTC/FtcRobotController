@@ -91,7 +91,7 @@ public class RedFar12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(1700);
+        launchMotor.setVelocity(3000);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -116,7 +116,7 @@ public class RedFar12Ball extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        // ---- INTAKE 1–3 ----
+        // Intake 1
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.toIntake1(), 0, 1);
@@ -124,81 +124,16 @@ public class RedFar12Ball extends LinearOpMode {
 
         runPathWithIntake(paths.intake1(), 0, 0.21);
         double startTime = System.currentTimeMillis();
-//        while (System.currentTimeMillis() < startTime + 500) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-
-
-
-        runPathWithIntake(paths.gate(), 750, 1);
-
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        aimToPattern(pattern);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        runPath(paths.shoot2(), 0, 1);
-
-        // ---- SHOOT ----
-        //shootAllPattern(pattern);
-        shootAll();
-
-        intakeMotor.setPower(-0.6);
+      
         intakeActive = true;
         rotateToIndex(0);
+        runPath(paths.shoot(), 0, 1);
         resetSlots();
 
-        // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intake2(), 0, 0.21);
-
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        aimToPattern(pattern);
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        runPath(paths.shoot3(), 0, 1);
-
-        //shootAllPattern(pattern);
-        shootAll();
-
-        intakeMotor.setPower(-0.6);
-        intakeActive = true;
-        rotateToIndex(0);
+        runPath(paths.wallBump(), 0, 1);
         resetSlots();
-
-        runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.intake3(), 0, 0.21);
-
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.GREEN;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.PURPLE;
-
-        aimToPattern(pattern);
-
-        slots[0] = Ball.GREEN;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.PURPLE;
-
-        runPath(paths.shoot4(), 0, 1);
-
         //shootAllPattern(pattern);
         shootAll();
 
