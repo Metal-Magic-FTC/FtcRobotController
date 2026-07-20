@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 @TeleOp(name="! TeleV2 - Modular")
-@Disabled
+//@Disabled
 public class TeleV2 extends LinearOpMode {
 
     // -----------------------------

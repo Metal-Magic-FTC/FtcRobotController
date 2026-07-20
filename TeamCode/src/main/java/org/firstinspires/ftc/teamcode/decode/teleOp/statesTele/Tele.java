@@ -47,7 +47,7 @@ public class Tele extends LinearOpMode {
 
     private CustomMecanumDrive drivetrain;
 
-    Servo hoodServo;
+//    Servo hoodServo;
 
     private NormalizedColorSensor intakeColor;
     private NormalizedColorSensor intakeColor2;
@@ -146,7 +146,7 @@ public class Tele extends LinearOpMode {
 
         waitForStart();
 
-        hoodServo.setPosition(0.77);
+//        hoodServo.setPosition(0.77);
         flickMotor.setPower(0);
 
         while (opModeIsActive()) {
@@ -654,7 +654,7 @@ public class Tele extends LinearOpMode {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.93);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
-        hoodServo = hardwareMap.servo.get("hoodServo");
+//        hoodServo = hardwareMap.servo.get("hoodServo");
         //flickServo = hardwareMap.servo.get("flickServo");
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");

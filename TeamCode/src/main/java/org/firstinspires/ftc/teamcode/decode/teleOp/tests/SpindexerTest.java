@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-@Disabled
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+//@Disabled
 @TeleOp(name = "!!!SpindexerTest")
 public class SpindexerTest extends LinearOpMode {
     private DcMotor spinMotor;
@@ -21,7 +23,7 @@ public class SpindexerTest extends LinearOpMode {
         spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set direction (flip if needed)
-        spinMotor.setDirection(DcMotor.Direction.FORWARD);
+        spinMotor.setDirection(DcMotor.Direction.REVERSE);
 
         // 3 positions
         int[] positions = {0, 250, 500};
