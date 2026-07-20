@@ -58,6 +58,11 @@ public class RedClose12Ball extends LinearOpMode {
 
     private int lastSpinTarget = 0;
 
+    private boolean sensorCleared = true; // sensor has read empty since the last accepted ball
+
+    private static final long BALL_DEBOUNCE_MS = 250; // min gap between two accepted ball detections
+    private long lastAcceptedTime = 0;
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -279,41 +284,37 @@ public class RedClose12Ball extends LinearOpMode {
     }
 
     private void intake() {
+        if (!intakeActive) return;
 
-        // spindexer logic (COLOR-BASED DETECTION) with delay
-        if (waitingForBall && intakeActive && spinAtTarget() && !waitingToRotate) {
+        // ---- DETECT ----
+        if (waitingForBall && spinAtTarget() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
-            if (detected != Ball.EMPTY) {
+            boolean debounceOk = System.currentTimeMillis() - lastAcceptedTime > BALL_DEBOUNCE_MS;
+
+            if (detected != Ball.EMPTY && debounceOk) {
                 slots[index] = detected;
                 waitingForBall = false;
+                lastAcceptedTime = System.currentTimeMillis();
 
-                // compute next index, but don't rotate yet
-                int nextEmpty = findNextEmpty();
-                nextIndexAfterDelay = nextEmpty;
+                nextIndexAfterDelay = findNextEmpty();
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                intakeMotor.setPower(0);
+                // NOTE: intake motor stays ON here — don't cut power, keep the ball moving
             }
         }
 
-        // after COLOR_DELAY_MS, rotate if needed
-        if (waitingToRotate) {
-            if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
-//                int nextEmpty = findNextEmpty();
-//                nextIndexAfterDelay = nextEmpty;
-                if (nextIndexAfterDelay != -1) {
-                    rotateToIndex(nextIndexAfterDelay);
-                    waitingForBall = true; // continue intake
-                    intakeMotor.setPower(-0.6);
-                } else {
-//                    intakeActive = false;
-//                    rotateToIndex(0); // back to home
-                    // Stay in intake position, keep waiting
-                    waitingForBall = true;
-                }
-                waitingToRotate = false; // reset
+        // ---- INDEX + KEEP INTAKING ----
+        if (waitingToRotate
+                && System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+
+            if (nextIndexAfterDelay != -1) {
+                rotateToIndex(nextIndexAfterDelay);
             }
+
+            waitingForBall = true;
+            intakeMotor.setPower(-0.6); // always resume, even if slots temporarily look full
+            waitingToRotate = false;
         }
     }
 
@@ -413,7 +414,9 @@ public class RedClose12Ball extends LinearOpMode {
         //launchMotor.setVelocity(900);
         intakeActive = true;
         waitingForBall = true;
-
+        waitingToRotate = false;
+        sensorCleared = true;
+        lastAcceptedTime = 0;
         intakeMotor.setPower(-0.6);
 
         follower.setMaxPower(speed);

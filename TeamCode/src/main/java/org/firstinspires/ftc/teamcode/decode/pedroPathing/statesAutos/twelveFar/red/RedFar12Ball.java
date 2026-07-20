@@ -17,13 +17,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red.GeneratedPathsRed12BallCloseV3;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! MM STATES Red Close 12 Ball")
+@Autonomous(name = "!!!!!!!! Nihal nihers back 12")
 public class RedFar12Ball extends LinearOpMode {
 
     private int index = 0;
@@ -35,7 +35,7 @@ public class RedFar12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red.GeneratedPathsRed12BallCloseV3 paths;
+    private org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -80,8 +80,8 @@ public class RedFar12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red.GeneratedPathsRed12BallCloseV3.START_POSE);
-        paths = new GeneratedPathsRed12BallCloseV3(follower);
+        follower.setPose(org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3.START_POSE);
+        paths = new GeneratedPathsRed12BallFarV3(follower);
         hoodServo.setPosition(0.80);
 
 
