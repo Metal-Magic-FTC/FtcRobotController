@@ -15,7 +15,7 @@ public class GeneratedPathsRed12BallFarV3 {
 
     //public static final Pose START_POSE = new Pose(118.157, 128.629, Math.toRadians(45));
     public static final Pose START_POSE =
-            new Pose(108+10, 130.2926713735558-8, Math.toRadians(180));
+            new Pose(86, 8, Math.toRadians(180));
 
     public GeneratedPathsRed12BallFarV3(Follower follower) {
         this.follower = follower;
