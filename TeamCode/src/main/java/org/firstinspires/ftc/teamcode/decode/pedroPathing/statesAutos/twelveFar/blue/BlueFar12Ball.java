@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! MM STATES Blue Close 12 Ball")
+@Autonomous(name = "hands on booty Blue FAR 12 Ball")
 public class BlueFar12Ball extends LinearOpMode {
 
     private int index = 0;
@@ -635,7 +635,7 @@ public class BlueFar12Ball extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(1700);
+        launchMotor.setVelocity(3000);
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;
