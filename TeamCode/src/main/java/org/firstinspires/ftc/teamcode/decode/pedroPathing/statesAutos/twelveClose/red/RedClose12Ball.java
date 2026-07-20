@@ -63,6 +63,9 @@ public class RedClose12Ball extends LinearOpMode {
     private static final long BALL_DEBOUNCE_MS = 250; // min gap between two accepted ball detections
     private long lastAcceptedTime = 0;
 
+    private static final long BALL_WAIT_TIMEOUT_MS = 500;
+    private long waitForBallStartTime = 0;
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -283,6 +286,15 @@ public class RedClose12Ball extends LinearOpMode {
         ) <= 8;
     }
 
+    private int findNextEmptyAfter(int startIndex) {
+        // like findNextEmpty(), but always skips startIndex itself
+        for (int i = 1; i <= 3; i++) {
+            int idx = (startIndex + i) % 3;
+            if (slots[idx] == Ball.EMPTY) return idx;
+        }
+        return -1;
+    }
+
     private void intake() {
         if (!intakeActive) return;
 
@@ -291,8 +303,10 @@ public class RedClose12Ball extends LinearOpMode {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
             boolean debounceOk = System.currentTimeMillis() - lastAcceptedTime > BALL_DEBOUNCE_MS;
+            boolean timedOut = System.currentTimeMillis() - waitForBallStartTime > BALL_WAIT_TIMEOUT_MS;
 
             if (detected != Ball.EMPTY && debounceOk) {
+                // ---- normal case: a ball arrived ----
                 slots[index] = detected;
                 waitingForBall = false;
                 lastAcceptedTime = System.currentTimeMillis();
@@ -300,7 +314,13 @@ public class RedClose12Ball extends LinearOpMode {
                 nextIndexAfterDelay = findNextEmpty();
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                // NOTE: intake motor stays ON here — don't cut power, keep the ball moving
+
+            } else if (timedOut) {
+                // ---- nothing showed up in time: give up on this slot and move on ----
+                waitingForBall = false;
+                nextIndexAfterDelay = findNextEmptyAfter(index); // don't re-select the same empty slot
+                colorDetectedTime = System.currentTimeMillis();
+                waitingToRotate = true;
             }
         }
 
@@ -313,7 +333,8 @@ public class RedClose12Ball extends LinearOpMode {
             }
 
             waitingForBall = true;
-            intakeMotor.setPower(-0.6); // always resume, even if slots temporarily look full
+            waitForBallStartTime = System.currentTimeMillis(); // reset the clock for the new slot
+            intakeMotor.setPower(-0.6);
             waitingToRotate = false;
         }
     }
@@ -415,8 +436,8 @@ public class RedClose12Ball extends LinearOpMode {
         intakeActive = true;
         waitingForBall = true;
         waitingToRotate = false;
-        sensorCleared = true;
         lastAcceptedTime = 0;
+        waitForBallStartTime = System.currentTimeMillis(); // add this
         intakeMotor.setPower(-0.6);
 
         follower.setMaxPower(speed);
