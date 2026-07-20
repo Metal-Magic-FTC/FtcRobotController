@@ -2,29 +2,19 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
+import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.blue.GeneratedPathsBlue12BallCloseV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! MM STATES Blue Close 12 Ball")
-public class BlueFar12Ball extends LinearOpMode {
+@Autonomous(name = "!!!!!!!! MM STATES Blue Far")
+public class BlueFar extends LinearOpMode {
 
     private int index = 0;
 
@@ -35,7 +25,7 @@ public class BlueFar12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsBlue12BallCloseV3 paths;
+    private GeneratedPathsBlueFar paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -80,10 +70,9 @@ public class BlueFar12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlue12BallCloseV3.START_POSE);
-        paths = new GeneratedPathsBlue12BallCloseV3(follower);
+        follower.setPose(GeneratedPathsBlueFar.START_POSE);
+        paths = new GeneratedPathsBlueFar(follower);
         hoodServo.setPosition(0.80);
-
 
         telemetry.addLine("Ready");
         telemetry.update();
@@ -91,7 +80,7 @@ public class BlueFar12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(1700);
+        launchMotor.setVelocity(3000);
 
         // scan balls
         //scanBallsInSlots(5000);
@@ -105,7 +94,7 @@ public class BlueFar12Ball extends LinearOpMode {
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 400, 1);
+        runPath(paths.scan_to_shoot(), 400, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -119,10 +108,10 @@ public class BlueFar12Ball extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 0, 1);
+        runPath(paths.toIntake(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intake1(), 0, 0.21);
+        runPathWithIntake(paths.intake(), 0, 0.21);
         double startTime = System.currentTimeMillis();
 //        while (System.currentTimeMillis() < startTime + 500) {
 //            waitingForBall = true;
@@ -132,7 +121,7 @@ public class BlueFar12Ball extends LinearOpMode {
 
 
 
-        runPathWithIntake(paths.gate(), 750, 1);
+//        runPathWithIntake(paths.gate(), 750, 1);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -145,7 +134,7 @@ public class BlueFar12Ball extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot2(), 0, 1);
+        runPath(paths.shoot(), 0, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -159,8 +148,8 @@ public class BlueFar12Ball extends LinearOpMode {
         // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake2(), 0, 1);
-        runPathWithIntake(paths.intake2(), 0, 0.21);
+        runPath(paths.toIntake(), 0, 1);
+        runPathWithIntake(paths.intake(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
@@ -173,7 +162,7 @@ public class BlueFar12Ball extends LinearOpMode {
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot3(), 0, 1);
+        runPath(paths.shoot(), 0, 1);
 
         //shootAllPattern(pattern);
         shootAll();
@@ -183,8 +172,8 @@ public class BlueFar12Ball extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        runPath(paths.toIntake3(), 0, 1);
-        runPathWithIntake(paths.intake3(), 0, 0.21);
+        runPath(paths.toIntake(), 0, 1);
+        runPathWithIntake(paths.intake(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
@@ -197,7 +186,7 @@ public class BlueFar12Ball extends LinearOpMode {
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot4(), 0, 1);
+        runPath(paths.shoot(), 0, 1);
 
         //shootAllPattern(pattern);
         shootAll();
