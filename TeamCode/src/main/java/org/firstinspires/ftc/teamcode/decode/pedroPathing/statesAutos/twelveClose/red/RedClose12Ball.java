@@ -66,6 +66,8 @@ public class RedClose12Ball extends LinearOpMode {
     private static final long BALL_WAIT_TIMEOUT_MS = 500;
     private long waitForBallStartTime = 0;
 
+    private int ballsAcceptedThisPass = 0;
+
     // ---------------- RUN ----------------
     @Override
     public void runOpMode() throws InterruptedException {
@@ -287,7 +289,6 @@ public class RedClose12Ball extends LinearOpMode {
     }
 
     private int findNextEmptyAfter(int startIndex) {
-        // like findNextEmpty(), but always skips startIndex itself
         for (int i = 1; i <= 3; i++) {
             int idx = (startIndex + i) % 3;
             if (slots[idx] == Ball.EMPTY) return idx;
@@ -303,22 +304,26 @@ public class RedClose12Ball extends LinearOpMode {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
             boolean debounceOk = System.currentTimeMillis() - lastAcceptedTime > BALL_DEBOUNCE_MS;
-            boolean timedOut = System.currentTimeMillis() - waitForBallStartTime > BALL_WAIT_TIMEOUT_MS;
+            boolean waitingForSecondBall = (ballsAcceptedThisPass == 1);
+            boolean timedOut = waitingForSecondBall
+                    && System.currentTimeMillis() - waitForBallStartTime > BALL_WAIT_TIMEOUT_MS;
 
             if (detected != Ball.EMPTY && debounceOk) {
                 // ---- normal case: a ball arrived ----
                 slots[index] = detected;
                 waitingForBall = false;
                 lastAcceptedTime = System.currentTimeMillis();
+                ballsAcceptedThisPass++;
 
                 nextIndexAfterDelay = findNextEmpty();
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
 
             } else if (timedOut) {
-                // ---- nothing showed up in time: give up on this slot and move on ----
+                // ---- only for the 2nd ball: give up on this slot and move on ----
                 waitingForBall = false;
-                nextIndexAfterDelay = findNextEmptyAfter(index); // don't re-select the same empty slot
+                ballsAcceptedThisPass++; // still counts as "moved past" the 2nd slot
+                nextIndexAfterDelay = findNextEmptyAfter(index);
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
             }
@@ -333,7 +338,7 @@ public class RedClose12Ball extends LinearOpMode {
             }
 
             waitingForBall = true;
-            waitForBallStartTime = System.currentTimeMillis(); // reset the clock for the new slot
+            waitForBallStartTime = System.currentTimeMillis();
             intakeMotor.setPower(-0.6);
             waitingToRotate = false;
         }
@@ -437,7 +442,8 @@ public class RedClose12Ball extends LinearOpMode {
         waitingForBall = true;
         waitingToRotate = false;
         lastAcceptedTime = 0;
-        waitForBallStartTime = System.currentTimeMillis(); // add this
+        waitForBallStartTime = System.currentTimeMillis();
+        ballsAcceptedThisPass = 0;   // add this
         intakeMotor.setPower(-0.6);
 
         follower.setMaxPower(speed);
