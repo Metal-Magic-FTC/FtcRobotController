@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! MM STATES Red Close 12 Ball")
-public class RedClose12Ball extends LinearOpMode {
+@Autonomous(name = "!!!!!!!! MM STATES Red Close 12 Ball OLDDD UNC")
+public class RedClose12BallOld extends LinearOpMode {
 
     private int index = 0;
 
@@ -44,7 +44,7 @@ public class RedClose12Ball extends LinearOpMode {
     private static final int[] OUTTAKE_POS = {500, 0, 250};
     private static final int[] INTAKE_POS  = {125, 375, 625};
 
-    private double spinMotorSpeed = 0.33;
+    private double spinMotorSpeed = 0.38;
 
     private boolean intakeActive = false;
     private boolean waitingToRotate = false;
@@ -57,16 +57,6 @@ public class RedClose12Ball extends LinearOpMode {
     private static final long SPIN_TIMEOUT_MS = 10000;
 
     private int lastSpinTarget = 0;
-
-    private boolean sensorCleared = true; // sensor has read empty since the last accepted ball
-
-    private static final long BALL_DEBOUNCE_MS = 250; // min gap between two accepted ball detections
-    private long lastAcceptedTime = 0;
-
-    private static final long BALL_WAIT_TIMEOUT_MS = 500;
-    private long waitForBallStartTime = 0;
-
-    private int ballsAcceptedThisPass = 0;
 
     // ---------------- RUN ----------------
     @Override
@@ -200,8 +190,7 @@ public class RedClose12Ball extends LinearOpMode {
         runPath(paths.shoot4(), 0, 1);
 
         //shootAllPattern(pattern);
-        //shootAll();
-        shootAllLast();
+        shootAll();
 
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);
@@ -289,59 +278,42 @@ public class RedClose12Ball extends LinearOpMode {
         ) <= 8;
     }
 
-    private int findNextEmptyAfter(int startIndex) {
-        for (int i = 1; i <= 3; i++) {
-            int idx = (startIndex + i) % 3;
-            if (slots[idx] == Ball.EMPTY) return idx;
-        }
-        return -1;
-    }
-
     private void intake() {
-        if (!intakeActive) return;
 
-        // ---- DETECT ----
-        if (waitingForBall && spinAtTarget() && !waitingToRotate) {
+        // spindexer logic (COLOR-BASED DETECTION) with delay
+        if (waitingForBall && intakeActive && spinAtTarget() && !waitingToRotate) {
             Ball detected = detectColor(intakeColor, intakeColor2);
 
-            boolean debounceOk = System.currentTimeMillis() - lastAcceptedTime > BALL_DEBOUNCE_MS;
-            boolean waitingForSecondBall = (ballsAcceptedThisPass == 1);
-            boolean timedOut = waitingForSecondBall
-                    && System.currentTimeMillis() - waitForBallStartTime > BALL_WAIT_TIMEOUT_MS;
-
-            if (detected != Ball.EMPTY && debounceOk) {
-                // ---- normal case: a ball arrived ----
+            if (detected != Ball.EMPTY) {
                 slots[index] = detected;
                 waitingForBall = false;
-                lastAcceptedTime = System.currentTimeMillis();
-                ballsAcceptedThisPass++;
 
-                nextIndexAfterDelay = findNextEmpty();
+                // compute next index, but don't rotate yet
+                int nextEmpty = findNextEmpty();
+                nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-
-            } else if (timedOut) {
-                // ---- only for the 2nd ball: give up on this slot and move on ----
-                waitingForBall = false;
-                ballsAcceptedThisPass++; // still counts as "moved past" the 2nd slot
-                nextIndexAfterDelay = findNextEmptyAfter(index);
-                colorDetectedTime = System.currentTimeMillis();
-                waitingToRotate = true;
+                intakeMotor.setPower(0);
             }
         }
 
-        // ---- INDEX + KEEP INTAKING ----
-        if (waitingToRotate
-                && System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
-
-            if (nextIndexAfterDelay != -1) {
-                rotateToIndex(nextIndexAfterDelay);
+        // after COLOR_DELAY_MS, rotate if needed
+        if (waitingToRotate) {
+            if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+//                int nextEmpty = findNextEmpty();
+//                nextIndexAfterDelay = nextEmpty;
+                if (nextIndexAfterDelay != -1) {
+                    rotateToIndex(nextIndexAfterDelay);
+                    waitingForBall = true; // continue intake
+                    intakeMotor.setPower(-0.6);
+                } else {
+//                    intakeActive = false;
+//                    rotateToIndex(0); // back to home
+                    // Stay in intake position, keep waiting
+                    waitingForBall = true;
+                }
+                waitingToRotate = false; // reset
             }
-
-            waitingForBall = true;
-            waitForBallStartTime = System.currentTimeMillis();
-            intakeMotor.setPower(-0.6);
-            waitingToRotate = false;
         }
     }
 
@@ -441,10 +413,7 @@ public class RedClose12Ball extends LinearOpMode {
         //launchMotor.setVelocity(900);
         intakeActive = true;
         waitingForBall = true;
-        waitingToRotate = false;
-        lastAcceptedTime = 0;
-        waitForBallStartTime = System.currentTimeMillis();
-        ballsAcceptedThisPass = 0;   // add this
+
         intakeMotor.setPower(-0.6);
 
         follower.setMaxPower(speed);
@@ -660,39 +629,6 @@ public class RedClose12Ball extends LinearOpMode {
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;
-        spinMotor.setTargetPosition(endPosition);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.3);
-
-        while (opModeIsActive() && spinMotor.isBusy()) {
-            // let balls fire naturally
-        }
-
-        spinMotor.setPower(0);
-
-        flickMotor.setPower(1);
-        sleep(200);
-        flickMotor.setPower(0);
-
-        slots[0] = Ball.EMPTY;
-        slots[1] = Ball.EMPTY;
-        slots[2] = Ball.EMPTY;
-
-        index = (index + 2) % 3;
-
-        intakeMotor.setPower(-0.6);
-
-    }
-
-    private void shootAllLast() {
-
-        intakeMotor.setPower(0);
-
-        flickMotor.setPower(1);
-        launchMotor.setVelocity(1700);
-        sleep(200);
-
-        int endPosition = spinMotor.getCurrentPosition() + 600;
         spinMotor.setTargetPosition(endPosition);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(0.3);
