@@ -87,14 +87,14 @@ public class BlueFar extends LinearOpMode {
 
         //runPath(paths.scan(), 0, 1.0);
 
-        runPath(paths.scan(), 0, 0.9);
-        Ball[] pattern = getPatternFromTag();
+//        runPath(paths.scan(), 0, 0.9);
+//        Ball[] pattern = getPatternFromTag();
 
-        aimToPattern(pattern);
-        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
-        telemetry.update();
+//        aimToPattern(pattern);
+//        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
+//        telemetry.update();
 
-        runPath(paths.scan_to_shoot(), 400, 1);
+        runPath(paths.start_to_shoot(), 400, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -108,33 +108,21 @@ public class BlueFar extends LinearOpMode {
         // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake(), 0, 1);
+        runPath(paths.row_toIntake(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intake(), 0, 0.21);
-        double startTime = System.currentTimeMillis();
-//        while (System.currentTimeMillis() < startTime + 500) {
-//            waitingForBall = true;
-//            intakeActive = true;
-//            intake();
-//        }
-
-
-
-//        runPathWithIntake(paths.gate(), 750, 1);
+        runPathWithIntake(paths.row_intake(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        aimToPattern(pattern);
-
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.GREEN;
 
-        runPath(paths.shoot(), 0, 1);
+        runPath(paths.row_to_shoot(), 0, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -148,21 +136,19 @@ public class BlueFar extends LinearOpMode {
         // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake(), 0, 1);
-        runPathWithIntake(paths.intake(), 0, 0.21);
+        runPath(paths.human_toIntake(), 0, 1);
+        runPathWithIntake(paths.human_intake(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        aimToPattern(pattern);
-
         slots[0] = Ball.PURPLE;
         slots[1] = Ball.GREEN;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot(), 0, 1);
+        runPath(paths.human_to_shoot(), 0, 1);
 
         //shootAllPattern(pattern);
         shootAll();
@@ -172,21 +158,19 @@ public class BlueFar extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        runPath(paths.toIntake(), 0, 1);
-        runPathWithIntake(paths.intake(), 0, 0.21);
+        runPath(paths.human_toIntake(), 0, 1);
+        runPathWithIntake(paths.human_intake(), 0, 0.21);
 
         intakeMotor.setPower(-0.6);
         slots[0] = Ball.GREEN;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.PURPLE;
 
-        aimToPattern(pattern);
-
         slots[0] = Ball.GREEN;
         slots[1] = Ball.PURPLE;
         slots[2] = Ball.PURPLE;
 
-        runPath(paths.shoot(), 0, 1);
+        runPath(paths.human_to_shoot(), 0, 1);
 
         //shootAllPattern(pattern);
         shootAll();
