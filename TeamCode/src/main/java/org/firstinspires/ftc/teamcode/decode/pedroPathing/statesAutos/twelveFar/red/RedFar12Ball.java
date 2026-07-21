@@ -128,14 +128,20 @@ public class RedFar12Ball extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.shoot(), 0, 1);
+        shootAll();
         resetSlots();
 
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.wallBump(), 0, 1);
+
+        intakeActive = true;
+        rotateToIndex(0);
+        runPath(paths.shoot(), 0, 1);
+        shootAll();
         resetSlots();
         //shootAllPattern(pattern);
-        shootAll();
+
 
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);

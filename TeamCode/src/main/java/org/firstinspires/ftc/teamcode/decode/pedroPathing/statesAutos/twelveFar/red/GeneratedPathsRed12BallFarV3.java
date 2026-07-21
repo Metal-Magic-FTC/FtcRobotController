@@ -97,8 +97,8 @@ public class GeneratedPathsRed12BallFarV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                new Pose(96, 94, Math.toRadians(30)),
-                                new Pose(117.3496136071887, 82.19084724005137, Math.toRadians(90))
+                                new Pose(96, 14, Math.toRadians(35)),
+                                new Pose(96, 20, Math.toRadians(35))
                         )
                 )
                 .setLinearHeadingInterpolation(
