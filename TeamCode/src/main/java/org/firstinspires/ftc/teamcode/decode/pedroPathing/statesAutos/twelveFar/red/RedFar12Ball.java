@@ -104,7 +104,7 @@ public class RedFar12Ball extends LinearOpMode {
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
-
+        wait(1000);
         runPath(paths.shoot(), 400, 1);
 
         // ---- SHOOT ----
