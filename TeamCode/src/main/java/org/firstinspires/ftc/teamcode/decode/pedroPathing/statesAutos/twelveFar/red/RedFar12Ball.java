@@ -93,11 +93,6 @@ public class RedFar12Ball extends LinearOpMode {
 
         launchMotor.setVelocity(5000);
 
-        // scan balls
-        //scanBallsInSlots(5000);
-
-        //runPath(paths.scan(), 0, 1.0);
-
         Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
         pattern = getPatternFromTag();
 
@@ -108,7 +103,7 @@ public class RedFar12Ball extends LinearOpMode {
         runPath(paths.shoot(), 400, 1);
 
         // ---- SHOOT ----
-        //shootAllPattern(pattern);
+  
         shootAll();
 
         intakeMotor.setPower(-0.6);
