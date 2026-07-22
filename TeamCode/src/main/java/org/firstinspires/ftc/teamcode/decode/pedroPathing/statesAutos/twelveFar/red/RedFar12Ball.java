@@ -91,7 +91,7 @@ public class RedFar12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(5000);
 
         // scan balls
         //scanBallsInSlots(5000);
