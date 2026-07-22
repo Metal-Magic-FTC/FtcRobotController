@@ -1,30 +1,20 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.blue;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
+import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! Nihal nihers back 12")
-public class RedFar12Ball extends LinearOpMode {
+@Autonomous(name = "!!!!!!!! MM STATES Blue Far")
+public class BlueFar extends LinearOpMode {
 
     private int index = 0;
 
@@ -35,7 +25,7 @@ public class RedFar12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3 paths;
+    private GeneratedPathsBlueFar paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -80,10 +70,9 @@ public class RedFar12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3.START_POSE);
-        paths = new GeneratedPathsRed12BallFarV3(follower);
+        follower.setPose(GeneratedPathsBlueFar.START_POSE);
+        paths = new GeneratedPathsBlueFar(follower);
         hoodServo.setPosition(0.80);
-
 
         telemetry.addLine("Ready");
         telemetry.update();
@@ -91,21 +80,21 @@ public class RedFar12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(5000);
+        launchMotor.setVelocity(3000);
 
         // scan balls
         //scanBallsInSlots(5000);
 
         //runPath(paths.scan(), 0, 1.0);
 
-        Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
-        pattern = getPatternFromTag();
+//        runPath(paths.scan(), 0, 0.9);
+//        Ball[] pattern = getPatternFromTag();
 
-        aimToPattern(pattern);
-        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
-        telemetry.update();
+//        aimToPattern(pattern);
+//        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
+//        telemetry.update();
 
-        runPath(paths.shoot(), 400, 1);
+        runPath(paths.start_to_shoot(), 400, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -116,32 +105,75 @@ public class RedFar12Ball extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        // Intake 1
+        // ---- INTAKE 1–3 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 0, 1);
+        runPath(paths.row_toIntake(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.intake1(), 0, 0.21);
-        double startTime = System.currentTimeMillis();
-      
-        intakeActive = true;
-        rotateToIndex(0);
-        runPath(paths.shoot(), 0, 1);
-        shootAll();
-        resetSlots();
+        runPathWithIntake(paths.row_intake(), 0, 0.21);
 
-        intakeActive = true;
-        rotateToIndex(0);
-        runPath(paths.wallBump(), 0, 1);
+        intakeMotor.setPower(-0.6);
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.GREEN;
 
-        intakeActive = true;
-        rotateToIndex(0);
-        runPath(paths.shoot(), 0, 1);
-        shootAll();
-        resetSlots();
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.GREEN;
+
+        runPath(paths.row_to_shoot(), 0, 1);
+
+        // ---- SHOOT ----
         //shootAllPattern(pattern);
+        shootAll();
 
+        intakeMotor.setPower(-0.6);
+        intakeActive = true;
+        rotateToIndex(0);
+        resetSlots();
+
+        // ---- INTAKE 4–6 ----
+        intakeActive = true;
+        rotateToIndex(0);
+        runPath(paths.human_toIntake(), 0, 1);
+        runPathWithIntake(paths.human_intake(), 0, 0.21);
+
+        intakeMotor.setPower(-0.6);
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.GREEN;
+        slots[2] = Ball.PURPLE;
+
+        slots[0] = Ball.PURPLE;
+        slots[1] = Ball.GREEN;
+        slots[2] = Ball.PURPLE;
+
+        runPath(paths.human_to_shoot(), 0, 1);
+
+        //shootAllPattern(pattern);
+        shootAll();
+
+        intakeMotor.setPower(-0.6);
+        intakeActive = true;
+        rotateToIndex(0);
+        resetSlots();
+
+        runPath(paths.human_toIntake(), 0, 1);
+        runPathWithIntake(paths.human_intake(), 0, 0.21);
+
+        intakeMotor.setPower(-0.6);
+        slots[0] = Ball.GREEN;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.PURPLE;
+
+        slots[0] = Ball.GREEN;
+        slots[1] = Ball.PURPLE;
+        slots[2] = Ball.PURPLE;
+
+        runPath(paths.human_to_shoot(), 0, 1);
+
+        //shootAllPattern(pattern);
+        shootAll();
 
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);
@@ -244,7 +276,7 @@ public class RedFar12Ball extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                intakeMotor.setPower(0);
+                //intakeMotor.setPower(0);
             }
         }
 

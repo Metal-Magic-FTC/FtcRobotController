@@ -1,30 +1,20 @@
-package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.blue;
+package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.red;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
+import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveClose.blue.GeneratedPathsBlue12BallCloseV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "hands on booty Blue FAR 12 Ball")
-public class BlueFar12Ball extends LinearOpMode {
+@Autonomous(name = "!!!!!!!! MM STATES Red Close 12 Ball OLDDD UNC")
+public class RedClose12BallOld extends LinearOpMode {
 
     private int index = 0;
 
@@ -35,7 +25,7 @@ public class BlueFar12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private GeneratedPathsBlue12BallCloseV3 paths;
+    private GeneratedPathsRed12BallCloseV3 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -80,8 +70,8 @@ public class BlueFar12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(GeneratedPathsBlue12BallCloseV3.START_POSE);
-        paths = new GeneratedPathsBlue12BallCloseV3(follower);
+        follower.setPose(GeneratedPathsRed12BallCloseV3.START_POSE);
+        paths = new GeneratedPathsRed12BallCloseV3(follower);
         hoodServo.setPosition(0.80);
 
 
@@ -98,8 +88,8 @@ public class BlueFar12Ball extends LinearOpMode {
 
         //runPath(paths.scan(), 0, 1.0);
 
-        runPath(paths.scan(), 0, 0.9);
-        Ball[] pattern = getPatternFromTag();
+        Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
+        pattern = getPatternFromTag();
 
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
@@ -303,7 +293,7 @@ public class BlueFar12Ball extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                //intakeMotor.setPower(0);
+                intakeMotor.setPower(0);
             }
         }
 
@@ -635,7 +625,7 @@ public class BlueFar12Ball extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(1700);
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;
