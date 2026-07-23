@@ -19,9 +19,9 @@ public class GeneratedPathsRed12BallFarV3 {
     // ---------------- SHARED WAYPOINTS (unchanged ball/target positions) ----------------
     // The pose the robot shoots from. Same physical spot every time, only the
     // path we drive TO it changes depending on where we're coming from.
-    private static final Pose SHOOT_POSE     = new Pose(90, 10, Math.toRadians(71));
+    private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(69));
     private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
-    private static final Pose INTAKE1_END    = new Pose(133, 34, Math.toRadians(0));   // unchanged pickup lane exit
+    private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
     private static final Pose WALLBUMP_END   = new Pose(133, 14, Math.toRadians(0));   // unchanged wall bump target
     private static final Pose BUMP_BACK_POSE = new Pose(118, 14, Math.toRadians(0));   // unchanged back-off point for re-bumping
 

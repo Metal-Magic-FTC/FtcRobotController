@@ -99,7 +99,7 @@ public class RedFar12Ball extends LinearOpMode {
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
-        runPath(paths.shoot1(), 3000, 1);
+        runPath(paths.shoot1(), 1750, 1);
 
         // ---- SHOOT ----
 
@@ -117,7 +117,7 @@ public class RedFar12Ball extends LinearOpMode {
         resetSlots();
 
         intakeMotor.setPower(0.6);
-        runPathWithIntake(paths.intake1(), 0, 0.35);
+        runPathWithIntake(paths.intake1(), 0, 0.23);
         double startTime = System.currentTimeMillis();
 
         intakeActive = true;
