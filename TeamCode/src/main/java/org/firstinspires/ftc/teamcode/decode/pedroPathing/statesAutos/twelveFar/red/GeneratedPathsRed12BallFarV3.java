@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
@@ -12,18 +11,17 @@ public class GeneratedPathsRed12BallFarV3 {
     private final Follower follower;
 
     // ---------------- START POSE ----------------
-    //public static final Pose START_POSE = new Pose(118.157, 128.629, Math.toRadians(45));
+    // From the real red-far states reference (GeneratedPathsRedFarStates)
     public static final Pose START_POSE =
             new Pose(86, 8, Math.toRadians(90));
 
-    // ---------------- SHARED WAYPOINTS (unchanged ball/target positions) ----------------
-    // The pose the robot shoots from. Same physical spot every time, only the
-    // path we drive TO it changes depending on where we're coming from.
-    private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(69));
-    private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
-    private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
-    private static final Pose WALLBUMP_END   = new Pose(133, 14, Math.toRadians(0));   // unchanged wall bump target
-    private static final Pose BUMP_BACK_POSE = new Pose(118, 14, Math.toRadians(0));   // unchanged back-off point for re-bumping
+    // ---------------- SHARED WAYPOINTS (from the real red-far states reference) ----------------
+    private static final Pose SHOOT_POSE     = new Pose(86, 7, Math.toRadians(63));
+    private static final Pose INTAKE1_START  = new Pose(101, 26, Math.toRadians(0));
+    private static final Pose INTAKE1_END    = new Pose(125, 23, Math.toRadians(0));
+    private static final Pose INTAKE2_START  = new Pose(101, 53, Math.toRadians(0));
+    private static final Pose INTAKE2_END    = new Pose(125, 53, Math.toRadians(0));
+    private static final Pose LEAVE_END      = new Pose(110, 3, Math.toRadians(90));
 
     public GeneratedPathsRed12BallFarV3(Follower follower) {
         this.follower = follower;
@@ -44,7 +42,7 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Shot after intake1: robot is actually at INTAKE1_END, not START_POSE
+    // Shot after row 1: robot is actually at INTAKE1_END, not START_POSE
     public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
@@ -57,24 +55,24 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Shot after the wall-bump sequence: robot is actually at WALLBUMP_END, not START_POSE
+    // Shot after row 2: robot is actually at INTAKE2_END, not START_POSE
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                WALLBUMP_END,
+                                INTAKE2_END,
                                 SHOOT_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(WALLBUMP_END.getHeading(), SHOOT_POSE.getHeading())
+                .setLinearHeadingInterpolation(INTAKE2_END.getHeading(), SHOOT_POSE.getHeading())
                 .build();
     }
 
-    // Starts where shoot1() actually ends (SHOOT_POSE), not the old hardcoded (90,14,75)
+    // Row 1 entry: starts where shoot1() actually ends (SHOOT_POSE)
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierCurve(
+                        new BezierLine(
                                 SHOOT_POSE,
                                 INTAKE1_START
                         )
@@ -83,7 +81,7 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Unchanged ball pickup line: starts where toIntake1() ends
+    // Row 1 pickup sweep
     public PathChain intake1() {
         return new PathBuilder(follower)
                 .addPath(
@@ -96,59 +94,42 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Starts where shoot2() actually ends (SHOOT_POSE), not the old hardcoded (90,14,70).
-    // This is bump #1 in the 3-bump sequence.
-    public PathChain wallBump() {
+    // Row 2 entry: starts where shoot2() actually ends (SHOOT_POSE)
+    public PathChain toIntake2() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
                                 SHOOT_POSE,
-                                WALLBUMP_END
+                                INTAKE2_START
                         )
                 )
-                .setLinearHeadingInterpolation(SHOOT_POSE.getHeading(), WALLBUMP_END.getHeading())
+                .setLinearHeadingInterpolation(SHOOT_POSE.getHeading(), INTAKE2_START.getHeading())
                 .build();
     }
 
-    // Backs off the wall after a bump. Reusable every cycle since the robot's
-    // actual pose is WALLBUMP_END exactly each time it's called.
-    public PathChain backUp() {
+    // Row 2 pickup sweep
+    public PathChain intake2() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                WALLBUMP_END,
-                                BUMP_BACK_POSE
+                                INTAKE2_START,
+                                INTAKE2_END
                         )
                 )
-                .setLinearHeadingInterpolation(WALLBUMP_END.getHeading(), BUMP_BACK_POSE.getHeading())
+                .setLinearHeadingInterpolation(INTAKE2_START.getHeading(), INTAKE2_END.getHeading())
                 .build();
     }
 
-    // Drives back into the wall after backUp(). Reusable every cycle since the
-    // robot's actual pose is BUMP_BACK_POSE exactly each time it's called.
-    // Used for bumps #2 and #3.
-    public PathChain rebump() {
-        return new PathBuilder(follower)
-                .addPath(
-                        new BezierLine(
-                                BUMP_BACK_POSE,
-                                WALLBUMP_END
-                        )
-                )
-                .setLinearHeadingInterpolation(BUMP_BACK_POSE.getHeading(), WALLBUMP_END.getHeading())
-                .build();
-    }
-
-    // Starts where shoot3() actually ends (SHOOT_POSE), not the old hardcoded (90,14,75)
+    // Starts where shoot3() actually ends (SHOOT_POSE). Matches leaveNew() from the reference.
     public PathChain leave() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
                                 SHOOT_POSE,
-                                new Pose(90, 20, Math.toRadians(75))
+                                LEAVE_END
                         )
                 )
-                .setLinearHeadingInterpolation(SHOOT_POSE.getHeading(), Math.toRadians(75))
+                .setLinearHeadingInterpolation(SHOOT_POSE.getHeading(), LEAVE_END.getHeading())
                 .build();
     }
 }
