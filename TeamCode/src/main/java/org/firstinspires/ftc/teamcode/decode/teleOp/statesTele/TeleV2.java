@@ -1,0 +1,701 @@
+package org.firstinspires.ftc.teamcode.decode.teleOp.statesTele;
+
+import com.pedropathing.control.FilteredPIDFCoefficients;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
+
+import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.teleoptests.WheelFlickerV2;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
+
+import com.pedropathing.control.PIDFController;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.MathFunctions;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
+import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
+
+
+@TeleOp(name = "!!!!!!!!! STATES TELEOP V2 - CLAUDEIUS FABLETON OPUSTON SONNETTON Vth Jr")
+public class TeleV2 extends LinearOpMode {
+
+    //launch motor - left bumper
+    //flick servo - right trigger
+    //spindexer intake - up arrow
+    //spindexer shoot purple - b
+    //spindexer shoot green - a
+    private DcMotor spinMotor;
+    private DcMotorEx launchMotor;
+    private DcMotorEx flickMotor;
+    private DcMotor intakeMotor;
+
+    private Follower follower;
+    private Pose savePose;
+    private boolean oneTime;
+
+    private CustomMecanumDrive drivetrain;
+
+//    Servo hoodServo;
+
+    private NormalizedColorSensor intakeColor;
+    private NormalizedColorSensor intakeColor2;
+
+    private static final int[] OUTTAKE_POS = {504, 2, 252};
+    private static final int[] INTAKE_POS  = {125, 375, 625};
+
+    private enum Ball { EMPTY, PURPLE, GREEN }
+    private Ball[] slots = {Ball.EMPTY, Ball.EMPTY, Ball.EMPTY};
+
+    private int index = 0;
+    private boolean intakeActive = false;
+    private boolean waitingForBall = false;
+
+    private float gain = 20;
+
+    // ---- RISING EDGE DETECTORS ----
+    private boolean
+            prevA,
+            prevX,
+            prevY,
+            prevB,
+            prevLeftBumper,
+            prev2LeftBumper,
+            prevRightBumper,
+            prevLeftTrigger,
+            prevRightTrigger,
+            prev2RightBumper,
+            prevIntakeButton; // NEW: edge detector for dpad_up (intake start)
+
+    // ---- AUTO LAUNCH ALL ----
+    private boolean autoLaunching = false;
+    private int autoLaunchTarget = -1;
+
+    private long flickStartTime = 0;
+    private boolean flicking = false;
+
+    // new auto launch
+    private int shootAllTargetPos = 0;
+
+    private static final long FLICK_TIME_MS = 0; // 500 ms flick
+
+    // ---- POST FLICK DELAY ----
+    private boolean waitingAfterFlick = false;
+    private long flickEndTime = 0;
+    private static final long POST_FLICK_DELAY_MS = 0; // 100 ms delay after flick retra
+
+    private double spinMotorSpeed = 0.38;
+
+    // ---- COLOR SENSOR DELAY ----
+    private boolean waitingToRotate = false;
+    private long colorDetectedTime = 0;
+    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
+    private int nextIndexAfterDelay = -1;
+
+    // ---- BUTTON STATES ----
+
+    // ---- GAMEPAD 2 FAILSAFES ----
+    private boolean prev2A, prev2B;
+
+    private double flickUp = 0.75;
+    private double flickDown = 1;
+
+    private double targetVelocity = 1800;
+
+    private static double TARGET_X = 150;
+    private static double TARGET_Y = 137;
+
+    public static Pose startPose = new Pose(
+            109,
+            130,
+            Math.toRadians(180)
+    );
+
+    double targetHeading;
+    PIDFController controller;
+    boolean headingLock;
+
+    FusedPose fusedPose;
+
+    private boolean
+            intakePressed,
+            aimGreenPressed,
+            aimPurplePressed,
+            shootPressed,
+            runLaunch,
+            intakePower,
+            intakePowerReverse,
+            launchAllPressed,
+            nextIntake2,
+            prevNextIntake2;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        initialize();
+
+        waitForStart();
+
+//        hoodServo.setPosition(0.77);
+        flickMotor.setPower(0);
+
+        while (opModeIsActive()) {
+            follower.update();
+            fusedPose.update();
+            Pose limelightPose = fusedPose.getRobotPose(true); // CONVERTED pose
+            if (limelightPose != null) {
+                follower.setPose(limelightPose);
+            }
+
+            double drive = -gamepad1.left_stick_y;
+            double strafe = gamepad1.left_stick_x;
+            double turn = gamepad1.right_stick_x;
+
+            //launch motor - left bumper
+            //flick servo - right bumper
+            //spindexer intake - up arrow (dpad)
+            //spindexer shoot purple - b
+            //spindexer shoot green - a
+            //launch all three - left arrow (dpad)
+            //reverse intake - left trigger
+
+            // FIX: intakePressed is now RISING-EDGE triggered instead of a raw level
+            // read of dpad_up. Previously, holding dpad_up caused this block to
+            // re-fire every single loop iteration (~50x/sec), which stomped on the
+            // color-sensor debounce/delay state (waitingToRotate) mid-flight and
+            // caused slots to get skipped -- this was the root cause of only
+            // intaking 2 of 3 balls. One tap now starts the sequence; the automatic
+            // color-detect + delay logic below handles advancing through the rest.
+            intakePressed      = gamepad1.dpad_up && !prevIntakeButton;
+            aimGreenPressed    = gamepad1.a && !prevA;
+            aimPurplePressed   = gamepad1.b && !prevB;
+            shootPressed       = gamepad1.right_bumper; // && !prevB;
+            runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
+            intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
+            intakePowerReverse = (gamepad1.x && !prevX) != intakePowerReverse;
+            launchAllPressed = gamepad1.dpad_left;
+
+            prevA = gamepad1.a;
+            prevY = gamepad1.y;
+            prevB = gamepad1.b;
+            prevX = gamepad1.x;
+            prevLeftBumper = gamepad1.left_bumper;
+            prev2LeftBumper = gamepad2.left_bumper;
+            prevRightBumper = gamepad1.right_bumper;
+            prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
+            prevRightTrigger = gamepad1.right_trigger >= 0.3F;
+            prev2RightBumper = gamepad2.right_bumper;
+            prevIntakeButton = gamepad1.dpad_up;
+
+            if (gamepad2.dpad_left) {
+                targetVelocity = 1600;
+            }
+            if (gamepad2.dpad_down) {
+                targetVelocity = 1900;
+            }
+            if (gamepad2.dpad_right) {
+                targetVelocity = 2500;
+            }
+
+            // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
+            boolean manualGreen  = gamepad2.a && !prev2A;
+            boolean manualPurple = gamepad2.b && !prev2B;
+
+            prev2A = gamepad2.a;
+            prev2B = gamepad2.b;
+
+            boolean idle =
+                    Math.abs(drive) < 0.05 &&
+                            Math.abs(strafe) < 0.05 &&
+                            Math.abs(turn) < 0.05 && (gamepad1.left_bumper || gamepad2.left_stick_button);
+
+
+            telemetry.addData("Move: ", drive + strafe + turn);
+            if (idle) {
+
+                // HOLD POSITION
+                if (oneTime) {
+                    follower.update();
+                    savePose = follower.getPose();
+                    oneTime = false;
+                    follower.holdPoint(savePose);
+//                    savePath = follower.pathBuilder()
+//                            .addPath(new BezierPoint(savePose))
+//                            .setConstantHeadingInterpolation(savePose.getHeading())
+//                            //.setBrakingStrength(5)
+//                            .build();
+//                            //.build();
+                }
+                telemetry.addLine("Holding Position");
+                //follower.followPath(savePath);
+                follower.update();
+
+            } else {
+                drivetrain.driveMecanum(strafe, drive, turn);
+                oneTime = true;
+                telemetry.addLine("Manual Drive");
+
+            }
+
+            updateGoalHeading();
+
+            headingLock = gamepad1.left_bumper;
+
+            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
+            double v = getHeadingError();
+            controller.updateError(v);
+
+            double otherV = 0;
+
+            if (headingLock) {
+                otherV = controller.run();
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
+            } else
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+
+
+//            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
+//            double v = getHeadingError();
+//            controller.updateError(v);
+//
+//            double otherV = turn;
+//            if (headingLock) {
+//                otherV = controller.run();
+//                otherV = -1*otherV;
+//                drivetrain.setMode(DcMotor.ZeroPowerBehavior.FLOAT);
+//            } else {
+//                drivetrain.setMode(DcMotor.ZeroPowerBehavior.BRAKE);
+//            }
+//            telemetry.addData("otherV", otherV);
+//
+//            drivetrain.driveMecanum(strafe, drive, otherV);
+
+
+//            if (gamepad1.x) {
+//                headingLock = true;
+//            }
+
+
+//            if (gamepad1.x) {
+//                intakeActive = false;
+//                waitingForBall = false;
+//                rotateToIndex(0);
+//            }
+
+            if (nextIntake2 && !prevNextIntake2) {
+                index++;
+                index = index % 3;
+
+                // normal intake
+                intakeActive = true;
+                waitingForBall = true;
+                rotateToIndex(index);
+            }
+
+            if (intakePower) {
+                intakeMotor.setPower(0);
+            } else if (intakePowerReverse) {
+                intakeMotor.setPower(0.8);
+            } else {
+                intakeMotor.setPower(-0.6);
+            }
+
+            if (autoLaunching) {
+                spinMotorSpeed = 0.35;
+            } else {
+                spinMotorSpeed = 0.38;
+            }
+
+            // FIX: added !waitingToRotate guard so a manual color override can't
+            // fire while an automatic detection is already mid-delay, which would
+            // otherwise double-advance the index.
+            if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
+
+                if (manualGreen || manualPurple) {
+                    Ball forced = manualGreen ? Ball.GREEN : Ball.PURPLE;
+
+                    slots[index] = forced;
+                    waitingForBall = false;
+
+                    int nextEmpty = findNextEmpty();
+                    nextIndexAfterDelay = nextEmpty;
+                    colorDetectedTime = System.currentTimeMillis();
+                    waitingToRotate = true;
+                }
+            }
+
+            // ----- MANUAL SPINDEXER CONTROL (HOLD X) -----
+            if (gamepad2.x) {
+
+                spinMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+                double manualPower = 0.2*(gamepad2.right_trigger - gamepad2.left_trigger);
+
+                spinMotor.setPower(manualPower);
+
+                // Encoder reset while holding X + DPAD UP
+                if (gamepad2.dpad_up) {
+                    spinMotor.setPower(0);
+                    spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    slots[0] = Ball.EMPTY;
+                    slots[1] = Ball.EMPTY;
+                    slots[2] = Ball.EMPTY;
+                    index = 0;
+                }
+
+                // HARD EXIT so auto logic doesn't fight you
+                telemetry.addLine("MANUAL SPINDEXER MODE");
+                telemetry.update();
+                continue;
+            }
+
+            if (launchAllPressed && !autoLaunching) {
+                autoLaunching = true;
+                intakeActive = false;
+
+                // FULL sweep math (NO closestModular)
+                int current = spinMotor.getCurrentPosition();
+                int currentMod = ((current % 750) + 750) % 750;
+
+                int targetInRev = OUTTAKE_POS[2];
+                if (targetInRev <= currentMod) {
+                    targetInRev += 750;
+                }
+
+                // FIX: add one additional full revolution (750 ticks). Previously
+                // this only traveled to the NEXT occurrence of OUTTAKE_POS[2],
+                // which is sometimes less than a full lap of the spindexer -- not
+                // guaranteed to sweep past all three outtake positions, so the
+                // last loaded ball could be left behind. The extra lap guarantees
+                // every slot passes the flicker at least once before we stop.
+                targetInRev += 750;
+
+                shootAllTargetPos = current - currentMod + targetInRev;
+
+                spinMotor.setTargetPosition(shootAllTargetPos);
+                spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spinMotor.setPower(0.35);
+
+                flickMotor.setPower(1);
+                launchMotor.setVelocity(targetVelocity);
+            }
+
+            if (autoLaunching) {
+
+                launchMotor.setVelocity(targetVelocity);
+
+                // Wait until the sweep finishes
+                if (!spinMotor.isBusy()) {
+
+                    // Stop shooter systems
+                    flickMotor.setPower(0);
+
+                    // Clear ALL slots at once
+                    slots[0] = Ball.EMPTY;
+                    slots[1] = Ball.EMPTY;
+                    slots[2] = Ball.EMPTY;
+
+                    // FIX: fully reset intake state after a shoot-all, not just the
+                    // slots array. Previously index was left at 2 and the
+                    // intake/waitingForBall/waitingToRotate flags weren't touched,
+                    // so any state left over from before the shot (e.g. a pending
+                    // waitingToRotate delay) could bleed into the next intake
+                    // cycle and cause it to only pick up 2 of the 3 empty slots.
+                    index = 0;
+                    intakeActive = false;
+                    waitingForBall = false;
+                    waitingToRotate = false;
+                    nextIndexAfterDelay = -1;
+                    autoLaunching = false;
+                }
+            }
+
+            // intake
+            if (intakePressed) {
+                int nextEmpty = findNextEmpty();
+
+                if (nextEmpty != -1) {
+                    // normal intake
+                    intakeActive = true;
+                    waitingForBall = true;
+                    rotateToIndex(nextEmpty);
+                } else {
+                    // all full then go shoot
+                    intakeActive = false;
+                    waitingForBall = false;
+
+//                    int nextLoaded = findClosestLoaded();
+//                    if (nextLoaded != -1) {
+//                        rotateToIndex(nextLoaded);
+//                    }
+                    rotateToIndex(0);
+                }
+            }
+
+            // go to balls
+            if (aimGreenPressed) {
+                aimClosest(Ball.GREEN);
+            }
+
+            if (aimPurplePressed) {
+                aimClosest(Ball.PURPLE);
+            }
+
+            // shoot
+
+            if (shootPressed && !autoLaunching) {
+                //flickServo.setPosition(flickUp);
+                flickMotor.setPower(1);
+            } else if (!autoLaunching) {
+                //flickServo.setPosition(flickDown);
+                flickMotor.setPower(0);
+            }
+
+            if (shootPressed && !autoLaunching) {
+                if (slots[index] != Ball.EMPTY) {
+                    // INSERT TS launcher code
+                    slots[index] = Ball.EMPTY;
+                }
+            }
+
+            if (runLaunch) {
+                //launchMotor.setPower(1);
+                launchMotor.setVelocity(targetVelocity);
+            } else {
+                //launchMotor.setPower(0);
+                launchMotor.setVelocity(targetVelocity);
+            }
+
+            // spindexer logic (COLOR-BASED DETECTION)
+
+            // spindexer logic (COLOR-BASED DETECTION) with delay
+            if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
+                Ball detected = detectColor(intakeColor, intakeColor2);
+
+                if (detected != Ball.EMPTY) {
+                    slots[index] = detected;
+                    waitingForBall = false;
+
+                    // compute next index, but don't rotate yet
+                    int nextEmpty = findNextEmpty();
+                    nextIndexAfterDelay = nextEmpty;
+                    colorDetectedTime = System.currentTimeMillis();
+                    waitingToRotate = true;
+                }
+            }
+
+            // after COLOR_DELAY_MS, rotate if needed
+            if (waitingToRotate) {
+                if (System.currentTimeMillis() - colorDetectedTime >= COLOR_DELAY_MS) {
+                    if (nextIndexAfterDelay != -1) {
+                        rotateToIndex(nextIndexAfterDelay);
+                        waitingForBall = true; // continue intake
+                    } else {
+                        intakeActive = false;
+                        rotateToIndex(0); // back to home
+                    }
+                    waitingToRotate = false; // reset
+                }
+            }
+
+            telemetry.addData("Index", index);
+            telemetry.addData("Position", spinMotor.getCurrentPosition());
+            telemetry.addLine("Slots:");
+            for (int i = 0; i < 3; i++) {
+                telemetry.addData("Slot " + i, slots[i]);
+            }
+            NormalizedRGBA c = intakeColor.getNormalizedColors();
+            telemetry.addData("R", "%.2f", c.red);
+            telemetry.addData("G", "%.2f", c.green);
+            telemetry.addData("B", "%.2f", c.blue);
+            telemetry.addData("Sum", "%.2f", c.red + c.green + c.blue);
+            telemetry.update();
+
+            NormalizedRGBA c2 = intakeColor2.getNormalizedColors();
+            telemetry.addData("R", "%.2f", c2.red);
+            telemetry.addData("G", "%.2f", c2.green);
+            telemetry.addData("B", "%.2f", c2.blue);
+            telemetry.addData("Sum", "%.2f", c2.red + c2.green + c2.blue);
+
+            telemetry.addLine("----------------------------");
+            telemetry.addData("Launch Velocity", launchMotor.getVelocity());
+            telemetry.addData("Launch Power", launchMotor.getPower());
+            telemetry.addData("launch target velocity", targetVelocity);
+
+            telemetry.update();
+        }
+    }
+
+    public double getHeadingError() {
+        double headingError = MathFunctions.getTurnDirection(follower.getPose().getHeading(), targetHeading) * MathFunctions.getSmallestAngleDifference(follower.getPose().getHeading(), targetHeading);
+        return headingError;
+    }
+
+    public void updateGoalHeading() {
+        Pose robotPos = follower.getPose();
+        double angleToTarget = MathFunctions.normalizeAngle(Math.atan2(
+                TARGET_Y - robotPos.getY(),
+                TARGET_X - robotPos.getX()
+        ));
+        targetHeading = angleToTarget;
+    }
+
+    // ROTATION
+
+    private void rotateToIndex(int target) {
+        index = target;
+        int base = intakeActive ? INTAKE_POS[target] : OUTTAKE_POS[target];
+        int targetPos = closestModular(base, spinMotor.getCurrentPosition());
+
+        spinMotor.setTargetPosition(targetPos);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(spinMotorSpeed);
+    }
+
+    private int closestModular(int mod, int current) {
+        int best = mod;
+        int minDiff = Integer.MAX_VALUE;
+        for (int k = -2; k <= 2; k++) {
+            int candidate = mod + 750 * k;
+            int diff = Math.abs(candidate - current);
+            if (diff < minDiff) {
+                minDiff = diff;
+                best = candidate;
+            }
+        }
+        return best;
+    }
+
+    private int findNextEmpty() {
+        for (int i = 0; i < 3; i++) {
+            int idx = (index + i) % 3;
+            if (slots[idx] == Ball.EMPTY) return idx;
+        }
+        return -1;
+    }
+
+    private int findClosestLoaded() {
+        for (int i = 0; i < 3; i++) {
+            int idx = (index + i) % 3;
+            if (slots[idx] != Ball.EMPTY) return idx;
+        }
+        return -1;
+    }
+
+    private void aimClosest(Ball target) {
+        intakeActive = false;
+        for (int i = 0; i < 3; i++) {
+            int idx = (index + i) % 3;
+            if (slots[idx] == target) {
+                rotateToIndex(idx);
+                return;
+            }
+        }
+    }
+
+    // COLOR SENSOR (WIDE MARGIN + FLOOR REJECTION)
+
+    private Ball detectColor(NormalizedColorSensor sensor1, NormalizedColorSensor sensor2) {
+        Ball ball1 = detectSingleSensor(sensor1);
+        Ball ball2 = detectSingleSensor(sensor2);
+
+        // Prioritize detected balls
+        if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
+        if (ball1 == Ball.GREEN  || ball2 == Ball.GREEN)  return Ball.GREEN;
+
+        return Ball.EMPTY;
+    }
+
+    // helper function for a single sensor
+    private Ball detectSingleSensor(NormalizedColorSensor sensor) {
+        NormalizedRGBA c = sensor.getNormalizedColors();
+        float r = c.red, g = c.green, b = c.blue;
+
+        // reject far / floor
+        float total = r + g + b;
+        if (total < 0.07f) return Ball.EMPTY;
+
+        // PURPLE: blue-dominant (keep strict)
+        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
+            return Ball.PURPLE;
+        }
+
+        // GREEN: looser dominance + absolute floor
+        if (g > r * 1.15f && g > b * 1.15f && g > 0.15f) {
+            return Ball.GREEN;
+        }
+
+        return Ball.EMPTY;
+    }
+
+    private void enableLight(NormalizedColorSensor s) {
+        if (s instanceof SwitchableLight) {
+            ((SwitchableLight) s).enableLight(true);
+        }
+    }
+
+    public void initialize() {
+        spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
+        intakeColor = hardwareMap.get(NormalizedColorSensor.class, "intakeColor");
+        intakeColor2 = hardwareMap.get(NormalizedColorSensor.class, "intakeColor2");
+
+        follower = Constants.createFollower(hardwareMap);
+        follower.setDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.15, 0.001, 0.00001, 0.6, 0.003));
+        follower.setStartingPose(startPose == null ? new Pose() : startPose);
+        follower.update();
+
+        follower.startTeleopDrive(true);
+        follower.update();
+
+        follower.updateDrivetrain();
+
+        fusedPose = new FusedPose(hardwareMap, startPose);
+
+        targetHeading = Math.toRadians(180); // Radians
+        controller = new PIDFController(follower.constants.coefficientsHeadingPIDF);
+        headingLock = false;
+
+        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        spinMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        intakeColor.setGain(gain);
+        enableLight(intakeColor);
+
+        intakeColor2.setGain(gain);
+        enableLight(intakeColor2);
+
+        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
+        launchMotor.setDirection(DcMotor.Direction.FORWARD); // same as TeleOp_Flick_Launch
+
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.93);
+        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
+//        hoodServo = hardwareMap.servo.get("hoodServo");
+        //flickServo = hardwareMap.servo.get("flickServo");
+
+        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        flickMotor = hardwareMap.get(DcMotorEx.class, "flickMotor");
+        flickMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        drivetrain = new CustomMecanumDrive(hardwareMap);
+
+    }
+
+}
