@@ -9,24 +9,18 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
-import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.teleoptests.WheelFlickerV2;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
-import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
-
 
 @TeleOp(name = "!!!!!!!!! STATES TELEOP V2")
 public class TeleV2 extends LinearOpMode {
@@ -46,8 +40,6 @@ public class TeleV2 extends LinearOpMode {
     private boolean oneTime;
 
     private CustomMecanumDrive drivetrain;
-
-//    Servo hoodServo;
 
     private NormalizedColorSensor intakeColor;
     private NormalizedColorSensor intakeColor2;
@@ -75,46 +67,37 @@ public class TeleV2 extends LinearOpMode {
             prevRightBumper,
             prevLeftTrigger,
             prevRightTrigger,
-            prev2RightBumper,
-            prevIntakeButton, // NEW: edge detector for dpad_up (intake start)
-            prev2Y; // NEW: edge detector for gamepad2.y (launcher failsafe)
-
-    // ---- LAUNCHER AUTO-RAMP / FAILSAFE ----
-    private boolean launcherShouldRun = false;
-    private boolean launcherKilled = false; // gamepad2 Y toggles this on/off
+            prev2RightBumper;
 
     // ---- AUTO LAUNCH ALL ----
     private boolean autoLaunching = false;
-    private int autoLaunchTarget = -1;
-
-    private long flickStartTime = 0;
-    private boolean flicking = false;
 
     // new auto launch
     private int shootAllTargetPos = 0;
 
-    private static final long FLICK_TIME_MS = 0; // 500 ms flick
-
-    // ---- POST FLICK DELAY ----
-    private boolean waitingAfterFlick = false;
-    private long flickEndTime = 0;
-    private static final long POST_FLICK_DELAY_MS = 0; // 100 ms delay after flick retra
-
     private double spinMotorSpeed = 0.38;
 
-    // ---- COLOR SENSOR DELAY ----
+    // ---- COLOR SENSOR DEBOUNCE / SETTLE ----
+    // Root cause of the "false ball" / "skips a real ball" bugs: the old code
+    // made a decision off a single sensor frame the instant the spindexer
+    // stopped moving - the worst possible moment (residual vibration, ball
+    // still settling in the tube). Now we (1) wait a short settle window
+    // after arriving at a slot before sampling at all, and (2) require
+    // several consecutive matching reads before accepting a color.
     private boolean waitingToRotate = false;
     private long colorDetectedTime = 0;
-    private static final long COLOR_DELAY_MS = 50; // 100 ms delay before spinning
+    private static final long COLOR_DELAY_MS = 80; // delay after confirmed detection before rotating
     private int nextIndexAfterDelay = -1;
 
+    private static final long SLOT_SETTLE_MS = 120;      // ignore sensor for this long after arriving
+    private static final int  DEBOUNCE_SAMPLES_REQUIRED = 4; // consecutive matching reads to accept
+    private boolean armedForSample = false;
+    private long arrivedAtSlotTime = 0;
+    private Ball debounceCandidate = Ball.EMPTY;
+    private int debounceCount = 0;
+
     // ---- BUTTON STATES ----
-
-    // ---- GAMEPAD 2 FAILSAFES ----
     private boolean prev2A, prev2B;
-
-    private double flickUp = 0.75;
-    private double flickDown = 1;
 
     private double targetVelocity = 1800;
 
@@ -152,7 +135,6 @@ public class TeleV2 extends LinearOpMode {
 
         waitForStart();
 
-//        hoodServo.setPosition(0.77);
         flickMotor.setPower(0);
 
         while (opModeIsActive()) {
@@ -167,25 +149,10 @@ public class TeleV2 extends LinearOpMode {
             double strafe = gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
 
-            //launch motor - left bumper
-            //flick servo - right bumper
-            //spindexer intake - up arrow (dpad)
-            //spindexer shoot purple - b
-            //spindexer shoot green - a
-            //launch all three - left arrow (dpad)
-            //reverse intake - left trigger
-
-            // FIX: intakePressed is now RISING-EDGE triggered instead of a raw level
-            // read of dpad_up. Previously, holding dpad_up caused this block to
-            // re-fire every single loop iteration (~50x/sec), which stomped on the
-            // color-sensor debounce/delay state (waitingToRotate) mid-flight and
-            // caused slots to get skipped -- this was the root cause of only
-            // intaking 2 of 3 balls. One tap now starts the sequence; the automatic
-            // color-detect + delay logic below handles advancing through the rest.
-            intakePressed      = gamepad1.dpad_up && !prevIntakeButton;
+            intakePressed      = gamepad1.dpad_up;
             aimGreenPressed    = gamepad1.a && !prevA;
             aimPurplePressed   = gamepad1.b && !prevB;
-            shootPressed       = gamepad1.right_bumper; // && !prevB;
+            shootPressed       = gamepad1.right_bumper;
             runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.x && !prevX) != intakePowerReverse;
@@ -201,23 +168,15 @@ public class TeleV2 extends LinearOpMode {
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
             prev2RightBumper = gamepad2.right_bumper;
-            prevIntakeButton = gamepad1.dpad_up;
-
-            // ---- GAMEPAD 2 LAUNCHER FAILSAFE (Y toggles launcher kill switch) ----
-            boolean launcherKillPressed = gamepad2.y && !prev2Y;
-            if (launcherKillPressed) {
-                launcherKilled = !launcherKilled;
-            }
-            prev2Y = gamepad2.y;
 
             if (gamepad2.dpad_left) {
                 targetVelocity = 1600;
             }
             if (gamepad2.dpad_down) {
-                targetVelocity = 1900;
+                targetVelocity = 1800;
             }
             if (gamepad2.dpad_right) {
-                targetVelocity = 2500;
+                targetVelocity = 6000;
             }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
@@ -232,32 +191,20 @@ public class TeleV2 extends LinearOpMode {
                             Math.abs(strafe) < 0.05 &&
                             Math.abs(turn) < 0.05 && (gamepad1.left_bumper || gamepad2.left_stick_button);
 
-
             telemetry.addData("Move: ", drive + strafe + turn);
             if (idle) {
-
-                // HOLD POSITION
                 if (oneTime) {
                     follower.update();
                     savePose = follower.getPose();
                     oneTime = false;
                     follower.holdPoint(savePose);
-//                    savePath = follower.pathBuilder()
-//                            .addPath(new BezierPoint(savePose))
-//                            .setConstantHeadingInterpolation(savePose.getHeading())
-//                            //.setBrakingStrength(5)
-//                            .build();
-//                            //.build();
                 }
                 telemetry.addLine("Holding Position");
-                //follower.followPath(savePath);
                 follower.update();
-
             } else {
                 drivetrain.driveMecanum(strafe, drive, turn);
                 oneTime = true;
                 telemetry.addLine("Manual Drive");
-
             }
 
             updateGoalHeading();
@@ -276,51 +223,25 @@ public class TeleV2 extends LinearOpMode {
             } else
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
-
-//            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
-//            double v = getHeadingError();
-//            controller.updateError(v);
-//
-//            double otherV = turn;
-//            if (headingLock) {
-//                otherV = controller.run();
-//                otherV = -1*otherV;
-//                drivetrain.setMode(DcMotor.ZeroPowerBehavior.FLOAT);
-//            } else {
-//                drivetrain.setMode(DcMotor.ZeroPowerBehavior.BRAKE);
-//            }
-//            telemetry.addData("otherV", otherV);
-//
-//            drivetrain.driveMecanum(strafe, drive, otherV);
-
-
-//            if (gamepad1.x) {
-//                headingLock = true;
-//            }
-
-
-//            if (gamepad1.x) {
-//                intakeActive = false;
-//                waitingForBall = false;
-//                rotateToIndex(0);
-//            }
-
             if (nextIntake2 && !prevNextIntake2) {
                 index++;
                 index = index % 3;
 
-                // normal intake
                 intakeActive = true;
                 waitingForBall = true;
                 rotateToIndex(index);
             }
 
-            if (intakePower) {
+            if (autoLaunching) {
                 intakeMotor.setPower(0);
-            } else if (intakePowerReverse) {
-                intakeMotor.setPower(0.8);
             } else {
-                intakeMotor.setPower(-0.6);
+                if (intakePower) {
+                    intakeMotor.setPower(0);
+                } else if (intakePowerReverse) {
+                    intakeMotor.setPower(0.8);
+                } else {
+                    intakeMotor.setPower(-0.6);
+                }
             }
 
             if (autoLaunching) {
@@ -329,25 +250,15 @@ public class TeleV2 extends LinearOpMode {
                 spinMotorSpeed = 0.38;
             }
 
-            // FIX: added !waitingToRotate guard so a manual color override can't
-            // fire while an automatic detection is already mid-delay, which would
-            // otherwise double-advance the index.
-            if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
-
+            // ----- MANUAL COLOR OVERRIDE (still instant - explicit driver input, no debounce needed) -----
+            if (waitingForBall && intakeActive && !spinMotor.isBusy()) {
                 if (manualGreen || manualPurple) {
                     Ball forced = manualGreen ? Ball.GREEN : Ball.PURPLE;
-
-                    slots[index] = forced;
-                    waitingForBall = false;
-
-                    int nextEmpty = findNextEmpty();
-                    nextIndexAfterDelay = nextEmpty;
-                    colorDetectedTime = System.currentTimeMillis();
-                    waitingToRotate = true;
+                    acceptBall(forced);
                 }
             }
 
-            // ----- MANUAL SPINDEXER CONTROL (HOLD X) -----
+            // ----- MANUAL SPINDEXER CONTROL (HOLD X on gamepad2) -----
             if (gamepad2.x) {
 
                 spinMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -356,7 +267,6 @@ public class TeleV2 extends LinearOpMode {
 
                 spinMotor.setPower(manualPower);
 
-                // Encoder reset while holding X + DPAD UP
                 if (gamepad2.dpad_up) {
                     spinMotor.setPower(0);
                     spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -367,7 +277,6 @@ public class TeleV2 extends LinearOpMode {
                     index = 0;
                 }
 
-                // HARD EXIT so auto logic doesn't fight you
                 telemetry.addLine("MANUAL SPINDEXER MODE");
                 telemetry.update();
                 continue;
@@ -377,52 +286,35 @@ public class TeleV2 extends LinearOpMode {
                 autoLaunching = true;
                 intakeActive = false;
 
-                // FIX: previously this computed a "smart" modular target to land
-                // exactly on OUTTAKE_POS[2], which sometimes wasn't enough travel
-                // to reliably clear the third ball. The autonomous code solves
-                // this the same way every time with a simple, generous fixed
-                // sweep distance (+600 ticks, same as shootAllLast() in auto --
-                // the version auto itself uses when it absolutely needs the last
-                // ball to fire). Mirroring that exact distance and power here.
                 int current = spinMotor.getCurrentPosition();
-                shootAllTargetPos = current + 600;
+                int currentMod = ((current % 750) + 750) % 750;
+
+                int targetInRev = OUTTAKE_POS[2];
+                if (targetInRev <= currentMod) {
+                    targetInRev += 750;
+                }
+
+                shootAllTargetPos = current - currentMod + targetInRev;
 
                 spinMotor.setTargetPosition(shootAllTargetPos);
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                spinMotor.setPower(0.3); // matches auto's shootAll/shootAllLast power
+                spinMotor.setPower(0.35);
 
                 flickMotor.setPower(1);
-                launchMotor.setVelocity(launcherKilled ? 0 : targetVelocity);
+                launchMotor.setVelocity(targetVelocity);
             }
 
             if (autoLaunching) {
+                launchMotor.setVelocity(targetVelocity);
 
-                // Failsafe still applies mid-sweep: if gamepad2 kills the
-                // launcher during a shoot-all, the flywheel stops immediately.
-                launchMotor.setVelocity(launcherKilled ? 0 : targetVelocity);
-
-                // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
-
-                    // Stop shooter systems
                     flickMotor.setPower(0);
 
-                    // Clear ALL slots at once
                     slots[0] = Ball.EMPTY;
                     slots[1] = Ball.EMPTY;
                     slots[2] = Ball.EMPTY;
 
-                    // FIX: fully reset intake state after a shoot-all, not just the
-                    // slots array. Previously index was left at 2 and the
-                    // intake/waitingForBall/waitingToRotate flags weren't touched,
-                    // so any state left over from before the shot (e.g. a pending
-                    // waitingToRotate delay) could bleed into the next intake
-                    // cycle and cause it to only pick up 2 of the 3 empty slots.
-                    index = 0;
-                    intakeActive = false;
-                    waitingForBall = false;
-                    waitingToRotate = false;
-                    nextIndexAfterDelay = -1;
+                    index = 2;
                     autoLaunching = false;
                 }
             }
@@ -432,28 +324,16 @@ public class TeleV2 extends LinearOpMode {
                 int nextEmpty = findNextEmpty();
 
                 if (nextEmpty != -1) {
-                    // normal intake
                     intakeActive = true;
                     waitingForBall = true;
-                    // Starting a fresh intake cycle clears any lingering launcher
-                    // failsafe kill so the operator doesn't have to remember to
-                    // un-kill it before the next set of balls is ready to shoot.
-                    launcherKilled = false;
                     rotateToIndex(nextEmpty);
                 } else {
-                    // all full then go shoot
                     intakeActive = false;
                     waitingForBall = false;
-
-//                    int nextLoaded = findClosestLoaded();
-//                    if (nextLoaded != -1) {
-//                        rotateToIndex(nextLoaded);
-//                    }
                     rotateToIndex(0);
                 }
             }
 
-            // go to balls
             if (aimGreenPressed) {
                 aimClosest(Ball.GREEN);
             }
@@ -462,58 +342,26 @@ public class TeleV2 extends LinearOpMode {
                 aimClosest(Ball.PURPLE);
             }
 
-            // shoot
-
             if (shootPressed && !autoLaunching) {
-                //flickServo.setPosition(flickUp);
                 flickMotor.setPower(1);
             } else if (!autoLaunching) {
-                //flickServo.setPosition(flickDown);
                 flickMotor.setPower(0);
             }
 
             if (shootPressed && !autoLaunching) {
                 if (slots[index] != Ball.EMPTY) {
-                    // INSERT TS launcher code
                     slots[index] = Ball.EMPTY;
                 }
             }
 
-            // FIX: previously both branches here set the SAME velocity, so the
-            // launch motor was effectively commanded to full targetVelocity from
-            // the moment the opmode started, with no real ramp control -- that's
-            // why the first ball could shoot short (motor timing wasn't tied to
-            // anything meaningful). Now the flywheel only spins up once all 3
-            // slots are loaded (giving it a clean ramp window before the
-            // shoot-all sweep starts), or when a shot is actively requested, or
-            // when the driver manually pre-spins with left bumper (runLaunch).
-            // Gamepad2's Y failsafe (launcherKilled) overrides all of this off.
-            boolean allSlotsLoaded = slots[0] != Ball.EMPTY && slots[1] != Ball.EMPTY && slots[2] != Ball.EMPTY;
-            launcherShouldRun = (allSlotsLoaded || shootPressed || autoLaunching || runLaunch) && !launcherKilled;
-
-            if (launcherShouldRun) {
+            if (runLaunch) {
                 launchMotor.setVelocity(targetVelocity);
             } else {
-                launchMotor.setVelocity(0);
+                launchMotor.setVelocity(targetVelocity);
             }
 
-            // spindexer logic (COLOR-BASED DETECTION)
-
-            // spindexer logic (COLOR-BASED DETECTION) with delay
-            if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
-                Ball detected = detectColor(intakeColor, intakeColor2);
-
-                if (detected != Ball.EMPTY) {
-                    slots[index] = detected;
-                    waitingForBall = false;
-
-                    // compute next index, but don't rotate yet
-                    int nextEmpty = findNextEmpty();
-                    nextIndexAfterDelay = nextEmpty;
-                    colorDetectedTime = System.currentTimeMillis();
-                    waitingToRotate = true;
-                }
-            }
+            // ---- SPINDEXER AUTO COLOR DETECTION (settled + debounced) ----
+            intake();
 
             // after COLOR_DELAY_MS, rotate if needed
             if (waitingToRotate) {
@@ -531,6 +379,8 @@ public class TeleV2 extends LinearOpMode {
 
             telemetry.addData("Index", index);
             telemetry.addData("Position", spinMotor.getCurrentPosition());
+            telemetry.addData("Armed for sample", armedForSample);
+            telemetry.addData("Debounce candidate", debounceCandidate + " x" + debounceCount);
             telemetry.addLine("Slots:");
             for (int i = 0; i < 3; i++) {
                 telemetry.addData("Slot " + i, slots[i]);
@@ -540,20 +390,17 @@ public class TeleV2 extends LinearOpMode {
             telemetry.addData("G", "%.2f", c.green);
             telemetry.addData("B", "%.2f", c.blue);
             telemetry.addData("Sum", "%.2f", c.red + c.green + c.blue);
-            telemetry.update();
 
             NormalizedRGBA c2 = intakeColor2.getNormalizedColors();
-            telemetry.addData("R", "%.2f", c2.red);
-            telemetry.addData("G", "%.2f", c2.green);
-            telemetry.addData("B", "%.2f", c2.blue);
-            telemetry.addData("Sum", "%.2f", c2.red + c2.green + c2.blue);
+            telemetry.addData("R2", "%.2f", c2.red);
+            telemetry.addData("G2", "%.2f", c2.green);
+            telemetry.addData("B2", "%.2f", c2.blue);
+            telemetry.addData("Sum2", "%.2f", c2.red + c2.green + c2.blue);
 
             telemetry.addLine("----------------------------");
             telemetry.addData("Launch Velocity", launchMotor.getVelocity());
             telemetry.addData("Launch Power", launchMotor.getPower());
             telemetry.addData("launch target velocity", targetVelocity);
-            telemetry.addData("Launcher Running", launcherShouldRun);
-            telemetry.addData("Launcher Failsafe Killed (GP2 Y)", launcherKilled);
 
             telemetry.update();
         }
@@ -573,7 +420,7 @@ public class TeleV2 extends LinearOpMode {
         targetHeading = angleToTarget;
     }
 
-    // ROTATION
+    // ---------------- SPINDEXER ----------------
 
     private void rotateToIndex(int target) {
         index = target;
@@ -583,6 +430,12 @@ public class TeleV2 extends LinearOpMode {
         spinMotor.setTargetPosition(targetPos);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spinMotor.setPower(spinMotorSpeed);
+
+        // Any time we start a new move, invalidate the settle/debounce state -
+        // we are no longer sitting still at a confirmed slot.
+        armedForSample = false;
+        debounceCandidate = Ball.EMPTY;
+        debounceCount = 0;
     }
 
     private int closestModular(int mod, int current) {
@@ -626,35 +479,90 @@ public class TeleV2 extends LinearOpMode {
         }
     }
 
+    // Shared acceptance path for both auto color-detect and manual override.
+    private void acceptBall(Ball detected) {
+        slots[index] = detected;
+        waitingForBall = false;
+        armedForSample = false;
+
+        int nextEmpty = findNextEmpty();
+        nextIndexAfterDelay = nextEmpty;
+        colorDetectedTime = System.currentTimeMillis();
+        waitingToRotate = true;
+    }
+
+    // ---- SETTLED + DEBOUNCED AUTO DETECTION ----
+    // Called every loop. Only samples once the spindexer has been stopped and
+    // settled for SLOT_SETTLE_MS, and only accepts a color once it has read
+    // the same non-empty result DEBOUNCE_SAMPLES_REQUIRED times in a row.
+    // This is what fixes both false-positive-when-empty and skipping a real
+    // ball: a single noisy/glare frame can no longer decide anything on its
+    // own, and we never even look during the first moments after arriving,
+    // when vibration and ball settling make readings least trustworthy.
+    private void intake() {
+
+        if (!(waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate)) {
+            return;
+        }
+
+        if (!armedForSample) {
+            // Just confirmed stopped at this slot - start the settle timer,
+            // don't trust any reading yet.
+            armedForSample = true;
+            arrivedAtSlotTime = System.currentTimeMillis();
+            debounceCandidate = Ball.EMPTY;
+            debounceCount = 0;
+            return;
+        }
+
+        if (System.currentTimeMillis() - arrivedAtSlotTime < SLOT_SETTLE_MS) {
+            return; // still settling, don't sample yet
+        }
+
+        Ball detected = detectColor(intakeColor, intakeColor2);
+
+        if (detected == Ball.EMPTY) {
+            // Any empty read resets the streak - a real ball should read
+            // consistently, not flicker between colored/empty.
+            debounceCandidate = Ball.EMPTY;
+            debounceCount = 0;
+            return;
+        }
+
+        if (detected == debounceCandidate) {
+            debounceCount++;
+        } else {
+            debounceCandidate = detected;
+            debounceCount = 1;
+        }
+
+        if (debounceCount >= DEBOUNCE_SAMPLES_REQUIRED) {
+            acceptBall(detected);
+        }
+    }
+
     // COLOR SENSOR (WIDE MARGIN + FLOOR REJECTION)
 
     private Ball detectColor(NormalizedColorSensor sensor1, NormalizedColorSensor sensor2) {
         Ball ball1 = detectSingleSensor(sensor1);
         Ball ball2 = detectSingleSensor(sensor2);
 
-        // Prioritize detected balls
         if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
         if (ball1 == Ball.GREEN  || ball2 == Ball.GREEN)  return Ball.GREEN;
 
         return Ball.EMPTY;
     }
 
-    // helper function for a single sensor
     private Ball detectSingleSensor(NormalizedColorSensor sensor) {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
-        // FIX: swapped in the thresholds from the autonomous code, which reads
-        // these same sensors reliably. Teleop's floor/purple thresholds were
-        // stricter (0.07 floor, 1.35/1.25 purple ratios) than what the
-        // hardware actually needs, causing balls to go undetected.
-
         // reject far / floor
         float total = r + g + b;
-        if (total < 0.03f) return Ball.EMPTY;
+        if (total < 0.07f) return Ball.EMPTY;
 
-        // PURPLE: blue-dominant
-        if (b > r * 1.2f && b > g * 1.1f && b > 0.12f) {
+        // PURPLE: blue-dominant (keep strict)
+        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
             return Ball.PURPLE;
         }
 
@@ -710,9 +618,6 @@ public class TeleV2 extends LinearOpMode {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.93);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
-//        hoodServo = hardwareMap.servo.get("hoodServo");
-        //flickServo = hardwareMap.servo.get("flickServo");
-
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -721,7 +626,5 @@ public class TeleV2 extends LinearOpMode {
         flickMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         drivetrain = new CustomMecanumDrive(hardwareMap);
-
     }
-
 }

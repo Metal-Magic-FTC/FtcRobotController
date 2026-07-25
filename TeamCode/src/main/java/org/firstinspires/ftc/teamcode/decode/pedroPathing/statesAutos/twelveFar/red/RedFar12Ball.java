@@ -30,22 +30,15 @@ public class RedFar12Ball extends LinearOpMode {
 
     private float gain = 20;
 
-    private static final double LAUNCH_TARGET_VELOCITY = 5000;
-    private static final double LAUNCH_VELOCITY_TOLERANCE = 150;   // ticks/sec window considered "at speed"
-    private static final long   LAUNCH_VELOCITY_TIMEOUT_MS = 800;  // don't hang forever if it can't recover
-    private static final long   FLICK_PULSE_MS = 150;
-    private static final long   POST_FLICK_SETTLE_MS = 60;
-    private static final int    SPIN_STEP_TICKS = 250;             // OUTTAKE_POS entries are 250 apart mod 750
-    private static final double SPIN_STEP_POWER = 0.18;            // slower discrete step instead of one fast sweep
+    private enum Ball {EMPTY, PURPLE, GREEN}
 
-    private enum Ball { EMPTY, PURPLE, GREEN }
     private Ball[] slots = {Ball.EMPTY, Ball.EMPTY, Ball.EMPTY};
 
     // ---------------- DRIVE ----------------
     private Follower follower;
     private GeneratedPathsRed12BallFarV3 paths;
     private CustomMecanumDrive drivetrain;
-    private Limelight3A limelight;        
+    private Limelight3A limelight;
 
     // ---------------- INTAKE, TRANSFER, SCORING ----------------
 
@@ -60,7 +53,7 @@ public class RedFar12Ball extends LinearOpMode {
     NormalizedColorSensor intakeColor2;
 
     private static final int[] OUTTAKE_POS = {500, 0, 250};
-    private static final int[] INTAKE_POS  = {125, 375, 625};
+    private static final int[] INTAKE_POS = {125, 375, 625};
 
     private double spinMotorSpeed = 0.38;
 
@@ -449,7 +442,7 @@ public class RedFar12Ball extends LinearOpMode {
 
         // Prioritize detected balls
         if (ball1 == Ball.PURPLE || ball2 == Ball.PURPLE) return Ball.PURPLE;
-        if (ball1 == Ball.GREEN  || ball2 == Ball.GREEN)  return Ball.GREEN;
+        if (ball1 == Ball.GREEN || ball2 == Ball.GREEN) return Ball.GREEN;
 
         return Ball.EMPTY;
     }
@@ -577,56 +570,29 @@ public class RedFar12Ball extends LinearOpMode {
         index = endSlot;
     }
 
-    private void waitForLaunchVelocity() {
-        long start = System.currentTimeMillis();
-        while (opModeIsActive()
-                && System.currentTimeMillis() - start < LAUNCH_VELOCITY_TIMEOUT_MS) {
-            double v = launchMotor.getVelocity();
-            if (Math.abs(v - LAUNCH_TARGET_VELOCITY) <= LAUNCH_VELOCITY_TOLERANCE) return;
-            sleep(10);
-        }
-        // timeout: fire anyway rather than stalling auto, but this is the sign
-        // the PIDF isn't recovering fast enough - see note below
-    }
-
-    private void fireOneBall() {
-        waitForLaunchVelocity();
-        flickMotor.setPower(1);
-        sleep(FLICK_PULSE_MS);
-        flickMotor.setPower(0);
-        sleep(POST_FLICK_SETTLE_MS); // let velocity start dipping/recovering before we check again
-    }
-
-    private void advanceSpindexerStep() {
-        int target = spinMotor.getCurrentPosition() + SPIN_STEP_TICKS;
-        spinMotor.setTargetPosition(target);
-        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(SPIN_STEP_POWER);
-        while (opModeIsActive() && spinMotor.isBusy()) {
-            // discrete move, one slot at a time
-        }
-        spinMotor.setPower(0);
-    }
-
     private void shootAll() {
 
         intakeMotor.setPower(0);
-        launchMotor.setVelocity(LAUNCH_TARGET_VELOCITY);
 
-        // Ball already aligned at current slot from before shootAll() was called.
-        // Make sure the flywheel is truly at speed (not just ramping/overshooting)
-        // before the first shot - this fixes "first shot too far".
-        waitForLaunchVelocity();
-        fireOneBall();
+        flickMotor.setPower(1);
+        launchMotor.setVelocity(5000);
+        sleep(200);
 
-        // Ball 2
-        advanceSpindexerStep();
-        fireOneBall();
+        launchMotor.setVelocity(5000);
+        int endPosition = spinMotor.getCurrentPosition() + 750;
+        spinMotor.setTargetPosition(endPosition);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(0.15);
 
-        // Ball 3 - this is the one that was starving before; now it waits
-        // for real recovery instead of firing on a fixed timer.
-        advanceSpindexerStep();
-        fireOneBall();
+        while (opModeIsActive() && spinMotor.isBusy()) {
+            //nothing
+        }
+
+        spinMotor.setPower(0);
+
+        flickMotor.setPower(1);
+        sleep(200);
+        flickMotor.setPower(0);
 
         slots[0] = Ball.EMPTY;
         slots[1] = Ball.EMPTY;
@@ -635,44 +601,10 @@ public class RedFar12Ball extends LinearOpMode {
         index = (index + 2) % 3;
 
         intakeMotor.setPower(-0.6);
-        launchMotor.setVelocity(LAUNCH_TARGET_VELOCITY);
-    }
 
-//    private void shootAll() {
-//
-//        intakeMotor.setPower(0);
-//
-//        flickMotor.setPower(1);
-//        launchMotor.setVelocity(5000);
-//        sleep(200);
-//
-//        launchMotor.setVelocity(5000);
-//        int endPosition = spinMotor.getCurrentPosition() + 750;
-//        spinMotor.setTargetPosition(endPosition);
-//        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        spinMotor.setPower(0.15);
-//
-//        while (opModeIsActive() && spinMotor.isBusy()) {
-//            //nothing
-//        }
-//
-//        spinMotor.setPower(0);
-//
-//        flickMotor.setPower(1);
-//        sleep(200);
-//        flickMotor.setPower(0);
-//
-//        slots[0] = Ball.EMPTY;
-//        slots[1] = Ball.EMPTY;
-//        slots[2] = Ball.EMPTY;
-//
-//        index = (index + 2) % 3;
-//
-//        intakeMotor.setPower(-0.6);
-//
-//        launchMotor.setVelocity(5000);
-//
-//    }
+        launchMotor.setVelocity(5000);
+
+    }
 
     // ---------------- INIT ----------------
     private void initHardware() {
