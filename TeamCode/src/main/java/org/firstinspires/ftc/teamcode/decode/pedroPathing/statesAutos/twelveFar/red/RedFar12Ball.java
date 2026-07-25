@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! BACK 12 HOPES AND DREAMS")
+@Autonomous(name = "!!!!!!!! BACK 12  HOPES AND DREAMS")
 public class RedFar12Ball extends LinearOpMode {
 
     private int index = 0;
@@ -35,7 +35,7 @@ public class RedFar12Ball extends LinearOpMode {
 
     // ---------------- DRIVE ----------------
     private Follower follower;
-    private org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3 paths;
+    private GeneratedPathsRed12BallFarV3 paths;
     private CustomMecanumDrive drivetrain;
     private Limelight3A limelight;
 
@@ -80,7 +80,7 @@ public class RedFar12Ball extends LinearOpMode {
         slots[2] = Ball.PURPLE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setPose(org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3.START_POSE);
+        follower.setPose(GeneratedPathsRed12BallFarV3.START_POSE);
         paths = new GeneratedPathsRed12BallFarV3(follower);
         hoodServo.setPosition(0.80);
 

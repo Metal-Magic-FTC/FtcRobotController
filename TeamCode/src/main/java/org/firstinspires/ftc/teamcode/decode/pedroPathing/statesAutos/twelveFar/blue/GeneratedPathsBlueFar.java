@@ -1,32 +1,35 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.blue;
 
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.follower.Follower;
 
 public class GeneratedPathsBlueFar {
 
     private final Follower follower;
 
     // ---------------- START POSE ----------------
-
     //public static final Pose START_POSE = new Pose(118.157, 128.629, Math.toRadians(45));
     public static final Pose START_POSE =
-            new Pose(56, 8, Math.toRadians(90));
+            new Pose(86, 8, Math.toRadians(90)).mirror();
 
-    public static final Pose SHOOT_POSE = new Pose(58, 20, Math.toRadians(110));
+    // ---------------- SHARED WAYPOINTS (unchanged ball/target positions) ----------------
+    // The pose the robot shoots from. Same physical spot every time, only the
+    // path we drive TO it changes depending on where we're coming from.
+    private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(69)).mirror();
+    private static final Pose SHOOT2_POSE     = new Pose(90, 16, Math.toRadians(70)).mirror();
+    private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0)).mirror();    // unchanged pickup lane entry
+    private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0)).mirror();   // unchanged pickup lane exit
+    private static final Pose WALLBUMP_END   = new Pose(133, 14, Math.toRadians(0)).mirror();   // unchanged wall bump target
 
-    public static final Pose TO_INTAKE_HUMAN_POSE = new Pose(35, 10, Math.toRadians(180));
-
-    public static final Pose INTAKE_HUMAN_POSE = new Pose(20, 10, Math.toRadians(180));
-
-    public static final Pose TO_INTAKE_ROW_POSE = new Pose(40, 35, Math.toRadians(180));
-    public static final Pose INTAKE_ROW_POSE = new Pose(20, 35, Math.toRadians(180));
-
-    public static final Pose LEAVE_POSE = new Pose(72, 40, Math.toRadians(90));
+    // PLACEHOLDER - not a verified field position. Adjust this in the Pedro
+    // visualizer against your real red-far field before running. This should
+    // be the second wall your robot drives into to reset both axes, near the
+    // corner adjacent to WALLBUMP_END.
+    private static final Pose CORNER_POSE    = new Pose(140, 6, Math.toRadians(45)).mirror();
 
     public GeneratedPathsBlueFar(Follower follower) {
         this.follower = follower;
@@ -34,7 +37,8 @@ public class GeneratedPathsBlueFar {
 
     // ---------------- PATHS ----------------
 
-    public PathChain start_to_shoot() {
+    // Preload shot: START_POSE -> SHOOT_POSE
+    public PathChain shoot1() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
@@ -42,108 +46,98 @@ public class GeneratedPathsBlueFar {
                                 SHOOT_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(
-                        Math.toRadians(START_POSE.getHeading()),
-                        Math.toRadians(SHOOT_POSE.getHeading())
-                )
+                .setLinearHeadingInterpolation(180-START_POSE.getHeading(), 180-SHOOT_POSE.getHeading())
                 .build();
     }
 
-    public PathChain human_to_shoot() {
+    // Shot after intake1: robot is actually at INTAKE1_END, not START_POSE
+    public PathChain shoot2() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                INTAKE_HUMAN_POSE,
-                                SHOOT_POSE
+                                INTAKE1_END,
+                                SHOOT2_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(
-                        Math.toRadians(INTAKE_HUMAN_POSE.getHeading()),
-                        Math.toRadians(SHOOT_POSE.getHeading())
-                )
+                .setLinearHeadingInterpolation(180-INTAKE1_END.getHeading(), 180-SHOOT2_POSE.getHeading())
                 .build();
     }
 
-    public PathChain row_to_shoot() {
+    // Shot after the wall+corner bump: robot is actually at CORNER_POSE, not START_POSE
+    public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                INTAKE_ROW_POSE,
-                                SHOOT_POSE
+                                CORNER_POSE,
+                                SHOOT2_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(
-                        Math.toRadians(INTAKE_ROW_POSE.getHeading()),
-                        Math.toRadians(SHOOT_POSE.getHeading())
-                )
+                .setLinearHeadingInterpolation(180-CORNER_POSE.getHeading(), 180-SHOOT_POSE.getHeading())
                 .build();
     }
 
-
-    public PathChain human_toIntake() {
+    // Starts where shoot1() actually ends (SHOOT_POSE), not the old hardcoded (90,14,75)
+    public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierCurve(
                                 SHOOT_POSE,
-                                new Pose(45, 15),
-                                TO_INTAKE_HUMAN_POSE
+                                INTAKE1_START
                         )
                 )
-                .setLinearHeadingInterpolation(
-                        Math.toRadians(SHOOT_POSE.getHeading()),
-                        Math.toRadians(TO_INTAKE_HUMAN_POSE.getHeading())
-                )
+                .setLinearHeadingInterpolation(180-SHOOT_POSE.getHeading(), 180-INTAKE1_START.getHeading())
                 .build();
     }
 
-    public PathChain human_intake() {
+    // Unchanged ball pickup line: starts where toIntake1() ends
+    public PathChain intake1() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                TO_INTAKE_HUMAN_POSE,
-                                INTAKE_HUMAN_POSE
+                                INTAKE1_START,
+                                INTAKE1_END
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(TO_INTAKE_HUMAN_POSE.getHeading()), Math.toRadians(INTAKE_HUMAN_POSE.getHeading()))
+                .setLinearHeadingInterpolation(180-INTAKE1_START.getHeading(), 180-INTAKE1_END.getHeading())
                 .build();
     }
 
-    public PathChain row_toIntake() {
+    // Bump 1 of 2: starts where shoot2() actually ends (SHOOT_POSE), drives into the wall
+    public PathChain wallBump() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                SHOOT_POSE,
-                                TO_INTAKE_HUMAN_POSE
+                                SHOOT2_POSE,
+                                WALLBUMP_END
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_POSE.getHeading()), Math.toRadians(TO_INTAKE_HUMAN_POSE.getHeading()))
+                .setLinearHeadingInterpolation(180-SHOOT2_POSE.getHeading(), 180-WALLBUMP_END.getHeading())
                 .build();
     }
 
-    public PathChain row_intake() {
+    // Bump 2 of 2: starts where wallBump() actually ends (WALLBUMP_END), drives into the corner
+    public PathChain cornerBump() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                TO_INTAKE_ROW_POSE,
-                                INTAKE_ROW_POSE
+                                WALLBUMP_END,
+                                CORNER_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(TO_INTAKE_ROW_POSE.getHeading()), Math.toRadians(INTAKE_ROW_POSE.getHeading()))
+                .setLinearHeadingInterpolation(180-WALLBUMP_END.getHeading(),180-CORNER_POSE.getHeading())
                 .build();
     }
 
+    // Starts where shoot3() actually ends (SHOOT_POSE), not the old hardcoded (90,14,75)
     public PathChain leave() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
                                 SHOOT_POSE,
-                                LEAVE_POSE
+                                new Pose(90, 20, Math.toRadians(75)).mirror()
                         )
                 )
-                .setLinearHeadingInterpolation(
-                        Math.toRadians(SHOOT_POSE.getHeading()),
-                        Math.toRadians(LEAVE_POSE.getHeading())
-                )
+                .setLinearHeadingInterpolation(180-SHOOT_POSE.getHeading(), Math.toRadians(75))
                 .build();
     }
 }

@@ -2,18 +2,28 @@ package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.hardware.limelightvision.*;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! MM STATES Blue Far")
+@Autonomous(name = "!!!!!!!! BLUE BACK")
 public class BlueFar extends LinearOpMode {
 
     private int index = 0;
@@ -74,30 +84,25 @@ public class BlueFar extends LinearOpMode {
         paths = new GeneratedPathsBlueFar(follower);
         hoodServo.setPosition(0.80);
 
+
         telemetry.addLine("Ready");
         telemetry.update();
 
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
+        launchMotor.setPower(1);
+        Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
+        pattern = getPatternFromTag();
 
-        // scan balls
-        //scanBallsInSlots(5000);
-
-        //runPath(paths.scan(), 0, 1.0);
-
-//        runPath(paths.scan(), 0, 0.9);
-//        Ball[] pattern = getPatternFromTag();
-
-//        aimToPattern(pattern);
-//        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
-//        telemetry.update();
-
-        runPath(paths.start_to_shoot(), 400, 1);
+        aimToPattern(pattern);
+        telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
+        telemetry.update();
+        runPath(paths.shoot1(), 50, 1);
 
         // ---- SHOOT ----
-        //shootAllPattern(pattern);
+
         shootAll();
 
         intakeMotor.setPower(-0.6);
@@ -105,75 +110,34 @@ public class BlueFar extends LinearOpMode {
         rotateToIndex(0);
         resetSlots();
 
-        // ---- INTAKE 1–3 ----
+        // Intake 1
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.row_toIntake(), 0, 1);
+        runPathWithIntake(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        runPathWithIntake(paths.row_intake(), 0, 0.21);
-
         intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
+        runPathWithIntake(paths.intake1(), 0, 0.23);
+        double startTime = System.currentTimeMillis();
 
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.GREEN;
-
-        runPath(paths.row_to_shoot(), 0, 1);
-
-        // ---- SHOOT ----
-        //shootAllPattern(pattern);
-        shootAll();
-
-        intakeMotor.setPower(-0.6);
         intakeActive = true;
         rotateToIndex(0);
+        runPath(paths.shoot2(), 0, 1);
+        shootAll();
         resetSlots();
 
-        // ---- INTAKE 4–6 ----
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.human_toIntake(), 0, 1);
-        runPathWithIntake(paths.human_intake(), 0, 0.21);
+        runPathWithIntake(paths.wallBump(), 100, 1);     // bump 1 - into the wall
+        runPathWithIntake(paths.cornerBump(), 100, 1);   // bump 2 - into the corner
 
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        slots[0] = Ball.PURPLE;
-        slots[1] = Ball.GREEN;
-        slots[2] = Ball.PURPLE;
-
-        runPath(paths.human_to_shoot(), 0, 1);
-
-        //shootAllPattern(pattern);
+        intakeActive = true;
+        rotateToIndex(0);
+        runPath(paths.shoot3(), 0, 1);
         shootAll();
-
-        intakeMotor.setPower(-0.6);
-        intakeActive = true;
-        rotateToIndex(0);
         resetSlots();
-
-        runPath(paths.human_toIntake(), 0, 1);
-        runPathWithIntake(paths.human_intake(), 0, 0.21);
-
-        intakeMotor.setPower(-0.6);
-        slots[0] = Ball.GREEN;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.PURPLE;
-
-        slots[0] = Ball.GREEN;
-        slots[1] = Ball.PURPLE;
-        slots[2] = Ball.PURPLE;
-
-        runPath(paths.human_to_shoot(), 0, 1);
-
         //shootAllPattern(pattern);
-        shootAll();
+
 
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);
@@ -276,7 +240,7 @@ public class BlueFar extends LinearOpMode {
                 nextIndexAfterDelay = nextEmpty;
                 colorDetectedTime = System.currentTimeMillis();
                 waitingToRotate = true;
-                //intakeMotor.setPower(0);
+                intakeMotor.setPower(0);
             }
         }
 
@@ -417,7 +381,7 @@ public class BlueFar extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(1700);
+        launchMotor.setVelocity(3000);
 
     }
 
@@ -567,7 +531,7 @@ public class BlueFar extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(1700);
+        launchMotor.setVelocity(3000);
 
         sleep(100);
 
@@ -608,7 +572,7 @@ public class BlueFar extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(1700);
+        launchMotor.setVelocity(3000);
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;
@@ -617,7 +581,7 @@ public class BlueFar extends LinearOpMode {
         spinMotor.setPower(0.3);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
-            // let balls fire naturally
+            //nothing
         }
 
         spinMotor.setPower(0);
@@ -662,7 +626,7 @@ public class BlueFar extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 
