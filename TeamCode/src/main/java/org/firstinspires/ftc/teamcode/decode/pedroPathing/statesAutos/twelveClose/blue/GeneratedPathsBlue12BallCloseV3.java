@@ -89,7 +89,7 @@ public class GeneratedPathsBlue12BallCloseV3 {
                         new BezierCurve(
                                 new Pose(127, 75.5, Math.toRadians(0)).mirror(),
                                 //new Pose(111.86034912718205, 80.07980049875314),
-                                new Pose(130, 73, Math.toRadians(90)).mirror()
+                                new Pose(130, 71, Math.toRadians(90)).mirror()
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180-90))
