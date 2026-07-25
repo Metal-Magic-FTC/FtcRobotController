@@ -19,6 +19,7 @@ public class GeneratedPathsRed12BallFarV3 {
     // ---------------- SHARED WAYPOINTS (unchanged ball/target positions) ----------------
     private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(63.5));
     private static final Pose SHOOT2_POSE    = new Pose(90, 12, Math.toRadians(68));
+    private static final Pose SHOOT3_POSE    = new Pose(90, 12, Math.toRadians(68));
     private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
     private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
 
@@ -68,10 +69,10 @@ public class GeneratedPathsRed12BallFarV3 {
                 .addPath(
                         new BezierLine(
                                 WALLBUMP_3,
-                                SHOOT2_POSE
+                                SHOOT3_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(WALLBUMP_3.getHeading(), SHOOT2_POSE.getHeading())
+                .setLinearHeadingInterpolation(WALLBUMP_3.getHeading(), SHOOT3_POSE.getHeading())
                 .build();
     }
 
@@ -151,11 +152,11 @@ public class GeneratedPathsRed12BallFarV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                SHOOT_POSE,
+                                SHOOT3_POSE,
                                 new Pose(90, 20, Math.toRadians(75))
                         )
                 )
-                .setLinearHeadingInterpolation(SHOOT_POSE.getHeading(), Math.toRadians(75))
+                .setLinearHeadingInterpolation(SHOOT3_POSE.getHeading(), Math.toRadians(75))
                 .build();
     }
 }
