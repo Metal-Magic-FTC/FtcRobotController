@@ -22,13 +22,13 @@ public class GeneratedPathsRed12BallFarV3 {
     private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
     private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
 
-    // PLACEHOLDER x3 - not verified field positions. I could not confidently
-    // read exact coordinates off the marker sketch, so these are spaced along
-    // the same wall (x=130) as a starting point. Adjust each Y in the Pedro
-    // visualizer to match the three spots you actually want to bump.
+    // Verified from Pedro visualizer export.
     private static final Pose WALLBUMP_1 = new Pose(130, 10, Math.toRadians(0));
-    private static final Pose WALLBUMP_2 = new Pose(130, 16, Math.toRadians(0));
-    private static final Pose WALLBUMP_3 = new Pose(130, 22, Math.toRadians(0));
+    private static final Pose WALLBUMP_2 = new Pose(130, 20, Math.toRadians(0));
+    private static final Pose WALLBUMP_3 = new Pose(130, 30, Math.toRadians(0));
+    // Curve control points from the visualizer export (loop out toward center field between bumps)
+    private static final Pose WALLBUMP_2_CONTROL = new Pose(88.064, 24.324);
+    private static final Pose WALLBUMP_3_CONTROL = new Pose(87.866, 31.756);
 
     public GeneratedPathsRed12BallFarV3(Follower follower) {
         this.follower = follower;
@@ -114,13 +114,15 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Bump 2 of 3: starts where wallBump1() actually ends (WALLBUMP_1), slides to a
-    // different spot on the same wall
+    // Bump 2 of 3: starts where wallBump1() actually ends (WALLBUMP_1). Loops out
+    // toward center field through the control point and back to the wall - matches
+    // the Pedro visualizer export.
     public PathChain wallBump2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(
+                        new BezierCurve(
                                 WALLBUMP_1,
+                                WALLBUMP_2_CONTROL,
                                 WALLBUMP_2
                         )
                 )
@@ -128,13 +130,15 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Bump 3 of 3: starts where wallBump2() actually ends (WALLBUMP_2), slides to a
-    // third spot on the same wall
+    // Bump 3 of 3: starts where wallBump2() actually ends (WALLBUMP_2). Loops out
+    // toward center field through the control point and back to the wall - matches
+    // the Pedro visualizer export.
     public PathChain wallBump3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(
+                        new BezierCurve(
                                 WALLBUMP_2,
+                                WALLBUMP_3_CONTROL,
                                 WALLBUMP_3
                         )
                 )
