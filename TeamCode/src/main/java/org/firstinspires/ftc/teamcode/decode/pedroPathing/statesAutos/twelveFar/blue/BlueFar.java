@@ -17,13 +17,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red.GeneratedPathsRed12BallFarV3;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! BLUE BACK")
+@Autonomous(name = "!!!!!!!! BACK 12  HOPES AND DREAMS")
 public class BlueFar extends LinearOpMode {
 
     private int index = 0;
@@ -128,8 +127,9 @@ public class BlueFar extends LinearOpMode {
 
         intakeActive = true;
         rotateToIndex(0);
-        runPathWithIntake(paths.wallBump(), 100, 1);     // bump 1 - into the wall
-        runPathWithIntake(paths.cornerBump(), 100, 1);   // bump 2 - into the corner
+        runPathWithIntake(paths.wallBump1(), 80, 1);   // bump 1
+        runPathWithIntake(paths.wallBump2(), 80, 1);   // bump 2
+        runPathWithIntake(paths.wallBump3(), 80, 1);   // bump 3
 
         intakeActive = true;
         rotateToIndex(0);

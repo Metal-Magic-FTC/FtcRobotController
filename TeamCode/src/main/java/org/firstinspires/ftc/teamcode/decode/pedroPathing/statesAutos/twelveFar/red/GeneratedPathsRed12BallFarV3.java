@@ -17,19 +17,18 @@ public class GeneratedPathsRed12BallFarV3 {
             new Pose(86, 8, Math.toRadians(90));
 
     // ---------------- SHARED WAYPOINTS (unchanged ball/target positions) ----------------
-    // The pose the robot shoots from. Same physical spot every time, only the
-    // path we drive TO it changes depending on where we're coming from.
     private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(69));
-    private static final Pose SHOOT2_POSE     = new Pose(90, 16, Math.toRadians(70));
+    private static final Pose SHOOT2_POSE    = new Pose(90, 12, Math.toRadians(70));
     private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
     private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
-    private static final Pose WALLBUMP_END   = new Pose(133, 14, Math.toRadians(0));   // unchanged wall bump target
 
-    // PLACEHOLDER - not a verified field position. Adjust this in the Pedro
-    // visualizer against your real red-far field before running. This should
-    // be the second wall your robot drives into to reset both axes, near the
-    // corner adjacent to WALLBUMP_END.
-    private static final Pose CORNER_POSE    = new Pose(140, 6, Math.toRadians(45));
+    // PLACEHOLDER x3 - not verified field positions. I could not confidently
+    // read exact coordinates off the marker sketch, so these are spaced along
+    // the same wall (x=130) as a starting point. Adjust each Y in the Pedro
+    // visualizer to match the three spots you actually want to bump.
+    private static final Pose WALLBUMP_1 = new Pose(130, 10, Math.toRadians(0));
+    private static final Pose WALLBUMP_2 = new Pose(130, 16, Math.toRadians(0));
+    private static final Pose WALLBUMP_3 = new Pose(130, 22, Math.toRadians(0));
 
     public GeneratedPathsRed12BallFarV3(Follower follower) {
         this.follower = follower;
@@ -63,16 +62,16 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Shot after the wall+corner bump: robot is actually at CORNER_POSE, not START_POSE
+    // Shot after the 3-point wall bump: robot is actually at WALLBUMP_3, not START_POSE
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                CORNER_POSE,
+                                WALLBUMP_3,
                                 SHOOT2_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(CORNER_POSE.getHeading(), SHOOT_POSE.getHeading())
+                .setLinearHeadingInterpolation(WALLBUMP_3.getHeading(), SHOOT2_POSE.getHeading())
                 .build();
     }
 
@@ -102,29 +101,44 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Bump 1 of 2: starts where shoot2() actually ends (SHOOT_POSE), drives into the wall
-    public PathChain wallBump() {
+    // Bump 1 of 3: starts where shoot2() actually ends (SHOOT2_POSE)
+    public PathChain wallBump1() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
                                 SHOOT2_POSE,
-                                WALLBUMP_END
+                                WALLBUMP_1
                         )
                 )
-                .setLinearHeadingInterpolation(SHOOT2_POSE.getHeading(), WALLBUMP_END.getHeading())
+                .setLinearHeadingInterpolation(SHOOT2_POSE.getHeading(), WALLBUMP_1.getHeading())
                 .build();
     }
 
-    // Bump 2 of 2: starts where wallBump() actually ends (WALLBUMP_END), drives into the corner
-    public PathChain cornerBump() {
+    // Bump 2 of 3: starts where wallBump1() actually ends (WALLBUMP_1), slides to a
+    // different spot on the same wall
+    public PathChain wallBump2() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                WALLBUMP_END,
-                                CORNER_POSE
+                                WALLBUMP_1,
+                                WALLBUMP_2
                         )
                 )
-                .setLinearHeadingInterpolation(WALLBUMP_END.getHeading(), CORNER_POSE.getHeading())
+                .setLinearHeadingInterpolation(WALLBUMP_1.getHeading(), WALLBUMP_2.getHeading())
+                .build();
+    }
+
+    // Bump 3 of 3: starts where wallBump2() actually ends (WALLBUMP_2), slides to a
+    // third spot on the same wall
+    public PathChain wallBump3() {
+        return new PathBuilder(follower)
+                .addPath(
+                        new BezierLine(
+                                WALLBUMP_2,
+                                WALLBUMP_3
+                        )
+                )
+                .setLinearHeadingInterpolation(WALLBUMP_2.getHeading(), WALLBUMP_3.getHeading())
                 .build();
     }
 

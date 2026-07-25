@@ -128,8 +128,9 @@ public class RedFar12Ball extends LinearOpMode {
 
         intakeActive = true;
         rotateToIndex(0);
-        runPathWithIntake(paths.wallBump(), 100, 1);     // bump 1 - into the wall
-        runPathWithIntake(paths.cornerBump(), 100, 1);   // bump 2 - into the corner
+        runPathWithIntake(paths.wallBump1(), 80, 1);   // bump 1
+        runPathWithIntake(paths.wallBump2(), 80, 1);   // bump 2
+        runPathWithIntake(paths.wallBump3(), 80, 1);   // bump 3
 
         intakeActive = true;
         rotateToIndex(0);
