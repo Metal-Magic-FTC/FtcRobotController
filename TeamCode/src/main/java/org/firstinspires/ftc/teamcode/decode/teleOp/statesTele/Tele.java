@@ -248,11 +248,11 @@ public class Tele extends LinearOpMode {
 
             double otherV = 0;
 
-//            if (headingLock) {
-//                otherV = controller.run();
-//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
-//            } else
-//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            if (headingLock) {
+                otherV = controller.run();
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
+            } else
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
 
 //            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
@@ -293,12 +293,16 @@ public class Tele extends LinearOpMode {
                 rotateToIndex(index);
             }
 
-            if (intakePower) {
+            if (autoLaunching) {
                 intakeMotor.setPower(0);
-            } else if (intakePowerReverse) {
-                intakeMotor.setPower(0.8);
             } else {
-                intakeMotor.setPower(-0.6);
+                if (intakePower) {
+                    intakeMotor.setPower(0);
+                } else if (intakePowerReverse) {
+                    intakeMotor.setPower(0.8);
+                } else {
+                    intakeMotor.setPower(-0.6);
+                }
             }
 
             if (autoLaunching) {
