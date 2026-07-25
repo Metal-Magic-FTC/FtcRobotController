@@ -17,8 +17,8 @@ public class GeneratedPathsRed12BallFarV3 {
             new Pose(86, 8, Math.toRadians(90));
 
     // ---------------- SHARED WAYPOINTS (unchanged ball/target positions) ----------------
-    private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(69));
-    private static final Pose SHOOT2_POSE    = new Pose(90, 12, Math.toRadians(70));
+    private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(63.5));
+    private static final Pose SHOOT2_POSE    = new Pose(90, 12, Math.toRadians(68));
     private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
     private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
 

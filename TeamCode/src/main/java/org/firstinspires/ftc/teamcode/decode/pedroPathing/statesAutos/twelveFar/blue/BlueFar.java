@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! BACK 12  HOPES AND DREAMS")
+@Autonomous(name = "!!!!!!!! BLUE BACK 12  HOPES AND DREAMS")
 public class BlueFar extends LinearOpMode {
 
     private int index = 0;
@@ -95,7 +95,7 @@ public class BlueFar extends LinearOpMode {
         Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
         pattern = getPatternFromTag();
 
-        sleep(4000);
+
 
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
@@ -103,7 +103,7 @@ public class BlueFar extends LinearOpMode {
         runPath(paths.shoot1(), 50, 1);
 
         // ---- SHOOT ----
-
+        sleep(4000);
         shootAll();
 
         intakeMotor.setPower(-0.6);
@@ -383,7 +383,7 @@ public class BlueFar extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
 
     }
 
@@ -533,7 +533,7 @@ public class BlueFar extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
 
         sleep(100);
 
@@ -574,13 +574,13 @@ public class BlueFar extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
         sleep(200);
 
-        int endPosition = spinMotor.getCurrentPosition() + 500;
+        int endPosition = spinMotor.getCurrentPosition() + 750;
         spinMotor.setTargetPosition(endPosition);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.3);
+        spinMotor.setPower(0.2);
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             //nothing
