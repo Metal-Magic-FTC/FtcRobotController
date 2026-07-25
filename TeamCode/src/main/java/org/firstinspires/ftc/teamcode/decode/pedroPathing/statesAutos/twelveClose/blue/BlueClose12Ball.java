@@ -88,14 +88,14 @@ public class BlueClose12Ball extends LinearOpMode {
 
         //runPath(paths.scan(), 0, 1.0);
 
-        runPath(paths.scan(), 0, 0.9);
+        //runPath(paths.scan(), 0, 0.9);
         Ball[] pattern = getPatternFromTag();
 
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
 
-        runPath(paths.shoot(), 400, 1);
+        runPath(paths.shootOld(), 400, 1);
 
         // ---- SHOOT ----
         //shootAllPattern(pattern);
@@ -140,6 +140,7 @@ public class BlueClose12Ball extends LinearOpMode {
         // ---- SHOOT ----
         //shootAllPattern(pattern);
         shootAll();
+        resetSlots();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -167,6 +168,7 @@ public class BlueClose12Ball extends LinearOpMode {
 
         //shootAllPattern(pattern);
         shootAll();
+        resetSlots();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -191,6 +193,7 @@ public class BlueClose12Ball extends LinearOpMode {
 
         //shootAllPattern(pattern);
         shootAll();
+        resetSlots();
 
         runPath(paths.leave(), 0, 1);
         intakeMotor.setPower(-0.6);
@@ -458,7 +461,7 @@ public class BlueClose12Ball extends LinearOpMode {
 
     // ---------------- APRILTAG AND COLOR SENSORS ----------------
     private Ball[] getPatternFromTag() {
-        int id = detectAprilTag(500);
+        int id = detectAprilTag(200);
         if (id == 21) return new Ball[]{Ball.GREEN, Ball.PURPLE, Ball.PURPLE};
         if (id == 23) return new Ball[]{Ball.PURPLE, Ball.PURPLE, Ball.GREEN};
         return new Ball[]{Ball.PURPLE, Ball.GREEN, Ball.PURPLE};

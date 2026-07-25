@@ -192,10 +192,10 @@ public class Tele extends LinearOpMode {
                 targetVelocity = 1600;
             }
             if (gamepad2.dpad_down) {
-                targetVelocity = 1900;
+                targetVelocity = 1800;
             }
             if (gamepad2.dpad_right) {
-                targetVelocity = 2500;
+                targetVelocity = 6000;
             }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
@@ -293,12 +293,16 @@ public class Tele extends LinearOpMode {
                 rotateToIndex(index);
             }
 
-            if (intakePower) {
+            if (autoLaunching) {
                 intakeMotor.setPower(0);
-            } else if (intakePowerReverse) {
-                intakeMotor.setPower(0.8);
             } else {
-                intakeMotor.setPower(-0.6);
+                if (intakePower) {
+                    intakeMotor.setPower(0);
+                } else if (intakePowerReverse) {
+                    intakeMotor.setPower(0.8);
+                } else {
+                    intakeMotor.setPower(-0.6);
+                }
             }
 
             if (autoLaunching) {

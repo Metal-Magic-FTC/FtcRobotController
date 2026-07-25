@@ -73,7 +73,7 @@ public class GeneratedPathsRed12BallCloseV3 {
                         new BezierCurve(
                                 new Pose(128, 79, Math.toRadians(0)),
                                 //new Pose(111.86034912718205, 80.07980049875314),
-                                new Pose(129, 77, Math.toRadians(90))
+                                new Pose(129, 75, Math.toRadians(90))
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(90))
@@ -90,13 +90,13 @@ public class GeneratedPathsRed12BallCloseV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                new Pose(127, 78, Math.toRadians(90)),
-                                new Pose(105, 91, Math.toRadians(30))
+                                new Pose(127, 75, Math.toRadians(90)),
+                                new Pose(105, 91, Math.toRadians(32))
                         )
                 )
                 .setLinearHeadingInterpolation(
                         Math.toRadians(90),
-                        Math.toRadians(30)
+                        Math.toRadians(32)
                 )
                 .build();
     }
@@ -105,14 +105,14 @@ public class GeneratedPathsRed12BallCloseV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierCurve(
-                                new Pose(105, 91, Math.toRadians(30)),
+                                new Pose(105, 91, Math.toRadians(32)),
                                 new Pose(68.8707865168539, 60.123595505617985),
                                 // new Pose(89.75910487372168, 65.29946200112505),
                                 new Pose(104.2, 55, Math.toRadians(0))
                         )
                 )
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(30),
+                        Math.toRadians(32),
                         Math.toRadians(0)
                 )
                 .build();

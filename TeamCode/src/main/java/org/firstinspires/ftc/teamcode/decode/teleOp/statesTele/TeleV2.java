@@ -28,7 +28,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.Fus
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
-@TeleOp(name = "!!!!!!!!! STATES TELEOP V2 - CLAUDEIUS FABLETON OPUSTON SONNETTON Vth Jr")
+@TeleOp(name = "!!!!!!!!! STATES TELEOP V2")
 public class TeleV2 extends LinearOpMode {
 
     //launch motor - left bumper
@@ -76,7 +76,12 @@ public class TeleV2 extends LinearOpMode {
             prevLeftTrigger,
             prevRightTrigger,
             prev2RightBumper,
-            prevIntakeButton; // NEW: edge detector for dpad_up (intake start)
+            prevIntakeButton, // NEW: edge detector for dpad_up (intake start)
+            prev2Y; // NEW: edge detector for gamepad2.y (launcher failsafe)
+
+    // ---- LAUNCHER AUTO-RAMP / FAILSAFE ----
+    private boolean launcherShouldRun = false;
+    private boolean launcherKilled = false; // gamepad2 Y toggles this on/off
 
     // ---- AUTO LAUNCH ALL ----
     private boolean autoLaunching = false;
@@ -197,6 +202,13 @@ public class TeleV2 extends LinearOpMode {
             prevRightTrigger = gamepad1.right_trigger >= 0.3F;
             prev2RightBumper = gamepad2.right_bumper;
             prevIntakeButton = gamepad1.dpad_up;
+
+            // ---- GAMEPAD 2 LAUNCHER FAILSAFE (Y toggles launcher kill switch) ----
+            boolean launcherKillPressed = gamepad2.y && !prev2Y;
+            if (launcherKillPressed) {
+                launcherKilled = !launcherKilled;
+            }
+            prev2Y = gamepad2.y;
 
             if (gamepad2.dpad_left) {
                 targetVelocity = 1600;
@@ -365,36 +377,29 @@ public class TeleV2 extends LinearOpMode {
                 autoLaunching = true;
                 intakeActive = false;
 
-                // FULL sweep math (NO closestModular)
+                // FIX: previously this computed a "smart" modular target to land
+                // exactly on OUTTAKE_POS[2], which sometimes wasn't enough travel
+                // to reliably clear the third ball. The autonomous code solves
+                // this the same way every time with a simple, generous fixed
+                // sweep distance (+600 ticks, same as shootAllLast() in auto --
+                // the version auto itself uses when it absolutely needs the last
+                // ball to fire). Mirroring that exact distance and power here.
                 int current = spinMotor.getCurrentPosition();
-                int currentMod = ((current % 750) + 750) % 750;
-
-                int targetInRev = OUTTAKE_POS[2];
-                if (targetInRev <= currentMod) {
-                    targetInRev += 750;
-                }
-
-                // FIX: add one additional full revolution (750 ticks). Previously
-                // this only traveled to the NEXT occurrence of OUTTAKE_POS[2],
-                // which is sometimes less than a full lap of the spindexer -- not
-                // guaranteed to sweep past all three outtake positions, so the
-                // last loaded ball could be left behind. The extra lap guarantees
-                // every slot passes the flicker at least once before we stop.
-                targetInRev += 750;
-
-                shootAllTargetPos = current - currentMod + targetInRev;
+                shootAllTargetPos = current + 600;
 
                 spinMotor.setTargetPosition(shootAllTargetPos);
                 spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                spinMotor.setPower(0.35);
+                spinMotor.setPower(0.3); // matches auto's shootAll/shootAllLast power
 
                 flickMotor.setPower(1);
-                launchMotor.setVelocity(targetVelocity);
+                launchMotor.setVelocity(launcherKilled ? 0 : targetVelocity);
             }
 
             if (autoLaunching) {
 
-                launchMotor.setVelocity(targetVelocity);
+                // Failsafe still applies mid-sweep: if gamepad2 kills the
+                // launcher during a shoot-all, the flywheel stops immediately.
+                launchMotor.setVelocity(launcherKilled ? 0 : targetVelocity);
 
                 // Wait until the sweep finishes
                 if (!spinMotor.isBusy()) {
@@ -430,6 +435,10 @@ public class TeleV2 extends LinearOpMode {
                     // normal intake
                     intakeActive = true;
                     waitingForBall = true;
+                    // Starting a fresh intake cycle clears any lingering launcher
+                    // failsafe kill so the operator doesn't have to remember to
+                    // un-kill it before the next set of balls is ready to shoot.
+                    launcherKilled = false;
                     rotateToIndex(nextEmpty);
                 } else {
                     // all full then go shoot
@@ -470,12 +479,22 @@ public class TeleV2 extends LinearOpMode {
                 }
             }
 
-            if (runLaunch) {
-                //launchMotor.setPower(1);
+            // FIX: previously both branches here set the SAME velocity, so the
+            // launch motor was effectively commanded to full targetVelocity from
+            // the moment the opmode started, with no real ramp control -- that's
+            // why the first ball could shoot short (motor timing wasn't tied to
+            // anything meaningful). Now the flywheel only spins up once all 3
+            // slots are loaded (giving it a clean ramp window before the
+            // shoot-all sweep starts), or when a shot is actively requested, or
+            // when the driver manually pre-spins with left bumper (runLaunch).
+            // Gamepad2's Y failsafe (launcherKilled) overrides all of this off.
+            boolean allSlotsLoaded = slots[0] != Ball.EMPTY && slots[1] != Ball.EMPTY && slots[2] != Ball.EMPTY;
+            launcherShouldRun = (allSlotsLoaded || shootPressed || autoLaunching || runLaunch) && !launcherKilled;
+
+            if (launcherShouldRun) {
                 launchMotor.setVelocity(targetVelocity);
             } else {
-                //launchMotor.setPower(0);
-                launchMotor.setVelocity(targetVelocity);
+                launchMotor.setVelocity(0);
             }
 
             // spindexer logic (COLOR-BASED DETECTION)
@@ -533,6 +552,8 @@ public class TeleV2 extends LinearOpMode {
             telemetry.addData("Launch Velocity", launchMotor.getVelocity());
             telemetry.addData("Launch Power", launchMotor.getPower());
             telemetry.addData("launch target velocity", targetVelocity);
+            telemetry.addData("Launcher Running", launcherShouldRun);
+            telemetry.addData("Launcher Failsafe Killed (GP2 Y)", launcherKilled);
 
             telemetry.update();
         }
@@ -623,12 +644,17 @@ public class TeleV2 extends LinearOpMode {
         NormalizedRGBA c = sensor.getNormalizedColors();
         float r = c.red, g = c.green, b = c.blue;
 
+        // FIX: swapped in the thresholds from the autonomous code, which reads
+        // these same sensors reliably. Teleop's floor/purple thresholds were
+        // stricter (0.07 floor, 1.35/1.25 purple ratios) than what the
+        // hardware actually needs, causing balls to go undetected.
+
         // reject far / floor
         float total = r + g + b;
-        if (total < 0.07f) return Ball.EMPTY;
+        if (total < 0.03f) return Ball.EMPTY;
 
-        // PURPLE: blue-dominant (keep strict)
-        if (b > r * 1.35f && b > g * 1.25f && b > 0.12f) {
+        // PURPLE: blue-dominant
+        if (b > r * 1.2f && b > g * 1.1f && b > 0.12f) {
             return Ball.PURPLE;
         }
 
