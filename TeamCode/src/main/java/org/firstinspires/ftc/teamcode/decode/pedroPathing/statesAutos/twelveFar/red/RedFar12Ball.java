@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! Nihal nihers back 12")
+@Autonomous(name = "!!!!!!!! BACK 12 HOPES AND DREAMS")
 public class RedFar12Ball extends LinearOpMode {
 
     private int index = 0;
@@ -91,7 +91,7 @@ public class RedFar12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
         launchMotor.setPower(1);
         Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
         pattern = getPatternFromTag();
@@ -99,7 +99,7 @@ public class RedFar12Ball extends LinearOpMode {
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
-        runPath(paths.shoot1(), 1750, 1);
+        runPath(paths.shoot1(), 50, 1);
 
         // ---- SHOOT ----
 
@@ -113,7 +113,7 @@ public class RedFar12Ball extends LinearOpMode {
         // Intake 1
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.toIntake1(), 0, 1);
+        runPathWithIntake(paths.toIntake1(), 0, 1);
         resetSlots();
 
         intakeMotor.setPower(-0.6);
@@ -128,8 +128,8 @@ public class RedFar12Ball extends LinearOpMode {
 
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.wallBump(), 100, 1);     // bump 1 - into the wall
-        runPath(paths.cornerBump(), 100, 1);   // bump 2 - into the corner
+        runPathWithIntake(paths.wallBump(), 100, 1);     // bump 1 - into the wall
+        runPathWithIntake(paths.cornerBump(), 100, 1);   // bump 2 - into the corner
 
         intakeActive = true;
         rotateToIndex(0);

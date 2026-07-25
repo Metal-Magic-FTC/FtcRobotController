@@ -20,6 +20,7 @@ public class GeneratedPathsRed12BallFarV3 {
     // The pose the robot shoots from. Same physical spot every time, only the
     // path we drive TO it changes depending on where we're coming from.
     private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(69));
+    private static final Pose SHOOT2_POSE     = new Pose(90, 16, Math.toRadians(70));
     private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
     private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
     private static final Pose WALLBUMP_END   = new Pose(133, 14, Math.toRadians(0));   // unchanged wall bump target
@@ -55,10 +56,10 @@ public class GeneratedPathsRed12BallFarV3 {
                 .addPath(
                         new BezierLine(
                                 INTAKE1_END,
-                                SHOOT_POSE
+                                SHOOT2_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(INTAKE1_END.getHeading(), SHOOT_POSE.getHeading())
+                .setLinearHeadingInterpolation(INTAKE1_END.getHeading(), SHOOT2_POSE.getHeading())
                 .build();
     }
 
@@ -68,7 +69,7 @@ public class GeneratedPathsRed12BallFarV3 {
                 .addPath(
                         new BezierLine(
                                 CORNER_POSE,
-                                SHOOT_POSE
+                                SHOOT2_POSE
                         )
                 )
                 .setLinearHeadingInterpolation(CORNER_POSE.getHeading(), SHOOT_POSE.getHeading())
@@ -106,11 +107,11 @@ public class GeneratedPathsRed12BallFarV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                SHOOT_POSE,
+                                SHOOT2_POSE,
                                 WALLBUMP_END
                         )
                 )
-                .setLinearHeadingInterpolation(SHOOT_POSE.getHeading(), WALLBUMP_END.getHeading())
+                .setLinearHeadingInterpolation(SHOOT2_POSE.getHeading(), WALLBUMP_END.getHeading())
                 .build();
     }
 
