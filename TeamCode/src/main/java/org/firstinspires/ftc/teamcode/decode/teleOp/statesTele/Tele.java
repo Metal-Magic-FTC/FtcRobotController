@@ -192,7 +192,7 @@ public class Tele extends LinearOpMode {
                 targetVelocity = 1600;
             }
             if (gamepad2.dpad_down) {
-                targetVelocity = 1900;
+                targetVelocity = 1800;
             }
             if (gamepad2.dpad_right) {
                 targetVelocity = 6000;
@@ -248,11 +248,11 @@ public class Tele extends LinearOpMode {
 
             double otherV = 0;
 
-            if (headingLock) {
-                otherV = controller.run();
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
-            } else
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+//            if (headingLock) {
+//                otherV = controller.run();
+//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, otherV, true);
+//            } else
+//                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
 
 
 //            controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
