@@ -23,7 +23,12 @@ public class GeneratedPathsRed12BallFarV3 {
     private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0));    // unchanged pickup lane entry
     private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0));   // unchanged pickup lane exit
     private static final Pose WALLBUMP_END   = new Pose(133, 14, Math.toRadians(0));   // unchanged wall bump target
-    private static final Pose BUMP_BACK_POSE = new Pose(118, 14, Math.toRadians(0));   // unchanged back-off point for re-bumping
+
+    // PLACEHOLDER - not a verified field position. Adjust this in the Pedro
+    // visualizer against your real red-far field before running. This should
+    // be the second wall your robot drives into to reset both axes, near the
+    // corner adjacent to WALLBUMP_END.
+    private static final Pose CORNER_POSE    = new Pose(140, 6, Math.toRadians(45));
 
     public GeneratedPathsRed12BallFarV3(Follower follower) {
         this.follower = follower;
@@ -57,16 +62,16 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Shot after the wall-bump sequence: robot is actually at WALLBUMP_END, not START_POSE
+    // Shot after the wall+corner bump: robot is actually at CORNER_POSE, not START_POSE
     public PathChain shoot3() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                WALLBUMP_END,
+                                CORNER_POSE,
                                 SHOOT_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(WALLBUMP_END.getHeading(), SHOOT_POSE.getHeading())
+                .setLinearHeadingInterpolation(CORNER_POSE.getHeading(), SHOOT_POSE.getHeading())
                 .build();
     }
 
@@ -96,8 +101,7 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Starts where shoot2() actually ends (SHOOT_POSE), not the old hardcoded (90,14,70).
-    // This is bump #1 in the 3-bump sequence.
+    // Bump 1 of 2: starts where shoot2() actually ends (SHOOT_POSE), drives into the wall
     public PathChain wallBump() {
         return new PathBuilder(follower)
                 .addPath(
@@ -110,32 +114,16 @@ public class GeneratedPathsRed12BallFarV3 {
                 .build();
     }
 
-    // Backs off the wall after a bump. Reusable every cycle since the robot's
-    // actual pose is WALLBUMP_END exactly each time it's called.
-    public PathChain backUp() {
+    // Bump 2 of 2: starts where wallBump() actually ends (WALLBUMP_END), drives into the corner
+    public PathChain cornerBump() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
                                 WALLBUMP_END,
-                                BUMP_BACK_POSE
+                                CORNER_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(WALLBUMP_END.getHeading(), BUMP_BACK_POSE.getHeading())
-                .build();
-    }
-
-    // Drives back into the wall after backUp(). Reusable every cycle since the
-    // robot's actual pose is BUMP_BACK_POSE exactly each time it's called.
-    // Used for bumps #2 and #3.
-    public PathChain rebump() {
-        return new PathBuilder(follower)
-                .addPath(
-                        new BezierLine(
-                                BUMP_BACK_POSE,
-                                WALLBUMP_END
-                        )
-                )
-                .setLinearHeadingInterpolation(BUMP_BACK_POSE.getHeading(), WALLBUMP_END.getHeading())
+                .setLinearHeadingInterpolation(WALLBUMP_END.getHeading(), CORNER_POSE.getHeading())
                 .build();
     }
 
