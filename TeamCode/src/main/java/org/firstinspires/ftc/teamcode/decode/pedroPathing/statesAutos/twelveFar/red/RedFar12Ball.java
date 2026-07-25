@@ -91,7 +91,7 @@ public class RedFar12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(5600);
+        launchMotor.setVelocity(3000);
         launchMotor.setPower(1);
         Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
         pattern = getPatternFromTag();
@@ -99,7 +99,7 @@ public class RedFar12Ball extends LinearOpMode {
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
-        runPath(paths.shoot1(), 2000, 1);
+        runPath(paths.shoot1(), 1750, 1);
 
         // ---- SHOOT ----
 
@@ -116,7 +116,7 @@ public class RedFar12Ball extends LinearOpMode {
         runPath(paths.toIntake1(), 0, 1);
         resetSlots();
 
-        intakeMotor.setPower(0.6);
+        intakeMotor.setPower(-0.6);
         runPathWithIntake(paths.intake1(), 0, 0.23);
         double startTime = System.currentTimeMillis();
 
@@ -128,11 +128,8 @@ public class RedFar12Ball extends LinearOpMode {
 
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.wallBump(), 80, 1);   // bump 1
-        runPath(paths.backUp(), 0, 1);
-        runPath(paths.rebump(), 80, 1);     // bump 2
-        runPath(paths.backUp(), 0, 1);
-        runPath(paths.rebump(), 80, 1);     // bump 3
+        runPath(paths.wallBump(), 100, 1);     // bump 1 - into the wall
+        runPath(paths.cornerBump(), 100, 1);   // bump 2 - into the corner
 
         intakeActive = true;
         rotateToIndex(0);
@@ -534,7 +531,7 @@ public class RedFar12Ball extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(5600);
+        launchMotor.setVelocity(3000);
 
         sleep(100);
 
@@ -575,7 +572,7 @@ public class RedFar12Ball extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(5600);
+        launchMotor.setVelocity(3000);
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;
@@ -629,7 +626,7 @@ public class RedFar12Ball extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 12.9);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 
