@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 import java.util.Arrays;
 
 //@Disabled
-@Autonomous(name = "!!!!!!!! BACK 12  HOPES AND DREAMS")
+@Autonomous(name = "!!!!!!!! BACK RED 12 HOPES AND DREAMS")
 public class RedFar12Ball extends LinearOpMode {
 
     private int index = 0;
@@ -381,7 +381,7 @@ public class RedFar12Ball extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
 
     }
 
@@ -531,7 +531,7 @@ public class RedFar12Ball extends LinearOpMode {
 
         // ---- START SHOOTING ----
         flickMotor.setPower(1);
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
 
         sleep(100);
 
@@ -572,7 +572,7 @@ public class RedFar12Ball extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(3000);
+        launchMotor.setVelocity(10000);
         sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 500;

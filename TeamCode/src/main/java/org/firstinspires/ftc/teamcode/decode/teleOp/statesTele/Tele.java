@@ -195,7 +195,7 @@ public class Tele extends LinearOpMode {
                 targetVelocity = 1900;
             }
             if (gamepad2.dpad_right) {
-                targetVelocity = 2500;
+                targetVelocity = 6000;
             }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
