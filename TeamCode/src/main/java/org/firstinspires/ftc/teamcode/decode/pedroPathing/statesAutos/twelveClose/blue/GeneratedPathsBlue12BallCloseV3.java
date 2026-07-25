@@ -45,12 +45,12 @@ public class GeneratedPathsBlue12BallCloseV3 {
                         new BezierLine(
                                 new Pose(107, 106, Math.toRadians(125)).mirror(),
                                 //new Pose(91.371, 102.034, Math.toRadians(45))
-                                new Pose(96, 94, Math.toRadians(38)).mirror()
+                                new Pose(96, 94, Math.toRadians(36.5)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
                         Math.toRadians(180-125),
-                        Math.toRadians(180-38)
+                        Math.toRadians(180-36.5)
                 )
                 .build();
     }
@@ -61,12 +61,12 @@ public class GeneratedPathsBlue12BallCloseV3 {
                         new BezierLine(
                                 START_POSE,
                                 //new Pose(91.371, 102.034, Math.toRadians(45))
-                                new Pose(96, 94, Math.toRadians(38)).mirror()
+                                new Pose(96, 94, Math.toRadians(36.5)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
                         Math.toRadians(180-180),
-                        Math.toRadians(180-38)
+                        Math.toRadians(180-36.5)
                 )
                 .build();
     }
@@ -75,13 +75,13 @@ public class GeneratedPathsBlue12BallCloseV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierCurve(
-                                new Pose(96, 94, Math.toRadians(38)).mirror(),
+                                new Pose(96, 94, Math.toRadians(36.5)).mirror(),
                                 new Pose(84.88846763536056, 84.28908937098198).mirror(),
                                 new Pose(103.2, 75.5, Math.toRadians(0)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(180-38),
+                        Math.toRadians(180-36.5),
                         Math.toRadians(180-0)
                 )
                 .build();
@@ -123,12 +123,12 @@ public class GeneratedPathsBlue12BallCloseV3 {
                 .addPath(
                         new BezierLine(
                                 new Pose(127, 72.5, Math.toRadians(90)).mirror(),
-                                new Pose(105, 91, Math.toRadians(29)).mirror()
+                                new Pose(105, 91, Math.toRadians(27.5)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
                         Math.toRadians(180-90),
-                        Math.toRadians(180-29)
+                        Math.toRadians(180-27.5)
                 )
                 .build();
     }
@@ -137,14 +137,14 @@ public class GeneratedPathsBlue12BallCloseV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierCurve(
-                                new Pose(105, 91, Math.toRadians(29)).mirror(),
+                                new Pose(105, 91, Math.toRadians(27.5)).mirror(),
                                 new Pose(68.8707865168539, 60.123595505617985).mirror(),
                                 // new Pose(89.75910487372168, 65.29946200112505),
                                 new Pose(104.2, 52, Math.toRadians(0)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(180-29),
+                        Math.toRadians(180-27.5),
                         Math.toRadians(180-0)
                 )
                 .build();
@@ -168,12 +168,12 @@ public class GeneratedPathsBlue12BallCloseV3 {
                         new BezierCurve(
                                 new Pose(128, 52, Math.toRadians(0)).mirror(),
                                 new Pose(109.05707981278215, 62.47068594135381).mirror(),
-                                new Pose(96, 94, Math.toRadians(38)).mirror()
+                                new Pose(96, 94, Math.toRadians(35.5)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
                         Math.toRadians(180-0),
-                        Math.toRadians(180-38)
+                        Math.toRadians(180-35.5)
                 )
                 .build();
     }
@@ -182,14 +182,14 @@ public class GeneratedPathsBlue12BallCloseV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierCurve(
-                                new Pose(96, 94, Math.toRadians(39)).mirror(),
+                                new Pose(96, 94, Math.toRadians(35.5)).mirror(),
                                 new Pose(68.58988764044946, 35.7).mirror(),
                                 // new Pose(83.56293000245203, 52.706418485237485),
                                 new Pose(102.6, 30, Math.toRadians(0)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(180-39),
+                        Math.toRadians(180-35.5),
                         Math.toRadians(180-0)
                 )
                 .build();
@@ -212,12 +212,12 @@ public class GeneratedPathsBlue12BallCloseV3 {
                 .addPath(
                         new BezierLine(
                                 new Pose(130, 30, Math.toRadians(0)).mirror(),
-                                new Pose(96, 94, Math.toRadians(30)).mirror()
+                                new Pose(96, 94, Math.toRadians(28)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
                         Math.toRadians(180-0),
-                        Math.toRadians(180-30)
+                        Math.toRadians(180-28)
                 )
                 .build();
     }
@@ -226,12 +226,12 @@ public class GeneratedPathsBlue12BallCloseV3 {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                new Pose(96, 94, Math.toRadians(30)).mirror(),
+                                new Pose(96, 94, Math.toRadians(28)).mirror(),
                                 new Pose(117.3496136071887, 82.19084724005137, Math.toRadians(90)).mirror()
                         )
                 )
                 .setLinearHeadingInterpolation(
-                        Math.toRadians(180-30),
+                        Math.toRadians(180-28),
                         Math.toRadians(180-90)
                 )
                 .build();
