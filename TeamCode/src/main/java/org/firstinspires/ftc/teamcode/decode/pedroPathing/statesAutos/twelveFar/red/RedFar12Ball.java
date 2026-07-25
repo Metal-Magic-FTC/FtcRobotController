@@ -103,7 +103,7 @@ public class RedFar12Ball extends LinearOpMode {
 
         // ---- SHOOT ----
 
-        sleep(3000);
+        sleep(4000);
         shootAll();
 
         intakeMotor.setPower(-0.6);
@@ -628,7 +628,7 @@ public class RedFar12Ball extends LinearOpMode {
         launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD); // same as TeleOp_Flick_Launch
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(400, 0, 0, 17.4);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(425, 0, 0, 17.4);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launchMotor.setVelocity(0);
 

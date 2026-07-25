@@ -95,6 +95,8 @@ public class BlueFar extends LinearOpMode {
         Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
         pattern = getPatternFromTag();
 
+        sleep(4000);
+
         aimToPattern(pattern);
         telemetry.addData("pattern", pattern[0].toString() + " " + pattern[1].toString() + " " + pattern[2].toString());
         telemetry.update();
