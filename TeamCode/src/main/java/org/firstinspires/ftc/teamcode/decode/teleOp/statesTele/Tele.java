@@ -110,7 +110,7 @@ public class Tele extends LinearOpMode {
     private double flickUp = 0.75;
     private double flickDown = 1;
 
-    private double targetVelocity = 1800;
+    private double targetVelocity = 1900;
 
     private static double TARGET_X = 150;
     private static double TARGET_Y = 137;
@@ -172,7 +172,7 @@ public class Tele extends LinearOpMode {
             aimGreenPressed    = gamepad1.a && !prevA;
             aimPurplePressed   = gamepad1.b && !prevB;
             shootPressed       = gamepad1.right_bumper; // && !prevB;
-            runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
+            runLaunch          = (false && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.x && !prevX) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
@@ -181,7 +181,7 @@ public class Tele extends LinearOpMode {
             prevY = gamepad1.y;
             prevB = gamepad1.b;
             prevX = gamepad1.x;
-            prevLeftBumper = gamepad1.left_bumper;
+            prevLeftBumper = false;
             prev2LeftBumper = gamepad2.left_bumper;
             prevRightBumper = gamepad1.right_bumper;
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
@@ -189,13 +189,16 @@ public class Tele extends LinearOpMode {
             prev2RightBumper = gamepad2.right_bumper;
 
             if (gamepad2.dpad_left) {
-                targetVelocity = 1600;
+                targetVelocity = 1800;
             }
             if (gamepad2.dpad_down) {
-                targetVelocity = 1800;
+                targetVelocity = 2000;
             }
             if (gamepad2.dpad_right) {
                 targetVelocity = 6000;
+            }
+            if (gamepad2.leftStickButtonWasPressed()) {
+                targetVelocity = 1900;
             }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
@@ -208,7 +211,7 @@ public class Tele extends LinearOpMode {
             boolean idle =
                     Math.abs(drive) < 0.05 &&
                             Math.abs(strafe) < 0.05 &&
-                            Math.abs(turn) < 0.05 && (gamepad1.left_bumper || gamepad2.left_stick_button);
+                            Math.abs(turn) < 0.05 && (false || gamepad2.left_stick_button);
 
 
             telemetry.addData("Move: ", drive + strafe + turn);
@@ -240,7 +243,7 @@ public class Tele extends LinearOpMode {
 
             updateGoalHeading();
 
-            headingLock = gamepad1.left_bumper;
+            headingLock = false;
 
             controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
             double v = getHeadingError();
@@ -393,6 +396,8 @@ public class Tele extends LinearOpMode {
                     // Reset state
                     index = 2;
                     autoLaunching = false;
+
+                    intakePressed = true;
                 }
             }
 
@@ -457,6 +462,7 @@ public class Tele extends LinearOpMode {
             // spindexer logic (COLOR-BASED DETECTION) with delay
             if (waitingForBall && intakeActive && !spinMotor.isBusy() && !waitingToRotate) {
                 Ball detected = detectColor(intakeColor, intakeColor2);
+
 
                 if (detected != Ball.EMPTY) {
                     slots[index] = detected;

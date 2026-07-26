@@ -7,33 +7,29 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-// Mirrored from GeneratedPathsRed12BallFarV3 using: x' = 144 - x, y' = y, heading' = 180deg - heading
 public class GeneratedPathsBlueFar {
 
     private final Follower follower;
 
     // ---------------- START POSE ----------------
-    // Mirrored from red (86, 8, 90deg)
+    //public static final Pose START_POSE = new Pose(118.157, 128.629, Math.toRadians(45));
     public static final Pose START_POSE =
-            new Pose(58, 8, Math.toRadians(90));
+            new Pose(86, 8, Math.toRadians(90)).mirror();
 
-    // ---------------- SHARED WAYPOINTS (mirrored ball/target positions) ----------------
-    // Mirrored from red (90, 12, 69deg)
-    private static final Pose SHOOT_POSE     = new Pose(54, 12, Math.toRadians(115));
-    // Mirrored from red (90, 12, 70deg)
-    private static final Pose SHOOT2_POSE    = new Pose(54, 12, Math.toRadians(110));
-    // Mirrored from red (90, 34, 0deg)
-    private static final Pose INTAKE1_START  = new Pose(54, 34, Math.toRadians(180));   // unchanged pickup lane entry
-    // Mirrored from red (128, 34, 0deg)
-    private static final Pose INTAKE1_END    = new Pose(16, 34, Math.toRadians(180));   // unchanged pickup lane exit
+    // ---------------- SHARED WAYPOINTS (unchanged ball/target positions) ----------------
+    private static final Pose SHOOT_POSE     = new Pose(90, 12, Math.toRadians(59.5)).mirror();
+    private static final Pose SHOOT2_POSE    = new Pose(90, 12, Math.toRadians(68)).mirror();
+    private static final Pose SHOOT3_POSE    = new Pose(90, 12, Math.toRadians(68)).mirror();
+    private static final Pose INTAKE1_START  = new Pose(90, 34, Math.toRadians(0)).mirror();    // unchanged pickup lane entry
+    private static final Pose INTAKE1_END    = new Pose(128, 34, Math.toRadians(0)).mirror();   // unchanged pickup lane exit
 
-    // PLACEHOLDER x3 - mirrored from red (130, Y, 0deg) wall bump spots.
-    // Same caveat as the red version: these are not verified field positions,
-    // just spaced along the mirrored wall (x=14) as a starting point. Adjust
-    // each Y in the Pedro visualizer to match the three spots you actually want.
-    private static final Pose WALLBUMP_1 = new Pose(14, 10, Math.toRadians(180));
-    private static final Pose WALLBUMP_2 = new Pose(14, 16, Math.toRadians(180));
-    private static final Pose WALLBUMP_3 = new Pose(14, 22, Math.toRadians(180));
+    // Verified from Pedro visualizer export.
+    private static final Pose WALLBUMP_1 = new Pose(130, 10, Math.toRadians(0)).mirror();
+    private static final Pose WALLBUMP_2 = new Pose(130, 20, Math.toRadians(0)).mirror();
+    private static final Pose WALLBUMP_3 = new Pose(130, 30, Math.toRadians(0)).mirror();
+    // Curve control points from the visualizer export (loop out toward center field between bumps)
+    private static final Pose WALLBUMP_2_CONTROL = new Pose(88.064, 24.324).mirror();
+    private static final Pose WALLBUMP_3_CONTROL = new Pose(87.866, 31.756).mirror();
 
     public GeneratedPathsBlueFar(Follower follower) {
         this.follower = follower;
@@ -73,14 +69,14 @@ public class GeneratedPathsBlueFar {
                 .addPath(
                         new BezierLine(
                                 WALLBUMP_3,
-                                SHOOT2_POSE
+                                SHOOT3_POSE
                         )
                 )
-                .setLinearHeadingInterpolation(WALLBUMP_3.getHeading(), SHOOT2_POSE.getHeading())
+                .setLinearHeadingInterpolation(WALLBUMP_3.getHeading(), SHOOT3_POSE.getHeading())
                 .build();
     }
 
-    // Starts where shoot1() actually ends (SHOOT_POSE), not the old hardcoded pose
+    // Starts where shoot1() actually ends (SHOOT_POSE), not the old hardcoded (90,14,75)
     public PathChain toIntake1() {
         return new PathBuilder(follower)
                 .addPath(
@@ -119,13 +115,15 @@ public class GeneratedPathsBlueFar {
                 .build();
     }
 
-    // Bump 2 of 3: starts where wallBump1() actually ends (WALLBUMP_1), slides to a
-    // different spot on the same wall
+    // Bump 2 of 3: starts where wallBump1() actually ends (WALLBUMP_1). Loops out
+    // toward center field through the control point and back to the wall - matches
+    // the Pedro visualizer export.
     public PathChain wallBump2() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(
+                        new BezierCurve(
                                 WALLBUMP_1,
+                                WALLBUMP_2_CONTROL,
                                 WALLBUMP_2
                         )
                 )
@@ -133,13 +131,15 @@ public class GeneratedPathsBlueFar {
                 .build();
     }
 
-    // Bump 3 of 3: starts where wallBump2() actually ends (WALLBUMP_2), slides to a
-    // third spot on the same wall
+    // Bump 3 of 3: starts where wallBump2() actually ends (WALLBUMP_2). Loops out
+    // toward center field through the control point and back to the wall - matches
+    // the Pedro visualizer export.
     public PathChain wallBump3() {
         return new PathBuilder(follower)
                 .addPath(
-                        new BezierLine(
+                        new BezierCurve(
                                 WALLBUMP_2,
+                                WALLBUMP_3_CONTROL,
                                 WALLBUMP_3
                         )
                 )
@@ -147,17 +147,16 @@ public class GeneratedPathsBlueFar {
                 .build();
     }
 
-    // Starts where shoot3() actually ends (SHOOT_POSE), not the old hardcoded pose
-    // Mirrored target from red (90, 20, 75deg)
+    // Starts where shoot3() actually ends (SHOOT_POSE), not the old hardcoded (90,14,75)
     public PathChain leave() {
         return new PathBuilder(follower)
                 .addPath(
                         new BezierLine(
-                                SHOOT_POSE,
-                                new Pose(54, 20, Math.toRadians(105))
+                                SHOOT3_POSE,
+                                new Pose(90, 20, Math.toRadians(180-75)).mirror()
                         )
                 )
-                .setLinearHeadingInterpolation(SHOOT_POSE.getHeading(), Math.toRadians(105))
+                .setLinearHeadingInterpolation(SHOOT3_POSE.getHeading(), Math.toRadians(180-75))
                 .build();
     }
 }

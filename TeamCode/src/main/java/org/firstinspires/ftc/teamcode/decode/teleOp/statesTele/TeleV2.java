@@ -99,7 +99,7 @@ public class TeleV2 extends LinearOpMode {
     // ---- BUTTON STATES ----
     private boolean prev2A, prev2B;
 
-    private double targetVelocity = 1800;
+    private double targetVelocity = 1900;
 
     private static double TARGET_X = 150;
     private static double TARGET_Y = 137;
@@ -153,7 +153,7 @@ public class TeleV2 extends LinearOpMode {
             aimGreenPressed    = gamepad1.a && !prevA;
             aimPurplePressed   = gamepad1.b && !prevB;
             shootPressed       = gamepad1.right_bumper;
-            runLaunch          = (gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
+            runLaunch          = false; //(gamepad1.left_bumper && !prevLeftBumper || gamepad2.left_bumper && !prev2LeftBumper) != runLaunch;
             intakePower        = ((gamepad1.right_trigger >= 0.3f && !prevRightTrigger) || (gamepad2.right_bumper && !prev2RightBumper))!= intakePower;
             intakePowerReverse = (gamepad1.x && !prevX) != intakePowerReverse;
             launchAllPressed = gamepad1.dpad_left;
@@ -162,7 +162,7 @@ public class TeleV2 extends LinearOpMode {
             prevY = gamepad1.y;
             prevB = gamepad1.b;
             prevX = gamepad1.x;
-            prevLeftBumper = gamepad1.left_bumper;
+            prevLeftBumper = false;// gamepad1.left_bumper;
             prev2LeftBumper = gamepad2.left_bumper;
             prevRightBumper = gamepad1.right_bumper;
             prevLeftTrigger = gamepad1.left_trigger >= 0.3F;
@@ -170,13 +170,17 @@ public class TeleV2 extends LinearOpMode {
             prev2RightBumper = gamepad2.right_bumper;
 
             if (gamepad2.dpad_left) {
-                targetVelocity = 1600;
+                targetVelocity = 1800;
             }
             if (gamepad2.dpad_down) {
-                targetVelocity = 1800;
+                targetVelocity = 2000;
             }
             if (gamepad2.dpad_right) {
                 targetVelocity = 6000;
+            }
+
+            if (gamepad2.leftStickButtonWasPressed()) {
+                targetVelocity = 1900;
             }
 
             // ----- GAMEPAD 2 MANUAL COLOR OVERRIDE -----
@@ -189,7 +193,7 @@ public class TeleV2 extends LinearOpMode {
             boolean idle =
                     Math.abs(drive) < 0.05 &&
                             Math.abs(strafe) < 0.05 &&
-                            Math.abs(turn) < 0.05 && (gamepad1.left_bumper || gamepad2.left_stick_button);
+                            Math.abs(turn) < 0.05 &&  ( gamepad2.left_stick_button); //(gamepad1.left_bumper || gamepad2.left_stick_button);
 
             telemetry.addData("Move: ", drive + strafe + turn);
             if (idle) {
@@ -209,7 +213,7 @@ public class TeleV2 extends LinearOpMode {
 
             updateGoalHeading();
 
-            headingLock = gamepad1.left_bumper;
+            headingLock = false;// gamepad1.left_bumper;
 
             controller.setCoefficients(follower.constants.coefficientsHeadingPIDF);
             double v = getHeadingError();
@@ -316,6 +320,8 @@ public class TeleV2 extends LinearOpMode {
 
                     index = 2;
                     autoLaunching = false;
+
+                    intakePressed = true;
                 }
             }
 

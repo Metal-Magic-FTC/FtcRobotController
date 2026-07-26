@@ -5,15 +5,18 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-@TeleOp(name="Tune the flywheel PIDF")
+@TeleOp(name="Tune Flywheel & Auto")
 public class FlywheelTuningTest extends OpMode {
 
     public DcMotorEx launchMotor;
+    private DcMotor spinMotor;
+    private DcMotorEx flickMotor;
 
-    public double highVelocity = 2000;
+    public double highVelocity = 2400;
     public double lowVelocity = 900;
 
     double curTargetVelocity = highVelocity;
@@ -35,6 +38,19 @@ public class FlywheelTuningTest extends OpMode {
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        launchMotor.setVelocity(0);
+
+
+        spinMotor = hardwareMap.get(DcMotor.class, "spinMotor");
+
+        spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spinMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spinMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        spinMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        flickMotor = hardwareMap.get(DcMotorEx.class, "flickMotor");
+        flickMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        flickMotor.setPower(0);
 
         telemetry.addLine("initialized");
 

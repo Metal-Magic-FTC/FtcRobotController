@@ -20,8 +20,8 @@ public class FlywheelTest extends OpMode {
 
     public DcMotorEx launchMotor;
 
-    public double velocity = 2000;
-    public double highVelocity = 2000;
+    public double velocity = 2400;
+    public double highVelocity = 2400;
     public double lowVelocity = 900;
     private Follower follower;
 

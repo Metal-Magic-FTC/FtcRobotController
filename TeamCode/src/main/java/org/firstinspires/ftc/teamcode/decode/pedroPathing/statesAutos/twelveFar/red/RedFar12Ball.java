@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.red;
 
+import static java.lang.Math.abs;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -92,7 +94,7 @@ public class RedFar12Ball extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        launchMotor.setVelocity(5000);
+        launchMotor.setVelocity(4500);
         launchMotor.setPower(1);
         Ball[] pattern = {Ball.GREEN, Ball.PURPLE, Ball.GREEN};
         pattern = getPatternFromTag();
@@ -104,8 +106,10 @@ public class RedFar12Ball extends LinearOpMode {
 
         // ---- SHOOT ----
 
-        sleep(4000);
+        sleep(3500);
         shootAll();
+        telemetry.addLine("Not shooting");
+        telemetry.update();
 
         intakeMotor.setPower(-0.6);
         intakeActive = true;
@@ -125,19 +129,24 @@ public class RedFar12Ball extends LinearOpMode {
         intakeActive = true;
         rotateToIndex(0);
         runPath(paths.shoot2(), 0, 1);
+        sleep(4000);
         shootAll();
+        telemetry.addLine("Not shooting");
+        telemetry.update();
         resetSlots();
 
         intakeActive = true;
         rotateToIndex(0);
         runPathWithIntake(paths.wallBump1(), 80, 1);   // bump 1
-        runPathWithIntake(paths.wallBump2(), 80, 1);   // bump 2
-        runPathWithIntake(paths.wallBump3(), 80, 1);   // bump 3
+//        runPathWithIntake(paths.wallBump2(), 80, 1);   // bump 2
+//        runPathWithIntake(paths.wallBump3(), 80, 1);   // bump 3
 
         intakeActive = true;
         rotateToIndex(0);
-        runPath(paths.shoot3(), 0, 1);
+        runPathWithIntake(paths.shoot3(), 0, 1);
         shootAll();
+        telemetry.addLine("Not shooting");
+        telemetry.update();
         resetSlots();
         //shootAllPattern(pattern);
 
@@ -171,7 +180,7 @@ public class RedFar12Ball extends LinearOpMode {
         int minDiff = Integer.MAX_VALUE;
         for (int k = -2; k <= 2; k++) {
             int candidate = mod + 750 * k;
-            int diff = Math.abs(candidate - current);
+            int diff = abs(candidate - current);
             if (diff < minDiff) {
                 minDiff = diff;
                 best = candidate;
@@ -223,7 +232,7 @@ public class RedFar12Ball extends LinearOpMode {
     }
 
     private boolean spinAtTarget() {
-        return Math.abs(
+        return abs(
                 spinMotor.getTargetPosition() - spinMotor.getCurrentPosition()
         ) <= 8;
     }
@@ -392,7 +401,7 @@ public class RedFar12Ball extends LinearOpMode {
         long start = System.currentTimeMillis();
 
         while (opModeIsActive()) {
-            int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
+            int error = abs(spinMotor.getCurrentPosition() - lastSpinTarget);
 
             if (error <= SPIN_TOLERANCE_TICKS) {
                 break;
@@ -575,17 +584,43 @@ public class RedFar12Ball extends LinearOpMode {
         intakeMotor.setPower(0);
 
         flickMotor.setPower(1);
-        launchMotor.setVelocity(5000);
-        sleep(200);
+        launchMotor.setVelocity(3500);
+//        sleep(200);
 
-        launchMotor.setVelocity(5000);
-        int endPosition = spinMotor.getCurrentPosition() + 750;
-        spinMotor.setTargetPosition(endPosition);
+//        launchMotor.setVelocity(5000);
+        int endPos1 = spinMotor.getCurrentPosition() + 250;
+        int endPos2 = spinMotor.getCurrentPosition() + 500;
+        int endPos3 = spinMotor.getCurrentPosition() + 750;
+//        int endPosition = spinMotor.getCurrentPosition() + 750;
+        spinMotor.setTargetPosition(endPos1);
         spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinMotor.setPower(0.15);
-
+        spinMotor.setPower(0.3);
         while (opModeIsActive() && spinMotor.isBusy()) {
-            //nothing
+            telemetry.addData("Ball #:", 1);
+            telemetry.addData("Flywheel speed:", launchMotor.getVelocity());
+            telemetry.update();
+        }
+        while (launchMotor.getVelocity()<2400) {
+            // Wait for ramp up
+        }
+        spinMotor.setTargetPosition(endPos2);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(0.3);
+        while (opModeIsActive() && spinMotor.isBusy()) {
+            telemetry.addData("Ball #:", 2);
+            telemetry.addData("Flywheel speed:", launchMotor.getVelocity());
+            telemetry.update();
+        }
+        while (launchMotor.getVelocity()<2400) {
+            // Wait for ramp up
+        }
+        spinMotor.setTargetPosition(endPos3);
+        spinMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spinMotor.setPower(0.3);
+        while (opModeIsActive() && spinMotor.isBusy()) {
+            telemetry.addData("Ball #:", 3);
+            telemetry.addData("Flywheel speed:", launchMotor.getVelocity());
+            telemetry.update();
         }
 
         spinMotor.setPower(0);

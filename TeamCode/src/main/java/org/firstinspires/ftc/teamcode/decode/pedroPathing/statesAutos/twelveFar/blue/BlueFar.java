@@ -1,5 +1,12 @@
 package org.firstinspires.ftc.teamcode.decode.pedroPathing.statesAutos.twelveFar.blue;
 
+import static java.lang.Math.abs;
+
+//import com.bylazar.panels.Panels;
+//import com.bylazar.telemetry.PanelsTelemetry;
+//import com.bylazar.telemetry.TelemetryManager;
+
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -64,6 +71,8 @@ public class BlueFar extends LinearOpMode {
 
     private static final int SPIN_TOLERANCE_TICKS = 5;
     private static final long SPIN_TIMEOUT_MS = 10000;
+
+//    private TelemetryManager panelsTelemetry;
 
     private int lastSpinTarget = 0;
 
@@ -170,7 +179,7 @@ public class BlueFar extends LinearOpMode {
         int minDiff = Integer.MAX_VALUE;
         for (int k = -2; k <= 2; k++) {
             int candidate = mod + 750 * k;
-            int diff = Math.abs(candidate - current);
+            int diff = abs(candidate - current);
             if (diff < minDiff) {
                 minDiff = diff;
                 best = candidate;
@@ -222,7 +231,7 @@ public class BlueFar extends LinearOpMode {
     }
 
     private boolean spinAtTarget() {
-        return Math.abs(
+        return abs(
                 spinMotor.getTargetPosition() - spinMotor.getCurrentPosition()
         ) <= 8;
     }
@@ -383,7 +392,7 @@ public class BlueFar extends LinearOpMode {
         intakeActive = false;
         waitingForBall = false;
 
-        launchMotor.setVelocity(10000);
+//        launchMotor.setVelocity(10000);
 
     }
 
@@ -391,7 +400,7 @@ public class BlueFar extends LinearOpMode {
         long start = System.currentTimeMillis();
 
         while (opModeIsActive()) {
-            int error = Math.abs(spinMotor.getCurrentPosition() - lastSpinTarget);
+            int error = abs(spinMotor.getCurrentPosition() - lastSpinTarget);
 
             if (error <= SPIN_TOLERANCE_TICKS) {
                 break;
@@ -575,7 +584,12 @@ public class BlueFar extends LinearOpMode {
 
         flickMotor.setPower(1);
         launchMotor.setVelocity(10000);
-        sleep(200);
+//        while (abs(launchMotor.getVelocity()-3000)>500) {
+//            //wait for launchmotor speed to correct
+//        }
+//        telemetry.addData("LaunchMotor Speed:", launchMotor.getVelocity());
+//        telemetry.update();
+//        sleep(200);
 
         int endPosition = spinMotor.getCurrentPosition() + 750;
         spinMotor.setTargetPosition(endPosition);
@@ -584,6 +598,10 @@ public class BlueFar extends LinearOpMode {
 
         while (opModeIsActive() && spinMotor.isBusy()) {
             //nothing
+//            panelsTelemetry.addData("Flywheel speed:", launchMotor.getVelocity());
+//            panelsTelemetry.update();
+            telemetry.addData("Flywheel speed:", launchMotor.getVelocity());
+            telemetry.update();
         }
 
         spinMotor.setPower(0);
@@ -641,6 +659,8 @@ public class BlueFar extends LinearOpMode {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+//        TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     }
 
