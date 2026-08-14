@@ -59,7 +59,7 @@ public class BasicTele extends LinearOpMode {
             // Remember: y needs a minus sign in front of it!
             double y = gamepad1.left_stick_x;
             double x = -gamepad1.left_stick_y;
-            double rx = gamepad1.right_stick_x;
+            double rx = -gamepad1.right_stick_x;
             // TODO 5 (slide "Normalizing Motor Power"): create a variable called
             // denominator using Math.max(...) so no motor power ever goes above 1.0.
             double denominator = Math.max(Math.abs(y)+Math.abs(x)+Math.abs(rx),1);
