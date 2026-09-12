@@ -22,6 +22,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "!!!!!!!!! STATES TELEOP V2")
 public class TeleV2 extends LinearOpMode {
 

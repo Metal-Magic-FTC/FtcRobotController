@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "Aryan Turret Face Red Corner", group = "Test")
 public class AryanTurret extends LinearOpMode {
 

@@ -13,7 +13,8 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "!!!!!WheelFlickerV1")
 public class WheelFlickerV1 extends LinearOpMode {
 

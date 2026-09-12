@@ -17,6 +17,10 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
+
 @TeleOp(name = "Auto Alignment", group = "Test")
 public class AutoAlign extends OpMode {
 

@@ -28,6 +28,8 @@ import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.Fus
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "!!!!!!!!! STATES TELEOP")
 public class Tele extends LinearOpMode {
 

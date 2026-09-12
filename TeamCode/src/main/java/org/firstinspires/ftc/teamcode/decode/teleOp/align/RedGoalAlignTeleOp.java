@@ -37,6 +37,8 @@ import java.util.List;
  *
  * Hardware: Pedro's usual "odo" Pinpoint (via Constants) + a Limelight3A named "limelight".
  */
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "Red Goal Align TeleOp", group = "align")
 public class RedGoalAlignTeleOp extends LinearOpMode {
 

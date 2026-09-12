@@ -8,6 +8,8 @@ import com.pedropathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "Drive + Hold + Face Goal", group = "Drive")
 public class TeleOpFSM extends LinearOpMode {
 
