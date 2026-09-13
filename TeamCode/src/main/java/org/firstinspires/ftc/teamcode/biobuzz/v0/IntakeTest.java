@@ -32,12 +32,15 @@ public class IntakeTest extends OpMode {
             intakeMotor.setPower(0);
         }
 
-        if (gamepad1.a && !gamepad1.aWasReleased()) {
+        if (gamepad1.a && !gamepad1.aWasPressed()) {
             amnt += 0.05;
         }
-        if (gamepad1.b && !gamepad1.bWasReleased()) {
+        if (gamepad1.b && !gamepad1.bWasPressed()) {
             amnt -= 0.05;
         }
+
+        telemetry.addData("amnt: ", amnt);
+        telemetry.addData("power: ", intakeMotor.getPower());
 
     }
 }
