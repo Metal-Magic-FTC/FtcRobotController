@@ -97,7 +97,6 @@ public class BasicTele extends LinearOpMode {
         // motor variables to hardwareMap.get(DcMotor.class, "..."), using the
         // configuration names listed at the top of this file.
 
-
         // TODO 2 (slide "Servos"): connect pivotServo and clawServo to
         // hardwareMap.get(Servo.class, "...") the same way.
 
