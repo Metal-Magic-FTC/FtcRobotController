@@ -17,6 +17,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
 
+    // Robot dimensions, inches. Pedro itself does not use these (it learns the drivetrain from tuning);
+    // they are here for start poses / geometry.
+    public static final double ROBOT_WIDTH_IN = 17.5;
+    public static final double ROBOT_LENGTH_IN = 16.0;
+    /** Outside of wheel to outside of wheel. */
+    public static final double WHEEL_SPAN_WIDTH_IN = 16.0;
+    public static final double WHEEL_SPAN_LENGTH_IN = 15.5;
+    /** goBILDA mecanum. */
+    public static final double WHEEL_DIAMETER_MM = 104.0;
+
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(6.8);
 //            .forwardZeroPowerAcceleration(66.87291134811763
@@ -36,8 +46,8 @@ public class Constants {
             //.yVelocity(59.43);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(0)
-            .strafePodX(0)
+            .forwardPodY(-3)   // forward pod is 3 in RIGHT of robot center (left = +)
+            .strafePodX(0)     // strafe pod is level with robot center front-to-back (forward = +)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("odo")
             .encoderResolution(
