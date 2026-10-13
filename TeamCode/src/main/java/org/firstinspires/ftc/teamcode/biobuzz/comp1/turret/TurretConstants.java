@@ -14,7 +14,7 @@ public final class TurretConstants {
 
     private TurretConstants() {}
 
-    public static final String TURRET_MOTOR_NAME = "turret";
+    public static final String TURRET_MOTOR_NAME = "turretMotor";
 
     /**
      * Flip this until turning the turret COUNTER-CLOCKWISE (seen from above) makes the angle go UP in
@@ -27,11 +27,11 @@ public final class TurretConstants {
      * e.g. goBILDA 5203 312 rpm = 537.7 ticks/rev, with a 100:20 turret ring -> 537.7 * 5 = 2688.5.
      * To measure: in TurretEncoderTest zero it facing front, rotate exactly 180 deg, then ticks * 2.
      */
-    public static final double TICKS_PER_TURRET_REV = 537.7 * 5.0;
+    public static final double TICKS_PER_TURRET_REV = 554.0; // measured: -554 ticks for one full turn clockwise
 
     /** Soft limits in continuous degrees (fill these in from TurretEncoderTest; keep a few degrees of margin). */
-    public static final double MIN_DEG = -170.0;
-    public static final double MAX_DEG = 170.0;
+    public static final double MIN_DEG = -355.0; // measured 360 deg clockwise travel, 5 deg margin
+    public static final double MAX_DEG = 0.0;    // counter-clockwise travel not measured yet
 
     /** Turret rotation center relative to robot center, inches (forward = robot front, left = robot left). */
     public static final double TURRET_FORWARD_IN = 0.0;

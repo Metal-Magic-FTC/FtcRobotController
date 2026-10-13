@@ -20,9 +20,9 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
  * +X right, +Y away from the audience, heading 0 = facing +X, counter-clockwise positive, inches.
  *
  * BEFORE PRESSING INIT
- *   1. Robot at START_POSE: bottom-left start, FACING THE RED (left) WALL, robot's LEFT side flush against the
- *      audience wall, robot center START_X inches from the red wall.
- *   2. Turret pointing straight out the robot FRONT (= toward the red wall). That is turret 0 deg.
+ *   1. Robot at START_POSE: bottom-left corner (red wall / audience wall), FACING AWAY FROM THE AUDIENCE
+ *      (+Y, toward the far wall), back against the audience wall, left side against the red wall.
+ *   2. Turret pointing straight out the robot FRONT (also away from the audience). That is turret 0 deg.
  *   3. Robot perfectly still until telemetry says ready (Pinpoint IMU calibrates).
  *
  * gamepad1:
@@ -34,10 +34,11 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
 public class TurretAimGoal extends LinearOpMode {
 
     // ======================= START POSE =======================
-    private static final double START_X = 38.0;
-    /** Robot's left side against the audience wall while facing the red wall. */
-    private static final double START_Y = Constants.ROBOT_WIDTH_IN / 2.0;
-    private static final double START_HEADING_DEG = 180.0;
+    /** Left side against the red wall. */
+    private static final double START_X = Constants.ROBOT_WIDTH_IN / 2.0;
+    /** Back against the audience wall. */
+    private static final double START_Y = Constants.ROBOT_LENGTH_IN / 2.0;
+    private static final double START_HEADING_DEG = 90.0;
     private static final Pose START_POSE = new Pose(START_X, START_Y, Math.toRadians(START_HEADING_DEG));
 
     // ======================= GOAL (red HIVE) =======================
@@ -68,7 +69,7 @@ public class TurretAimGoal extends LinearOpMode {
         // Odometry runs during INIT too (turret stays unpowered), so you can check the pose before START.
         while (opModeInInit()) {
             Pose pose = updatePose();
-            telemetry.addLine("Ready. Robot on start spot facing red wall, turret facing FRONT?");
+            telemetry.addLine("Ready. Robot in bottom-left corner facing away from audience, turret facing FRONT?");
             addTelemetry(pose, aimTop, Double.NaN);
             telemetry.update();
         }

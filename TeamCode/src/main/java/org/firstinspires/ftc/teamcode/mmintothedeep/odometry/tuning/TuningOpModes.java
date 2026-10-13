@@ -38,7 +38,7 @@ public final class TuningOpModes {
     public static final Class<?> DRIVE_CLASS = MecanumDrive.class;
 
     public static final String GROUP = "quickstart";
-    public static final boolean DISABLED = false;
+    public static final boolean DISABLED = true; // old Into the Deep Road Runner tuning; its dashboard call crashes OpMode registration under Sloth
 
     private TuningOpModes() {}
 
