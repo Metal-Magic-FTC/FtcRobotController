@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.turret;
 
-import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
-import com.pedropathing.geometry.Pose;
+import com.pedropathing.revhub.localizers.PinpointLocalizer;
+import com.pedropathing.math.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
 
 /**
@@ -61,7 +61,7 @@ public class TurretAimGoal extends LinearOpMode {
 
         telemetry.addLine("Resetting Pinpoint - keep the robot STILL");
         telemetry.update();
-        localizer = new PinpointLocalizer(hardwareMap, Constants.localizerConstants);
+        localizer = new PinpointLocalizer(hardwareMap, Constants.localizerConfig);
         resetOdometry();
 
         boolean aimTop = START_Y > HALF_LINE_Y;
@@ -82,15 +82,15 @@ public class TurretAimGoal extends LinearOpMode {
             if (gamepad1.xWasPressed()) {
                 turret.stop();
                 resetOdometry();
-                pose = localizer.getPose();
+                pose = localizer.pose();
             }
 
-            if (pose.getY() > HALF_LINE_Y + SWITCH_HYSTERESIS_IN) aimTop = true;
-            else if (pose.getY() < HALF_LINE_Y - SWITCH_HYSTERESIS_IN) aimTop = false;
+            if (pose.y() > HALF_LINE_Y + SWITCH_HYSTERESIS_IN) aimTop = true;
+            else if (pose.y() < HALF_LINE_Y - SWITCH_HYSTERESIS_IN) aimTop = false;
 
             double targetDeg = Double.NaN;
             if (autoAim) {
-                targetDeg = turret.aimAt(pose.getX(), pose.getY(), pose.getHeading(),
+                targetDeg = turret.aimAt(pose.x(), pose.y(), pose.heading(),
                         GOAL_X, aimTop ? GOAL_TOP_Y : GOAL_BOTTOM_Y);
             } else {
                 turret.manual(-gamepad1.left_stick_x); // stick left = counter-clockwise
@@ -105,15 +105,15 @@ public class TurretAimGoal extends LinearOpMode {
     }
 
     private void resetOdometry() {
-        localizer.resetIMU(); // resetPosAndIMU + 300 ms wait, robot must be still
+        localizer.reset(); // recalibrates the Pinpoint IMU (500 ms wait), robot must be still
         localizer.setPose(START_POSE);
         turret.resetHeadingTracking();
     }
 
     private Pose updatePose() {
         localizer.update();
-        Pose pose = localizer.getPose();
-        turret.updateHeading(pose.getHeading());
+        Pose pose = localizer.pose();
+        turret.updateHeading(pose.heading());
         return pose;
     }
 
@@ -121,10 +121,10 @@ public class TurretAimGoal extends LinearOpMode {
         double goalY = aimTop ? GOAL_TOP_Y : GOAL_BOTTOM_Y;
         telemetry.addLine("A auto aim | X reset to start pose | stick X manual");
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°",
-                pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()));
-        telemetry.addData("Field half", pose.getY() < HALF_LINE_Y ? "BOTTOM" : "TOP");
+                pose.x(), pose.y(), Math.toDegrees(pose.heading()));
+        telemetry.addData("Field half", pose.y() < HALF_LINE_Y ? "BOTTOM" : "TOP");
         telemetry.addData("Aiming at", "%s cell (%.1f, %.1f), %.1f in away", aimTop ? "TOP" : "BOTTOM",
-                GOAL_X, goalY, Math.hypot(GOAL_X - pose.getX(), goalY - pose.getY()));
+                GOAL_X, goalY, Math.hypot(GOAL_X - pose.x(), goalY - pose.y()));
         double cur = turret.angleDeg();
         telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", cur, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
         if (!Double.isNaN(targetDeg)) {

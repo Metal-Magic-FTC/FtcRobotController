@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.turret;
 
-import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
-import com.pedropathing.geometry.Pose;
+import com.pedropathing.revhub.localizers.PinpointLocalizer;
+import com.pedropathing.math.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
 
 import java.util.ArrayDeque;
@@ -79,7 +79,7 @@ public class TurretAimTag extends LinearOpMode {
 
         telemetry.addLine("Resetting Pinpoint - keep the robot STILL");
         telemetry.update();
-        localizer = new PinpointLocalizer(hardwareMap, Constants.localizerConstants);
+        localizer = new PinpointLocalizer(hardwareMap, Constants.localizerConfig);
         resetOdometry();
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -105,12 +105,12 @@ public class TurretAimTag extends LinearOpMode {
             if (gamepad1.bWasPressed()) tagLocked = false;
             if (gamepad1.xWasPressed()) {
                 resetOdometry();
-                pose = localizer.getPose();
+                pose = localizer.pose();
             }
 
             double targetDeg = Double.NaN;
             if (autoAim && tagLocked) {
-                targetDeg = turret.aimAt(pose.getX(), pose.getY(), pose.getHeading(), tagX, tagY);
+                targetDeg = turret.aimAt(pose.x(), pose.y(), pose.heading(), tagX, tagY);
             } else if (!autoAim) {
                 turret.manual(-gamepad1.left_stick_x); // stick left = counter-clockwise
             } else {
@@ -128,7 +128,7 @@ public class TurretAimTag extends LinearOpMode {
 
     // ======================= ODOMETRY =======================
     private void resetOdometry() {
-        localizer.resetIMU(); // resetPosAndIMU + 300 ms wait, robot must be still
+        localizer.reset(); // recalibrates the Pinpoint IMU (500 ms wait), robot must be still
         localizer.setPose(new Pose(0, 0, 0));
         poseHistory.clear();
         tagLocked = false;
@@ -137,13 +137,13 @@ public class TurretAimTag extends LinearOpMode {
 
     private Pose updatePose() {
         localizer.update();
-        Pose pose = localizer.getPose();
+        Pose pose = localizer.pose();
         double now = clock.seconds();
 
-        poseHistory.addLast(new double[]{now, pose.getX(), pose.getY(), pose.getHeading()});
+        poseHistory.addLast(new double[]{now, pose.x(), pose.y(), pose.heading()});
         while (now - poseHistory.peekFirst()[0] > POSE_HISTORY_SEC) poseHistory.removeFirst();
 
-        turret.updateHeading(pose.getHeading());
+        turret.updateHeading(pose.heading());
         return pose;
     }
 
@@ -215,13 +215,13 @@ public class TurretAimTag extends LinearOpMode {
     private void addTelemetry(Pose pose, double targetDeg) {
         telemetry.addLine("A auto aim | B forget tag | X reset odo | stick X manual");
         telemetry.addData("Robot (odo frame)", "(%.1f, %.1f) %.1f°",
-                pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()));
+                pose.x(), pose.y(), Math.toDegrees(pose.heading()));
         telemetry.addData("Robot turn rate", "%.0f°/s", turret.robotOmegaDeg());
         telemetry.addLine();
         telemetry.addData("Tag " + TARGET_TAG_ID + " visible", tagVisible
                 ? String.format("yes, %.1f in, image %.0f ms old", lastTagRangeIn, lastImageAgeMs) : "no");
         if (tagLocked) {
-            double dx = pose.getX() - tagX, dy = pose.getY() - tagY;
+            double dx = pose.x() - tagX, dy = pose.y() - tagY;
             telemetry.addData("Tag (odo frame)", "(%.1f, %.1f)", tagX, tagY);
             telemetry.addData("Robot relative to tag", "(%.1f, %.1f)  dist %.1f in", dx, dy, Math.hypot(dx, dy));
         } else {

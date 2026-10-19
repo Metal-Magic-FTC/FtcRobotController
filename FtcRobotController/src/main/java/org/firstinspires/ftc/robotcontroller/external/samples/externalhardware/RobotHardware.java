@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.robotcontroller.external.samples.externalhardware;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -72,7 +72,6 @@ public class RobotHardware {
     public static final double ARM_DOWN_POWER  = -0.45 ;
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
-    public RobotHardware () {}
     public RobotHardware (LinearOpMode opmode) {
         myOpMode = opmode;
     }

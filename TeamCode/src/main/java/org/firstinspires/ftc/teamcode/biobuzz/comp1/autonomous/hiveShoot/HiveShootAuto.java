@@ -1,17 +1,18 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.hiveShoot;
 
+import static com.pedropathing.api.Paths.curve;
+import static com.pedropathing.api.Paths.line;
+
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.v1.PathsV1;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.Hive;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.HiveTilt;
@@ -58,8 +59,8 @@ public class HiveShootAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(START_POSE);
+        follower = Constants.create(hardwareMap);
+        follower.setPose(START_POSE);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
@@ -90,15 +91,9 @@ public class HiveShootAuto extends LinearOpMode {
                 ? facingHive(SHOOT_TOP_X, SHOOT_TOP_Y)
                 : facingHive(SHOOT_BOTTOM_X, SHOOT_BOTTOM_Y);
 
-        PathChain toShoot = shootTop
-                ? follower.pathBuilder()
-                        .addPath(new BezierCurve(START_POSE, TOP_PATH_CONTROL, shootPose))
-                        .setLinearHeadingInterpolation(START_POSE.getHeading(), shootPose.getHeading())
-                        .build()
-                : follower.pathBuilder()
-                        .addPath(new BezierLine(START_POSE, shootPose))
-                        .setLinearHeadingInterpolation(START_POSE.getHeading(), shootPose.getHeading())
-                        .build();
+        Path toShoot = shootTop
+                ? curve(START_POSE, TOP_PATH_CONTROL, shootPose).linear(START_POSE, shootPose)
+                : line(START_POSE, shootPose).linear(START_POSE, shootPose);
 
         String spot = shootTop ? "TOP" : "BOTTOM";
         String source = confirmedState != null ? "tags" : "default (tags not read)";
@@ -134,8 +129,8 @@ public class HiveShootAuto extends LinearOpMode {
         if (candidateFrames >= CONFIRM_FRAMES) confirmedState = state;
     }
 
-    private void runPath(PathChain path, String status, TiltState decision, String source) {
-        follower.followPath(path, true);
+    private void runPath(Path path, String status, TiltState decision, String source) {
+        follower.follow(path);
         ElapsedTime timer = new ElapsedTime();
         while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {
             follower.update();
@@ -167,10 +162,10 @@ public class HiveShootAuto extends LinearOpMode {
     }
 
     private void addStatusTelemetry(String status, TiltState decision, String spot, String source) {
-        Pose pose = follower.getPose();
+        Pose pose = follower.pose();
         telemetry.addData("Status", status);
         telemetry.addData("HIVE", "%s (from %s)", decision.label, source);
         if (!spot.isEmpty()) telemetry.addData("Shoot spot", spot);
-        telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()));
+        telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
     }
 }

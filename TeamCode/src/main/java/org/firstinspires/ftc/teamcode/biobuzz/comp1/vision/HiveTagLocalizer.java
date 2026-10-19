@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.vision;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Pose;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.Hive;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.HiveTilt;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.TagObservation;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 
 import java.util.ArrayDeque;
 import java.util.List;
@@ -56,7 +56,7 @@ public class HiveTagLocalizer extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.create(hardwareMap);
         follower.setPose(START_POSE);
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -66,11 +66,10 @@ public class HiveTagLocalizer extends LinearOpMode {
 
         telemetry.addLine("HIVE Tag Localizer ready");
         telemetry.addData("Start pose", "(%.1f, %.1f) %.0f°",
-                START_POSE.getX(), START_POSE.getY(), Math.toDegrees(START_POSE.getHeading()));
+                START_POSE.x(), START_POSE.y(), Math.toDegrees(START_POSE.heading()));
         telemetry.update();
         waitForStart();
 
-        follower.startTeleopDrive();
         ElapsedTime clock = new ElapsedTime();
 
         boolean continuous = false;
@@ -82,7 +81,7 @@ public class HiveTagLocalizer extends LinearOpMode {
         while (opModeIsActive()) {
             follower.update();
             double now = clock.seconds();
-            Pose pose = follower.getPose();
+            Pose pose = follower.pose();
 
             // ---------- vision ----------
             List<TagObservation> tags = HiveTagGeometry.readTags(limelight.getLatestResult());
@@ -91,7 +90,7 @@ public class HiveTagLocalizer extends LinearOpMode {
 
             double visionHeading = HiveTagGeometry.headingFromTagPair(tags);
             double headingForVision = USE_VISION_HEADING && !Double.isNaN(visionHeading)
-                    ? visionHeading : pose.getHeading();
+                    ? visionHeading : pose.heading();
             double[] estimate = estimateRobotXY(tags, redTilt, blueTilt, headingForVision);
 
             if (estimate != null) {
@@ -102,7 +101,7 @@ public class HiveTagLocalizer extends LinearOpMode {
             }
 
             // ---------- buttons ----------
-            // Pose edits are blocked while turning: turnTo holds the X/Y it started with, so moving the pose
+            // Pose edits are blocked while turning: hold() keeps the X/Y it started with, so moving the pose
             // mid-turn would make the robot drive to "correct" itself.
             if (gamepad1.x && !prevX && !turning) snapToVision(pose);
             if (gamepad1.y && !prevY) continuous = !continuous;
@@ -110,40 +109,39 @@ public class HiveTagLocalizer extends LinearOpMode {
 
             if (continuous && estimate != null && !turning) {
                 double heading = USE_VISION_HEADING
-                        ? pose.getHeading() + CONTINUOUS_GAIN
-                                * HiveTagGeometry.normalizeAngle(headingForVision - pose.getHeading())
-                        : pose.getHeading();
+                        ? pose.heading() + CONTINUOUS_GAIN
+                                * HiveTagGeometry.normalizeAngle(headingForVision - pose.heading())
+                        : pose.heading();
                 follower.setPose(new Pose(
-                        pose.getX() + CONTINUOUS_GAIN * (estimate[0] - pose.getX()),
-                        pose.getY() + CONTINUOUS_GAIN * (estimate[1] - pose.getY()),
+                        pose.x() + CONTINUOUS_GAIN * (estimate[0] - pose.x()),
+                        pose.y() + CONTINUOUS_GAIN * (estimate[1] - pose.y()),
                         heading));
             }
 
             // ---------- face field center ----------
-            pose = follower.getPose();
-            double centerHeading = HiveTagGeometry.headingToFieldCenter(pose.getX(), pose.getY());
-            double turnNeeded = HiveTagGeometry.normalizeAngle(centerHeading - pose.getHeading());
+            pose = follower.pose();
+            double centerHeading = HiveTagGeometry.headingToFieldCenter(pose.x(), pose.y());
+            double turnNeeded = HiveTagGeometry.normalizeAngle(centerHeading - pose.heading());
 
             if (gamepad1.a && !prevA && !turning) {
                 turnTarget = centerHeading;
-                follower.turnTo(turnTarget);
+                follower.hold(pose.withHeading(turnTarget)); // turn in place
                 turning = true;
                 settleLoops = 0;
             }
 
             if (turning) {
-                double error = HiveTagGeometry.normalizeAngle(turnTarget - pose.getHeading());
+                double error = HiveTagGeometry.normalizeAngle(turnTarget - pose.heading());
                 settleLoops = Math.abs(error) < Math.toRadians(TURN_TOLERANCE_DEG) ? settleLoops + 1 : 0;
                 boolean driverOverride = gamepad1.b
                         || Math.abs(gamepad1.left_stick_x) > STICK_CANCEL
                         || Math.abs(gamepad1.left_stick_y) > STICK_CANCEL
                         || Math.abs(gamepad1.right_stick_x) > STICK_CANCEL;
                 if (settleLoops >= TURN_SETTLE_LOOPS || driverOverride) {
-                    follower.startTeleopDrive();
                     turning = false;
                 }
             } else {
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+                follower.manual(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
             }
 
             prevX = gamepad1.x;
@@ -154,7 +152,7 @@ public class HiveTagLocalizer extends LinearOpMode {
             // ---------- telemetry ----------
             telemetry.addLine("X snap | Y continuous | A face center | B cancel | BACK reset");
             telemetry.addData("Pedro pose", "(%.1f, %.1f) %.1f°",
-                    pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()));
+                    pose.x(), pose.y(), Math.toDegrees(pose.heading()));
             telemetry.addData("Continuous vision", continuous);
             telemetry.addData("Heading to center", "%.1f°  (turn %+.1f°)",
                     Math.toDegrees(centerHeading), Math.toDegrees(turnNeeded));
@@ -202,7 +200,7 @@ public class HiveTagLocalizer extends LinearOpMode {
             sumCos += Math.cos(e[2]);
         }
         int n = recentEstimates.size();
-        double heading = USE_VISION_HEADING ? Math.atan2(sumSin, sumCos) : current.getHeading();
+        double heading = USE_VISION_HEADING ? Math.atan2(sumSin, sumCos) : current.heading();
         follower.setPose(new Pose(sumX / n, sumY / n, heading));
     }
 

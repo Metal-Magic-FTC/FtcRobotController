@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.vision;
 
-import com.pedropathing.follower.Follower;
+import com.pedropathing.drivetrain.DrivePowers;
+import com.pedropathing.revhub.drivetrains.Mecanum;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -10,7 +11,7 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.Hive;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.HiveTilt;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.TagObservation;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.TiltState;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 
 import java.util.List;
 
@@ -31,7 +32,8 @@ public class HiveTiltDetector extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Follower follower = Constants.createFollower(hardwareMap);
+        // Drive only: the drivetrain alone, so this works before Foresight is tuned.
+        Mecanum drivetrain = new Mecanum(hardwareMap, Constants.drivetrainConfig);
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
@@ -44,14 +46,12 @@ public class HiveTiltDetector extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        follower.startTeleopDrive();
         ElapsedTime clock = new ElapsedTime();
         double[] filteredTilt = new double[Hive.values().length];
         double[] lastSeen = {-100, -100};
 
         while (opModeIsActive()) {
-            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
-            follower.update();
+            drivetrain.drive(new DrivePowers(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x), true);
 
             double now = clock.seconds();
             List<TagObservation> tags = HiveTagGeometry.readTags(limelight.getLatestResult());

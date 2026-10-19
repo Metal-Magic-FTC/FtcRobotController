@@ -11,12 +11,13 @@
 buildscript {
     repositories {
         mavenCentral()
+        google()
         maven {
             url "https://repo.dairy.foundation/releases"
         }
     }
     dependencies {
-        classpath "dev.frozenmilk:Load:0.2.4"
+        classpath "dev.frozenmilk:Load:0.3.2"
     }
 }
 
@@ -38,23 +39,39 @@ android {
         }
         jniLibs.useLegacyPackaging true
     }
+
+    // Old code written for Pedro Pathing 2 / Road Runner. It does not compile against Pedro 3, so it is kept in the
+    // repo but left out of the build. Delete a line here (and port the code) to bring it back.
+    sourceSets {
+        main {
+            java {
+                exclude 'org/firstinspires/ftc/teamcode/decode/**'           // last season, Pedro 2
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/MecanumDrive.java'      // Road Runner
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/pinpoint/Localizer.java'
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/pinpoint/*DeadWheelLocalizer.java'
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/pinpoint/TankDrive.java'
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/tuning/**'
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/other/Drawing.java'
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/util/ControlTheory/CustomPIDController.java' // FTC Dashboard
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/util/Camera/*.java'                // SDK 11 AprilTag API
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/pinpoint/LocalizeWithOdo.java'
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/pinpoint/PinpointAutoRight.java'
+                exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/pinpoint/tagLocalizer.java'
+                exclude 'org/firstinspires/ftc/teamcode/messages/**'         // Road Runner log messages
+                exclude 'org/firstinspires/ftc/teamcode/summer26/aarushTests/tests/GuthaAuto*.java' // Pedro 2
+                exclude 'org/firstinspires/ftc/teamcode/biobuzz/comp1/pedroPathing/**' // Pedro 2 constants/tuning, replaced by biobuzz/comp1/pedro
+            }
+        }
+    }
 }
 
 repositories {
-    maven {
-        url = 'https://maven.brott.dev/'
-    }
     maven {
         url = 'https://repo.dairy.foundation/releases'
     }
 }
 
 dependencies {
-    
-    //Roadrunner
-    implementation "com.acmerobotics.roadrunner:ftc:0.1.12"
-    implementation "com.acmerobotics.roadrunner:core:1.0.0"
-    implementation "com.acmerobotics.roadrunner:actions:1.0.0"
 
     implementation project(':FtcRobotController')
     implementation 'androidx.xr.runtime:runtime:1.0.0-alpha07'
@@ -64,5 +81,5 @@ dependencies {
     // at Interpreter construction and crashes the OpMode on INIT.
     implementation 'org.tensorflow:tensorflow-lite:2.9.0'
 
-    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
+    implementation("dev.frozenmilk.sinister:Sloth:0.3.2")
 }

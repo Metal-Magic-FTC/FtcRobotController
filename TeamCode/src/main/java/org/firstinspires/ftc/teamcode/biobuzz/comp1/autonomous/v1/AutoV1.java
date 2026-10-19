@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.v1;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 
 /**
  * Auto V1: drives the 6 paths from my_path2.pp in order. Add mechanism actions between runPath calls.
@@ -22,19 +22,19 @@ public class AutoV1 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(PathsV1.START_POSE);
-        PathsV1 paths = new PathsV1(follower);
+        follower = Constants.create(hardwareMap);
+        follower.setPose(PathsV1.START_POSE);
+        PathsV1 paths = new PathsV1();
 
         // Build everything during init so start is instant
-        PathChain[] sequence = {
+        Path[] sequence = {
                 paths.path1(), paths.path2(), paths.path3(),
                 paths.path4(), paths.path5(), paths.path6()
         };
 
         telemetry.addLine("BioBuzz Auto V1 ready");
-        telemetry.addData("Start pose", "(%.1f, %.1f) %.0f°", PathsV1.START_POSE.getX(),
-                PathsV1.START_POSE.getY(), Math.toDegrees(PathsV1.START_POSE.getHeading()));
+        telemetry.addData("Start pose", "(%.1f, %.1f) %.0f°", PathsV1.START_POSE.x(),
+                PathsV1.START_POSE.y(), Math.toDegrees(PathsV1.START_POSE.heading()));
         telemetry.addData("Visualizer reverse headings", PathsV1.FOLLOW_VISUALIZER_REVERSE);
         telemetry.update();
 
@@ -52,8 +52,8 @@ public class AutoV1 extends LinearOpMode {
         }
     }
 
-    private void runPath(PathChain path, int number) {
-        follower.followPath(path, true);
+    private void runPath(Path path, int number) {
+        follower.follow(path);
         ElapsedTime timer = new ElapsedTime();
         while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {
             follower.update();
@@ -63,8 +63,8 @@ public class AutoV1 extends LinearOpMode {
     }
 
     private void addPoseTelemetry(String status) {
-        Pose pose = follower.getPose();
+        Pose pose = follower.pose();
         telemetry.addData("Status", status);
-        telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()));
+        telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
     }
 }
