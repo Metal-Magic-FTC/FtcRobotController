@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
 
 /**
  * RED alliance: keeps the turret pointed at our HIVE (the goal) while the robot is pushed around by hand.
@@ -41,17 +40,6 @@ public class TurretAimGoal extends LinearOpMode {
     private static final double START_HEADING_DEG = 90.0;
     private static final Pose START_POSE = new Pose(START_X, START_Y, Math.toRadians(START_HEADING_DEG));
 
-    // ======================= GOAL (red HIVE) =======================
-    private static final double GOAL_X = HiveTagGeometry.RED_HIVE_X_IN;
-    /** Field line that splits "bottom half" from "top half" (the HIVE pivot line). */
-    private static final double HALF_LINE_Y = HiveTagGeometry.PIVOT_Y_IN;
-    /** Cell center distance from the pivot line: 42.91/2 - 12.04/2 (level HIVE). */
-    private static final double CELL_OFFSET_Y = 15.4;
-    private static final double GOAL_BOTTOM_Y = HALF_LINE_Y - CELL_OFFSET_Y;
-    private static final double GOAL_TOP_Y = HALF_LINE_Y + CELL_OFFSET_Y;
-    /** The robot must cross the half line by this much before the target switches (stops flip-flopping). */
-    private static final double SWITCH_HYSTERESIS_IN = 3.0;
-
     private PinpointLocalizer localizer;
     private TurretController turret;
 
@@ -64,13 +52,13 @@ public class TurretAimGoal extends LinearOpMode {
         localizer = new PinpointLocalizer(hardwareMap, Constants.localizerConfig);
         resetOdometry();
 
-        boolean aimTop = START_Y > HALF_LINE_Y;
+        RedHiveGoal goal = new RedHiveGoal(START_Y);
 
         // Odometry runs during INIT too (turret stays unpowered), so you can check the pose before START.
         while (opModeInInit()) {
             Pose pose = updatePose();
             telemetry.addLine("Ready. Robot in bottom-left corner facing away from audience, turret facing FRONT?");
-            addTelemetry(pose, aimTop, Double.NaN);
+            addTelemetry(pose, goal, Double.NaN);
             telemetry.update();
         }
 
@@ -85,19 +73,17 @@ public class TurretAimGoal extends LinearOpMode {
                 pose = localizer.pose();
             }
 
-            if (pose.y() > HALF_LINE_Y + SWITCH_HYSTERESIS_IN) aimTop = true;
-            else if (pose.y() < HALF_LINE_Y - SWITCH_HYSTERESIS_IN) aimTop = false;
+            goal.update(pose.y());
 
             double targetDeg = Double.NaN;
             if (autoAim) {
-                targetDeg = turret.aimAt(pose.x(), pose.y(), pose.heading(),
-                        GOAL_X, aimTop ? GOAL_TOP_Y : GOAL_BOTTOM_Y);
+                targetDeg = turret.aimAt(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
             } else {
                 turret.manual(-gamepad1.left_stick_x); // stick left = counter-clockwise
             }
 
             telemetry.addData("Auto aim (A)", autoAim);
-            addTelemetry(pose, aimTop, targetDeg);
+            addTelemetry(pose, goal, targetDeg);
             telemetry.update();
         }
 
@@ -117,14 +103,13 @@ public class TurretAimGoal extends LinearOpMode {
         return pose;
     }
 
-    private void addTelemetry(Pose pose, boolean aimTop, double targetDeg) {
-        double goalY = aimTop ? GOAL_TOP_Y : GOAL_BOTTOM_Y;
+    private void addTelemetry(Pose pose, RedHiveGoal goal, double targetDeg) {
         telemetry.addLine("A auto aim | X reset to start pose | stick X manual");
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°",
                 pose.x(), pose.y(), Math.toDegrees(pose.heading()));
-        telemetry.addData("Field half", pose.y() < HALF_LINE_Y ? "BOTTOM" : "TOP");
-        telemetry.addData("Aiming at", "%s cell (%.1f, %.1f), %.1f in away", aimTop ? "TOP" : "BOTTOM",
-                GOAL_X, goalY, Math.hypot(GOAL_X - pose.x(), goalY - pose.y()));
+        telemetry.addData("Field half", pose.y() < RedHiveGoal.HALF_LINE_Y ? "BOTTOM" : "TOP");
+        telemetry.addData("Aiming at", "%s cell (%.1f, %.1f), %.1f in away", goal.aimingTop() ? "TOP" : "BOTTOM",
+                goal.x(), goal.y(), Math.hypot(goal.x() - pose.x(), goal.y() - pose.y()));
         double cur = turret.angleDeg();
         telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", cur, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
         if (!Double.isNaN(targetDeg)) {

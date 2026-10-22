@@ -9,18 +9,20 @@
 // before doing so.
 apply plugin: 'com.android.application'
 
-buildscript {
-    repositories {
-        mavenCentral()
-        google()
-        maven {
-            url "https://repo.dairy.foundation/releases"
-        }
-    }
-    dependencies {
-        classpath "dev.frozenmilk:Load:0.3.2"
-    }
-}
+// Sloth hot reload is disabled for now (known Sloth + Pedro 3 bug). To turn it back on, uncomment this block,
+// the 'apply plugin' line below and the Sloth dependency at the bottom.
+//buildscript {
+//    repositories {
+//        mavenCentral()
+//        google()
+//        maven {
+//            url "https://repo.dairy.foundation/releases"
+//        }
+//    }
+//    dependencies {
+//        classpath "dev.frozenmilk:Load:0.3.2"
+//    }
+//}
 
 // Custom definitions may go here
 
@@ -28,8 +30,7 @@ buildscript {
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
-//
-apply plugin: 'dev.frozenmilk.sinister.sloth.load'
+//apply plugin: 'dev.frozenmilk.sinister.sloth.load'
 
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
@@ -82,5 +83,5 @@ dependencies {
     // at Interpreter construction and crashes the OpMode on INIT.
     implementation 'org.tensorflow:tensorflow-lite:2.9.0'
 
-    implementation("dev.frozenmilk.sinister:Sloth:0.3.2")
+    //implementation("dev.frozenmilk.sinister:Sloth:0.3.2")
 }
