@@ -21,13 +21,15 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretController;
  *   2. Turret pointing straight out the robot FRONT (toward the red wall). That is turret 0 deg.
  *   3. Robot still during INIT (Pinpoint IMU calibrates).
  *
- * Add mechanism actions (shooting, intake) between the runPath calls.
+ * Add mechanism actions (shooting, intake) in the waits between paths (WAIT_AFTER_SEC).
  */
 @Autonomous(name = "BioBuzz Auto V2 + Turret", group = "BioBuzz")
 public class AutoV2Turret extends LinearOpMode {
 
     /** Give up on a path after this long so a stuck robot still runs the rest of the auto. */
     private static final double PATH_TIMEOUT_SEC = 6.0;
+    /** Pause at the end of each path, seconds (one per path, same order). The robot holds position meanwhile. */
+    private static final double[] WAIT_AFTER_SEC = {0, 0, 0, 0, 0.0};
 
     private Follower follower;
     private TurretController turret;
@@ -63,6 +65,7 @@ public class AutoV2Turret extends LinearOpMode {
 
         for (int i = 0; i < sequence.length && opModeIsActive(); i++) {
             runPath(sequence[i], "Path " + names[i]);
+            waitAt(WAIT_AFTER_SEC[i], "Waiting after " + names[i]);
         }
 
         while (opModeIsActive()) {
@@ -77,6 +80,16 @@ public class AutoV2Turret extends LinearOpMode {
         follower.follow(path);
         ElapsedTime timer = new ElapsedTime();
         while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {
+            double target = updateRobot();
+            addTelemetry(status, target);
+            telemetry.update();
+        }
+    }
+
+    /** Holds the end of the last path (the follower keeps holding) while the turret keeps aiming. */
+    private void waitAt(double seconds, String status) {
+        ElapsedTime timer = new ElapsedTime();
+        while (opModeIsActive() && timer.seconds() < seconds) {
             double target = updateRobot();
             addTelemetry(status, target);
             telemetry.update();
