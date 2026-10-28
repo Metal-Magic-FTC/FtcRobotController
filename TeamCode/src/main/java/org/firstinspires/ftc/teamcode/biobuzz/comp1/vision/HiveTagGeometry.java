@@ -54,17 +54,22 @@ public final class HiveTagGeometry {
     private HiveTagGeometry() {}
 
     // ======================= CAMERA MOUNT (MEASURE THESE ON YOUR ROBOT) =======================
+    // Measure to the CENTER OF THE LIMELIGHT LENS from the robot's center of rotation (the same robot center the
+    // Pinpoint offsets use). Rotations are applied in this order: yaw, then pitch, then roll.
     /** Limelight pipeline index that is set up for AprilTags (36h11, tag size 82.55 mm, "Full 3D" on). */
     public static final int APRILTAG_PIPELINE = 1;
-    /** Lens position relative to robot center, inches. Forward is robot front, left is robot left. */
-    public static final double CAMERA_FORWARD_IN = 7.0;
+    /** X: lens distance in front of robot center, inches (behind = negative). */
+    public static final double CAMERA_FORWARD_IN = 3.5;
+    /** Y: lens distance to the LEFT of robot center, inches (right = negative). */
     public static final double CAMERA_LEFT_IN = 0.0;
-    /** Lens height above the tiles, inches. Tilt detection depends directly on this number. */
-    public static final double CAMERA_HEIGHT_IN = 10.0;
-    /** 0 = looking straight ahead parallel to the ground. Positive = tilted up. */
-    public static final double CAMERA_PITCH_DEG = 0.0;
-    /** 0 = pointing out the robot front. Positive = rotated toward robot left. */
+    /** Z: lens height above the tiles, inches. Tilt detection depends directly on this number. */
+    public static final double CAMERA_HEIGHT_IN = 9.0;
+    /** Pitch: 0 = looking level, parallel to the floor. Positive = tilted UP (toward the HIVE tags). */
+    public static final double CAMERA_PITCH_DEG = 20.0;
+    /** Yaw: 0 = pointing out the robot front. Positive = turned toward the robot's LEFT (seen from above). */
     public static final double CAMERA_YAW_DEG = 0.0;
+    /** Roll: 0 = image level. Positive = camera's RIGHT side lower (looking out through the lens). */
+    public static final double CAMERA_ROLL_DEG = 0.0;
 
     // ======================= FIELD / HIVE NUMBERS (MANUAL) =======================
     public static final double FIELD_CENTER_X = 72.0;
@@ -184,9 +189,6 @@ public final class HiveTagGeometry {
         List<TagObservation> out = new ArrayList<>();
         if (result == null || !result.isValid() || result.getStaleness() > MAX_STALENESS_MS) return out;
 
-        double pitch = Math.toRadians(CAMERA_PITCH_DEG);
-        double yaw = Math.toRadians(CAMERA_YAW_DEG);
-
         for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
             TagInfo info = lookup(tag.getFiducialId());
             if (info == null) continue;
@@ -196,15 +198,8 @@ public final class HiveTagGeometry {
             Position p = camPose.getPosition().toUnit(DistanceUnit.INCH);
             if (p.z <= 0) continue; // no 3D solve (tag behind lens / not computed)
 
-            // Undo the camera pitch: forward/up in a level frame attached to the camera
-            double levelForward = p.z * Math.cos(pitch) + p.y * Math.sin(pitch);
-            double levelUp = p.z * Math.sin(pitch) - p.y * Math.cos(pitch);
-            double levelLeft = -p.x;
-
-            // Undo the camera yaw and add the mount offset
-            double forward = CAMERA_FORWARD_IN + levelForward * Math.cos(yaw) - levelLeft * Math.sin(yaw);
-            double left = CAMERA_LEFT_IN + levelForward * Math.sin(yaw) + levelLeft * Math.cos(yaw);
-            double height = CAMERA_HEIGHT_IN + levelUp;
+            double[] robot = cameraToRobot(p);
+            double forward = robot[0], left = robot[1], height = robot[2];
 
             double r = Math.hypot(TAG_ARM_DISTANCE_IN, TAG_BELOW_PIVOT_IN);
             if (Math.abs(height - PIVOT_HEIGHT_IN) > r + HEIGHT_SLACK_IN) continue;
@@ -212,6 +207,29 @@ public final class HiveTagGeometry {
             out.add(new TagObservation(info, forward, left, height, Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z)));
         }
         return out;
+    }
+
+    /**
+     * A point in Limelight camera space (+x right, +y down, +z out of the lens, any distance unit converted to
+     * inches) to robot coordinates {forward, left, height above tiles}, using the camera mount constants above.
+     */
+    public static double[] cameraToRobot(Position p) {
+        double roll = Math.toRadians(CAMERA_ROLL_DEG);
+        double pitch = Math.toRadians(CAMERA_PITCH_DEG);
+        double yaw = Math.toRadians(CAMERA_YAW_DEG);
+
+        // Camera axes as forward / left / up
+        double f = p.z, l = -p.x, u = -p.y;
+
+        // Undo roll (about the lens axis), then pitch (about camera left), then yaw (about vertical)
+        double l1 = l * Math.cos(roll) - u * Math.sin(roll);
+        double u1 = l * Math.sin(roll) + u * Math.cos(roll);
+        double f2 = f * Math.cos(pitch) - u1 * Math.sin(pitch);
+        double u2 = f * Math.sin(pitch) + u1 * Math.cos(pitch);
+        double f3 = f2 * Math.cos(yaw) - l1 * Math.sin(yaw);
+        double l3 = f2 * Math.sin(yaw) + l1 * Math.cos(yaw);
+
+        return new double[]{CAMERA_FORWARD_IN + f3, CAMERA_LEFT_IN + l3, CAMERA_HEIGHT_IN + u2};
     }
 
     // ======================= TILT =======================

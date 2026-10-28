@@ -169,7 +169,7 @@ public class TurretAimTag extends LinearOpMode {
             Position p = camPose.getPosition().toUnit(DistanceUnit.INCH);
             if (p.z <= 0) continue; // no 3D solve
 
-            double[] robotRel = cameraToRobot(p);
+            double[] robotRel = HiveTagGeometry.cameraToRobot(p);
             lastTagRangeIn = Math.hypot(robotRel[0], robotRel[1]);
             if (lastTagRangeIn > MAX_TAG_RANGE_IN) continue;
             tagVisible = true;
@@ -195,20 +195,6 @@ public class TurretAimTag extends LinearOpMode {
             }
             return;
         }
-    }
-
-    /**
-     * Limelight camera space (+x right, +y down, +z out of the lens) -> robot frame {forward, left} in inches,
-     * using the camera mount from HiveTagGeometry.
-     */
-    private static double[] cameraToRobot(Position p) {
-        double pitch = Math.toRadians(HiveTagGeometry.CAMERA_PITCH_DEG);
-        double yaw = Math.toRadians(HiveTagGeometry.CAMERA_YAW_DEG);
-        double levelForward = p.z * Math.cos(pitch) + p.y * Math.sin(pitch);
-        double levelLeft = -p.x;
-        double forward = HiveTagGeometry.CAMERA_FORWARD_IN + levelForward * Math.cos(yaw) - levelLeft * Math.sin(yaw);
-        double left = HiveTagGeometry.CAMERA_LEFT_IN + levelForward * Math.sin(yaw) + levelLeft * Math.cos(yaw);
-        return new double[]{forward, left};
     }
 
     // ======================= TELEMETRY =======================
