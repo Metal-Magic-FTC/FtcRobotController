@@ -50,12 +50,14 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private static final long MAX_STALENESS_MS = 100;
     /** Ignore tags farther than this (3D solve gets noisy). */
     private static final double MAX_TAG_RANGE_IN = 110.0;
-    /** Consistent frames needed for the first fix. */
+    /** First fix, step 1: frames with a heading (2+ tags on one cell) that must agree within HEADING_MAX_SPREAD_DEG. */
+    private static final int HEADING_SAMPLES = 5;
+    private static final double HEADING_MAX_SPREAD_DEG = 5.0;
+    /** First fix, step 2: frames (any tags) whose position must agree within LOCK_MAX_SPREAD_IN. */
     private static final int LOCK_SAMPLES = 8;
-    /** Lock samples older than this are dropped. */
-    private static final double LOCK_WINDOW_SEC = 1.5;
-    /** The lock samples must agree within this (inches) or we keep collecting. */
-    private static final double LOCK_MAX_SPREAD_IN = 3.0;
+    private static final double LOCK_MAX_SPREAD_IN = 4.0;
+    /** Lock frames older than this are dropped. */
+    private static final double LOCK_WINDOW_SEC = 2.0;
     /** Fraction of the vision error applied per frame once localized (X/Y and heading). */
     private static final double XY_GAIN = 0.2;
     private static final double HEADING_GAIN = 0.05;
@@ -77,8 +79,29 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     /** {time sec, x, y, heading} so a sighting can be matched with the pose from when the photo was taken. */
     private final ArrayDeque<double[]> poseHistory = new ArrayDeque<>();
-    /** Field-from-odometry transforms seen while searching: {dTheta, tx, ty, time}. */
-    private final ArrayDeque<double[]> lockSamples = new ArrayDeque<>();
+    /** Frames seen while searching. */
+    private final ArrayDeque<LockFrame> lockFrames = new ArrayDeque<>();
+    private String lockStatus = "no tags";
+
+    /** One Limelight frame kept for the first fix. */
+    private static class LockFrame {
+        final double time;
+        /** Odometry {time, x, y, heading} when the frame was captured. */
+        final double[] then;
+        final List<TagObservation> tags;
+        final HiveTilt red, blue;
+        /** Field heading minus odometry heading from this frame's tags, NaN if it had no usable cell. */
+        final double dTheta;
+
+        LockFrame(double time, double[] then, List<TagObservation> tags, HiveTilt red, HiveTilt blue, double dTheta) {
+            this.time = time;
+            this.then = then;
+            this.tags = tags;
+            this.red = red;
+            this.blue = blue;
+            this.dTheta = dTheta;
+        }
+    }
 
     private boolean localized = false;
     private boolean visionCorrection = true;
@@ -165,7 +188,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     private void relocalize() {
         localized = false;
-        lockSamples.clear();
+        lockFrames.clear();
         outlierFrames = 0;
     }
 
@@ -179,7 +202,10 @@ public class BioBuzzTeleOp extends LinearOpMode {
         List<TagObservation> tags = HiveTagGeometry.readTags(result);
         tags.removeIf(t -> t.rangeIn > MAX_TAG_RANGE_IN);
         lastTags = tags;
-        if (tags.isEmpty()) return;
+        if (tags.isEmpty()) {
+            lockStatus = "no tags";
+            return;
+        }
         lastRedTilt = HiveTagGeometry.measureHive(tags, Hive.RED);
         lastBlueTilt = HiveTagGeometry.measureHive(tags, Hive.BLUE);
 
@@ -195,53 +221,95 @@ public class BioBuzzTeleOp extends LinearOpMode {
         }
     }
 
-    /** First fix: needs heading from a tag pair. Collects field-from-odometry transforms until they agree. */
+    /**
+     * First fix. The robot heading is unknown, so: (1) average the heading from frames that see 2+ tags on a cell,
+     * then (2) use that heading to place the robot from every frame and average the positions. Frames are stored as
+     * "field = odometry rotated by dTheta, then shifted", so the robot may move while this happens.
+     */
     private void tryLock(List<TagObservation> tags, double visionHeading, double[] then) {
-        if (Double.isNaN(visionHeading)) return;
-        double[] xy = estimateXY(tags, visionHeading);
-        if (xy == null) return;
-
-        // Transform T with field = T(odometry): rotate by dTheta, then translate
-        double dTheta = HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
-        double cos = Math.cos(dTheta), sin = Math.sin(dTheta);
-        double tx = xy[0] - (then[1] * cos - then[2] * sin);
-        double ty = xy[1] - (then[1] * sin + then[2] * cos);
         double now = clock.seconds();
-        lockSamples.addLast(new double[]{dTheta, tx, ty, now});
-        while (!lockSamples.isEmpty() && now - lockSamples.peekFirst()[3] > LOCK_WINDOW_SEC) lockSamples.removeFirst();
-        if (lockSamples.size() < LOCK_SAMPLES) return;
+        double dTheta = Double.isNaN(visionHeading) ? Double.NaN : HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
+        lockFrames.addLast(new LockFrame(now, then, tags, lastRedTilt, lastBlueTilt, dTheta));
+        while (!lockFrames.isEmpty() && now - lockFrames.peekFirst().time > LOCK_WINDOW_SEC) lockFrames.removeFirst();
 
-        // Average the transforms (circular mean for the angle) and check they agree
-        double sumSin = 0, sumCos = 0, sumX = 0, sumY = 0;
-        for (double[] s : lockSamples) {
-            sumSin += Math.sin(s[0]);
-            sumCos += Math.cos(s[0]);
-            sumX += s[1];
-            sumY += s[2];
+        // (1) heading offset: circular mean, then keep only frames close to it
+        double sumSin = 0, sumCos = 0;
+        int headingFrames = 0;
+        for (LockFrame f : lockFrames) {
+            if (Double.isNaN(f.dTheta)) continue;
+            sumSin += Math.sin(f.dTheta);
+            sumCos += Math.cos(f.dTheta);
+            headingFrames++;
         }
-        int n = lockSamples.size();
-        double meanX = sumX / n, meanY = sumY / n;
-        for (double[] s : lockSamples) {
-            if (Math.hypot(s[1] - meanX, s[2] - meanY) > LOCK_MAX_SPREAD_IN) return;
+        if (headingFrames < HEADING_SAMPLES) {
+            lockStatus = String.format("heading %d/%d (need 2+ tags on one cell)", headingFrames, HEADING_SAMPLES);
+            return;
+        }
+        double roughTheta = Math.atan2(sumSin, sumCos);
+        sumSin = 0;
+        sumCos = 0;
+        int kept = 0;
+        for (LockFrame f : lockFrames) {
+            if (Double.isNaN(f.dTheta)) continue;
+            if (Math.abs(HiveTagGeometry.normalizeAngle(f.dTheta - roughTheta)) > Math.toRadians(HEADING_MAX_SPREAD_DEG)) continue;
+            sumSin += Math.sin(f.dTheta);
+            sumCos += Math.cos(f.dTheta);
+            kept++;
+        }
+        if (kept < HEADING_SAMPLES) {
+            lockStatus = String.format("heading noisy (%d/%d agree)", kept, HEADING_SAMPLES);
+            return;
         }
         double meanTheta = Math.atan2(sumSin, sumCos);
+        double c = Math.cos(meanTheta), sn = Math.sin(meanTheta);
+
+        // (2) translation from every frame using that heading
+        double[][] shifts = new double[lockFrames.size()][];
+        int n = 0;
+        double sumX = 0, sumY = 0;
+        for (LockFrame f : lockFrames) {
+            double[] xy = estimateXY(f.tags, f.red, f.blue, f.then[3] + meanTheta);
+            if (xy == null) continue;
+            double tx = xy[0] - (f.then[1] * c - f.then[2] * sn);
+            double ty = xy[1] - (f.then[1] * sn + f.then[2] * c);
+            shifts[n++] = new double[]{tx, ty};
+            sumX += tx;
+            sumY += ty;
+        }
+        if (n < LOCK_SAMPLES) {
+            lockStatus = String.format("position %d/%d", n, LOCK_SAMPLES);
+            return;
+        }
+        double meanX = sumX / n, meanY = sumY / n;
+        double keptX = 0, keptY = 0;
+        int keptN = 0;
+        for (int i = 0; i < n; i++) {
+            if (Math.hypot(shifts[i][0] - meanX, shifts[i][1] - meanY) > LOCK_MAX_SPREAD_IN) continue;
+            keptX += shifts[i][0];
+            keptY += shifts[i][1];
+            keptN++;
+        }
+        if (keptN < LOCK_SAMPLES) {
+            lockStatus = String.format("position noisy (%d/%d agree)", keptN, LOCK_SAMPLES);
+            return;
+        }
+        double tx = keptX / keptN, ty = keptY / keptN;
 
         // Apply the averaged transform to the CURRENT odometry pose
         Pose now0 = follower.pose();
-        double c = Math.cos(meanTheta), s = Math.sin(meanTheta);
         follower.setPose(new Pose(
-                meanX + now0.x() * c - now0.y() * s,
-                meanY + now0.x() * s + now0.y() * c,
+                tx + now0.x() * c - now0.y() * sn,
+                ty + now0.x() * sn + now0.y() * c,
                 HiveTagGeometry.normalizeAngle(now0.heading() + meanTheta)));
         poseHistory.clear();
-        lockSamples.clear();
+        lockFrames.clear();
         localized = true;
         outlierFrames = 0;
     }
 
     /** Once localized: nudge the pose toward vision, measured against where the robot was when the photo was taken. */
     private void correct(List<TagObservation> tags, double visionHeading, double[] then, Pose current) {
-        double[] xy = estimateXY(tags, then[3]);
+        double[] xy = estimateXY(tags, lastRedTilt, lastBlueTilt, then[3]);
         if (xy == null) return;
         double errX = xy[0] - then[1];
         double errY = xy[1] - then[2];
@@ -269,10 +337,10 @@ public class BioBuzzTeleOp extends LinearOpMode {
     }
 
     /** Range-weighted robot X/Y implied by every visible tag, using each HIVE's measured (or snapped) tilt. */
-    private double[] estimateXY(List<TagObservation> tags, double heading) {
+    private static double[] estimateXY(List<TagObservation> tags, HiveTilt redTilt, HiveTilt blueTilt, double heading) {
         double sumX = 0, sumY = 0, sumW = 0;
         for (TagObservation t : tags) {
-            HiveTilt tilt = t.info.hive == Hive.RED ? lastRedTilt : lastBlueTilt;
+            HiveTilt tilt = t.info.hive == Hive.RED ? redTilt : blueTilt;
             double tiltRad = Math.toRadians(HiveTagGeometry.tiltForLocalizationDeg(tilt));
             double[] xy = HiveTagGeometry.robotPositionFromTag(t, tiltRad, heading);
             double w = 1.0 / (t.rangeIn * t.rangeIn);
@@ -286,8 +354,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
         telemetry.addLine("A auto aim | B re-localize | X vision correction | RB slow");
-        telemetry.addData("Localization", localized ? "LOCALIZED" : String.format("SEARCHING (%d/%d frames)",
-                lockSamples.size(), LOCK_SAMPLES));
+        telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
         telemetry.addData("Tags seen", lastTags == null ? 0 : lastTags.size());
         telemetry.addData("Vision correction", visionCorrection

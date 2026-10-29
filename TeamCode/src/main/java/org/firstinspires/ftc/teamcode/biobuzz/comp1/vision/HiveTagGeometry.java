@@ -302,29 +302,47 @@ public final class HiveTagGeometry {
         return new double[]{x, y};
     }
 
+    /** Visible tags on one cell must span at least this much along the cell (inches) to give a heading. */
+    public static final double MIN_HEADING_SPAN_IN = 3.0;
+
     /**
-     * Robot heading from two tags on the same cell. Tags on a cell lie on a line parallel to field X, and tilting
-     * the HIVE does not move them along X, so the direction between them is known no matter the tilt.
-     * Returns NaN if no usable pair is visible.
+     * Robot heading from the tags seen on each CELL. Tags on a cell lie on a line parallel to field X, and tilting
+     * the HIVE does not move them along X, so the direction of that line in the robot frame gives the heading no
+     * matter the tilt. Every cell with 2+ tags is used (least-squares fit of the rotation, wider spans count more).
+     * Returns NaN if no cell has tags spread at least MIN_HEADING_SPAN_IN apart.
      */
     public static double headingFromTagPair(List<TagObservation> tags) {
-        TagObservation bestA = null, bestB = null;
-        double bestSpan = 0;
-        for (TagObservation a : tags) {
-            for (TagObservation b : tags) {
-                if (a.info.hive != b.info.hive || a.info.cell != b.info.cell) continue;
-                double span = b.info.fieldX - a.info.fieldX;
-                if (span > bestSpan) {
-                    bestSpan = span;
-                    bestA = a;
-                    bestB = b;
+        double sumCross = 0, sumDot = 0;
+        boolean any = false;
+        for (Hive hive : Hive.values()) {
+            for (Cell cell : Cell.values()) {
+                double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE;
+                double meanF = 0, meanL = 0, meanX = 0;
+                int n = 0;
+                for (TagObservation t : tags) {
+                    if (t.info.hive != hive || t.info.cell != cell) continue;
+                    meanF += t.forward;
+                    meanL += t.left;
+                    meanX += t.info.fieldX;
+                    minX = Math.min(minX, t.info.fieldX);
+                    maxX = Math.max(maxX, t.info.fieldX);
+                    n++;
                 }
+                if (n < 2 || maxX - minX < MIN_HEADING_SPAN_IN) continue;
+                meanF /= n;
+                meanL /= n;
+                meanX /= n;
+                // Rotation that takes robot-frame offsets (f, l) onto field offsets (dx, 0)
+                for (TagObservation t : tags) {
+                    if (t.info.hive != hive || t.info.cell != cell) continue;
+                    double f = t.forward - meanF, l = t.left - meanL, dx = t.info.fieldX - meanX;
+                    sumCross += f * 0 - l * dx;
+                    sumDot += f * dx;
+                }
+                any = true;
             }
         }
-        if (bestA == null || bestSpan < 5.0) return Double.NaN;
-        // Field direction A->B is +X (angle 0); robot-frame direction is atan2(dLeft, dForward)
-        double robotAngle = Math.atan2(bestB.left - bestA.left, bestB.forward - bestA.forward);
-        return normalizeAngle(-robotAngle);
+        return any ? normalizeAngle(Math.atan2(sumCross, sumDot)) : Double.NaN;
     }
 
     public static double headingToFieldCenter(double x, double y) {
