@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "!!!!!!Turret Limelight Track Test")
 public class TurretLimelightTrack extends LinearOpMode {
 

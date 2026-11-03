@@ -14,7 +14,8 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.teamcode.decode.teleOp.tests.CustomMecanumDrive;
 
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "!!!!!WheelFlickerV3 33 MAX VERSTAPPEN")
 public class WheelFlickerV3 extends LinearOpMode {
 

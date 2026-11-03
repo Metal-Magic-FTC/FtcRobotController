@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.biobuzz;
+package org.firstinspires.ftc.teamcode.biobuzz.comp1.tests;
 
 import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.eventloop.opmode.*;

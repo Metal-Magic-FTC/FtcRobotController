@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.decode.teleOp.states.tests.limelightV2.FusedPose;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "Aryan Turret Face Red Corner (Limelight + Odo)", group = "Test")
 public class AryanTurretOdoLimelight extends LinearOpMode {
 

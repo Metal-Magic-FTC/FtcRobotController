@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.UtilityValues;
 import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.DriveToPoint;
 import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPinpointDriver;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "TeleOp Position Hold")
 public class TeleOpPositionHold extends LinearOpMode {
 

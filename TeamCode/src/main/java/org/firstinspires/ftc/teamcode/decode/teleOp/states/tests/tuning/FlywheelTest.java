@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.decode.pedroPathing.Constants;
 
 import kotlin.math.UMathKt;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name="Tune the flywheel PIDF")
 public class FlywheelTest extends OpMode {
 

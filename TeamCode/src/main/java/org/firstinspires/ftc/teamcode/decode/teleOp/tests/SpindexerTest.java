@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 //@Disabled
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name = "!!!SpindexerTest")
 public class SpindexerTest extends LinearOpMode {
     private DcMotor spinMotor;

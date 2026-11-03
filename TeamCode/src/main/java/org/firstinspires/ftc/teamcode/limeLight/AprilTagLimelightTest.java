@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.mmintothedeep.odometry.pinpoint.GoBildaPin
 import java.util.List;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 @TeleOp(name="April Tag Limelight Test")
 public class AprilTagLimelightTest extends OpMode {
 
