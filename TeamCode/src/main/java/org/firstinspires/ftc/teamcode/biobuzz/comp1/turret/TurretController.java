@@ -23,12 +23,19 @@ public class TurretController {
     public static final double TOLERANCE_DEG = 0.75;
     public static final double MAX_POWER = 0.6;
     public static final double MANUAL_POWER = 0.3;
+    /**
+     * Max change in turret power per second. Stops the turret slamming from 0 to full power on big swings (e.g. the
+     * wrap-around swing when it runs out of travel), whose reaction torque jerks the whole drivetrain.
+     */
+    public static final double MAX_POWER_SLEW_PER_SEC = 3.0;
 
     private final DcMotorEx motor;
     private final ElapsedTime clock = new ElapsedTime();
     private double prevHeading, prevTime;
     private boolean hasPrevHeading = false;
     private double robotOmegaDeg = 0;
+    private double lastPower = 0;
+    private final ElapsedTime slewClock = new ElapsedTime();
 
     public TurretController(HardwareMap hardwareMap) {
         motor = hardwareMap.get(DcMotorEx.class, TurretConstants.TURRET_MOTOR_NAME);
@@ -85,6 +92,7 @@ public class TurretController {
     }
 
     public void stop() {
+        lastPower = 0;
         motor.setPower(0);
     }
 
@@ -98,7 +106,8 @@ public class TurretController {
 
     /**
      * Of all the equivalent angles (desired + k*360) inside the limits, take the one closest to where the turret is.
-     * If none fit (target is in the dead zone), park at whichever limit is angularly closer to the target.
+     * If none fit (target is in the dead zone), stay at whichever limit the turret is already nearer. (Picking by the
+     * target instead made it slam 355 deg between the two limits whenever the target sat in the dead zone.)
      */
     public static double chooseTarget(double desired, double current) {
         double best = Double.NaN;
@@ -108,8 +117,8 @@ public class TurretController {
             if (Double.isNaN(best) || Math.abs(c - current) < Math.abs(best - current)) best = c;
         }
         if (!Double.isNaN(best)) return best;
-        double toMin = Math.abs(TurretConstants.wrap180(desired - TurretConstants.MIN_DEG));
-        double toMax = Math.abs(TurretConstants.wrap180(desired - TurretConstants.MAX_DEG));
+        double toMin = Math.abs(current - TurretConstants.MIN_DEG);
+        double toMax = Math.abs(current - TurretConstants.MAX_DEG);
         return toMin < toMax ? TurretConstants.MIN_DEG : TurretConstants.MAX_DEG;
     }
 
@@ -126,6 +135,14 @@ public class TurretController {
     private void setPowerLimited(double power, double currentDeg) {
         if (currentDeg >= TurretConstants.MAX_DEG && power > 0) power = 0;
         if (currentDeg <= TurretConstants.MIN_DEG && power < 0) power = 0;
+        double dt = Math.min(slewClock.seconds(), 0.1);
+        slewClock.reset();
+        double maxStep = MAX_POWER_SLEW_PER_SEC * dt;
+        // Speeding up is rate-limited; slowing down / stopping is always allowed immediately.
+        if (Math.abs(power) > Math.abs(lastPower) || Math.signum(power) != Math.signum(lastPower)) {
+            power = Range.clip(power, lastPower - maxStep, lastPower + maxStep);
+        }
+        lastPower = power;
         motor.setPower(power);
     }
 }

@@ -12,6 +12,7 @@ import com.pedropathing.revhub.localizers.PinpointConfig;
 import com.pedropathing.revhub.localizers.PinpointLocalizer;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -79,7 +80,10 @@ public class Constants {
                 c.coast.set(Controller.proportionalFeedforward(0.01506927707687244));
                 c.brake.set(Controller.proportionalFeedforward(0.012808885515341574));
 
-                c.headingFeedback.set(Controller.pid(4, 0, 0.05));
+                // Plain P, straight from the good Foresight tuner run. NO D term: Foresight calls headingFeedback twice
+                // per loop (projected + current error), which wrecks the PID's derivative timing -> random power spikes
+                // = jitter, even while holding still. Damping already comes from the heading brake coefficients.
+                c.headingFeedback.set(Controller.proportional(5.258721785960744));
                 c.headingBrakeCoefficients.set(Vector2D.cartesian(0.052184189730002425, 0.005043140645318475));
 
                 c.linearBrakeCoefficients.set(Matrix.diag(0.05094455637427183, 0.04740870396188775));
@@ -89,10 +93,21 @@ public class Constants {
                 c.maxAchievableStrafeVelocity.set(53.37354479171902);
                 c.naturalForwardDeceleration.set(42.43879337894181);
                 c.naturalStrafeDeceleration.set(80.23043147765924);
+
+                // Don't chase sub-1/4-inch errors (stops the drive motors buzzing back and forth while holding), and
+                // don't make every path end settle to 0.1 in / 0.4 deg before moving on.
+                c.minCorrectionDistance.set(0.25);
+                c.translationalConstraint.set(0.5);
+                c.headingConstraint.set(Math.toRadians(2));
+                c.velocityConstraint.set(1.0);
             }
     );
 
     public static Follower create(HardwareMap h) {
+        // Bulk reads: all motor encoder/velocity reads in a loop share one hub transaction -> faster, steadier loops.
+        for (LynxModule hub : h.getAll(LynxModule.class)) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
         return new Follower(
                 new PinpointLocalizer(h, localizerConfig),
                 new Mecanum(h, drivetrainConfig),

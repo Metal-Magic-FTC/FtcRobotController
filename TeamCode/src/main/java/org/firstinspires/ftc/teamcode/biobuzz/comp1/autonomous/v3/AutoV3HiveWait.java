@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.v3;
 
+import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
@@ -42,6 +43,11 @@ public class AutoV3HiveWait extends LinearOpMode {
     /** Placeholder durations until the real mechanisms replace them. */
     private static final double SHOOT_SEC = 2.5;
     private static final double PICK_UP_SEC = 1.0;
+    /**
+     * Path 1 packs a 181 deg turn into ~35 in, so drive it at this fraction of top speed to let the heading keep up.
+     * Raise toward 1.0 if it's smooth, lower (e.g. 0.4) if it still jerks.
+     */
+    private static final double PATH1_SPEED = 0.55;
 
     private Follower follower;
     private TurretController turret;
@@ -84,7 +90,7 @@ public class AutoV3HiveWait extends LinearOpMode {
         limelight.stop();
         shoot("Shooting preloads");       // 2
 
-        runPath(toFarFlower, "To far wall FLOWER");       // 3
+        runPath(toFarFlower, "To far wall FLOWER", PATH1_SPEED); // 3
         pickUp("Picking up at far wall FLOWER");          // 4
         shoot("Shooting far wall FLOWER POLLEN");
 
@@ -139,6 +145,20 @@ public class AutoV3HiveWait extends LinearOpMode {
     }
 
     private void runPath(Path path, String status) {
+        runPath(path, status, 1.0);
+    }
+
+    /** speedFraction: 0..1 of top speed for just this path (Foresight's maxPathSpeed), restored afterwards. */
+    private void runPath(Path path, String status, double speedFraction) {
+        Constants.foresightConfig.maxPathSpeed.set(speedFraction >= 1.0 ? ForesightConfig.Constraint.NONE : speedFraction);
+        try {
+            followPath(path, status);
+        } finally {
+            Constants.foresightConfig.maxPathSpeed.set(ForesightConfig.Constraint.NONE);
+        }
+    }
+
+    private void followPath(Path path, String status) {
         follower.follow(path);
         ElapsedTime timer = new ElapsedTime();
         while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {

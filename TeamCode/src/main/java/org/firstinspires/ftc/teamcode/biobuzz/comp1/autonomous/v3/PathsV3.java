@@ -6,6 +6,7 @@ import static com.pedropathing.api.Paths.line;
 import com.pedropathing.api.PoseFactory;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.interpolator.Interpolator;
 
 /**
  * Auto V3 paths, exported from the Pedro visualizer (class renamed from Paths, start pose made public).
@@ -16,7 +17,7 @@ public class PathsV3 {
 
     public static final Pose start = poseFactory.of(30.75, 132.75, 270);
     private final Pose path1 = poseFactory.of(46.4423, 127.1857, 89);
-    private final Pose path1Control1 = poseFactory.of(35.5847, 120.1073, 0);
+    private final Pose path1Control1 = poseFactory.of(38.0, 100.0, 0); // was (35.5847, 120.1073): pushed out = longer path to turn in
     private final Pose point2Start = poseFactory.of(46.4423, 127.1857, 90);
     private final Pose point2 = poseFactory.of(15.4132, 46.6454, 180);
     private final Pose point2Control1 = poseFactory.of(21.7926, 104.9804, 0);
@@ -28,9 +29,13 @@ public class PathsV3 {
     private final Pose point5 = poseFactory.of(9.6023, 103.0424, 125);
     private final Pose point5Control1 = poseFactory.of(42.0894, 69.4658, 0);
 
-    /** Start -> far wall FLOWER. */
+    /**
+     * Start -> far wall FLOWER. Turns CLOCKWISE (the long way, 181 deg) on purpose: turning CCW makes the turret run
+     * past its -355 limit partway through and whip ~343 deg back around, which jerks the robot. Turning CW keeps the
+     * turret sliding smoothly from about -328 to -161 deg.
+     */
     public Path path1() {
-        return curve(start, path1Control1, path1).linear(start, path1);
+        return curve(start, path1Control1, path1).heading(Interpolator.longLinear(start, path1));
     }
 
     /** Far wall FLOWER -> red wall FLOWER. */

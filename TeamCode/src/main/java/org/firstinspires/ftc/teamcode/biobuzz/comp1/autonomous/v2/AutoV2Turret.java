@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.v2;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
+import com.pedropathing.api.Paths;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -63,9 +64,16 @@ public class AutoV2Turret extends LinearOpMode {
         }
         if (isStopRequested()) return;
 
-        for (int i = 0; i < sequence.length && opModeIsActive(); i++) {
-            runPath(sequence[i], "Path " + names[i]);
-            waitAt(WAIT_AFTER_SEC[i], "Waiting after " + names[i]);
+        // Paths with no wait between them are glued into one chain so the robot flows through without stopping.
+        int i = 0;
+        while (i < sequence.length && opModeIsActive()) {
+            int end = i;
+            while (end < sequence.length - 1 && WAIT_AFTER_SEC[end] <= 0) end++;
+            Path chunk = end == i ? sequence[i] : Paths.path(java.util.Arrays.copyOfRange(sequence, i, end + 1));
+            runPath(chunk, "Paths " + names[i] + (end == i ? "" : " .. " + names[end]),
+                    PATH_TIMEOUT_SEC * (end - i + 1));
+            waitAt(WAIT_AFTER_SEC[end], "Waiting after " + names[end]);
+            i = end + 1;
         }
 
         while (opModeIsActive()) {
@@ -76,10 +84,10 @@ public class AutoV2Turret extends LinearOpMode {
         turret.stop();
     }
 
-    private void runPath(Path path, String status) {
+    private void runPath(Path path, String status, double timeoutSec) {
         follower.follow(path);
         ElapsedTime timer = new ElapsedTime();
-        while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {
+        while (opModeIsActive() && follower.isBusy() && timer.seconds() < timeoutSec) {
             double target = updateRobot();
             addTelemetry(status, target);
             telemetry.update();
