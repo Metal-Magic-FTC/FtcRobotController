@@ -25,5 +25,6 @@ dependencies {
     // Pedro Pathing 3 + AutoTune (robot-hosted tuning page at http://192.168.43.1:10158)
     implementation 'com.pedropathing:revhub:3.0.2'
     implementation 'com.pedropathing:tuning:1.0.1' // 1.0.2 crashes at startup (TunerScanner NPE); 1.0.1 matches the official quickstart
+    implementation 'com.pedropathing.ivy:pedro:1.1.1'
 }
 
