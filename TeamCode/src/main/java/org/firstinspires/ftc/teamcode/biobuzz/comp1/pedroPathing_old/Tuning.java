@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing;
+package org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old;
 
-import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Tuning.changes;
-import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Tuning.drawCurrent;
-import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Tuning.drawCurrentAndHistory;
-import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Tuning.follower;
-import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Tuning.stopRobot;
-import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Tuning.telemetryM;
+import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.Tuning.changes;
+import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.Tuning.drawCurrent;
+import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.Tuning.drawCurrentAndHistory;
+import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.Tuning.follower;
+import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.Tuning.stopRobot;
+import static org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.Tuning.telemetryM;
 
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;

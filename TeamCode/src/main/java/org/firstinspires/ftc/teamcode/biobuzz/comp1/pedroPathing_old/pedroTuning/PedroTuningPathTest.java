@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.pedroTuning;
+package org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.pedroTuning;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedroPathing_old.Constants;
 
 @Autonomous(name = "BioBuzz PedroTuning Path Test", group = "Auto")
 public class PedroTuningPathTest extends LinearOpMode {
