@@ -9,9 +9,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.RedHiveGoal;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretConstants;
-import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretController;
+// TURRET DISABLED
+// import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.RedHiveGoal;
+// import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretConstants;
+// import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretController;
 
 /**
  * Auto V2 (RED): drives the 5 visualizer paths in PathsV2 while the turret keeps aiming at the red HIVE
@@ -33,15 +34,16 @@ public class AutoV2Turret extends LinearOpMode {
     private static final double[] WAIT_AFTER_SEC = {0, 0, 0, 0, 0.0};
 
     private Follower follower;
-    private TurretController turret;
-    private RedHiveGoal goal;
+    // TURRET DISABLED
+    // private TurretController turret;
+    // private RedHiveGoal goal;
 
     @Override
     public void runOpMode() {
-        turret = new TurretController(hardwareMap);
+        // turret = new TurretController(hardwareMap);
         follower = Constants.create(hardwareMap);
         follower.setPose(PathsV2.start);
-        goal = new RedHiveGoal(PathsV2.start.y());
+        // goal = new RedHiveGoal(PathsV2.start.y());
         PathsV2 paths = new PathsV2();
 
         // Build everything during init so start is instant
@@ -81,7 +83,7 @@ public class AutoV2Turret extends LinearOpMode {
             addTelemetry("Done", target);
             telemetry.update();
         }
-        turret.stop();
+        // turret.stop();
     }
 
     private void runPath(Path path, String status, double timeoutSec) {
@@ -107,21 +109,24 @@ public class AutoV2Turret extends LinearOpMode {
     /** One loop: drive, then aim the turret from the new pose. Returns the turret target angle. */
     private double updateRobot() {
         follower.update();
-        Pose pose = follower.pose();
-        turret.updateHeading(pose.heading());
-        goal.update(pose.y());
-        return turret.aimAt(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
+        // TURRET DISABLED
+        // Pose pose = follower.pose();
+        // turret.updateHeading(pose.heading());
+        // goal.update(pose.y());
+        // return turret.aimAt(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
+        return Double.NaN;
     }
 
     private void addTelemetry(String status, double turretTargetDeg) {
         Pose pose = follower.pose();
         telemetry.addData("Status", status);
         telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
-        telemetry.addData("Aiming at", "%s cell (%.1f, %.1f)", goal.aimingTop() ? "TOP" : "BOTTOM", goal.x(), goal.y());
-        double cur = turret.angleDeg();
-        telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", cur, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
-        if (!Double.isNaN(turretTargetDeg)) {
-            telemetry.addData("Turret target", "%.1f°  error %+.1f°", turretTargetDeg, turretTargetDeg - cur);
-        }
+        // TURRET DISABLED
+        // telemetry.addData("Aiming at", "%s cell (%.1f, %.1f)", goal.aimingTop() ? "TOP" : "BOTTOM", goal.x(), goal.y());
+        // double cur = turret.angleDeg();
+        // telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", cur, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
+        // if (!Double.isNaN(turretTargetDeg)) {
+        //     telemetry.addData("Turret target", "%.1f°  error %+.1f°", turretTargetDeg, turretTargetDeg - cur);
+        // }
     }
 }
