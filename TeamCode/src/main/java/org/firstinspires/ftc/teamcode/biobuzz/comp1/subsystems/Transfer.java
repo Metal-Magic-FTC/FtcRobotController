@@ -10,50 +10,55 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp
 public class Transfer extends OpMode {
 
+    public DcMotor intake = null;
     public DcMotor transfer = null;
     double power = 0;
-    double incr = 0.1;
+    double sign = 1;
 
     @Override
     public void init() {
-        // Get the motor from the hardware map BEFORE configuring it
-        transfer = hardwareMap.dcMotor.get("test");
+        intake = hardwareMap.dcMotor.get("intakeMotor");
+        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        transfer = hardwareMap.dcMotor.get("transferMotor");
         transfer.setDirection(DcMotorSimple.Direction.FORWARD);
-        transfer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     @Override
     public void loop() {
         if (gamepad1.right_trigger >= 0.3F) {
-            transfer.setPower(power);
+            intake.setPower(power);
+            transfer.setPower(sign*power);
         }
         else if (gamepad1.left_trigger >= 0.3F) {
-            transfer.setPower(-power);
+            intake.setPower(-power);
+            transfer.setPower(-sign*power);
         }
         else {
+            intake.setPower(0);
             transfer.setPower(0);
         }
 
-        // xWasPressed() is already edge-triggered: true once per press
         if (gamepad1.aWasPressed()) {
-            power += incr;
+            power = 1;
         }
         if (gamepad1.bWasPressed()) {
-            power -= incr;
+            power = 0;
+        }
+        if (gamepad1.dpadUpWasPressed()) {
+            power += 0.1;
+        }
+        if (gamepad1.dpadDownWasPressed()) {
+            power -= 0.1;
         }
         power = Range.clip(power, 0, 1);
-
         if (gamepad1.xWasPressed()) {
-            incr -= 0.01;
+            sign *= -1;
         }
-        if (gamepad1.yWasPressed()) {
-            incr += 0.01;
-        }
-        incr = Range.clip(incr, 0.01, 1);
 
-        telemetry.addData("motor pos", transfer.getCurrentPosition());
         telemetry.addData("motor speed", power);
-        telemetry.addData("increment", incr);
+        telemetry.addData("sign", sign);
 
         telemetry.update();
     }
