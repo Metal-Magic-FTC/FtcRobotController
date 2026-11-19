@@ -61,7 +61,7 @@ android {
                 exclude 'org/firstinspires/ftc/teamcode/mmintothedeep/odometry/pinpoint/tagLocalizer.java'
                 exclude 'org/firstinspires/ftc/teamcode/messages/**'         // Road Runner log messages
                 exclude 'org/firstinspires/ftc/teamcode/summer26/aarushTests/tests/GuthaAuto*.java' // Pedro 2
-                exclude 'org/firstinspires/ftc/teamcode/biobuzz/comp1/pedroPathing/**' // Pedro 2 constants/tuning, replaced by biobuzz/comp1/pedro
+                exclude 'org/firstinspires/ftc/teamcode/biobuzz/comp1/pedroPathing_old/**' // Pedro 2 constants/tuning, replaced by biobuzz/comp1/pedro
             }
         }
     }
