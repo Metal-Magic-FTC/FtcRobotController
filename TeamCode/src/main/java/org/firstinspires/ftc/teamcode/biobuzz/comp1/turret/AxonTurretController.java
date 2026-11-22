@@ -39,15 +39,21 @@ public class AxonTurretController {
      */
     public static final boolean SERVO_REVERSED = true; // right trigger turned it LEFT with false
     // Not final: AxonTurretAimOdo tunes these live on gamepad2. Copy the good numbers back here.
-    public static double KP = 0.007;      // power per degree of error
-    public static double KD = 0.0006;     // power per deg/s of turret speed (damping - raise if it overshoots)
-    /** Full power ~ 500 deg/s at the turret (229 rpm overdrive / 2.75), so 1/500 power per deg/s of robot turn. */
-    public static double KV = 0.002;
-    /** Friction / CR-deadband push. Fades in over KS_RAMP_DEG past the tolerance so it can't bang back and forth. */
-    public static double KS = 0.03;
+    public static double KP = 0.015;      // power per degree of error
+    public static double KD = 0.0002;     // power per deg/s of turret speed (damping - raise if it overshoots)
+    /** Measured (START test): 224 deg/s @ 0.2, 444 deg/s @ 0.4 -> ~1100 deg/s per unit power -> KV = 0.00096. */
+    public static double KV = 0.00096;
+    /** Extra friction push. Fades in over KS_RAMP_DEG past the tolerance. Mostly replaced by SERVO_DEADBAND. */
+    public static double KS = 0.0;
+    /**
+     * The Axon in CR mode ignores powers smaller than this (its neutral deadband). Every non-zero command is shifted
+     * up past it, so small corrections (slow tracking while the robot turns) actually move the turret instead of
+     * waiting until the error is big. MEASURED ~0 (START test: speed line crosses zero at -0.004), so it is off.
+     */
+    public static double SERVO_DEADBAND = 0.0;
     public static final double KS_RAMP_DEG = 4.0;
     /** Inside this error the turret stops correcting (only the robot-rotation feedforward + damping stay on). */
-    public static double TOLERANCE_DEG = 1.5;
+    public static double TOLERANCE_DEG = 0.5;
     public static final double MAX_POWER = 0.7;
     public static final double MANUAL_POWER = 0.3;
     /** Max change in power per second (keeps big swings from jerking the robot). */
@@ -60,6 +66,8 @@ public class AxonTurretController {
     private double lastTime = 0;
     private double lastAngle = Double.NaN;
     private double turretVel = 0;     // deg/s, filtered
+    private double lastError = Double.NaN;
+    private double errorRate = 0;     // deg/s, filtered
     private double prevHeading = Double.NaN;
     private double robotOmega = 0;    // deg/s, filtered
     private double lastPower = 0;
@@ -133,8 +141,14 @@ public class AxonTurretController {
         target = Range.clip(target, MIN_DEG, MAX_DEG);
         double error = target - angle;
         // Robot turning CCW at w -> turret must turn CW at w (relative to the robot) to stay on target.
+        // D on the ERROR's rate (not the turret's speed): while tracking a turning robot the turret has to move,
+        // and damping its raw speed fought the tracking. This only brakes it when it closes on the target too fast.
+        if (!Double.isNaN(lastError)) {
+            errorRate += 0.3 * ((error - lastError) / loopDt - errorRate);
+        }
+        lastError = error;
         double feedforward = -KV * robotOmega;
-        double damping = -KD * turretVel;
+        double damping = KD * errorRate;
         double power;
         double outside = Math.abs(error) - TOLERANCE_DEG;
         if (outside > 0) {
@@ -142,7 +156,7 @@ public class AxonTurretController {
             double ks = KS * Math.min(1.0, outside / KS_RAMP_DEG);
             power = Math.signum(error) * (KP * outside + ks) + damping + feedforward;
         } else {
-            power = Math.abs(robotOmega) < 2.0 ? 0 : feedforward + damping;
+            power = Math.abs(robotOmega) < 2.0 ? 0 : feedforward;
         }
         setPower(Range.clip(power, -MAX_POWER, MAX_POWER));
     }
@@ -168,10 +182,12 @@ public class AxonTurretController {
 
     /** stick -1..1, + = counter-clockwise (left). Limits still apply. */
     public void manual(double stick) {
+        lastError = Double.NaN;
         setPower(stick * MANUAL_POWER);
     }
 
     public void stop() {
+        lastError = Double.NaN;
         lastPower = 0;
         servo.setPower(0);
     }
@@ -206,7 +222,17 @@ public class AxonTurretController {
             power = Range.clip(power, lastPower - maxStep, lastPower + maxStep);
         }
         lastPower = power;
-        servo.setPower(directionSign * power);
+        servo.setPower(directionSign * withDeadband(power));
+    }
+
+    /** Shift any non-zero command past the servo's deadband: 0 stays 0, tiny becomes just-enough-to-move. */
+    private static double withDeadband(double power) {
+        if (Math.abs(power) < 1e-3) return 0;
+        return Math.signum(power) * (SERVO_DEADBAND + (1.0 - SERVO_DEADBAND) * Math.abs(power));
+    }
+
+    public double turretVelDeg() {
+        return turretVel;
     }
 
     public static double wrap180(double deg) {

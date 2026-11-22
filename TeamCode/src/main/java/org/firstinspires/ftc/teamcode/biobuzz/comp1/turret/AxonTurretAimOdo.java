@@ -27,8 +27,10 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
  *
  * gamepad2 (LIVE TUNING - copy the final numbers into AxonTurretController):
  *   dpad up / down    - KP x1.25 / /1.25        dpad right / left - KD x1.25 / /1.25
- *   Y / A             - KS +/- 0.005             right / left bumper - KV x1.25 / /1.25
+ *   Y / A             - SERVO_DEADBAND +/- 0.005 right / left bumper - KV x1.25 / /1.25
  *   B / X             - tolerance +/- 0.25 deg
+ *   gamepad1 BACK     - measure SERVO_DEADBAND automatically (turret creeps a few degrees each way)
+ *   gamepad1 START    - measure KV automatically (turret spins ~90 deg at two speeds, toward the middle)
  *   Tip: use gamepad1 dpad up / left to jump the turret between 0 and 90 and watch it settle.
  *
  * At START it nudges the turret for a moment to learn which way the servo turns (no need to set SERVO_REVERSED).
@@ -69,6 +71,10 @@ public class AxonTurretAimOdo extends LinearOpMode {
 
         // ---- Direction check: nudge the turret and see which way the encoder moves ----
         String directionResult = checkDirection(turret, follower);
+        String deadbandResult = "not measured (gamepad1 BACK)";
+        String speedResult = "not measured (gamepad1 START)";
+        com.qualcomm.robotcore.util.ElapsedTime loopTimer = new com.qualcomm.robotcore.util.ElapsedTime();
+        double loopMs = 0;
 
         while (opModeIsActive()) {
             double s = gamepad1.right_bumper ? SLOW_SCALE : 1.0;
@@ -99,8 +105,13 @@ public class AxonTurretAimOdo extends LinearOpMode {
             if (gamepad2.dpadRightWasPressed()) AxonTurretController.KD =
                     AxonTurretController.KD <= 0 ? 0.0002 : AxonTurretController.KD * 1.25;
             if (gamepad2.dpadLeftWasPressed()) AxonTurretController.KD /= 1.25;
-            if (gamepad2.yWasPressed()) AxonTurretController.KS += 0.005;
-            if (gamepad2.aWasPressed()) AxonTurretController.KS = Math.max(0, AxonTurretController.KS - 0.005);
+            if (gamepad2.yWasPressed()) AxonTurretController.SERVO_DEADBAND += 0.005;
+            if (gamepad2.aWasPressed()) AxonTurretController.SERVO_DEADBAND =
+                    Math.max(0, AxonTurretController.SERVO_DEADBAND - 0.005);
+            if (gamepad1.backWasPressed()) deadbandResult = measureDeadband(turret, follower);
+            if (gamepad1.startWasPressed()) speedResult = measureSpeed(turret, follower);
+            loopMs += 0.1 * (loopTimer.milliseconds() - loopMs);
+            loopTimer.reset();
             if (gamepad2.rightBumperWasPressed()) AxonTurretController.KV *= 1.25;
             if (gamepad2.leftBumperWasPressed()) AxonTurretController.KV /= 1.25;
             if (gamepad2.bWasPressed()) AxonTurretController.TOLERANCE_DEG += 0.25;
@@ -131,12 +142,101 @@ public class AxonTurretAimOdo extends LinearOpMode {
                 telemetry.addData("Turret target", "%.1f°  error %+.1f°", target, target - turret.angleDeg());
             }
             telemetry.addData("Power", "%+.2f   robot turn %.0f°/s", turret.power(), turret.robotOmegaDeg());
-            telemetry.addData("Gains (gamepad2)", "KP %.4f  KD %.5f  KS %.3f  KV %.4f  tol %.2f°",
-                    AxonTurretController.KP, AxonTurretController.KD, AxonTurretController.KS,
+            telemetry.addData("Gains (gamepad2)", "KP %.4f  KD %.5f  deadband %.3f  KV %.4f  tol %.2f°",
+                    AxonTurretController.KP, AxonTurretController.KD, AxonTurretController.SERVO_DEADBAND,
                     AxonTurretController.KV, AxonTurretController.TOLERANCE_DEG);
+            telemetry.addData("Deadband measure (BACK)", deadbandResult);
+            telemetry.addData("KV measure (START)", speedResult);
+            telemetry.addData("Loop", "%.0f ms", loopMs);
             telemetry.update();
         }
         turret.stop();
+    }
+
+    /**
+     * Runs the turret at two raw powers and measures its speed, then sets KV = power per deg/s (from the slope) and
+     * SERVO_DEADBAND = where the speed line hits zero. Runs toward the middle of the travel so it never hits a limit.
+     */
+    private String measureSpeed(AxonTurretController turret, Follower follower) {
+        double[] powers = {0.2, 0.4};
+        double[] speeds = new double[2];
+        for (int i = 0; i < 2 && opModeIsActive(); i++) {
+            turret.update(follower.pose().heading());
+            double dir = turret.angleDeg() > 0 ? -1 : 1; // toward / through the middle
+            double start = turret.angleDeg();
+            com.qualcomm.robotcore.util.ElapsedTime t = new com.qualcomm.robotcore.util.ElapsedTime();
+            double tStart = 0, aStart = start;
+            boolean timing = false;
+            while (opModeIsActive() && t.seconds() < 0.8 && Math.abs(turret.angleDeg() - start) < 150) {
+                follower.update();
+                turret.update(follower.pose().heading());
+                turret.rawPower(dir * powers[i]);
+                if (!timing && t.seconds() > 0.25) { // skip the spin-up
+                    timing = true;
+                    tStart = t.seconds();
+                    aStart = turret.angleDeg();
+                }
+            }
+            double elapsed = t.seconds() - tStart;
+            speeds[i] = timing && elapsed > 0.1 ? Math.abs(turret.angleDeg() - aStart) / elapsed : Double.NaN;
+            turret.stop();
+            t.reset();
+            while (opModeIsActive() && t.seconds() < 0.5) {
+                follower.update();
+                turret.update(follower.pose().heading());
+            }
+        }
+        if (Double.isNaN(speeds[0]) || Double.isNaN(speeds[1]) || speeds[1] <= speeds[0] + 1) {
+            return String.format("FAILED (speeds %.0f / %.0f deg/s)", speeds[0], speeds[1]);
+        }
+        double degPerSecPerPower = (speeds[1] - speeds[0]) / (powers[1] - powers[0]);
+        double deadband = powers[0] - speeds[0] / degPerSecPerPower;
+        // Our command is shifted past the deadband, so KV maps deg/s onto the part ABOVE it.
+        // speed = slope * (DB + (1-DB) * p - DB)  ->  p = speed / (slope * (1-DB))
+        AxonTurretController.KV = 1.0 / (degPerSecPerPower * (1.0 - AxonTurretController.SERVO_DEADBAND));
+        return String.format("%.0f deg/s @0.2, %.0f deg/s @0.4 -> KV = %.5f, deadband ~%.3f (copy KV into code)",
+                speeds[0], speeds[1], AxonTurretController.KV, deadband);
+    }
+
+    /**
+     * Finds the smallest power that actually moves the turret, each direction, and sets SERVO_DEADBAND to it.
+     * Ramps the RAW servo power up slowly from 0 until the turret moves at 3 deg/s.
+     */
+    private String measureDeadband(AxonTurretController turret, Follower follower) {
+        double saved = AxonTurretController.SERVO_DEADBAND;
+        AxonTurretController.SERVO_DEADBAND = 0; // measure the raw servo
+        double[] found = new double[2];
+        double[] dirs = {turret.angleDeg() > 0 ? -1 : 1, turret.angleDeg() > 0 ? 1 : -1}; // first toward the middle
+        for (int i = 0; i < 2 && opModeIsActive(); i++) {
+            double power = 0;
+            found[i] = Double.NaN;
+            com.qualcomm.robotcore.util.ElapsedTime t = new com.qualcomm.robotcore.util.ElapsedTime();
+            double startAngle = turret.angleDeg();
+            while (opModeIsActive() && power < 0.3) {
+                follower.update();
+                turret.update(follower.pose().heading());
+                power = 0.02 * t.seconds() + 0.005; // +0.02 power per second
+                turret.rawPower(dirs[i] * power);
+                if (Math.abs(turret.angleDeg() - startAngle) > 1.0 && Math.abs(turret.turretVelDeg()) > 3.0) {
+                    found[i] = power;
+                    break;
+                }
+            }
+            turret.stop();
+            t.reset();
+            while (opModeIsActive() && t.seconds() < 0.4) { // let it stop
+                follower.update();
+                turret.update(follower.pose().heading());
+            }
+        }
+        if (Double.isNaN(found[0]) || Double.isNaN(found[1])) {
+            AxonTurretController.SERVO_DEADBAND = saved;
+            return "FAILED - turret did not move below 0.3 power";
+        }
+        // Slightly under the measured start so tiny commands don't overshoot
+        AxonTurretController.SERVO_DEADBAND = 0.9 * Math.min(found[0], found[1]);
+        return String.format("moves at %.3f / %.3f -> SERVO_DEADBAND = %.3f (copy into code)",
+                found[0], found[1], AxonTurretController.SERVO_DEADBAND);
     }
 
     /**
