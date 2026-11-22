@@ -37,7 +37,7 @@ public class AxonTurretController {
      * Flip if a POSITIVE power turns the turret RIGHT (clockwise). Check with the triggers in AxonTurretAimOdo:
      * the "Turret" telemetry should move toward + with left trigger.
      */
-    public static final boolean SERVO_REVERSED = false;
+    public static final boolean SERVO_REVERSED = true; // right trigger turned it LEFT with false
     public static final double KP = 0.012;     // power per degree of error
     public static final double KD = 0.0004;    // power per deg/s of turret speed (damping)
     /** Full power ~ 500 deg/s at the turret (229 rpm overdrive / 2.75), so 1/500 power per deg/s of robot turn. */
@@ -61,6 +61,8 @@ public class AxonTurretController {
     private double lastPower = 0;
     private double angle = 0;
     private double loopDt = 0.02;
+    /** +1 / -1: flips the servo command if positive power turns the turret the wrong way (see checkDirection). */
+    private double directionSign = 1;
 
     public AxonTurretController(HardwareMap hardwareMap) {
         servo = hardwareMap.get(CRServo.class, SERVO_NAME);
@@ -118,13 +120,38 @@ public class AxonTurretController {
      */
     public double aimAt(double robotX, double robotY, double headingRad, double targetX, double targetY) {
         double target = chooseTarget(desiredDeg(robotX, robotY, headingRad, targetX, targetY), angle);
+        driveTo(target);
+        return target;
+    }
+
+    /** Hold a robot-relative turret angle (0 = front, + = left), still cancelling robot rotation. */
+    public void driveTo(double target) {
+        target = Range.clip(target, MIN_DEG, MAX_DEG);
         double error = target - angle;
         // Robot turning CCW at w -> turret must turn CW at w (relative to the robot) to stay on target.
         double power = KP * error - KD * turretVel - KV * robotOmega;
         if (Math.abs(error) > TOLERANCE_DEG) power += Math.signum(error) * KS;
         else if (Math.abs(robotOmega) < 2.0) power = 0;
         setPower(Range.clip(power, -MAX_POWER, MAX_POWER));
-        return target;
+    }
+
+    /**
+     * Raw open-loop power for the direction check (limits still apply, no slew). + should turn the turret LEFT.
+     */
+    public void rawPower(double power) {
+        if (angle >= MAX_DEG && power > 0) power = 0;
+        if (angle <= MIN_DEG && power < 0) power = 0;
+        lastPower = power;
+        servo.setPower(directionSign * power);
+    }
+
+    /** Flip the servo command direction (+1 normal, -1 flipped). */
+    public void setDirectionSign(double sign) {
+        directionSign = sign >= 0 ? 1 : -1;
+    }
+
+    public double directionSign() {
+        return directionSign;
     }
 
     /** stick -1..1, + = counter-clockwise (left). Limits still apply. */
@@ -167,7 +194,7 @@ public class AxonTurretController {
             power = Range.clip(power, lastPower - maxStep, lastPower + maxStep);
         }
         lastPower = power;
-        servo.setPower(power);
+        servo.setPower(directionSign * power);
     }
 
     public static double wrap180(double deg) {

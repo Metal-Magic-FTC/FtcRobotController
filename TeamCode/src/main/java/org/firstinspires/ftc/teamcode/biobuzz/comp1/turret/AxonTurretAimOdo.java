@@ -22,6 +22,10 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
  *   left / right trigger       - manual turret left / right (while auto aim is off)
  *   B                          - reset pose to the start spot (put the robot there first)
  *   X                          - turret limp (power 0) toggle
+ *   dpad up / left / right / down - TEST: hold the turret at 0 (front) / +90 (left) / -90 (right) / 180 (back)
+ *                                   robot-relative. Checks the angle reading without odometry. Press A to go back.
+ *
+ * At START it nudges the turret for a moment to learn which way the servo turns (no need to set SERVO_REVERSED).
  */
 @TeleOp(name = "Axon Turret Aim (Red, odo only)", group = "BioBuzz Tests")
 public class AxonTurretAimOdo extends LinearOpMode {
@@ -43,6 +47,7 @@ public class AxonTurretAimOdo extends LinearOpMode {
 
         boolean autoAim = false; // off at start: check the servo direction with the triggers first
         boolean limp = false;
+        double testAngle = Double.NaN; // dpad test target, NaN = off
 
         while (opModeInInit()) {
             follower.update();
@@ -56,6 +61,9 @@ public class AxonTurretAimOdo extends LinearOpMode {
         }
         follower.manual(0, 0, 0);
 
+        // ---- Direction check: nudge the turret and see which way the encoder moves ----
+        String directionResult = checkDirection(turret, follower);
+
         while (opModeIsActive()) {
             double s = gamepad1.right_bumper ? SLOW_SCALE : 1.0;
             follower.manual(-gamepad1.left_stick_y * s, -gamepad1.left_stick_x * s, -gamepad1.right_stick_x * s);
@@ -64,7 +72,14 @@ public class AxonTurretAimOdo extends LinearOpMode {
             turret.update(pose.heading());
             goal.update(pose.y());
 
-            if (gamepad1.aWasPressed()) autoAim = !autoAim;
+            if (gamepad1.dpadUpWasPressed()) testAngle = 0;
+            if (gamepad1.dpadLeftWasPressed()) testAngle = 90;
+            if (gamepad1.dpadRightWasPressed()) testAngle = -90;
+            if (gamepad1.dpadDownWasPressed()) testAngle = turret.angleDeg() >= 0 ? 178 : -178;
+            if (gamepad1.aWasPressed()) {
+                autoAim = !autoAim;
+                testAngle = Double.NaN;
+            }
             if (gamepad1.xWasPressed()) limp = !limp;
             if (gamepad1.bWasPressed()) {
                 follower.setPose(START);
@@ -72,15 +87,22 @@ public class AxonTurretAimOdo extends LinearOpMode {
             }
 
             double target = Double.NaN;
+            double desired = AxonTurretController.desiredDeg(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
             if (limp) {
                 turret.stop();
+            } else if (!Double.isNaN(testAngle)) {
+                turret.driveTo(testAngle);
+                target = testAngle;
             } else if (autoAim) {
                 target = turret.aimAt(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
             } else {
                 turret.manual(gamepad1.left_trigger - gamepad1.right_trigger); // left trigger = turret left (+)
             }
 
-            telemetry.addData("Mode", limp ? "LIMP (X)" : autoAim ? "AUTO AIM (A)" : "MANUAL (triggers)");
+            telemetry.addData("Mode", limp ? "LIMP (X)" : !Double.isNaN(testAngle) ? "TEST HOLD (dpad), A to leave"
+                    : autoAim ? "AUTO AIM (A)" : "MANUAL (triggers)");
+            telemetry.addData("Direction check", directionResult);
+            telemetry.addData("HIVE is at", "%+.1f° from robot front  (+ = left)", desired);
             telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
             telemetry.addData("Aiming at", "%s cell (%.1f, %.1f)", goal.aimingTop() ? "TOP" : "BOTTOM", goal.x(), goal.y());
             telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)  %.3f V", turret.angleDeg(),
@@ -92,5 +114,37 @@ public class AxonTurretAimOdo extends LinearOpMode {
             telemetry.update();
         }
         turret.stop();
+    }
+
+    /**
+     * Pushes the turret gently for 0.3 s (away from the nearer limit) and checks the encoder moved the same way.
+     * Flips the servo direction if it moved the opposite way.
+     */
+    private String checkDirection(AxonTurretController turret, Follower follower) {
+        turret.update(follower.pose().heading());
+        double start = turret.angleDeg();
+        double push = start > 0 ? -0.2 : 0.2; // toward the middle of the travel
+        com.qualcomm.robotcore.util.ElapsedTime t = new com.qualcomm.robotcore.util.ElapsedTime();
+        while (opModeIsActive() && t.seconds() < 0.3) {
+            follower.update();
+            turret.update(follower.pose().heading());
+            turret.rawPower(push);
+        }
+        turret.stop();
+        t.reset();
+        while (opModeIsActive() && t.seconds() < 0.2) { // let it stop
+            follower.update();
+            turret.update(follower.pose().heading());
+        }
+        double moved = turret.angleDeg() - start;
+        if (Math.abs(moved) < 1.0) {
+            return String.format("FAILED - turret moved only %.1f° (servo not moving? encoder?)", moved);
+        }
+        if (Math.signum(moved) != Math.signum(push)) {
+            turret.setDirectionSign(-1);
+            return String.format("servo was backwards - FLIPPED (moved %+.1f°). Set SERVO_REVERSED = %b",
+                    moved, !AxonTurretController.SERVO_REVERSED);
+        }
+        return String.format("OK (moved %+.1f°)", moved);
     }
 }
