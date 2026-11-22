@@ -15,7 +15,7 @@ public final class LauncherConstants {
     /** Same motor name as FlywheelTuning. Its motor TYPE in the configuration must be right (see Launcher). */
     public static final String MOTOR_NAME = "launchMotor";
     /** Flip so that a positive velocity pushes the ball OUT. */
-    public static final boolean MOTOR_REVERSED = false;
+    public static final boolean MOTOR_REVERSED = true;
 
     // ======================= FLYWHEEL (MEASURE / TUNE) =======================
     /**
