@@ -10,10 +10,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
  * If "TurretServo" (Continuous Rotation Servo) is in the config, it is sent power 0 = STOP. That does not move it,
  * it just switches the servo's PWM on so the Axon is awake and its encoder wire outputs a position.
  *
- * Point the turret out the robot FRONT before INIT - that becomes turret 0 deg (or press A later to re-zero).
- *
  * gamepad1:
- *   A - zero here (turret facing robot front)
  *   B - clear the recorded min / max
  */
 @TeleOp(name = "Turret Encoder Readout (Axon)", group = "BioBuzz Tests")
@@ -21,14 +18,13 @@ public class TurretEncoderReadout extends OpMode {
 
     private AxonEncoder encoder;
     private CRServo servo; // null if "TurretServo" is not configured
-    private double minVolts, maxVolts, minTurretDeg, maxTurretDeg;
+    private double minVolts, maxVolts, minDeg, maxDeg;
 
     @Override
     public void init() {
         servo = hardwareMap.tryGet(CRServo.class, "TurretServo");
         if (servo != null) servo.setPower(0); // stopped, but PWM on so the Axon wakes up
         encoder = new AxonEncoder(hardwareMap);
-        encoder.zero();
         clearMinMax();
     }
 
@@ -44,38 +40,27 @@ public class TurretEncoderReadout extends OpMode {
 
     private void readAndShow() {
         encoder.update();
-        if (gamepad1.aWasPressed()) {
-            encoder.zero();
-            clearMinMax();
-        }
         if (gamepad1.bWasPressed()) clearMinMax();
 
         double v = encoder.volts();
-        double turret = encoder.turretDeg();
+        double deg = encoder.turretDeg();
         minVolts = Math.min(minVolts, v);
         maxVolts = Math.max(maxVolts, v);
-        minTurretDeg = Math.min(minTurretDeg, turret);
-        maxTurretDeg = Math.max(maxTurretDeg, turret);
+        minDeg = Math.min(minDeg, deg);
+        maxDeg = Math.max(maxDeg, deg);
 
-        telemetry.addLine("Turn the turret BY HAND. 0 = robot front.");
         telemetry.addData("TurretServo", servo != null ? "found, held at power 0 (awake)"
                 : "NOT in config - Axon may be asleep / unpowered");
-        telemetry.addData("TURRET angle", "%.1f°", turret);
-        telemetry.addData("Turret min / max seen", "%.1f° / %.1f°  (span %.1f°)",
-                minTurretDeg, maxTurretDeg, maxTurretDeg - minTurretDeg);
-        telemetry.addLine("-----------------------------");
-        telemetry.addData("Voltage", "%.3f V  (hub max %.3f V)", v, encoder.maxVolts());
-        telemetry.addData("Voltage min / max seen", "%.3f / %.3f V", minVolts, maxVolts);
-        telemetry.addData("Servo shaft (this turn)", "%.1f°", encoder.rawServoDeg());
-        telemetry.addData("Servo shaft total", "%.1f° = %.2f turns  (wraps %d)",
-                encoder.servoDeg(), encoder.servoDeg() / 360.0, encoder.wraps());
-        telemetry.addData("Servo turns per turret turn (config)", "%.2f", AxonEncoder.SERVO_REVS_PER_TURRET_REV);
-        telemetry.addLine("A zero here | B clear min/max");
+        telemetry.addData("Raw voltage", "%.3f V", v);
+        telemetry.addData("Voltage min / max seen", "%.3f / %.3f", minVolts, maxVolts);
+        telemetry.addData("Turret angle (absolute)", "%.1f°   0 = front, + = left", deg);
+        telemetry.addData("Turret min / max seen", "%.1f° / %.1f°", minDeg, maxDeg);
+        telemetry.addLine("B clear min/max");
     }
 
     private void clearMinMax() {
-        double v = encoder.volts();
-        minVolts = maxVolts = v;
-        minTurretDeg = maxTurretDeg = encoder.turretDeg();
+        encoder.update();
+        minVolts = maxVolts = encoder.volts();
+        minDeg = maxDeg = encoder.turretDeg();
     }
 }
