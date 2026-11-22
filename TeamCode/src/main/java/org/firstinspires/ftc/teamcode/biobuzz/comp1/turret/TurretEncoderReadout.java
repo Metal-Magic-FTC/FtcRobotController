@@ -2,9 +2,13 @@ package org.firstinspires.ftc.teamcode.biobuzz.comp1.turret;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 /**
- * Reads the Axon turret encoder ("TurretEncoder"). Nothing is powered: turn the turret BY HAND.
+ * Reads the Axon turret encoder ("TurretEncoder"). Turn the turret BY HAND.
+ *
+ * If "TurretServo" (Continuous Rotation Servo) is in the config, it is sent power 0 = STOP. That does not move it,
+ * it just switches the servo's PWM on so the Axon is awake and its encoder wire outputs a position.
  *
  * Point the turret out the robot FRONT before INIT - that becomes turret 0 deg (or press A later to re-zero).
  *
@@ -16,10 +20,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class TurretEncoderReadout extends OpMode {
 
     private AxonEncoder encoder;
+    private CRServo servo; // null if "TurretServo" is not configured
     private double minVolts, maxVolts, minTurretDeg, maxTurretDeg;
 
     @Override
     public void init() {
+        servo = hardwareMap.tryGet(CRServo.class, "TurretServo");
+        if (servo != null) servo.setPower(0); // stopped, but PWM on so the Axon wakes up
         encoder = new AxonEncoder(hardwareMap);
         encoder.zero();
         clearMinMax();
@@ -51,6 +58,8 @@ public class TurretEncoderReadout extends OpMode {
         maxTurretDeg = Math.max(maxTurretDeg, turret);
 
         telemetry.addLine("Turn the turret BY HAND. 0 = robot front.");
+        telemetry.addData("TurretServo", servo != null ? "found, held at power 0 (awake)"
+                : "NOT in config - Axon may be asleep / unpowered");
         telemetry.addData("TURRET angle", "%.1f°", turret);
         telemetry.addData("Turret min / max seen", "%.1f° / %.1f°  (span %.1f°)",
                 minTurretDeg, maxTurretDeg, maxTurretDeg - minTurretDeg);
