@@ -38,12 +38,16 @@ public class AxonTurretController {
      * the "Turret" telemetry should move toward + with left trigger.
      */
     public static final boolean SERVO_REVERSED = true; // right trigger turned it LEFT with false
-    public static final double KP = 0.012;     // power per degree of error
-    public static final double KD = 0.0004;    // power per deg/s of turret speed (damping)
+    // Not final: AxonTurretAimOdo tunes these live on gamepad2. Copy the good numbers back here.
+    public static double KP = 0.007;      // power per degree of error
+    public static double KD = 0.0006;     // power per deg/s of turret speed (damping - raise if it overshoots)
     /** Full power ~ 500 deg/s at the turret (229 rpm overdrive / 2.75), so 1/500 power per deg/s of robot turn. */
-    public static final double KV = 0.002;
-    public static final double KS = 0.04;      // kick to get past friction / the CR deadband
-    public static final double TOLERANCE_DEG = 1.0;
+    public static double KV = 0.002;
+    /** Friction / CR-deadband push. Fades in over KS_RAMP_DEG past the tolerance so it can't bang back and forth. */
+    public static double KS = 0.03;
+    public static final double KS_RAMP_DEG = 4.0;
+    /** Inside this error the turret stops correcting (only the robot-rotation feedforward + damping stay on). */
+    public static double TOLERANCE_DEG = 1.5;
     public static final double MAX_POWER = 0.7;
     public static final double MANUAL_POWER = 0.3;
     /** Max change in power per second (keeps big swings from jerking the robot). */
@@ -129,9 +133,17 @@ public class AxonTurretController {
         target = Range.clip(target, MIN_DEG, MAX_DEG);
         double error = target - angle;
         // Robot turning CCW at w -> turret must turn CW at w (relative to the robot) to stay on target.
-        double power = KP * error - KD * turretVel - KV * robotOmega;
-        if (Math.abs(error) > TOLERANCE_DEG) power += Math.signum(error) * KS;
-        else if (Math.abs(robotOmega) < 2.0) power = 0;
+        double feedforward = -KV * robotOmega;
+        double damping = -KD * turretVel;
+        double power;
+        double outside = Math.abs(error) - TOLERANCE_DEG;
+        if (outside > 0) {
+            // P only on the error OUTSIDE the deadband, so there is no jump in power at its edge
+            double ks = KS * Math.min(1.0, outside / KS_RAMP_DEG);
+            power = Math.signum(error) * (KP * outside + ks) + damping + feedforward;
+        } else {
+            power = Math.abs(robotOmega) < 2.0 ? 0 : feedforward + damping;
+        }
         setPower(Range.clip(power, -MAX_POWER, MAX_POWER));
     }
 

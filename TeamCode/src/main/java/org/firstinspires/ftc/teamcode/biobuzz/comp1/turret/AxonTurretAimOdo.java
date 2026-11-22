@@ -25,6 +25,12 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
  *   dpad up / left / right / down - TEST: hold the turret at 0 (front) / +90 (left) / -90 (right) / 180 (back)
  *                                   robot-relative. Checks the angle reading without odometry. Press A to go back.
  *
+ * gamepad2 (LIVE TUNING - copy the final numbers into AxonTurretController):
+ *   dpad up / down    - KP x1.25 / /1.25        dpad right / left - KD x1.25 / /1.25
+ *   Y / A             - KS +/- 0.005             right / left bumper - KV x1.25 / /1.25
+ *   B / X             - tolerance +/- 0.25 deg
+ *   Tip: use gamepad1 dpad up / left to jump the turret between 0 and 90 and watch it settle.
+ *
  * At START it nudges the turret for a moment to learn which way the servo turns (no need to set SERVO_REVERSED).
  */
 @TeleOp(name = "Axon Turret Aim (Red, odo only)", group = "BioBuzz Tests")
@@ -87,6 +93,20 @@ public class AxonTurretAimOdo extends LinearOpMode {
             }
 
             double target = Double.NaN;
+            // ---- live tuning on gamepad2 ----
+            if (gamepad2.dpadUpWasPressed()) AxonTurretController.KP *= 1.25;
+            if (gamepad2.dpadDownWasPressed()) AxonTurretController.KP /= 1.25;
+            if (gamepad2.dpadRightWasPressed()) AxonTurretController.KD =
+                    AxonTurretController.KD <= 0 ? 0.0002 : AxonTurretController.KD * 1.25;
+            if (gamepad2.dpadLeftWasPressed()) AxonTurretController.KD /= 1.25;
+            if (gamepad2.yWasPressed()) AxonTurretController.KS += 0.005;
+            if (gamepad2.aWasPressed()) AxonTurretController.KS = Math.max(0, AxonTurretController.KS - 0.005);
+            if (gamepad2.rightBumperWasPressed()) AxonTurretController.KV *= 1.25;
+            if (gamepad2.leftBumperWasPressed()) AxonTurretController.KV /= 1.25;
+            if (gamepad2.bWasPressed()) AxonTurretController.TOLERANCE_DEG += 0.25;
+            if (gamepad2.xWasPressed()) AxonTurretController.TOLERANCE_DEG =
+                    Math.max(0, AxonTurretController.TOLERANCE_DEG - 0.25);
+
             double desired = AxonTurretController.desiredDeg(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
             if (limp) {
                 turret.stop();
@@ -111,6 +131,9 @@ public class AxonTurretAimOdo extends LinearOpMode {
                 telemetry.addData("Turret target", "%.1f°  error %+.1f°", target, target - turret.angleDeg());
             }
             telemetry.addData("Power", "%+.2f   robot turn %.0f°/s", turret.power(), turret.robotOmegaDeg());
+            telemetry.addData("Gains (gamepad2)", "KP %.4f  KD %.5f  KS %.3f  KV %.4f  tol %.2f°",
+                    AxonTurretController.KP, AxonTurretController.KD, AxonTurretController.KS,
+                    AxonTurretController.KV, AxonTurretController.TOLERANCE_DEG);
             telemetry.update();
         }
         turret.stop();
