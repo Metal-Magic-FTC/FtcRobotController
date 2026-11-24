@@ -27,14 +27,14 @@ public final class TurretConstants {
      * e.g. goBILDA 5203 312 rpm = 537.7 ticks/rev, with a 100:20 turret ring -> 537.7 * 5 = 2688.5.
      * To measure: in TurretEncoderTest zero it facing front, rotate exactly 180 deg, then ticks * 2.
      */
-    public static final double TICKS_PER_TURRET_REV = 554.0; // measured: -554 ticks for one full turn clockwise
+    public static final double TICKS_PER_TURRET_REV = 400.0; // measured: +200 ticks for 180 deg to the left
 
     /** Soft limits in continuous degrees (fill these in from TurretEncoderTest; keep a few degrees of margin). */
-    public static final double MIN_DEG = -355.0; // measured 360 deg clockwise travel, 5 deg margin
-    public static final double MAX_DEG = 0.0;    // counter-clockwise travel not measured yet
+    public static final double MIN_DEG = -85.0;  // measured end: -100 ticks = -90 deg (right), 5 deg margin
+    public static final double MAX_DEG = 265.0;  // measured end: +300 ticks = +270 deg (left), 5 deg margin
 
     /** Turret rotation center relative to robot center, inches (forward = robot front, left = robot left). */
-    public static final double TURRET_FORWARD_IN = 0.0;
+    public static final double TURRET_FORWARD_IN = -16.5 / 4.0; // middle of the back half (robot length 16.5). MEASURE.
     public static final double TURRET_LEFT_IN = 0.0;
 
     public static double ticksToDeg(double ticks) {
