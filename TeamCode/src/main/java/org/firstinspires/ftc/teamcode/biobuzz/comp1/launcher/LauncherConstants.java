@@ -40,10 +40,10 @@ public final class LauncherConstants {
      * Hub velocity PIDF (ticks/sec units, the SDK default style). TUNE with FlywheelTuning; F ~ 32767 / max ticks per
      * sec (6000 rpm, 28 ticks/rev -> 2800 tps -> F ~ 11.7).
      */
-    public static final double VEL_P = 10.0;
+    public static final double VEL_P = 15.8; // tuned on the robot
     public static final double VEL_I = 0.0;
     public static final double VEL_D = 0.0;
-    public static final double VEL_F = 12.0;
+    public static final double VEL_F = 13.5; // tuned on the robot
     /** Flywheel counts as "at speed" within this fraction of the target. */
     public static final double VELOCITY_TOLERANCE = 0.03;
 
