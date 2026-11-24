@@ -20,8 +20,16 @@ public final class FlywheelSpeedTable {
     /** Used before the robot knows where it is (not localized yet): the measured wall shot. */
     public static final double DEFAULT_TPS = 1650;
 
-    /** Straight-line interpolation between rows; flat beyond the ends. */
+    /** Overall trim on every speed above. 1.0 = table as written; 0.95 = 5% slower. */
+    public static final double SPEED_SCALE = 0.97;
+
+    /** Speed for this distance, with SPEED_SCALE applied. */
     public static double velocityFor(double distanceIn) {
+        return SPEED_SCALE * tableVelocity(distanceIn);
+    }
+
+    /** Straight-line interpolation between rows; flat beyond the ends. */
+    private static double tableVelocity(double distanceIn) {
         if (Double.isNaN(distanceIn)) return DEFAULT_TPS;
         if (distanceIn <= DISTANCE_IN[0]) return VELOCITY_TPS[0];
         int last = DISTANCE_IN.length - 1;

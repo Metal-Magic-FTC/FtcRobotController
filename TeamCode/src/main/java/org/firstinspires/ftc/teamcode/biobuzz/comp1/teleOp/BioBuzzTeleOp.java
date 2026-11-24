@@ -51,8 +51,11 @@ import java.util.List;
  *   LEFT TRIGGER    - SHOOT (hold): transfer feeds up into the launcher
  *   RIGHT TRIGGER   - intake on / off (toggle)
  *   Y               - flip intake direction
- *   A               - toggle turret auto aim (on at start)
+ *   B / A / X       - launcher FIXED speed 1650 / 1700 / 1600 (press the same one again = back to auto distance)
  *   dpad left/right - manual turret while auto aim is off (left = counter-clockwise)
+ *
+ * gamepad2:
+ *   A               - toggle turret auto aim (on at start)
  *   B               - forget the pose and re-localize from the tags
  *   X               - toggle continuous vision correction (on at start)
  */
@@ -98,6 +101,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private boolean intakeOn = false;
     private double intakeDirection = 1;
     private boolean rightTriggerWasDown = false;
+    /** Fixed launcher speeds on gamepad1 B / A / X (ticks/s). NaN = auto speed from distance. */
+    private static final double FIXED_B_TPS = 1650, FIXED_A_TPS = 1700, FIXED_X_TPS = 1600;
+    private double fixedTps = Double.NaN;
 
     private Follower follower;
     private Limelight3A limelight;
@@ -173,9 +179,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
             updateVision(pose);
             pose = follower.pose();
 
-            if (gamepad1.aWasPressed()) autoAim = !autoAim;
-            if (gamepad1.xWasPressed()) visionCorrection = !visionCorrection;
-            if (gamepad1.bWasPressed()) relocalize();
+            if (gamepad2.aWasPressed()) autoAim = !autoAim;
+            if (gamepad2.xWasPressed()) visionCorrection = !visionCorrection;
+            if (gamepad2.bWasPressed()) relocalize();
 
             double targetDeg = Double.NaN;
             if (!autoAim) {
@@ -245,7 +251,10 @@ public class BioBuzzTeleOp extends LinearOpMode {
         } else {
             shotDistanceIn = Double.NaN;
         }
-        launchTargetTps = FlywheelSpeedTable.velocityFor(shotDistanceIn);
+        if (gamepad1.bWasPressed()) fixedTps = fixedTps == FIXED_B_TPS ? Double.NaN : FIXED_B_TPS;
+        if (gamepad1.aWasPressed()) fixedTps = fixedTps == FIXED_A_TPS ? Double.NaN : FIXED_A_TPS;
+        if (gamepad1.xWasPressed()) fixedTps = fixedTps == FIXED_X_TPS ? Double.NaN : FIXED_X_TPS;
+        launchTargetTps = Double.isNaN(fixedTps) ? FlywheelSpeedTable.velocityFor(shotDistanceIn) : fixedTps;
         launchMotor.setVelocity(launchTargetTps);
     }
 
@@ -253,8 +262,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
         double v = launchMotor.getVelocity();
         boolean atSpeed = Math.abs(v - launchTargetTps) <= LauncherConstants.VELOCITY_TOLERANCE * launchTargetTps;
         telemetry.addLine();
-        telemetry.addData("Launcher", "%s  target %.0f  actual %.0f ticks/s", atSpeed ? "READY" : "spinning up",
-                launchTargetTps, v);
+        telemetry.addData("Launcher", "%s  target %.0f  actual %.0f ticks/s  (%s)", atSpeed ? "READY" : "spinning up",
+                launchTargetTps, v, Double.isNaN(fixedTps) ? "AUTO from distance" : "FIXED - press again for auto");
         telemetry.addData("Shot distance", Double.isNaN(shotDistanceIn) ? "not localized - using wall speed"
                 : String.format("%.1f in", shotDistanceIn));
         telemetry.addData("Intake (RT / Y)", intakeOn ? (intakeDirection > 0 ? "IN" : "OUT") : "off");
@@ -448,7 +457,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
-        telemetry.addLine("LT shoot | RT intake | Y intake dir | A auto aim | B re-localize | X vision | RB slow");
+        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1650/1700/1600 | RB slow");
+        telemetry.addLine("gp2: A auto aim | B re-localize | X vision");
         if (launchMotor != null && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
