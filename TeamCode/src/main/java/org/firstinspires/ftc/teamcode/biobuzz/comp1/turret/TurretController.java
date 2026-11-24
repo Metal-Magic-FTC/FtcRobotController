@@ -133,13 +133,19 @@ public class TurretController {
     }
 
     private void setPowerLimited(double power, double currentDeg) {
-        if (currentDeg >= TurretConstants.MAX_DEG && power > 0) power = 0;
-        if (currentDeg <= TurretConstants.MIN_DEG && power < 0) power = 0;
+        // Never push past the HARD limits, and ease off as it gets close so momentum can't carry it over.
+        double roomLeft = TurretConstants.HARD_MAX_DEG - currentDeg;   // degrees left before the + limit
+        double roomRight = currentDeg - TurretConstants.HARD_MIN_DEG;  // degrees left before the - limit
+        if (power > 0) power = Math.min(power, MAX_POWER * Range.clip(roomLeft / TurretConstants.LIMIT_SLOWDOWN_DEG, 0, 1));
+        if (power < 0) power = Math.max(power, -MAX_POWER * Range.clip(roomRight / TurretConstants.LIMIT_SLOWDOWN_DEG, 0, 1));
         double dt = Math.min(slewClock.seconds(), 0.1);
         slewClock.reset();
         double maxStep = MAX_POWER_SLEW_PER_SEC * dt;
-        // Speeding up is rate-limited; slowing down / stopping is always allowed immediately.
-        if (Math.abs(power) > Math.abs(lastPower) || Math.signum(power) != Math.signum(lastPower)) {
+        // Speeding up is rate-limited; slowing down / stopping takes effect immediately. A reversal drops straight to
+        // 0 and ramps up the other way (never keeps pushing the old way, e.g. into a limit).
+        if (power != 0 && Math.signum(power) != Math.signum(lastPower)) {
+            power = Range.clip(power, -maxStep, maxStep);
+        } else if (Math.abs(power) > Math.abs(lastPower)) {
             power = Range.clip(power, lastPower - maxStep, lastPower + maxStep);
         }
         lastPower = power;

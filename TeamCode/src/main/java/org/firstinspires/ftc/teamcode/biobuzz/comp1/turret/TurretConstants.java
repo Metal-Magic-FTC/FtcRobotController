@@ -30,8 +30,17 @@ public final class TurretConstants {
     public static final double TICKS_PER_TURRET_REV = 400.0; // measured: +200 ticks for 180 deg to the left
 
     /** Soft limits in continuous degrees (fill these in from TurretEncoderTest; keep a few degrees of margin). */
-    public static final double MIN_DEG = -85.0;  // measured end: -100 ticks = -90 deg (right), 5 deg margin
-    public static final double MAX_DEG = 265.0;  // measured end: +300 ticks = +270 deg (left), 5 deg margin
+    /**
+     * HARD limits: +-200 ticks = +-180 deg. The turret is never powered further out than this (TurretController
+     * cuts power at these and slows down within LIMIT_SLOWDOWN_DEG of them, so it can't coast past).
+     */
+    public static final double HARD_MIN_DEG = -180.0; // -200 ticks (right)
+    public static final double HARD_MAX_DEG = 180.0;  // +200 ticks (left)
+    /** Furthest the auto aim will ASK for (5 deg inside the hard limits). */
+    public static final double MIN_DEG = -175.0;
+    public static final double MAX_DEG = 175.0;
+    /** Within this many degrees of a hard limit, power toward that limit is scaled down to 0 at the limit. */
+    public static final double LIMIT_SLOWDOWN_DEG = 30.0;
 
     /** Turret rotation center relative to robot center, inches (forward = robot front, left = robot left). */
     public static final double TURRET_FORWARD_IN = -16.5 / 4.0; // middle of the back half (robot length 16.5). MEASURE.

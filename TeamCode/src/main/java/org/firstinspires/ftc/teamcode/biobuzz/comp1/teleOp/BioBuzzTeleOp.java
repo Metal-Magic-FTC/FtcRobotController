@@ -6,8 +6,14 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.FlywheelSpeedTable;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.LauncherConstants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.RedHiveGoal;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretConstants;
@@ -36,10 +42,17 @@ import java.util.List;
  * BEFORE PRESSING INIT: turret pointing straight out the robot FRONT (turret 0 deg). Camera mount numbers are in
  * HiveTagGeometry and must be measured.
  *
+ * LAUNCHER: the 72 mm wheel ("launchMotor") runs the WHOLE match at a speed picked from the turret-to-cell distance
+ * (FlywheelSpeedTable). Before the robot is localized it runs the measured wall-shot speed.
+ * TRANSFER: spins DOWN the whole time, except while the shoot button is held, then it feeds UP into the launcher.
+ *
  * gamepad1:
  *   left stick      - drive (robot-centric), right stick X - turn, right bumper - slow mode
+ *   LEFT TRIGGER    - SHOOT (hold): transfer feeds up into the launcher
+ *   RIGHT TRIGGER   - intake on / off (toggle)
+ *   Y               - flip intake direction
  *   A               - toggle turret auto aim (on at start)
- *   left/right trig - manual turret while auto aim is off (left = counter-clockwise)
+ *   dpad left/right - manual turret while auto aim is off (left = counter-clockwise)
  *   B               - forget the pose and re-localize from the tags
  *   X               - toggle continuous vision correction (on at start)
  */
@@ -70,6 +83,21 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private static final double POSE_HISTORY_SEC = 1.0;
 
     private static final double SLOW_MODE_SCALE = 0.4;
+
+    // ======================= INTAKE / TRANSFER / LAUNCHER =======================
+    /** Signs from FullLaunch: intake + = in; transfer - = up into the launcher (FullLaunch needed X for this). */
+    private static final double INTAKE_POWER = 1.0;
+    private static final double TRANSFER_FEED_POWER = -1.0; // up into the launcher (shoot held)
+    private static final double TRANSFER_DOWN_POWER = 0.5;  // down / away from the launcher (the rest of the time)
+    private static final double LAUNCH_P = 15.8;
+    private static final double LAUNCH_F = 13.5;
+    private static final double TRIGGER_DOWN = 0.5;
+
+    private DcMotor intake, transfer;
+    private DcMotorEx launchMotor;
+    private boolean intakeOn = false;
+    private double intakeDirection = 1;
+    private boolean rightTriggerWasDown = false;
 
     private Follower follower;
     private Limelight3A limelight;
@@ -115,6 +143,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
         turret = new TurretController(hardwareMap);
+        initMechanisms();
 
         telemetry.addLine("Calibrating Pinpoint - keep the robot STILL");
         telemetry.update();
@@ -150,7 +179,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
             double targetDeg = Double.NaN;
             if (!autoAim) {
-                turret.manual(gamepad1.left_trigger - gamepad1.right_trigger);
+                turret.manual((gamepad1.dpad_left ? 1 : 0) - (gamepad1.dpad_right ? 1 : 0));
             } else if (localized) {
                 goal.update(pose.y());
                 targetDeg = turret.aimAt(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
@@ -158,12 +187,78 @@ public class BioBuzzTeleOp extends LinearOpMode {
                 turret.stop(); // do not know where the goal is yet
             }
 
+            updateMechanisms(pose);
+
             addTelemetry(pose, targetDeg, autoAim);
             telemetry.update();
         }
 
         turret.stop();
+        launchMotor.setVelocity(0);
+        intake.setPower(0);
+        transfer.setPower(0);
         limelight.stop();
+    }
+
+    // ======================= INTAKE / TRANSFER / LAUNCHER =======================
+    private void initMechanisms() {
+        intake = hardwareMap.dcMotor.get("intakeMotor");
+        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        transfer = hardwareMap.dcMotor.get("transferMotor");
+        transfer.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
+        launchMotor.setDirection(LauncherConstants.MOTOR_REVERSED
+                ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
+        launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // coast, don't brake the wheel
+        launchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        launchMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
+                new PIDFCoefficients(LAUNCH_P, 0, 0, LAUNCH_F));
+        launchMotor.setVelocity(0);
+    }
+
+    private double shotDistanceIn = Double.NaN;
+    private double launchTargetTps = FlywheelSpeedTable.DEFAULT_TPS;
+
+    private void updateMechanisms(Pose pose) {
+        // Intake: right trigger toggles on/off, Y flips direction
+        boolean rightDown = gamepad1.right_trigger > TRIGGER_DOWN;
+        if (rightDown && !rightTriggerWasDown) intakeOn = !intakeOn;
+        rightTriggerWasDown = rightDown;
+        if (gamepad1.yWasPressed()) intakeDirection = -intakeDirection;
+        intake.setPower(intakeOn ? intakeDirection * INTAKE_POWER : 0);
+
+        // Transfer: down all the time, up only while shooting
+        boolean shooting = gamepad1.left_trigger > TRIGGER_DOWN;
+        transfer.setPower(shooting ? TRANSFER_FEED_POWER : TRANSFER_DOWN_POWER);
+
+        // Launcher: speed from the turret-to-cell distance, the whole match
+        if (localized) {
+            goal.update(pose.y()); // keep the cell choice current even with auto aim off
+            double h = pose.heading();
+            double tx = pose.x() + TurretConstants.TURRET_FORWARD_IN * Math.cos(h) - TurretConstants.TURRET_LEFT_IN * Math.sin(h);
+            double ty = pose.y() + TurretConstants.TURRET_FORWARD_IN * Math.sin(h) + TurretConstants.TURRET_LEFT_IN * Math.cos(h);
+            shotDistanceIn = Math.hypot(goal.x() - tx, goal.y() - ty);
+        } else {
+            shotDistanceIn = Double.NaN;
+        }
+        launchTargetTps = FlywheelSpeedTable.velocityFor(shotDistanceIn);
+        launchMotor.setVelocity(launchTargetTps);
+    }
+
+    private void addMechanismTelemetry() {
+        double v = launchMotor.getVelocity();
+        boolean atSpeed = Math.abs(v - launchTargetTps) <= LauncherConstants.VELOCITY_TOLERANCE * launchTargetTps;
+        telemetry.addLine();
+        telemetry.addData("Launcher", "%s  target %.0f  actual %.0f ticks/s", atSpeed ? "READY" : "spinning up",
+                launchTargetTps, v);
+        telemetry.addData("Shot distance", Double.isNaN(shotDistanceIn) ? "not localized - using wall speed"
+                : String.format("%.1f in", shotDistanceIn));
+        telemetry.addData("Intake (RT / Y)", intakeOn ? (intakeDirection > 0 ? "IN" : "OUT") : "off");
+        telemetry.addData("Transfer (LT = shoot)", gamepad1.left_trigger > TRIGGER_DOWN ? "FEEDING UP" : "down");
     }
 
     // ======================= ODOMETRY =======================
@@ -353,7 +448,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
-        telemetry.addLine("A auto aim | B re-localize | X vision correction | RB slow");
+        telemetry.addLine("LT shoot | RT intake | Y intake dir | A auto aim | B re-localize | X vision | RB slow");
+        if (launchMotor != null && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
         telemetry.addData("Tags seen", lastTags == null ? 0 : lastTags.size());
