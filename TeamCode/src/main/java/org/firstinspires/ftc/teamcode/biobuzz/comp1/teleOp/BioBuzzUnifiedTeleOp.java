@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.LauncherConstants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.advanced.Flywheel;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.AxonTurretAimOdo;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretConstants;
@@ -59,7 +60,8 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
     private static final double MAX_VELOCITY = 2600; // 6000 rpm motor, 28 ticks/rev -> ~2800 free speed
 
     private DcMotor intake, transfer;
-    private DcMotorEx flywheel;
+    /** launcher/advanced/Flywheel: kS + kV + kP, voltage compensation, full-power boost after each ball. */
+    private final Flywheel flywheel = new Flywheel();
 
     @Override
     public void runOpMode() {
@@ -72,15 +74,8 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
         transfer.setDirection(DcMotorSimple.Direction.FORWARD);
         transfer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        flywheel = hardwareMap.get(DcMotorEx.class, LauncherConstants.MOTOR_NAME);
-        flywheel.setDirection(LauncherConstants.MOTOR_REVERSED
-                ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
-        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // coast down
-        flywheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                LauncherConstants.VEL_P, LauncherConstants.VEL_I, LauncherConstants.VEL_D, LauncherConstants.VEL_F));
-        flywheel.setVelocity(0);
+        flywheel.init(hardwareMap); // "launchMotor", direction from LauncherConstants
+        flywheel.stopMotors();
 
         TurretController turret = new TurretController(hardwareMap); // zeroes the turret encoder: must face FRONT
 
@@ -133,8 +128,10 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             if (gamepad2.dpadUpWasPressed()) targetVelocity += VELOCITY_STEP;
             if (gamepad2.dpadDownWasPressed()) targetVelocity -= VELOCITY_STEP;
             targetVelocity = Range.clip(targetVelocity, 0, MAX_VELOCITY);
-            flywheel.setVelocity(flywheelOn ? targetVelocity : 0);
-            double velocity = flywheel.getVelocity();
+            // target stays in ticks/s (same numbers as before), converted to RPM for Flywheel; runs every loop
+            if (flywheelOn) flywheel.setMotorRPM(Flywheel.ticksPerSecToRpm(targetVelocity));
+            else flywheel.stopMotors();
+            double velocity = flywheel.getTicksPerSec();
             boolean atSpeed = flywheelOn
                     && Math.abs(targetVelocity - velocity) <= LauncherConstants.VELOCITY_TOLERANCE * targetVelocity;
 
@@ -155,7 +152,8 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             }
 
             // ---- telemetry ----
-            telemetry.addData("Flywheel (Y)", !flywheelOn ? "OFF" : atSpeed ? "READY" : "spinning up");
+            telemetry.addData("Flywheel (Y)", !flywheelOn ? "OFF" : flywheel.isBoosting() ? "BOOST"
+                    : atSpeed ? "READY" : "spinning up");
             telemetry.addData("Flywheel speed", "%.0f / %.0f ticks/s  (gp2 dpad)", velocity, targetVelocity);
             telemetry.addData("Feed", feed);
             telemetry.addData("Turret (A)", autoAim ? "AUTO AIM" : "MANUAL (dpad L/R)");
@@ -169,7 +167,7 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             telemetry.update();
         }
 
-        flywheel.setVelocity(0);
+        flywheel.stopMotors();
         setFeed(0, 0);
         turret.stop();
     }

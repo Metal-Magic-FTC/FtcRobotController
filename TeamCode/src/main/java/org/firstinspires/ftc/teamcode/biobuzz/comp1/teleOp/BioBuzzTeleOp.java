@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.FlywheelSpeedTable;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.LauncherConstants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.advanced.Flywheel;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.RedHiveGoal;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretConstants;
@@ -92,12 +93,13 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private static final double INTAKE_POWER = 1.0;
     private static final double TRANSFER_FEED_POWER = -1.0; // up into the launcher (shoot held)
     private static final double TRANSFER_DOWN_POWER = 0.5;  // down / away from the launcher (the rest of the time)
-    private static final double LAUNCH_P = 15.8;
-    private static final double LAUNCH_F = 13.5;
+    // Launcher control: launcher/advanced/Flywheel (kS + kV + kP, voltage compensation, full-power boost after each
+    // ball). The speeds below stay in ticks/s (same numbers as before) and are converted to RPM for Flywheel.
     private static final double TRIGGER_DOWN = 0.5;
 
     private DcMotor intake, transfer;
-    private DcMotorEx launchMotor;
+    private final Flywheel launcher = new Flywheel();
+    private boolean launcherReady = false;
     private boolean intakeOn = false;
     private double intakeDirection = 1;
     private boolean rightTriggerWasDown = false;
@@ -200,7 +202,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         }
 
         turret.stop();
-        launchMotor.setVelocity(0);
+        launcher.stopMotors();
         intake.setPower(0);
         transfer.setPower(0);
         limelight.stop();
@@ -215,15 +217,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
         transfer = hardwareMap.dcMotor.get("transferMotor");
         transfer.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        launchMotor = hardwareMap.get(DcMotorEx.class, "launchMotor");
-        launchMotor.setDirection(LauncherConstants.MOTOR_REVERSED
-                ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
-        launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // coast, don't brake the wheel
-        launchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        launchMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launchMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
-                new PIDFCoefficients(LAUNCH_P, 0, 0, LAUNCH_F));
-        launchMotor.setVelocity(0);
+        launcher.init(hardwareMap); // "launchMotor", direction from LauncherConstants
+        launcher.stopMotors();
+        launcherReady = true;
     }
 
     private double shotDistanceIn = Double.NaN;
@@ -255,15 +251,18 @@ public class BioBuzzTeleOp extends LinearOpMode {
         if (gamepad1.aWasPressed()) fixedTps = fixedTps == FIXED_A_TPS ? Double.NaN : FIXED_A_TPS;
         if (gamepad1.xWasPressed()) fixedTps = fixedTps == FIXED_X_TPS ? Double.NaN : FIXED_X_TPS;
         launchTargetTps = Double.isNaN(fixedTps) ? FlywheelSpeedTable.velocityFor(shotDistanceIn) : fixedTps;
-        launchMotor.setVelocity(launchTargetTps);
+        launcher.setMotorRPM(Flywheel.ticksPerSecToRpm(launchTargetTps)); // must run every loop
     }
 
     private void addMechanismTelemetry() {
-        double v = launchMotor.getVelocity();
+        double v = launcher.getTicksPerSec();
         boolean atSpeed = Math.abs(v - launchTargetTps) <= LauncherConstants.VELOCITY_TOLERANCE * launchTargetTps;
         telemetry.addLine();
-        telemetry.addData("Launcher", "%s  target %.0f  actual %.0f ticks/s  (%s)", atSpeed ? "READY" : "spinning up",
+        telemetry.addData("Launcher", "%s  target %.0f  actual %.0f ticks/s  (%s)",
+                launcher.isBoosting() ? "BOOST" : atSpeed ? "READY" : "spinning up",
                 launchTargetTps, v, Double.isNaN(fixedTps) ? "AUTO from distance" : "FIXED - press again for auto");
+        telemetry.addData("Launcher RPM", "%.0f / %.0f   power %.2f   battery %.1f V", launcher.getRPM(),
+                Flywheel.ticksPerSecToRpm(launchTargetTps), launcher.lastPower(), launcher.batteryVoltage());
         telemetry.addData("Shot distance", Double.isNaN(shotDistanceIn) ? "not localized - using wall speed"
                 : String.format("%.1f in", shotDistanceIn));
         telemetry.addData("Intake (RT / Y)", intakeOn ? (intakeDirection > 0 ? "IN" : "OUT") : "off");
@@ -459,7 +458,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
         telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1650/1700/1600 | RB slow");
         telemetry.addLine("gp2: A auto aim | B re-localize | X vision");
-        if (launchMotor != null && opModeIsActive()) addMechanismTelemetry();
+        if (launcherReady && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
         telemetry.addData("Tags seen", lastTags == null ? 0 : lastTags.size());
