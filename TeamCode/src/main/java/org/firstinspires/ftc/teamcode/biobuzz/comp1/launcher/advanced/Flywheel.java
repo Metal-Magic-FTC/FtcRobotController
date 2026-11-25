@@ -30,11 +30,11 @@ public class Flywheel {
 
     // ======================= TUNED VALUES (12 V normalized) =======================
     /** Power that just barely gets the wheel turning. FlywheelKsTuner. */
-    public static double KS = 0.0;
+    public static double KS = 0.11; // measured with FlywheelKsTuner
     /** Power per flywheel RPM that holds a target without P. FlywheelKvTuner. ~1 / free RPM to start. */
-    public static double KV = 0.00016;
+    public static double KV = 0.000168; // measured with FlywheelKvTuner
     /** Extra power per RPM of error. FlywheelKpTuner. */
-    public static double KP = 0.0;
+    public static double KP = 0.00092; // measured with FlywheelKpTuner
 
     // ======================= DIP BOOST =======================
     public static boolean BOOST_ENABLED = true;
