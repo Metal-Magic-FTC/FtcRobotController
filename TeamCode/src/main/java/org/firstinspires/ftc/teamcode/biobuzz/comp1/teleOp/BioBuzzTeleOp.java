@@ -24,6 +24,7 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.Hive;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.HiveTilt;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.TagObservation;
+import org.firstinspires.ftc.teamcode.biobuzz.util.BulkReader;
 
 import java.util.ArrayDeque;
 import java.util.List;
@@ -186,6 +187,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
         telemetry.addLine("Calibrating Pinpoint - keep the robot STILL");
         telemetry.update();
         follower = Constants.create(hardwareMap);
+        // AFTER Constants.create and launcher.init: both switch the hubs to AUTO caching, this switches them to MANUAL.
+        BulkReader bulk = new BulkReader(hardwareMap);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
@@ -194,6 +197,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
         // Localize during INIT too, so the robot can already be located when START is pressed.
         while (opModeInInit()) {
+            bulk.update();
             Pose pose = updatePose();
             updateVision(pose);
             telemetry.addLine("Turret facing robot FRONT? Point the Limelight at a HIVE to localize.");
@@ -203,6 +207,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
         boolean autoAim = true;
         while (opModeIsActive()) {
+            bulk.update(); // FIRST: one fresh read of every hub's encoders / velocities this loop
+
             double scale = gamepad1.right_bumper ? SLOW_MODE_SCALE : 1.0;
             follower.manual(-gamepad1.left_stick_y * scale, -gamepad1.left_stick_x * scale,
                     -gamepad1.right_stick_x * scale);

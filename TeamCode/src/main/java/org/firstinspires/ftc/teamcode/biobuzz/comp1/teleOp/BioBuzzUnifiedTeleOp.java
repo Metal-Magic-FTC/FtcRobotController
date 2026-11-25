@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.AxonTurretAimOdo;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretConstants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretController;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
+import org.firstinspires.ftc.teamcode.biobuzz.util.BulkReader;
 
 /**
  * RED TeleOp, everything together: drive, motor turret (TurretController) auto-aiming at the CENTER of the red HIVE (odometry only),
@@ -90,8 +91,11 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
         telemetry.update();
         Follower follower = Constants.create(hardwareMap);
         follower.setPose(START);
+        // AFTER Constants.create and flywheel.init: both switch the hubs to AUTO caching, this switches them to MANUAL.
+        BulkReader bulk = new BulkReader(hardwareMap);
 
         while (opModeInInit()) {
+            bulk.update();
             follower.update();
             Pose pose = follower.pose();
             turret.updateHeading(pose.heading());
@@ -107,6 +111,8 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
         double targetVelocity = DEFAULT_VELOCITY;
 
         while (opModeIsActive()) {
+            bulk.update(); // FIRST: one fresh read of every hub's encoders / velocities this loop
+
             // ---- drive ----
             double s = gamepad1.right_bumper ? SLOW_SCALE : 1.0;
             follower.manual(-gamepad1.left_stick_y * s, -gamepad1.left_stick_x * s, -gamepad1.right_stick_x * s);
