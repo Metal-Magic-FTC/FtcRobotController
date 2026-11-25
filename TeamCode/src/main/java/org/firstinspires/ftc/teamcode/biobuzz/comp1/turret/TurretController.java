@@ -16,18 +16,19 @@ import com.qualcomm.robotcore.util.Range;
 public class TurretController {
 
     // ======================= TUNE =======================
-    public static final double KP = 0.02;          // power per degree of error
-    public static final double KD = 0.0008;        // power per deg/s of turret speed (damping)
+    // Not final: TurretTuning changes these live. Copy the tuned numbers back here (as the starting values).
+    public static double KP = 0.02;          // power per degree of error
+    public static double KD = 0.0008;        // power per deg/s of turret speed (damping)
     public static final double KV = 0.0025;        // power per deg/s of robot rotation (feedforward)
-    public static final double KS = 0.04;          // static friction kick
-    public static final double TOLERANCE_DEG = 0.75;
-    public static final double MAX_POWER = 0.6;
+    public static double KS = 0.04;          // static friction kick
+    public static double TOLERANCE_DEG = 0.75;
+    public static double MAX_POWER = 0.6;
     public static final double MANUAL_POWER = 0.3;
     /**
      * Max change in turret power per second. Stops the turret slamming from 0 to full power on big swings (e.g. the
      * wrap-around swing when it runs out of travel), whose reaction torque jerks the whole drivetrain.
      */
-    public static final double MAX_POWER_SLEW_PER_SEC = 3.0;
+    public static double MAX_POWER_SLEW_PER_SEC = 3.0;
 
     private final DcMotorEx motor;
     private final ElapsedTime clock = new ElapsedTime();
@@ -84,6 +85,36 @@ public class TurretController {
         double target = chooseTarget(desiredDeg(robotX, robotY, headingRad, targetX, targetY), current);
         setPowerLimited(pdPower(target, current), current);
         return target;
+    }
+
+    /**
+     * Hold a robot-relative turret angle (continuous degrees, clipped to MIN_DEG..MAX_DEG). Same PD as aimAt; the
+     * robot-rotation feedforward only acts if updateHeading() is being called.
+     */
+    public void driveTo(double targetDeg) {
+        double current = angleDeg();
+        double target = Range.clip(targetDeg, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
+        setPowerLimited(pdPower(target, current), current);
+    }
+
+    /** Raw power -1..1 (+ = counter-clockwise). Hard limits and the slew limit still apply. */
+    public void openLoop(double power) {
+        setPowerLimited(power, angleDeg());
+    }
+
+    /** Turret speed, deg/s (+ = counter-clockwise). */
+    public double velocityDeg() {
+        return TurretConstants.ticksToDeg(motor.getVelocity());
+    }
+
+    /** Raw encoder ticks since INIT. */
+    public int ticks() {
+        return motor.getCurrentPosition();
+    }
+
+    /** Last power actually sent to the motor. */
+    public double power() {
+        return lastPower;
     }
 
     /** stick: -1..1, positive = counter-clockwise. Soft limits still apply. */
