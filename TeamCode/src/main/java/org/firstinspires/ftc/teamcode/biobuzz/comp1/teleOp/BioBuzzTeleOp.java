@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -52,13 +53,16 @@ import java.util.List;
  *   LEFT TRIGGER    - SHOOT (hold): transfer feeds up into the launcher
  *   RIGHT TRIGGER   - intake on / off (toggle)
  *   Y               - flip intake direction
- *   B / A / X       - launcher FIXED speed 1650 / 1700 / 1600 (press the same one again = back to auto distance)
+ *   LEFT BUMPER     - hold: flower ramp DOWN (otherwise UP the whole match)
+ *   B / A / X       - launcher FIXED speed 1450 / 1500 / 1400 (press the same one again = back to auto distance)
  *   dpad left/right - manual turret while auto aim is off (left = counter-clockwise)
  *
  * gamepad2:
  *   A               - toggle turret auto aim (on at start)
  *   B               - forget the pose and re-localize from the tags
  *   X               - toggle continuous vision correction (on at start)
+ *   dpad up / down  - launcher speed trim +/- 2% (all speeds)
+ *   Y               - wait for speed on / off (on: while shooting, the transfer pauses until the wheel recovers)
  */
 @TeleOp(name = "BioBuzz TeleOp (Red)", group = "BioBuzz")
 public class BioBuzzTeleOp extends LinearOpMode {
@@ -82,6 +86,19 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private static final double MAX_JUMP_IN = 18.0;
     /** ... unless it keeps happening this many frames in a row (then re-localize). */
     private static final int RELOCK_AFTER_FRAMES = 15;
+    /**
+     * SNAP: when the Limelight says the pose is off by more than SNAP_IN or SNAP_DEG, and SNAP_FRAMES frames in a row
+     * agree on that (within SNAP_AGREE_IN / SNAP_AGREE_DEG, so one bad frame can't do it), the pose is set straight to
+     * the vision pose instead of being nudged 20% per frame. The turret re-aims from the new pose immediately.
+     */
+    private static final double SNAP_IN = 3.0;
+    private static final double SNAP_DEG = 3.0;
+    private static final int SNAP_FRAMES = 3;
+    private static final double SNAP_AGREE_IN = 2.5;
+    private static final double SNAP_AGREE_DEG = 2.5;
+    /** Recent big disagreements {errX, errY, errHeadingRad (NaN = no heading)}. */
+    private final ArrayDeque<double[]> snapFrames = new ArrayDeque<>();
+    private int snapCount = 0;
     /** No vision while spinning faster than this (motion blur). */
     private static final double MAX_TURN_RATE_FOR_VISION_DEG = 120.0;
     private static final double POSE_HISTORY_SEC = 1.0;
@@ -91,20 +108,33 @@ public class BioBuzzTeleOp extends LinearOpMode {
     // ======================= INTAKE / TRANSFER / LAUNCHER =======================
     /** Signs from FullLaunch: intake + = in; transfer - = up into the launcher (FullLaunch needed X for this). */
     private static final double INTAKE_POWER = 1.0;
-    private static final double TRANSFER_FEED_POWER = -1.0; // up into the launcher (shoot held)
+    private static final double TRANSFER_FEED_POWER = -0.7; // up into the launcher (shoot held). Was -1.0: slower = more
+                                                            // time for the wheel to recover between balls
+    /** Wait for speed: while shooting, pause the transfer until the wheel is back within this of its target. */
+    private static final double FEED_READY_FRACTION = 0.03;
+    private boolean waitForSpeed = true; // gamepad2 Y toggles
+    private double lowestWhileShootingTps = Double.NaN;
     private static final double TRANSFER_DOWN_POWER = 0.5;  // down / away from the launcher (the rest of the time)
     // Launcher control: launcher/advanced/Flywheel (kS + kV + kP, voltage compensation, full-power boost after each
     // ball). The speeds below stay in ticks/s (same numbers as before) and are converted to RPM for Flywheel.
     private static final double TRIGGER_DOWN = 0.5;
 
     private DcMotor intake, transfer;
+    /** Flower ramp servo ("flowerServo"): UP all match, DOWN only while LEFT BUMPER is held. Measured positions. */
+    private static final double RAMP_UP = 0.730;
+    private static final double RAMP_DOWN = 0.140;
+    private Servo flowerServo;
     private final Flywheel launcher = new Flywheel();
     private boolean launcherReady = false;
     private boolean intakeOn = false;
     private double intakeDirection = 1;
     private boolean rightTriggerWasDown = false;
     /** Fixed launcher speeds on gamepad1 B / A / X (ticks/s). NaN = auto speed from distance. */
-    private static final double FIXED_B_TPS = 1650, FIXED_A_TPS = 1700, FIXED_X_TPS = 1600;
+    // was 1650 / 1700 / 1600 - shots went too far with the new Flywheel controller
+    private static final double FIXED_B_TPS = 1450, FIXED_A_TPS = 1500, FIXED_X_TPS = 1400;
+    /** Live speed trim on gamepad2 dpad up/down, applied to EVERY launcher speed (auto and presets). */
+    private static final double TRIM_STEP = 0.02;
+    private double speedTrim = 1.0;
     private double fixedTps = Double.NaN;
 
     private Follower follower;
@@ -215,6 +245,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         transfer = hardwareMap.dcMotor.get("transferMotor");
+        flowerServo = hardwareMap.get(Servo.class, "flowerServo"); // not moved until START
         transfer.setDirection(DcMotorSimple.Direction.FORWARD);
 
         launcher.init(hardwareMap); // "launchMotor", direction from LauncherConstants
@@ -226,6 +257,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private double launchTargetTps = FlywheelSpeedTable.DEFAULT_TPS;
 
     private void updateMechanisms(Pose pose) {
+        // Flower ramp: hold left bumper = down, otherwise up
+        flowerServo.setPosition(gamepad1.left_bumper ? RAMP_DOWN : RAMP_UP);
+
         // Intake: right trigger toggles on/off, Y flips direction
         boolean rightDown = gamepad1.right_trigger > TRIGGER_DOWN;
         if (rightDown && !rightTriggerWasDown) intakeOn = !intakeOn;
@@ -235,7 +269,16 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
         // Transfer: down all the time, up only while shooting
         boolean shooting = gamepad1.left_trigger > TRIGGER_DOWN;
-        transfer.setPower(shooting ? TRANSFER_FEED_POWER : TRANSFER_DOWN_POWER);
+        if (gamepad2.yWasPressed()) waitForSpeed = !waitForSpeed;
+        double wheel = launcher.getTicksPerSec();
+        boolean wheelReady = !launcher.isBoosting() && wheel >= launchTargetTps * (1 - FEED_READY_FRACTION);
+        if (shooting) {
+            lowestWhileShootingTps = Double.isNaN(lowestWhileShootingTps) ? wheel : Math.min(lowestWhileShootingTps, wheel);
+            // hold the next ball (power 0) until the wheel has recovered, then feed
+            transfer.setPower(waitForSpeed && !wheelReady ? 0 : TRANSFER_FEED_POWER);
+        } else {
+            transfer.setPower(TRANSFER_DOWN_POWER);
+        }
 
         // Launcher: speed from the turret-to-cell distance, the whole match
         if (localized) {
@@ -250,7 +293,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
         if (gamepad1.bWasPressed()) fixedTps = fixedTps == FIXED_B_TPS ? Double.NaN : FIXED_B_TPS;
         if (gamepad1.aWasPressed()) fixedTps = fixedTps == FIXED_A_TPS ? Double.NaN : FIXED_A_TPS;
         if (gamepad1.xWasPressed()) fixedTps = fixedTps == FIXED_X_TPS ? Double.NaN : FIXED_X_TPS;
-        launchTargetTps = Double.isNaN(fixedTps) ? FlywheelSpeedTable.velocityFor(shotDistanceIn) : fixedTps;
+        if (gamepad2.dpadUpWasPressed()) speedTrim += TRIM_STEP;
+        if (gamepad2.dpadDownWasPressed()) speedTrim = Math.max(0.5, speedTrim - TRIM_STEP);
+        launchTargetTps = speedTrim * (Double.isNaN(fixedTps) ? FlywheelSpeedTable.velocityFor(shotDistanceIn) : fixedTps);
         launcher.setMotorRPM(Flywheel.ticksPerSecToRpm(launchTargetTps)); // must run every loop
     }
 
@@ -261,12 +306,21 @@ public class BioBuzzTeleOp extends LinearOpMode {
         telemetry.addData("Launcher", "%s  target %.0f  actual %.0f ticks/s  (%s)",
                 launcher.isBoosting() ? "BOOST" : atSpeed ? "READY" : "spinning up",
                 launchTargetTps, v, Double.isNaN(fixedTps) ? "AUTO from distance" : "FIXED - press again for auto");
+        telemetry.addData("Speed trim (gp2 dpad U/D)", "x%.2f", speedTrim);
         telemetry.addData("Launcher RPM", "%.0f / %.0f   power %.2f   battery %.1f V", launcher.getRPM(),
                 Flywheel.ticksPerSecToRpm(launchTargetTps), launcher.lastPower(), launcher.batteryVoltage());
         telemetry.addData("Shot distance", Double.isNaN(shotDistanceIn) ? "not localized - using wall speed"
                 : String.format("%.1f in", shotDistanceIn));
+        telemetry.addData("Flower ramp (LB)", gamepad1.left_bumper ? "DOWN" : "up");
         telemetry.addData("Intake (RT / Y)", intakeOn ? (intakeDirection > 0 ? "IN" : "OUT") : "off");
-        telemetry.addData("Transfer (LT = shoot)", gamepad1.left_trigger > TRIGGER_DOWN ? "FEEDING UP" : "down");
+        boolean shootingNow = gamepad1.left_trigger > TRIGGER_DOWN;
+        boolean waiting = shootingNow && waitForSpeed
+                && (launcher.isBoosting() || launcher.getTicksPerSec() < launchTargetTps * (1 - FEED_READY_FRACTION));
+        telemetry.addData("Transfer (LT = shoot)", !shootingNow ? "down" : waiting ? "WAITING for wheel speed" : "FEEDING UP");
+        telemetry.addData("Wait for speed (gp2 Y)", waitForSpeed ? "ON" : "off");
+        telemetry.addData("Lowest wheel speed while shooting", Double.isNaN(lowestWhileShootingTps) ? "-"
+                : String.format("%.0f ticks/s (%.0f%% of target)", lowestWhileShootingTps,
+                100 * lowestWhileShootingTps / launchTargetTps));
     }
 
     // ======================= ODOMETRY =======================
@@ -417,19 +471,50 @@ public class BioBuzzTeleOp extends LinearOpMode {
         double errX = xy[0] - then[1];
         double errY = xy[1] - then[2];
         lastVisionError = Math.hypot(errX, errY);
+        double errH = Double.isNaN(visionHeading) ? Double.NaN
+                : HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
 
-        if (lastVisionError > MAX_JUMP_IN) {
-            if (++outlierFrames >= RELOCK_AFTER_FRAMES) relocalize();
+        // ---- Big disagreement: SNAP once a few frames in a row agree on it ----
+        boolean big = lastVisionError > SNAP_IN || (!Double.isNaN(errH) && Math.abs(errH) > Math.toRadians(SNAP_DEG));
+        if (big) {
+            snapFrames.addLast(new double[]{errX, errY, errH});
+            while (snapFrames.size() > SNAP_FRAMES) snapFrames.removeFirst();
+            if (snapFrames.size() == SNAP_FRAMES && snapFramesAgree()) {
+                double mx = 0, my = 0, hs = 0, hc = 0;
+                int hn = 0;
+                for (double[] f : snapFrames) {
+                    mx += f[0] / SNAP_FRAMES;
+                    my += f[1] / SNAP_FRAMES;
+                    if (!Double.isNaN(f[2])) { hs += Math.sin(f[2]); hc += Math.cos(f[2]); hn++; }
+                }
+                double mh = hn > 0 ? Math.atan2(hs, hc) : 0;
+                applyShift(current, mx, my, mh);
+                turret.resetHeadingTracking(); // the heading jumped - don't read it as the robot spinning
+                snapFrames.clear();
+                snapCount++;
+            }
             return;
         }
-        outlierFrames = 0;
+        snapFrames.clear();
 
-        double dHeading = 0;
-        if (!Double.isNaN(visionHeading)) {
-            double errH = HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
-            if (Math.abs(errH) < Math.toRadians(15)) dHeading = HEADING_GAIN * errH;
+        // ---- Small disagreement: nudge toward vision every frame ----
+        double dHeading = Double.isNaN(errH) ? 0 : HEADING_GAIN * errH;
+        applyShift(current, XY_GAIN * errX, XY_GAIN * errY, dHeading);
+    }
+
+    /** True if the stored big-disagreement frames all say roughly the same thing (not random bad frames). */
+    private boolean snapFramesAgree() {
+        double[] first = snapFrames.peekFirst();
+        for (double[] f : snapFrames) {
+            if (Math.hypot(f[0] - first[0], f[1] - first[1]) > SNAP_AGREE_IN) return false;
+            if (!Double.isNaN(f[2]) && !Double.isNaN(first[2])
+                    && Math.abs(HiveTagGeometry.normalizeAngle(f[2] - first[2])) > Math.toRadians(SNAP_AGREE_DEG)) return false;
         }
-        double dx = XY_GAIN * errX, dy = XY_GAIN * errY;
+        return true;
+    }
+
+    /** Move the pose (and its history, so later frames line up) by dx, dy, dHeading. */
+    private void applyShift(Pose current, double dx, double dy, double dHeading) {
         follower.setPose(new Pose(current.x() + dx, current.y() + dy,
                 HiveTagGeometry.normalizeAngle(current.heading() + dHeading)));
         for (double[] p : poseHistory) { // keep the history in the same frame as the corrected pose
@@ -456,12 +541,13 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
-        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1650/1700/1600 | RB slow");
-        telemetry.addLine("gp2: A auto aim | B re-localize | X vision");
+        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1450/1500/1400 | LB ramp | RB slow");
+        telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim | Y wait for speed");
         if (launcherReady && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
         telemetry.addData("Tags seen", lastTags == null ? 0 : lastTags.size());
+        telemetry.addData("Vision snaps", "%d  (pose jumped to the Limelight)", snapCount);
         telemetry.addData("Vision correction", visionCorrection
                 ? (Double.isNaN(lastVisionError) ? "on" : String.format("on, last error %.1f in", lastVisionError))
                 : "off");

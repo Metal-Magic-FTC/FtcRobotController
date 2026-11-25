@@ -21,7 +21,7 @@ public final class FlywheelSpeedTable {
     public static final double DEFAULT_TPS = 1650;
 
     /** Overall trim on every speed above. 1.0 = table as written; 0.95 = 5% slower. */
-    public static final double SPEED_SCALE = 0.97;
+    public static final double SPEED_SCALE = 0.88; // was 0.97 - shots went too far with the new Flywheel controller
 
     /** Speed for this distance, with SPEED_SCALE applied. */
     public static double velocityFor(double distanceIn) {

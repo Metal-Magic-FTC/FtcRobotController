@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.Range;
 
@@ -27,6 +28,7 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
  *
  * gamepad1 (driver)
  *   left stick / right stick X - drive (robot-centric) / turn      right bumper - slow
+ *   left bumper (hold)         - flower ramp DOWN (otherwise UP the whole match)
  *   left trigger  (hold)       - INTAKE: intake in, transfer backward at 0.25 (keeps balls out of the flywheel)
  *   right trigger (hold)       - SHOOT:  intake in, transfer forward at 0.6
  *   X (hold)                   - unjam: intake and transfer both backward
@@ -51,15 +53,19 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
     // ======================= INTAKE / TRANSFER =======================
     private static final double INTAKE_POWER = 1.0;
     private static final double INTAKE_TRANSFER_POWER = -0.25; // while intaking: hold balls back
-    private static final double SHOOT_TRANSFER_POWER = 0.6;
+    private static final double SHOOT_TRANSFER_POWER = 0.45; // was 0.6: slower feed = more recovery time per ball
     private static final double TRIGGER_PRESSED = 0.3;
 
     // ======================= FLYWHEEL (ticks/s) =======================
-    private static final double DEFAULT_VELOCITY = 1650;
+    private static final double DEFAULT_VELOCITY = 1450; // was 1650 - too far with the new Flywheel controller
     private static final double VELOCITY_STEP = 50;
     private static final double MAX_VELOCITY = 2600; // 6000 rpm motor, 28 ticks/rev -> ~2800 free speed
 
     private DcMotor intake, transfer;
+    /** Flower ramp servo ("flowerServo"): UP all match, DOWN only while LEFT BUMPER is held. Measured positions. */
+    private static final double RAMP_UP = 0.730;
+    private static final double RAMP_DOWN = 0.140;
+    private Servo flowerServo;
     /** launcher/advanced/Flywheel: kS + kV + kP, voltage compensation, full-power boost after each ball. */
     private final Flywheel flywheel = new Flywheel();
 
@@ -71,6 +77,7 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         transfer = hardwareMap.dcMotor.get("transferMotor");
+        flowerServo = hardwareMap.get(Servo.class, "flowerServo"); // not moved until START
         transfer.setDirection(DcMotorSimple.Direction.FORWARD);
         transfer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -123,6 +130,9 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
                 turret.manual(manual);
             }
 
+            // ---- flower ramp: hold left bumper = down, otherwise up ----
+            flowerServo.setPosition(gamepad1.left_bumper ? RAMP_DOWN : RAMP_UP);
+
             // ---- flywheel ----
             if (gamepad1.yWasPressed() || gamepad2.yWasPressed()) flywheelOn = !flywheelOn;
             if (gamepad2.dpadUpWasPressed()) targetVelocity += VELOCITY_STEP;
@@ -152,6 +162,7 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             }
 
             // ---- telemetry ----
+            telemetry.addData("Flower ramp (LB)", gamepad1.left_bumper ? "DOWN" : "up");
             telemetry.addData("Flywheel (Y)", !flywheelOn ? "OFF" : flywheel.isBoosting() ? "BOOST"
                     : atSpeed ? "READY" : "spinning up");
             telemetry.addData("Flywheel speed", "%.0f / %.0f ticks/s  (gp2 dpad)", velocity, targetVelocity);

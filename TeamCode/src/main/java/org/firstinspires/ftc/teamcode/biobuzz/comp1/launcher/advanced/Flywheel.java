@@ -34,14 +34,14 @@ public class Flywheel {
     /** Power per flywheel RPM that holds a target without P. FlywheelKvTuner. ~1 / free RPM to start. */
     public static double KV = 0.000168; // measured with FlywheelKvTuner
     /** Extra power per RPM of error. FlywheelKpTuner. */
-    public static double KP = 0.00092; // measured with FlywheelKpTuner
+    public static double KP = 0.0015; // was 0.00092 (FlywheelKpTuner) - raised: speed sagged ball after ball
 
     // ======================= DIP BOOST =======================
     public static boolean BOOST_ENABLED = true;
     /** Go to full power when the wheel falls this far under the target (a ball just went through)... */
-    public static double BOOST_BELOW_FRACTION = 0.05;
+    public static double BOOST_BELOW_FRACTION = 0.025; // was 0.05 - boost kicks in on smaller drops
     /** ...and hand back to kS/kV/kP once it is back within this. */
-    public static double BOOST_EXIT_FRACTION = 0.015;
+    public static double BOOST_EXIT_FRACTION = 0.008; // was 0.015 - stays at full power until nearly recovered
 
     // ======================= HARDWARE =======================
     public static final double ENCODER_CPR = 28.0; // goBILDA / REV bare motor encoder, counts per motor rev
