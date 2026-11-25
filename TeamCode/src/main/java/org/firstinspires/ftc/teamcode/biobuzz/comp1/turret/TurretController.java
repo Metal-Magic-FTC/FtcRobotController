@@ -17,10 +17,11 @@ public class TurretController {
 
     // ======================= TUNE =======================
     // Not final: TurretTuning changes these live. Copy the tuned numbers back here (as the starting values).
-    public static double KP = 0.02;          // power per degree of error
-    public static double KD = 0.0008;        // power per deg/s of turret speed (damping)
+    // Tuned with TurretTuning (motor): KP 0.00891, KD 0.00090, KS 0.05567, tol 0.75, max 0.6, slew 3.0
+    public static double KP = 0.00891;          // power per degree of error
+    public static double KD = 0.00090;        // power per deg/s of turret speed (damping)
     public static final double KV = 0.0025;        // power per deg/s of robot rotation (feedforward)
-    public static double KS = 0.04;          // static friction kick
+    public static double KS = 0.05567;          // static friction kick
     public static double TOLERANCE_DEG = 0.75;
     public static double MAX_POWER = 0.6;
     public static final double MANUAL_POWER = 0.3;

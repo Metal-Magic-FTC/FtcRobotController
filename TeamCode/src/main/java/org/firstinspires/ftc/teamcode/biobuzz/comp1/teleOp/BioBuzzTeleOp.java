@@ -55,6 +55,8 @@ import java.util.List;
  *   RIGHT TRIGGER   - intake on / off (toggle)
  *   Y               - flip intake direction
  *   LEFT BUMPER     - hold: flower ramp DOWN (otherwise UP the whole match)
+ *   DPAD UP         - transfer feed speed: slow (default) <-> full
+ *   DPAD DOWN       - FORCE pose update from the Limelight (point it at the HIVE)
  *   B / A / X       - launcher FIXED speed 1450 / 1500 / 1400 (press the same one again = back to auto distance)
  *   dpad left/right - manual turret while auto aim is off (left = counter-clockwise)
  *
@@ -63,7 +65,8 @@ import java.util.List;
  *   B               - forget the pose and re-localize from the tags
  *   X               - toggle continuous vision correction (on at start)
  *   dpad up / down  - launcher speed trim +/- 2% (all speeds)
- *   Y               - wait for speed on / off (on: while shooting, the transfer pauses until the wheel recovers)
+ *   dpad right/left - volley boost +/- 0.05 (speed-up for balls 2+ of a burst)
+ *   right bumper    - FORCE pose update from the Limelight (same as gamepad1 dpad down)
  */
 @TeleOp(name = "BioBuzz TeleOp (Red)", group = "BioBuzz")
 public class BioBuzzTeleOp extends LinearOpMode {
@@ -81,6 +84,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
     /** Lock frames older than this are dropped. */
     private static final double LOCK_WINDOW_SEC = 2.0;
     /** Fraction of the vision error applied per frame once localized (X/Y and heading). */
+    // (old fixed blend gains - replaced by the Kalman filter below, kept for reference)
     private static final double XY_GAIN = 0.2;
     private static final double HEADING_GAIN = 0.05;
     /** A sighting further than this from the current pose is ignored ... */
@@ -100,6 +104,35 @@ public class BioBuzzTeleOp extends LinearOpMode {
     /** Recent big disagreements {errX, errY, errHeadingRad (NaN = no heading)}. */
     private final ArrayDeque<double[]> snapFrames = new ArrayDeque<>();
     private int snapCount = 0;
+
+    // ======================= KALMAN FILTER (pose = odometry + Limelight) =======================
+    // One small Kalman filter per axis (x, y, heading). Odometry is the PREDICTION: its uncertainty (variance P) grows
+    // as the robot drives/turns. Each Limelight frame is a MEASUREMENT with variance R (worse for far tags). The pose
+    // moves toward the measurement by K = P / (P + R): trusts vision more when odometry has drifted, less when vision
+    // is noisy. Frames further than KALMAN_GATE_SIGMA standard deviations away are rejected as outliers (the SNAP
+    // logic above then takes over if they keep agreeing).
+    /** Odometry drift: variance added per inch driven (in^2/in) and per radian turned (rad^2/rad), plus per second. */
+    private static final double Q_XY_PER_IN = 0.01;
+    private static final double Q_XY_PER_SEC = 0.002;
+    private static final double Q_H_PER_RAD = Math.pow(Math.toRadians(0.5), 2);
+    private static final double Q_H_PER_SEC = Math.pow(Math.toRadians(0.1), 2);
+    /** Vision noise: standard deviation of a position fix = base + this much per inch of tag distance. */
+    private static final double R_XY_BASE_IN = 1.0;
+    private static final double R_XY_PER_IN = 0.02;
+    private static final double R_HEADING_RAD = Math.toRadians(2.0);
+    private static final double KALMAN_GATE_SIGMA = 3.0;
+    /** Variances (uncertainty) of the current pose. */
+    private double varX = 4, varY = 4, varH = Math.pow(Math.toRadians(3), 2);
+    private Pose lastPredictPose = null;
+    private double lastPredictTime = 0;
+    private double lastKx = Double.NaN, lastKh = Double.NaN;
+
+    // ======================= FORCE UPDATE (gamepad1 dpad down / gamepad2 right bumper) =======================
+    /** Average this many Limelight frames, then set the pose straight to them (ignores odometry). */
+    private static final int FORCE_FRAMES = 3;
+    private boolean forcePending = false;
+    private final ArrayDeque<double[]> forceFrames = new ArrayDeque<>();
+    private String forceStatus = "-";
     /** No vision while spinning faster than this (motion blur). */
     private static final double MAX_TURN_RATE_FOR_VISION_DEG = 120.0;
     private static final double POSE_HISTORY_SEC = 1.0;
@@ -109,12 +142,12 @@ public class BioBuzzTeleOp extends LinearOpMode {
     // ======================= INTAKE / TRANSFER / LAUNCHER =======================
     /** Signs from FullLaunch: intake + = in; transfer - = up into the launcher (FullLaunch needed X for this). */
     private static final double INTAKE_POWER = 1.0;
-    private static final double TRANSFER_FEED_POWER = -0.7; // up into the launcher (shoot held). Was -1.0: slower = more
-                                                            // time for the wheel to recover between balls
-    /** Wait for speed: while shooting, pause the transfer until the wheel is back within this of its target. */
-    private static final double FEED_READY_FRACTION = 0.03;
-    private boolean waitForSpeed = true; // gamepad2 Y toggles
+    /** Feed up into the launcher while shooting. gamepad1 dpad up toggles SLOW (default) / FULL. */
+    private static final double TRANSFER_FEED_SLOW = -0.5;  // default. Slower = more time for the wheel to recover per ball
+    private static final double TRANSFER_FEED_FULL = -1.0;
+    private boolean fullTransfer = false;
     private double lowestWhileShootingTps = Double.NaN;
+    private boolean wasShooting = false;
     private static final double TRANSFER_DOWN_POWER = 0.5;  // down / away from the launcher (the rest of the time)
     // Launcher control: launcher/advanced/Flywheel (kS + kV + kP, voltage compensation, full-power boost after each
     // ball). The speeds below stay in ticks/s (same numbers as before) and are converted to RPM for Flywheel.
@@ -220,6 +253,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
             if (gamepad2.aWasPressed()) autoAim = !autoAim;
             if (gamepad2.xWasPressed()) visionCorrection = !visionCorrection;
             if (gamepad2.bWasPressed()) relocalize();
+            if (gamepad1.dpadDownWasPressed() || gamepad2.rightBumperWasPressed()) requestForceUpdate();
 
             double targetDeg = Double.NaN;
             if (!autoAim) {
@@ -275,13 +309,14 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
         // Transfer: down all the time, up only while shooting
         boolean shooting = gamepad1.left_trigger > TRIGGER_DOWN;
-        if (gamepad2.yWasPressed()) waitForSpeed = !waitForSpeed;
+        if (gamepad1.dpadUpWasPressed()) fullTransfer = !fullTransfer;
+        double feedPower = fullTransfer ? TRANSFER_FEED_FULL : TRANSFER_FEED_SLOW;
         double wheel = launcher.getTicksPerSec();
-        boolean wheelReady = !launcher.isBoosting() && wheel >= launchTargetTps * (1 - FEED_READY_FRACTION);
+        if (shooting && !wasShooting) lowestWhileShootingTps = Double.NaN; // new burst
+        wasShooting = shooting;
         if (shooting) {
             lowestWhileShootingTps = Double.isNaN(lowestWhileShootingTps) ? wheel : Math.min(lowestWhileShootingTps, wheel);
-            // hold the next ball (power 0) until the wheel has recovered, then feed
-            transfer.setPower(waitForSpeed && !wheelReady ? 0 : TRANSFER_FEED_POWER);
+            transfer.setPower(feedPower);
         } else {
             transfer.setPower(TRANSFER_DOWN_POWER);
         }
@@ -302,7 +337,12 @@ public class BioBuzzTeleOp extends LinearOpMode {
         if (gamepad2.dpadUpWasPressed()) speedTrim += TRIM_STEP;
         if (gamepad2.dpadDownWasPressed()) speedTrim = Math.max(0.5, speedTrim - TRIM_STEP);
         launchTargetTps = speedTrim * (Double.isNaN(fixedTps) ? FlywheelSpeedTable.velocityFor(shotDistanceIn) : fixedTps);
-        launcher.setMotorRPM(Flywheel.ticksPerSecToRpm(launchTargetTps)); // must run every loop
+        if (gamepad2.dpadRightWasPressed()) Flywheel.VOLLEY_FACTOR += 0.05;
+        if (gamepad2.dpadLeftWasPressed()) Flywheel.VOLLEY_FACTOR = Math.max(1.0, Flywheel.VOLLEY_FACTOR - 0.05);
+        // balls 2+ of a burst: target raised by VOLLEY_FACTOR so the wheel keeps up (see Flywheel)
+        double runRpm = launcher.volleyTarget(Flywheel.ticksPerSecToRpm(launchTargetTps),
+                gamepad1.left_trigger > TRIGGER_DOWN);
+        launcher.setMotorRPM(runRpm); // must run every loop
     }
 
     private void addMechanismTelemetry() {
@@ -313,6 +353,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
                 launcher.isBoosting() ? "BOOST" : atSpeed ? "READY" : "spinning up",
                 launchTargetTps, v, Double.isNaN(fixedTps) ? "AUTO from distance" : "FIXED - press again for auto");
         telemetry.addData("Speed trim (gp2 dpad U/D)", "x%.2f", speedTrim);
+        telemetry.addData("Volley boost (gp2 dpad L/R)", "x%.2f%s", Flywheel.VOLLEY_FACTOR,
+                launcher.inVolley() ? "  <<< ACTIVE" : "");
         telemetry.addData("Launcher RPM", "%.0f / %.0f   power %.2f   battery %.1f V", launcher.getRPM(),
                 Flywheel.ticksPerSecToRpm(launchTargetTps), launcher.lastPower(), launcher.batteryVoltage());
         telemetry.addData("Shot distance", Double.isNaN(shotDistanceIn) ? "not localized - using wall speed"
@@ -320,10 +362,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
         telemetry.addData("Flower ramp (LB)", gamepad1.left_bumper ? "DOWN" : "up");
         telemetry.addData("Intake (RT / Y)", intakeOn ? (intakeDirection > 0 ? "IN" : "OUT") : "off");
         boolean shootingNow = gamepad1.left_trigger > TRIGGER_DOWN;
-        boolean waiting = shootingNow && waitForSpeed
-                && (launcher.isBoosting() || launcher.getTicksPerSec() < launchTargetTps * (1 - FEED_READY_FRACTION));
-        telemetry.addData("Transfer (LT = shoot)", !shootingNow ? "down" : waiting ? "WAITING for wheel speed" : "FEEDING UP");
-        telemetry.addData("Wait for speed (gp2 Y)", waitForSpeed ? "ON" : "off");
+        telemetry.addData("Transfer (LT = shoot)", shootingNow ? "FEEDING UP" : "down");
+        telemetry.addData("Transfer speed (gp1 dpad up)", fullTransfer ? "FULL" : "slow");
         telemetry.addData("Lowest wheel speed while shooting", Double.isNaN(lowestWhileShootingTps) ? "-"
                 : String.format("%.0f ticks/s (%.0f%% of target)", lowestWhileShootingTps,
                 100 * lowestWhileShootingTps / launchTargetTps));
@@ -337,6 +377,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         poseHistory.addLast(new double[]{now, pose.x(), pose.y(), pose.heading()});
         while (now - poseHistory.peekFirst()[0] > POSE_HISTORY_SEC) poseHistory.removeFirst();
         turret.updateHeading(pose.heading());
+        kalmanPredict(pose, now);
         return pose;
     }
 
@@ -353,6 +394,51 @@ public class BioBuzzTeleOp extends LinearOpMode {
         localized = false;
         lockFrames.clear();
         outlierFrames = 0;
+        snapFrames.clear();
+        forceFrames.clear();
+        forcePending = false;
+    }
+
+    /** Force update: the next FORCE_FRAMES Limelight frames set the pose outright. If not localized, re-searches. */
+    private void requestForceUpdate() {
+        if (!localized) {
+            relocalize();
+            forceStatus = "not localized - searching";
+            return;
+        }
+        forcePending = true;
+        forceFrames.clear();
+        forceStatus = "waiting for tags...";
+    }
+
+    // ======================= KALMAN =======================
+    /** Odometry step: grow the uncertainty by how far the robot moved / turned since last loop. */
+    private void kalmanPredict(Pose pose, double now) {
+        if (lastPredictPose != null) {
+            double dt = Math.max(0, now - lastPredictTime);
+            double ds = Math.hypot(pose.x() - lastPredictPose.x(), pose.y() - lastPredictPose.y());
+            double dh = Math.abs(HiveTagGeometry.normalizeAngle(pose.heading() - lastPredictPose.heading()));
+            double qxy = Q_XY_PER_IN * ds + Q_XY_PER_SEC * dt;
+            varX += qxy;
+            varY += qxy;
+            varH += Q_H_PER_RAD * dh + Q_H_PER_SEC * dt;
+        }
+        lastPredictPose = pose;
+        lastPredictTime = now;
+    }
+
+    /** After a hard set (lock / snap / force): the pose is now about as good as one vision fix. */
+    private void kalmanReset(double rangeIn) {
+        double sd = R_XY_BASE_IN + R_XY_PER_IN * rangeIn;
+        varX = varY = sd * sd;
+        varH = R_HEADING_RAD * R_HEADING_RAD;
+        lastPredictPose = follower.pose();
+    }
+
+    private static double meanRange(List<TagObservation> tags) {
+        double sum = 0;
+        for (TagObservation t : tags) sum += t.rangeIn;
+        return tags.isEmpty() ? 60 : sum / tags.size();
     }
 
     // ======================= VISION =======================
@@ -379,7 +465,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
         if (!localized) {
             tryLock(tags, visionHeading, then);
-        } else if (visionCorrection) {
+        } else if (visionCorrection || forcePending) { // force update works even with correction off
             correct(tags, visionHeading, then, pose);
         }
     }
@@ -467,11 +553,42 @@ public class BioBuzzTeleOp extends LinearOpMode {
         poseHistory.clear();
         lockFrames.clear();
         localized = true;
+        kalmanReset(60);
         outlierFrames = 0;
     }
 
     /** Once localized: nudge the pose toward vision, measured against where the robot was when the photo was taken. */
     private void correct(List<TagObservation> tags, double visionHeading, double[] then, Pose current) {
+        double range = meanRange(tags);
+
+        // ---- FORCE UPDATE: average a few frames and set the pose outright ----
+        if (forcePending) {
+            // with a vision heading, place the robot using IT (not odometry's) so a heading error can't bias X/Y
+            double h = Double.isNaN(visionHeading) ? then[3] : visionHeading;
+            double[] fxy = estimateXY(tags, lastRedTilt, lastBlueTilt, h);
+            if (fxy == null) return;
+            double fh = Double.isNaN(visionHeading) ? Double.NaN : HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
+            forceFrames.addLast(new double[]{fxy[0] - then[1], fxy[1] - then[2], fh});
+            forceStatus = String.format("collecting %d/%d", forceFrames.size(), FORCE_FRAMES);
+            if (forceFrames.size() >= FORCE_FRAMES) {
+                double mx = 0, my = 0, hs = 0, hc = 0;
+                int hn = 0;
+                for (double[] f : forceFrames) {
+                    mx += f[0] / forceFrames.size();
+                    my += f[1] / forceFrames.size();
+                    if (!Double.isNaN(f[2])) { hs += Math.sin(f[2]); hc += Math.cos(f[2]); hn++; }
+                }
+                applyShift(current, mx, my, hn > 0 ? Math.atan2(hs, hc) : 0);
+                turret.resetHeadingTracking();
+                kalmanReset(range);
+                forceFrames.clear();
+                forcePending = false;
+                forceStatus = String.format("DONE (moved %.1f in%s)", Math.hypot(mx, my),
+                        hn > 0 ? String.format(", %.1f°", Math.toDegrees(Math.atan2(hs, hc))) : "");
+            }
+            return;
+        }
+
         double[] xy = estimateXY(tags, lastRedTilt, lastBlueTilt, then[3]);
         if (xy == null) return;
         double errX = xy[0] - then[1];
@@ -480,32 +597,54 @@ public class BioBuzzTeleOp extends LinearOpMode {
         double errH = Double.isNaN(visionHeading) ? Double.NaN
                 : HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
 
-        // ---- Big disagreement: SNAP once a few frames in a row agree on it ----
+        // ---- Kalman measurement noise for this frame ----
+        double sdXY = R_XY_BASE_IN + R_XY_PER_IN * range;
+        double rXY = sdXY * sdXY;
+        double rH = R_HEADING_RAD * R_HEADING_RAD;
+
+        // ---- Outlier gate: too far from what the filter believes? Then don't blend it in... ----
+        boolean xyOutlier = errX * errX > KALMAN_GATE_SIGMA * KALMAN_GATE_SIGMA * (varX + rXY)
+                || errY * errY > KALMAN_GATE_SIGMA * KALMAN_GATE_SIGMA * (varY + rXY);
+        boolean hOutlier = !Double.isNaN(errH) && errH * errH > KALMAN_GATE_SIGMA * KALMAN_GATE_SIGMA * (varH + rH);
         boolean big = lastVisionError > SNAP_IN || (!Double.isNaN(errH) && Math.abs(errH) > Math.toRadians(SNAP_DEG));
-        if (big) {
-            snapFrames.addLast(new double[]{errX, errY, errH});
-            while (snapFrames.size() > SNAP_FRAMES) snapFrames.removeFirst();
-            if (snapFrames.size() == SNAP_FRAMES && snapFramesAgree()) {
-                double mx = 0, my = 0, hs = 0, hc = 0;
-                int hn = 0;
-                for (double[] f : snapFrames) {
-                    mx += f[0] / SNAP_FRAMES;
-                    my += f[1] / SNAP_FRAMES;
-                    if (!Double.isNaN(f[2])) { hs += Math.sin(f[2]); hc += Math.cos(f[2]); hn++; }
+        if (xyOutlier || hOutlier) {
+            // ...but if several frames in a row agree on the big difference, odometry is the one that's wrong: SNAP
+            if (big) {
+                snapFrames.addLast(new double[]{errX, errY, errH});
+                while (snapFrames.size() > SNAP_FRAMES) snapFrames.removeFirst();
+                if (snapFrames.size() == SNAP_FRAMES && snapFramesAgree()) {
+                    double mx = 0, my = 0, hs = 0, hc = 0;
+                    int hn = 0;
+                    for (double[] f : snapFrames) {
+                        mx += f[0] / SNAP_FRAMES;
+                        my += f[1] / SNAP_FRAMES;
+                        if (!Double.isNaN(f[2])) { hs += Math.sin(f[2]); hc += Math.cos(f[2]); hn++; }
+                    }
+                    applyShift(current, mx, my, hn > 0 ? Math.atan2(hs, hc) : 0);
+                    turret.resetHeadingTracking(); // the heading jumped - don't read it as the robot spinning
+                    kalmanReset(range);
+                    snapFrames.clear();
+                    snapCount++;
                 }
-                double mh = hn > 0 ? Math.atan2(hs, hc) : 0;
-                applyShift(current, mx, my, mh);
-                turret.resetHeadingTracking(); // the heading jumped - don't read it as the robot spinning
-                snapFrames.clear();
-                snapCount++;
             }
             return;
         }
         snapFrames.clear();
 
-        // ---- Small disagreement: nudge toward vision every frame ----
-        double dHeading = Double.isNaN(errH) ? 0 : HEADING_GAIN * errH;
-        applyShift(current, XY_GAIN * errX, XY_GAIN * errY, dHeading);
+        // ---- Kalman update: K = P / (P + R), move by K * error, shrink P ----
+        double kx = varX / (varX + rXY);
+        double ky = varY / (varY + rXY);
+        varX *= (1 - kx);
+        varY *= (1 - ky);
+        double dHeading = 0;
+        if (!Double.isNaN(errH)) {
+            double kh = varH / (varH + rH);
+            dHeading = kh * errH;
+            varH *= (1 - kh);
+            lastKh = kh;
+        }
+        lastKx = kx;
+        applyShift(current, kx * errX, ky * errY, dHeading);
     }
 
     /** True if the stored big-disagreement frames all say roughly the same thing (not random bad frames). */
@@ -523,6 +662,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private void applyShift(Pose current, double dx, double dy, double dHeading) {
         follower.setPose(new Pose(current.x() + dx, current.y() + dy,
                 HiveTagGeometry.normalizeAngle(current.heading() + dHeading)));
+        lastPredictPose = follower.pose(); // a correction is not driving: don't grow the Kalman uncertainty for it
         for (double[] p : poseHistory) { // keep the history in the same frame as the corrected pose
             p[1] += dx;
             p[2] += dy;
@@ -547,12 +687,17 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
-        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1450/1500/1400 | LB ramp | RB slow");
-        telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim | Y wait for speed");
+        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1450/1500/1400 | LB ramp | RB slow | dpad up feed speed");
+        telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim | dpad L/R volley");
         if (launcherReady && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
         telemetry.addData("Tags seen", lastTags == null ? 0 : lastTags.size());
+        telemetry.addData("Force update (gp1 dpad down / gp2 RB)", forceStatus);
+        telemetry.addData("Kalman", "pos +/- %.1f in, heading +/- %.1f°, last gain %s",
+                Math.sqrt((varX + varY) / 2), Math.toDegrees(Math.sqrt(varH)),
+                Double.isNaN(lastKx) ? "-" : String.format("xy %.2f / h %s", lastKx,
+                        Double.isNaN(lastKh) ? "-" : String.format("%.2f", lastKh)));
         telemetry.addData("Vision snaps", "%d  (pose jumped to the Limelight)", snapCount);
         telemetry.addData("Vision correction", visionCorrection
                 ? (Double.isNaN(lastVisionError) ? "on" : String.format("on, last error %.1f in", lastVisionError))

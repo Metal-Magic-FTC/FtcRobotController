@@ -10,13 +10,12 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
  */
 public class RedHiveGoal {
 
-    public static final double GOAL_X = HiveTagGeometry.RED_HIVE_X_IN;
     /** Field line that splits "bottom half" from "top half" (the HIVE pivot line). */
     public static final double HALF_LINE_Y = HiveTagGeometry.PIVOT_Y_IN;
-    /** Cell center distance from the pivot line: 42.91/2 - 12.04/2 (level HIVE). */
-    public static final double CELL_OFFSET_Y = 15.4;
-    public static final double GOAL_BOTTOM_Y = HALF_LINE_Y - CELL_OFFSET_Y;
-    public static final double GOAL_TOP_Y = HALF_LINE_Y + CELL_OFFSET_Y;
+    /** Measured in CAD: bottom cell aim point (57.8, 54.2). The top cell is the same point mirrored over Y = 72. */
+    public static final double GOAL_X = 57.8;
+    public static final double GOAL_BOTTOM_Y = 54.2;
+    public static final double GOAL_TOP_Y = 2 * HALF_LINE_Y - GOAL_BOTTOM_Y; // 89.8
     public static final double SWITCH_HYSTERESIS_IN = 3.0;
 
     private boolean aimTop;

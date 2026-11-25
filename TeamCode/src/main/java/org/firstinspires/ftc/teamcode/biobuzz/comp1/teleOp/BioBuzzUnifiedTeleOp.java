@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.LauncherConstants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.launcher.advanced.Flywheel;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.AxonTurretAimOdo;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.RedHiveGoal;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretConstants;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.turret.TurretController;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.biobuzz.util.BulkReader;
  * gamepad1 (driver)
  *   left stick / right stick X - drive (robot-centric) / turn      right bumper - slow
  *   left bumper (hold)         - flower ramp DOWN (otherwise UP the whole match)
+ *   dpad up                    - transfer shoot speed: slow (default) <-> full
  *   left trigger  (hold)       - INTAKE: intake in, transfer backward at 0.25 (keeps balls out of the flywheel)
  *   right trigger (hold)       - SHOOT:  intake in, transfer forward at 0.6
  *   X (hold)                   - unjam: intake and transfer both backward
@@ -48,13 +50,16 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
     private static final double SLOW_SCALE = 0.4;
 
     // ======================= TURRET TARGET: center of the red HIVE =======================
-    private static final double HIVE_X = HiveTagGeometry.RED_HIVE_X_IN;
-    private static final double HIVE_Y = HiveTagGeometry.PIVOT_Y_IN;
+    /** Aims at the red HIVE cell on the robot's half of the field (RedHiveGoal: (57.8, 54.2) / (57.8, 89.8)). */
+    private final RedHiveGoal goal = new RedHiveGoal(AxonTurretAimOdo.START.y());
 
     // ======================= INTAKE / TRANSFER =======================
     private static final double INTAKE_POWER = 1.0;
     private static final double INTAKE_TRANSFER_POWER = -0.25; // while intaking: hold balls back
-    private static final double SHOOT_TRANSFER_POWER = 0.45; // was 0.6: slower feed = more recovery time per ball
+    /** Transfer while shooting. gamepad1 dpad up toggles SLOW (default) / FULL. */
+    private static final double SHOOT_TRANSFER_SLOW = 0.5;  // default. Slower = more time for the wheel to recover per ball
+    private static final double SHOOT_TRANSFER_FULL = 1.0;
+    private boolean fullTransfer = false;
     private static final double TRIGGER_PRESSED = 0.3;
 
     // ======================= FLYWHEEL (ticks/s) =======================
@@ -130,7 +135,8 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             if (gamepad1.aWasPressed()) autoAim = !autoAim;
             double turretTarget = Double.NaN;
             if (autoAim) {
-                turretTarget = turret.aimAt(pose.x(), pose.y(), pose.heading(), HIVE_X, HIVE_Y);
+                goal.update(pose.y());
+                turretTarget = turret.aimAt(pose.x(), pose.y(), pose.heading(), goal.x(), goal.y());
             } else {
                 double manual = (gamepad1.dpad_left ? 1 : 0) - (gamepad1.dpad_right ? 1 : 0); // left = +
                 turret.manual(manual);
@@ -145,19 +151,25 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             if (gamepad2.dpadDownWasPressed()) targetVelocity -= VELOCITY_STEP;
             targetVelocity = Range.clip(targetVelocity, 0, MAX_VELOCITY);
             // target stays in ticks/s (same numbers as before), converted to RPM for Flywheel; runs every loop
-            if (flywheelOn) flywheel.setMotorRPM(Flywheel.ticksPerSecToRpm(targetVelocity));
+            if (gamepad2.dpadRightWasPressed()) Flywheel.VOLLEY_FACTOR += 0.05;
+            if (gamepad2.dpadLeftWasPressed()) Flywheel.VOLLEY_FACTOR = Math.max(1.0, Flywheel.VOLLEY_FACTOR - 0.05);
+            // balls 2+ of a burst (right trigger held): target raised by VOLLEY_FACTOR so the wheel keeps up
+            if (flywheelOn) flywheel.setMotorRPM(flywheel.volleyTarget(Flywheel.ticksPerSecToRpm(targetVelocity),
+                    gamepad1.right_trigger >= TRIGGER_PRESSED));
             else flywheel.stopMotors();
             double velocity = flywheel.getTicksPerSec();
             boolean atSpeed = flywheelOn
                     && Math.abs(targetVelocity - velocity) <= LauncherConstants.VELOCITY_TOLERANCE * targetVelocity;
 
             // ---- intake / shoot ----
+            if (gamepad1.dpadUpWasPressed()) fullTransfer = !fullTransfer;
+            double shootTransfer = fullTransfer ? SHOOT_TRANSFER_FULL : SHOOT_TRANSFER_SLOW;
             String feed;
             if (gamepad1.x) {
-                setFeed(-INTAKE_POWER, -SHOOT_TRANSFER_POWER);
+                setFeed(-INTAKE_POWER, -shootTransfer);
                 feed = "UNJAM";
             } else if (gamepad1.right_trigger >= TRIGGER_PRESSED) {
-                setFeed(INTAKE_POWER, SHOOT_TRANSFER_POWER);
+                setFeed(INTAKE_POWER, shootTransfer);
                 feed = flywheelOn ? "SHOOTING" : "SHOOTING - flywheel is OFF (Y)";
             } else if (gamepad1.left_trigger >= TRIGGER_PRESSED) {
                 setFeed(INTAKE_POWER, INTAKE_TRANSFER_POWER);
@@ -168,6 +180,9 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             }
 
             // ---- telemetry ----
+            telemetry.addData("Transfer speed (dpad up)", fullTransfer ? "FULL" : "slow");
+            telemetry.addData("Volley boost (gp2 dpad L/R)", "x%.2f%s", Flywheel.VOLLEY_FACTOR,
+                    flywheel.inVolley() ? "  <<< ACTIVE" : "");
             telemetry.addData("Flower ramp (LB)", gamepad1.left_bumper ? "DOWN" : "up");
             telemetry.addData("Flywheel (Y)", !flywheelOn ? "OFF" : flywheel.isBoosting() ? "BOOST"
                     : atSpeed ? "READY" : "spinning up");
@@ -180,7 +195,8 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
                 telemetry.addData("Turret", "%.1f°", turret.angleDeg());
             }
             telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
-            telemetry.addData("Hive distance", "%.1f in", Math.hypot(HIVE_X - pose.x(), HIVE_Y - pose.y()));
+            telemetry.addData("Hive target", "%s cell (%.1f, %.1f), %.1f in away", goal.aimingTop() ? "TOP" : "BOTTOM",
+                    goal.x(), goal.y(), Math.hypot(goal.x() - pose.x(), goal.y() - pose.y()));
             telemetry.update();
         }
 
