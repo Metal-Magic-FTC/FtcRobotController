@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.aud2tip;
+package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.nihalsautos;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.api.Paths;
@@ -7,7 +7,7 @@ import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
 
 
-public class RedAud2TipPaths {
+public class RedTipPaths {
 
     private static final PoseFactory poseFactory = PoseFactory.degrees();
 
@@ -113,5 +113,77 @@ public class RedAud2TipPaths {
     /** RESCUE: start spot -> park through the lane. */
     public Path rescueToPark() {
         return Paths.curve(start, laneControlAudience, laneControlRear, park).linear(start, park);
+    }
+
+    // =====================================================================================
+    // ADAPT ROUTING (used by RedAutoAdaptV1). Same poses as above, just every combination.
+    // Shooting spots: START shoots cell A, LAUNCH_B shoots cell B.
+    // =====================================================================================
+
+    /** Named places the Adapt auto moves between. */
+    public enum Place { START, LAUNCH_B, GARDEN, WALL_FLOWER, FAR_FLOWER }
+
+    /** Shooting spot -> the first pose of a pickup (garden start, wall flower approach, far flower). */
+    public Path toPickup(Place from, Place pickup) {
+        boolean fromStart = from == Place.START;
+        switch (pickup) {
+            case GARDEN:
+                return fromStart ? toGarden()
+                        : Paths.curve(launchB, laneControlRear, laneControlAudience, gardenStart).linear(launchB, gardenStart);
+            case WALL_FLOWER:
+                return fromStart ? Paths.line(start, redWallFlowerApproach).linear(start, redWallFlowerApproach)
+                        : launchBToRedWallFlower();
+            default: // FAR_FLOWER
+                return fromStart ? Paths.curve(start, laneControlAudience, laneControlRear, farWallFlower).linear(start, farWallFlower)
+                        : launchBToFarWallFlower();
+        }
+    }
+
+    /** The slow intake part of a pickup (garden sweep / wall flower creep). null = none (far flower). */
+    public Path pickupSweep(Place pickup) {
+        if (pickup == Place.GARDEN) return gardenSweep();
+        if (pickup == Place.WALL_FLOWER) return redWallFlowerCreep();
+        return null;
+    }
+
+    /** Speed for pickupSweep(). */
+    public double pickupSweepSpeed(Place pickup) {
+        return pickup == Place.GARDEN ? SWEEP : CREEP;
+    }
+
+    /** Speed for toPickup(): the far flower hop from LAUNCH_B is short and turns in place. */
+    public double toPickupSpeed(Place from, Place pickup) {
+        return (pickup == Place.FAR_FLOWER && from == Place.LAUNCH_B) ? SHORT_HOP : FAST;
+    }
+
+    /** End of a pickup -> a shooting spot (START or LAUNCH_B). */
+    public Path pickupToSpot(Place pickup, Place spot) {
+        boolean toStart = spot == Place.START;
+        switch (pickup) {
+            case GARDEN:
+                return toStart ? Paths.line(gardenEnd, start).linear(gardenEnd, start) : gardenToLaunchB();
+            case WALL_FLOWER:
+                return toStart ? Paths.line(redWallFlower, start).linear(redWallFlower, start) : redWallFlowerToLaunchB();
+            default: // FAR_FLOWER
+                return toStart ? Paths.curve(farWallFlower, laneControlRear, laneControlAudience, start).linear(farWallFlower, start)
+                        : farWallFlowerToLaunchB();
+        }
+    }
+
+    /** Speed for pickupToSpot(). */
+    public double pickupToSpotSpeed(Place pickup, Place spot) {
+        return (pickup == Place.FAR_FLOWER && spot == Place.LAUNCH_B) ? SHORT_HOP : FAST;
+    }
+
+    /** Switch shooting spots through the lane (START <-> LAUNCH_B). */
+    public Path switchSpot(Place from) {
+        return from == Place.START
+                ? Paths.curve(start, laneControlAudience, laneControlRear, launchB).linear(start, launchB)
+                : rescueToStart();
+    }
+
+    /** Park from a shooting spot. */
+    public Path parkFromSpot(Place spot) {
+        return spot == Place.START ? rescueToPark() : parkPath();
     }
 }

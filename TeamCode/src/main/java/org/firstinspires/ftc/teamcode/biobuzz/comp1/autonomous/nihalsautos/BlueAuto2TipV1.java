@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.aud2tip;
+package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.nihalsautos;
 
 import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Autonomous(name = "RED Aud 2Tip v1", group = "BioBuzz")
-public class RedAud2TipV1 extends LinearOpMode {
+@Autonomous(name = "BLUE Auto 2Tip v1", group = "BioBuzz")
+public class BlueAuto2TipV1 extends LinearOpMode {
 
     // =====================================================================================
     // TIMING AND SPEED
@@ -76,11 +76,9 @@ public class RedAud2TipV1 extends LinearOpMode {
     private void feedStart() { intakeMotor.setPower(FEED_POWER); }
     private void feedStop()  { intakeMotor.setPower(0); }
 
-    // =====================================================================================
-    // RUN
-    // =====================================================================================
+
     private Follower follower;
-    private RedAud2TipPaths paths;
+    private BlueTipPaths paths;
     private final ElapsedTime matchTimer = new ElapsedTime();
     private final List<String> stepLog = new ArrayList<>();
     private enum CellState { UP, DOWN, MOVING, UNSEEN }
@@ -91,7 +89,7 @@ public class RedAud2TipV1 extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         initHardware();
         follower = Constants.create(hardwareMap);
-        paths = new RedAud2TipPaths(); // built during init so start is instant
+        paths = new BlueTipPaths(); // built during init so start is instant
         paths.setStartPose(follower);
         hoodServo.setPosition(HOOD_A);
 
@@ -99,8 +97,8 @@ public class RedAud2TipV1 extends LinearOpMode {
         while (opModeInInit()) {
             follower.update();
             readHiveOnce();
-            telemetry.addLine("RED. Robot on the audience wall, facing your start cell (the one with your 3 nectar).");
-            telemetry.addData("Red HIVE", "%s (%.1f°)", lastCellB, lastTiltDeg);
+            telemetry.addLine("BLUE. Robot on the audience wall, facing your start cell (the one with your 3 nectar).");
+            telemetry.addData("Blue HIVE", "%s (%.1f°)", lastCellB, lastTiltDeg);
             telemetry.update();
             sleep(20);
         }
@@ -126,16 +124,16 @@ public class RedAud2TipV1 extends LinearOpMode {
         log("1 shot cell A (tip 1)");
 
         // 2. Garden. Leaving the wall = LEAVE.
-        runPath(paths.toGarden(), RedAud2TipPaths.FAST);
+        runPath(paths.toGarden(), BlueTipPaths.FAST);
         intakeOn();
-        runPath(paths.gardenSweep(), RedAud2TipPaths.SWEEP);
+        runPath(paths.gardenSweep(), BlueTipPaths.SWEEP);
         holdMs(GARDEN_DWELL_MS);
         intakeOff();
         log("2 garden loaded");
 
         // 3. Lane to launch spot B. Make sure tip 1 is done and B is up before shooting.
         launcherForCellB();
-        runPath(paths.gardenToLaunchB(), RedAud2TipPaths.FAST);
+        runPath(paths.gardenToLaunchB(), BlueTipPaths.FAST);
         holdUntil(CELL_B_EARLIEST_S);
         if (USE_CELL_B_CHECK && readCellB(TIP1_CHECK_WAIT_S) == CellState.DOWN) {
             rescueTip1ThenPark(); // tip 1 never happened: put the garden pollen in cell A instead
@@ -145,15 +143,15 @@ public class RedAud2TipV1 extends LinearOpMode {
         log("3 shot B (4 in)");
 
         // 4. Alliance-wall flower.
-        runPath(paths.launchBToRedWallFlower(), RedAud2TipPaths.FAST);
+        runPath(paths.launchBToBlueWallFlower(), BlueTipPaths.FAST);
         intakeOn();
-        runPath(paths.redWallFlowerCreep(), RedAud2TipPaths.CREEP);
+        runPath(paths.blueWallFlowerCreep(), BlueTipPaths.CREEP);
         holdMs(FLOWER_INTAKE_MS);
         intakeOff();
         log("4 wall flower loaded");
 
         // 5. Back to B, shoot. 8 in B should tip it.
-        runPath(paths.redWallFlowerToLaunchB(), RedAud2TipPaths.FAST);
+        runPath(paths.blueWallFlowerToLaunchB(), BlueTipPaths.FAST);
         if (USE_CELL_B_CHECK) readCellB(SETTLE_WAIT_S); // lets the robot settle and waits out any wobble
         shootVolley();
         log("5 shot B (8 in)");
@@ -165,7 +163,7 @@ public class RedAud2TipV1 extends LinearOpMode {
 
         // 6. Far-wall flower (always intake the last set).
         intakeOn();
-        runPath(paths.launchBToFarWallFlower(), RedAud2TipPaths.SHORT_HOP);
+        runPath(paths.launchBToFarWallFlower(), BlueTipPaths.SHORT_HOP);
         holdMs(FLOWER_INTAKE_MS);
         intakeOff();
         log("6 far flower loaded");
@@ -173,11 +171,11 @@ public class RedAud2TipV1 extends LinearOpMode {
         if (tipped) {
             // 7. Already tipped: keep the pollen and go straight to park.
             startParking();
-            runPath(paths.farWallFlowerToPark(), RedAud2TipPaths.FAST);
+            runPath(paths.farWallFlowerToPark(), BlueTipPaths.FAST);
             log("8 parked (kept pollen)");
         } else {
             // 7. Not tipped: back to B and shoot, unless it would cost the park.
-            runPath(paths.farWallFlowerToLaunchB(), RedAud2TipPaths.SHORT_HOP);
+            runPath(paths.farWallFlowerToLaunchB(), BlueTipPaths.SHORT_HOP);
             if (matchTimer.seconds() <= VOLLEY_3_LATEST_S) {
                 shootVolley();
                 log("7 shot B (12 in)");
@@ -186,7 +184,7 @@ public class RedAud2TipV1 extends LinearOpMode {
             }
             // 8. Park.
             startParking();
-            runPath(paths.parkPath(), RedAud2TipPaths.FAST);
+            runPath(paths.parkPath(), BlueTipPaths.FAST);
             log("8 parked");
         }
     }
@@ -195,11 +193,11 @@ public class RedAud2TipV1 extends LinearOpMode {
     private void rescueTip1ThenPark() {
         log("3 B still down: rescue tip 1");
         launcherForCellA();
-        runPath(paths.rescueToStart(), RedAud2TipPaths.FAST);
+        runPath(paths.rescueToStart(), BlueTipPaths.FAST);
         shootVolley();
         log("R shot cell A");
         startParking();
-        runPath(paths.rescueToPark(), RedAud2TipPaths.FAST);
+        runPath(paths.rescueToPark(), BlueTipPaths.FAST);
         log("8 parked");
     }
 
@@ -227,7 +225,7 @@ public class RedAud2TipV1 extends LinearOpMode {
     private void parkNow() {
         startParking();
         log(String.format("! %.1f s: park now", PARK_AT_S));
-        runPath(paths.parkFromHere(follower), RedAud2TipPaths.FAST);
+        runPath(paths.parkFromHere(follower), BlueTipPaths.FAST);
         log("8 parked");
     }
 
@@ -274,8 +272,8 @@ public class RedAud2TipV1 extends LinearOpMode {
     }
 
     /**
-     * Watches the red HIVE until its tilt settles in a stable position.
-     * UP/DOWN (cell B) once settled, MOVING if it never settled, UNSEEN if no red tags were visible.
+     * Watches the blue HIVE until its tilt settles in a stable position.
+     * UP/DOWN (cell B) once settled, MOVING if it never settled, UNSEEN if no blue tags were visible.
      */
     private CellState readCellB(double maxWaitS) {
         ElapsedTime t = new ElapsedTime();
@@ -297,10 +295,10 @@ public class RedAud2TipV1 extends LinearOpMode {
         return seen ? CellState.MOVING : CellState.UNSEEN;
     }
 
-    /** One Limelight read of the red HIVE. SCORING cell up = cell B UP. */
+    /** One Limelight read of the blue HIVE. SCORING cell up = cell B UP. */
     private CellState readHiveOnce() {
         HiveTilt tilt = HiveTagGeometry.measureHive(
-                HiveTagGeometry.readTags(limelight.getLatestResult()), Hive.RED);
+                HiveTagGeometry.readTags(limelight.getLatestResult()), Hive.BLUE);
         TiltState s = tilt.state;
         lastTiltDeg = tilt.tiltDeg;
         if (s == TiltState.SCORING_UP) lastCellB = CellState.UP;
@@ -317,7 +315,7 @@ public class RedAud2TipV1 extends LinearOpMode {
 
     private void showLog() {
         telemetry.addData("Match time", "%.1f s", matchTimer.seconds());
-        telemetry.addData("Red HIVE", "%s (%.1f°)", lastCellB, lastTiltDeg);
+        telemetry.addData("Blue HIVE", "%s (%.1f°)", lastCellB, lastTiltDeg);
         for (String s : stepLog) telemetry.addLine(s);
         telemetry.update();
     }

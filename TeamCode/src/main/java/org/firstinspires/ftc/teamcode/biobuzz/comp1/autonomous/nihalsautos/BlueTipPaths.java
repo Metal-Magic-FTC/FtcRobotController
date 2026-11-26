@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.aud2tip;
+package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.nihalsautos;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.api.Paths;
@@ -7,11 +7,11 @@ import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
 
 /**
- * BLUE 2-tip paths: a mirror of RedAud2TipPaths across the field center line (x = 72).
+ * BLUE 2-tip paths: a mirror of RedTipPaths across the field center line (x = 72).
  *   blue x = 144 - red x,   y unchanged,   blue heading = 180 - red heading.
  * If you retune a red pose, mirror it the same way here.
  */
-public class BlueAud2TipPaths {
+public class BlueTipPaths {
 
     private static final PoseFactory poseFactory = PoseFactory.degrees();
 
