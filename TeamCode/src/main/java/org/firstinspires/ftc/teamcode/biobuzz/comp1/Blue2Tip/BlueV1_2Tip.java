@@ -76,9 +76,7 @@ public class BlueV1_2Tip extends LinearOpMode {
     private void feedStart() { intakeMotor.setPower(FEED_POWER); }
     private void feedStop()  { intakeMotor.setPower(0); }
 
-    // =====================================================================================
-    // RUN
-    // =====================================================================================
+
     private Follower follower;
     private Blue2TipPaths paths;
     private final ElapsedTime matchTimer = new ElapsedTime();
