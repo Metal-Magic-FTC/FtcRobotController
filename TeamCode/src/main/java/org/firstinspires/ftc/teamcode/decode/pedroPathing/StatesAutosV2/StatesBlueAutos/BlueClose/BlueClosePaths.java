@@ -17,7 +17,7 @@ public class BlueClosePaths {
 
     public final Pose SHOOT = np(1, 1, 0);
     public final Pose SHOOTC = np(1, 1, 0);
-    public final Pose SROW1 = np(1, 1, 0);
+    public final Pose SROW1x = np(1, 1, 0);
     public final Pose EROW1 = np(1, 1, 0);
     public final Pose SROW2 = np(1, 1, 0);
     public final Pose SROW2C = np(1, 1, 0);
