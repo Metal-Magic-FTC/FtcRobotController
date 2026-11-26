@@ -1,56 +1,51 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.Red2Tip;
 
-public class RedV1_2Tip {
-
-
-
+import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.pedro.Constants;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.Hive;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.HiveTilt;
+import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.TiltState;
 
-@Autonomous(name = "Solo 2 Tip (pollen only)", group = "BIOBUZZ")
-public class Solo2TipAuto extends LinearOpMode {
+import java.util.ArrayList;
+import java.util.List;
+
+
+@Autonomous(name = "Red V1 2 Tip", group = "BIOBUZZ")
+public class RedV1_2Tip extends LinearOpMode {
 
     // =====================================================================================
     // TIMING AND SPEED
     // =====================================================================================
-    private static final long   SHOOT_MS          = 2000; // one full volley of 4
-    private static final long   GARDEN_DWELL_MS   = 250;  // extra intake time after the garden sweep
-    private static final long   FLOWER_INTAKE_MS  = 3000; // pulling 4 out of a flower
-    private static final double FAST              = 1.0;  // max power on drive legs
-    private static final double SWEEP             = 0.45; // garden sweep
-    private static final double CREEP             = 0.35; // last few inches into a flower
-    private static final double SHORT_HOP         = 0.7;  // launch spot <-> far-wall flower
+    private static final long   SHOOT_MS          = 1800; // one full volley of 4 (was 2000)
+    private static final long   GARDEN_DWELL_MS   = 200;  // extra intake time after the garden sweep (was 250)
+    private static final long   FLOWER_INTAKE_MS  = 2700; // pulling 4 out of a flower (was 3000)
     private static final double CELL_B_EARLIEST_S = 6.5;  // tip 1 is finished turning by about here
-    private static final double VOLLEY_3_LATEST_S = 26.3; // later than this, skip volley 3 so you still park
+    private static final double VOLLEY_3_LATEST_S = 26.0; // later than this, skip the last shot (it would get cut off by PARK_AT_S)
     private static final double LEG_TIMEOUT_S     = 6.0;  // safety: never get stuck on one path
+    private static final double PARK_AT_S = 27.5;
 
-    // =====================================================================================
-    // CELL B CHECK (Limelight AprilTags)
-    // Team 12303's mapping: red second cell = tags 30-33, blue second cell = tags 38-41. Verify on your field.
-    // The camera has to see those tags from the launch spot (they are high, so it may need an upward tilt).
-    // If it can't, set USE_CELL_B_CHECK = false and the auto runs on timing only.
-    // =====================================================================================
-    private static final boolean USE_CELL_B_CHECK  = true;
-    private static final int     APRILTAG_PIPELINE = 3;
-    private static final int[]   RED_CELL_B_TAGS   = {30, 31, 32, 33};
-    private static final int[]   BLUE_CELL_B_TAGS  = {38, 39, 40, 41};
-    private static final double  CELL_B_UP_MIN_TY  = 10.0; // tune: tag ty (deg) when B is up, seen from the launch spot
-    private static final double  STILL_TY_DEG      = 0.5;  // ty change below this = not moving
-    private static final int     STILL_READS       = 3;    // this many still reads in a row = settled
 
-    // =====================================================================================
-    // HARDWARE: EDIT THIS SECTION TO MATCH YOUR BIOBUZZ ROBOT
-    // Names are from your DECODE autos. Change any that are different on the new robot.
-    // =====================================================================================
+    private static final boolean USE_CELL_B_CHECK = true;
+    private static final int     STILL_READS      = 3; // same stable tilt state this many reads in a row = settled
+    private static final double  TIP_CHECK_WAIT_S = 1.7; // after the third set: max time to wait for the HIVE to settle (was 2.0)
+    private static final double  TIP1_CHECK_WAIT_S = 1.7; // at launch B before the first B volley (was 2.0)
+    private static final double  SETTLE_WAIT_S     = 0.8; // before the third set (was 1.0)
+
     private DcMotorEx launchMotor;
-    private DcMotor   intakeMotor;
-    private Servo     hoodServo;
+    private DcMotor intakeMotor;
+    private Servo hoodServo;
     private Limelight3A limelight;
 
     private static final double LAUNCH_VEL_A = 1800; // tune: 43 in shot into cell A
@@ -67,7 +62,8 @@ public class Solo2TipAuto extends LinearOpMode {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         hoodServo   = hardwareMap.get(Servo.class, "hoodServo");
         limelight   = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(APRILTAG_PIPELINE);
+        limelight.setPollRateHz(100);
+        limelight.pipelineSwitch(HiveTagGeometry.APRILTAG_PIPELINE);
         limelight.start();
     }
 
@@ -84,54 +80,64 @@ public class Solo2TipAuto extends LinearOpMode {
     // RUN
     // =====================================================================================
     private Follower follower;
-    private Solo2TipPaths paths;
-    private boolean blue = false;
-    private int[] cellBTags = RED_CELL_B_TAGS;
+    private Red2TipPaths paths;
     private final ElapsedTime matchTimer = new ElapsedTime();
     private final List<String> stepLog = new ArrayList<>();
     private enum CellState { UP, DOWN, MOVING, UNSEEN }
+    private CellState lastCellB = CellState.UNSEEN;
+    private double lastTiltDeg = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
         initHardware();
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.create(hardwareMap);
+        paths = new Red2TipPaths(); // built during init so start is instant
+        paths.setStartPose(follower);
         hoodServo.setPosition(HOOD_A);
 
-        // Pick the alliance during INIT.
+
         while (opModeInInit()) {
-            if (gamepad1.x) blue = true;
-            if (gamepad1.b) blue = false;
-            telemetry.addLine("X = BLUE, B = RED");
-            telemetry.addData("Alliance", blue ? "BLUE" : "RED");
-            telemetry.addLine("Robot on the audience wall, facing your start cell (the one with your 3 nectar).");
+            follower.update();
+            readHiveOnce();
+            telemetry.addLine("RED. Robot on the audience wall, facing your start cell (the one with your 3 nectar).");
+            telemetry.addData("Red HIVE", "%s (%.1f°)", lastCellB, lastTiltDeg);
             telemetry.update();
             sleep(20);
         }
-        if (isStopRequested()) return;
+        if (isStopRequested()) {
+            limelight.stop();
+            return;
+        }
 
-        paths = new Solo2TipPaths(blue);
-        cellBTags = blue ? BLUE_CELL_B_TAGS : RED_CELL_B_TAGS;
-        follower.setStartingPose(paths.start);
         matchTimer.reset();
+        try {
+            runAuto();
+        } catch (ParkNow e) {
+            parkNow(); // PARK_AT_S hit in the middle of something: drop it and park
+        }
+        finish();
+    }
 
+    /** The whole auto. Any wait/path loop throws ParkNow once the clock reaches PARK_AT_S. */
+    private void runAuto() {
         // 1. Tip 1: shoot preloads into cell A from the start spot.
         launcherForCellA();
         shootVolley();
         log("1 shot cell A (tip 1)");
 
         // 2. Garden. Leaving the wall = LEAVE.
-        runPath(paths.toGarden(), FAST);
+        runPath(paths.toGarden(), Red2TipPaths.FAST);
         intakeOn();
-        runPath(paths.gardenSweep(), SWEEP);
+        runPath(paths.gardenSweep(), Red2TipPaths.SWEEP);
         holdMs(GARDEN_DWELL_MS);
         intakeOff();
         log("2 garden loaded");
 
         // 3. Lane to launch spot B. Make sure tip 1 is done and B is up before shooting.
         launcherForCellB();
-        runPath(paths.gardenToLaunchB(), FAST);
+        runPath(paths.gardenToLaunchB(), Red2TipPaths.FAST);
         holdUntil(CELL_B_EARLIEST_S);
-        if (USE_CELL_B_CHECK && readCellB(2.0) == CellState.DOWN) {
+        if (USE_CELL_B_CHECK && readCellB(TIP1_CHECK_WAIT_S) == CellState.DOWN) {
             rescueTip1ThenPark(); // tip 1 never happened: put the garden pollen in cell A instead
             return;
         }
@@ -139,57 +145,94 @@ public class Solo2TipAuto extends LinearOpMode {
         log("3 shot B (4 in)");
 
         // 4. Alliance-wall flower.
-        runPath(paths.launchBToRedWallFlower(), FAST);
+        runPath(paths.launchBToRedWallFlower(), Red2TipPaths.FAST);
         intakeOn();
-        runPath(paths.redWallFlowerCreep(), CREEP);
+        runPath(paths.redWallFlowerCreep(), Red2TipPaths.CREEP);
         holdMs(FLOWER_INTAKE_MS);
         intakeOff();
         log("4 wall flower loaded");
 
         // 5. Back to B, shoot. 8 in B should tip it.
-        runPath(paths.redWallFlowerToLaunchB(), FAST);
-        if (USE_CELL_B_CHECK) readCellB(1.0); // lets the robot settle and waits out any wobble
+        runPath(paths.redWallFlowerToLaunchB(), Red2TipPaths.FAST);
+        if (USE_CELL_B_CHECK) readCellB(SETTLE_WAIT_S); // lets the robot settle and waits out any wobble
         shootVolley();
         log("5 shot B (8 in)");
 
-        // 6. Far-wall flower.
+        // 5b. Did the HIVE tip after the third set? B DOWN = tip 2 done.
+        //     Anything else (still UP, still swinging, not seen) counts as NOT tipped, so we go back and shoot.
+        boolean tipped = USE_CELL_B_CHECK && readCellB(TIP_CHECK_WAIT_S) == CellState.DOWN;
+        log(tipped ? "5 HIVE tipped" : "5 HIVE not tipped");
+
+        // 6. Far-wall flower (always intake the last set).
         intakeOn();
-        runPath(paths.launchBToFarWallFlower(), SHORT_HOP);
+        runPath(paths.launchBToFarWallFlower(), Red2TipPaths.SHORT_HOP);
         holdMs(FLOWER_INTAKE_MS);
         intakeOff();
         log("6 far flower loaded");
 
-        // 7. Insurance volley. Skipped only if B already tipped (keep the pollen for cell A in teleop)
-        //    or if it would cost you the park.
-        runPath(paths.farWallFlowerToLaunchB(), SHORT_HOP);
-        boolean fire = matchTimer.seconds() <= VOLLEY_3_LATEST_S;
-        if (fire && USE_CELL_B_CHECK) {
-            CellState b = readCellB(1.0); // holds fire while B is still turning
-            if (b == CellState.DOWN) fire = false;
-        }
-        if (fire && matchTimer.seconds() <= VOLLEY_3_LATEST_S + 0.5) {
-            shootVolley();
-            log("7 shot B (12 in)");
+        if (tipped) {
+            // 7. Already tipped: keep the pollen and go straight to park.
+            startParking();
+            runPath(paths.farWallFlowerToPark(), Red2TipPaths.FAST);
+            log("8 parked (kept pollen)");
         } else {
-            log("7 skipped volley 3");
+            // 7. Not tipped: back to B and shoot, unless it would cost the park.
+            runPath(paths.farWallFlowerToLaunchB(), Red2TipPaths.SHORT_HOP);
+            if (matchTimer.seconds() <= VOLLEY_3_LATEST_S) {
+                shootVolley();
+                log("7 shot B (12 in)");
+            } else {
+                log("7 out of time, skipped shot");
+            }
+            // 8. Park.
+            startParking();
+            runPath(paths.parkPath(), Red2TipPaths.FAST);
+            log("8 parked");
         }
-
-        // 8. Park.
-        runPath(paths.parkPath(), FAST);
-        log("8 parked");
-
-        while (opModeIsActive()) { follower.update(); showLog(); }
     }
 
     /** Tip 1 failed: go back to cell A with the garden pollen, shoot, then park. */
     private void rescueTip1ThenPark() {
         log("3 B still down: rescue tip 1");
         launcherForCellA();
-        runPath(paths.rescueToStart(), FAST);
+        runPath(paths.rescueToStart(), Red2TipPaths.FAST);
         shootVolley();
         log("R shot cell A");
-        runPath(paths.rescueToPark(), FAST);
+        startParking();
+        runPath(paths.rescueToPark(), Red2TipPaths.FAST);
         log("8 parked");
+    }
+
+    // =====================================================================================
+    // PARK GUARD
+    // =====================================================================================
+    private static class ParkNow extends RuntimeException {}
+
+    /** true once the robot is on its way to park; the guard stops interrupting. */
+    private boolean parking = false;
+
+    /** Called inside every wait/path loop. */
+    private void checkParkClock() {
+        if (!parking && matchTimer.seconds() >= PARK_AT_S) throw new ParkNow();
+    }
+
+    private void startParking() {
+        parking = true;
+        feedStop();
+        intakeOff();
+        launchMotor.setVelocity(0);
+    }
+
+    /** Out of time: straight to park from wherever the robot is. */
+    private void parkNow() {
+        startParking();
+        log(String.format("! %.1f s: park now", PARK_AT_S));
+        runPath(paths.parkFromHere(follower), Red2TipPaths.FAST);
+        log("8 parked");
+    }
+
+    private void finish() {
+        limelight.stop();
         while (opModeIsActive()) { follower.update(); showLog(); }
     }
 
@@ -197,14 +240,20 @@ public class Solo2TipAuto extends LinearOpMode {
     // HELPERS
     // =====================================================================================
 
-    /** Follows a path to the end and keeps holding that position afterward. */
-    private void runPath(Path path, double maxPower) {
-        follower.setMaxPower(maxPower);
-        follower.followPath(path, true);
-        ElapsedTime t = new ElapsedTime();
-        while (opModeIsActive() && follower.isBusy() && t.seconds() < LEG_TIMEOUT_S) {
-            follower.update();
-            showLog();
+    /** Follows a path to the end (the follower keeps holding the end pose). speedFraction is 0..1 of top speed. */
+    private void runPath(Path path, double speedFraction) {
+        Constants.foresightConfig.maxPathSpeed.set(
+                speedFraction >= 1.0 ? ForesightConfig.Constraint.NONE : speedFraction);
+        try {
+            follower.follow(path);
+            ElapsedTime t = new ElapsedTime();
+            while (opModeIsActive() && follower.isBusy() && t.seconds() < LEG_TIMEOUT_S) {
+                checkParkClock();
+                follower.update();
+                showLog();
+            }
+        } finally {
+            Constants.foresightConfig.maxPathSpeed.set(ForesightConfig.Constraint.NONE);
         }
     }
 
@@ -217,45 +266,48 @@ public class Solo2TipAuto extends LinearOpMode {
 
     private void holdMs(long ms) {
         ElapsedTime t = new ElapsedTime();
-        while (opModeIsActive() && t.milliseconds() < ms) follower.update();
+        while (opModeIsActive() && t.milliseconds() < ms) { checkParkClock(); follower.update(); }
     }
 
     private void holdUntil(double matchSeconds) {
-        while (opModeIsActive() && matchTimer.seconds() < matchSeconds) follower.update();
+        while (opModeIsActive() && matchTimer.seconds() < matchSeconds) { checkParkClock(); follower.update(); }
     }
 
-    /** Watches cell B's tags until they stop moving. UP/DOWN once settled, MOVING if never settled, UNSEEN if not visible. */
+    /**
+     * Watches the red HIVE until its tilt settles in a stable position.
+     * UP/DOWN (cell B) once settled, MOVING if it never settled, UNSEEN if no red tags were visible.
+     */
     private CellState readCellB(double maxWaitS) {
         ElapsedTime t = new ElapsedTime();
-        Double lastTy = null;
+        CellState prev = null;
         int still = 0;
         boolean seen = false;
         while (opModeIsActive() && t.seconds() < maxWaitS) {
+            checkParkClock();
             follower.update();
-            Double ty = cellBTy();
-            if (ty != null) {
+            CellState now = readHiveOnce();
+            if (now != CellState.UNSEEN) {
                 seen = true;
-                still = (lastTy != null && Math.abs(ty - lastTy) < STILL_TY_DEG) ? still + 1 : 0;
-                lastTy = ty;
-                if (still >= STILL_READS) return ty >= CELL_B_UP_MIN_TY ? CellState.UP : CellState.DOWN;
+                still = (now == prev && now != CellState.MOVING) ? still + 1 : 0;
+                prev = now;
+                if (still >= STILL_READS) return now;
             }
             sleep(40);
         }
         return seen ? CellState.MOVING : CellState.UNSEEN;
     }
 
-    /** Average vertical angle of the visible cell B tags, or null if none are visible. */
-    private Double cellBTy() {
-        LLResult r = limelight.getLatestResult();
-        if (r == null || !r.isValid()) return null;
-        double sum = 0;
-        int n = 0;
-        for (LLResultTypes.FiducialResult f : r.getFiducialResults()) {
-            for (int id : cellBTags) {
-                if (f.getFiducialId() == id) { sum += f.getTargetYDegrees(); n++; }
-            }
-        }
-        return n == 0 ? null : sum / n;
+    /** One Limelight read of the red HIVE. SCORING cell up = cell B UP. */
+    private CellState readHiveOnce() {
+        HiveTilt tilt = HiveTagGeometry.measureHive(
+                HiveTagGeometry.readTags(limelight.getLatestResult()), Hive.RED);
+        TiltState s = tilt.state;
+        lastTiltDeg = tilt.tiltDeg;
+        if (s == TiltState.SCORING_UP) lastCellB = CellState.UP;
+        else if (s == TiltState.AUDIENCE_UP) lastCellB = CellState.DOWN;
+        else if (s == TiltState.TRANSITION) lastCellB = CellState.MOVING;
+        else lastCellB = CellState.UNSEEN;
+        return lastCellB;
     }
 
     private void log(String step) {
@@ -264,10 +316,9 @@ public class Solo2TipAuto extends LinearOpMode {
     }
 
     private void showLog() {
-        telemetry.addData("Alliance", blue ? "BLUE" : "RED");
         telemetry.addData("Match time", "%.1f s", matchTimer.seconds());
+        telemetry.addData("Red HIVE", "%s (%.1f°)", lastCellB, lastTiltDeg);
         for (String s : stepLog) telemetry.addLine(s);
         telemetry.update();
     }
 }
-

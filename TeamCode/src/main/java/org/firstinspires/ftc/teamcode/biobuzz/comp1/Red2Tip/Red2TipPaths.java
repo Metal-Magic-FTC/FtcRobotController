@@ -11,8 +11,15 @@ public class Red2TipPaths {
 
     private static final PoseFactory poseFactory = PoseFactory.degrees();
 
+    // ===================== PATH SPEEDS (fraction of top speed, 1.0 = full) =====================
+    public static final double FAST      = 1.0;  // normal drive legs
+    public static final double SWEEP     = 0.45; // garden sweep
+    public static final double CREEP     = 0.35; // last few inches into a flower
+    public static final double SHORT_HOP = 0.7;  // launch spot <-> far-wall flower
+
+    // ===================== POSES =====================
     // Starts on the AUDIENCE wall (not the rear wall like V4): cell A is the up cell with the 3 nectar.
-    public static final Pose start = poseFactory.of(58, 9, 90);
+    private final Pose start = poseFactory.of(58, 9, 90);
 
     // Garden sweep along the audience wall toward the red-wall corner
     private final Pose gardenStart = poseFactory.of(26, 10, 180);
@@ -36,6 +43,11 @@ public class Red2TipPaths {
     private final Pose gardenToBControl2 = poseFactory.of(22, 122, 0);
     private final Pose laneControlRear = poseFactory.of(26, 118, 0);
     private final Pose laneControlAudience = poseFactory.of(26, 70, 0);
+
+    /** Tells the follower where the robot starts. Call once during init. */
+    public void setStartPose(Follower follower) {
+        follower.setPose(start);
+    }
 
     /** Start -> garden. */
     public Path toGarden() {
@@ -80,5 +92,26 @@ public class Red2TipPaths {
     /** Launch spot -> park. */
     public Path parkPath() {
         return Paths.line(launchB, park).linear(launchB, park);
+    }
+
+    /** Emergency park: straight from wherever the robot is right now (the whole route stays left of the HIVE). */
+    public Path parkFromHere(Follower follower) {
+        Pose current = follower.pose();
+        return Paths.line(current, park).linear(current, park);
+    }
+
+    /** Far-wall FLOWER -> park (used when the HIVE already tipped, so no return to the launch spot). */
+    public Path farWallFlowerToPark() {
+        return Paths.line(farWallFlower, park).linear(farWallFlower, park);
+    }
+
+    /** RESCUE (tip 1 failed): launch spot -> back to the start spot through the lane (a straight line would hit the HIVE). */
+    public Path rescueToStart() {
+        return Paths.curve(launchB, laneControlRear, laneControlAudience, start).linear(launchB, start);
+    }
+
+    /** RESCUE: start spot -> park through the lane. */
+    public Path rescueToPark() {
+        return Paths.curve(start, laneControlAudience, laneControlRear, park).linear(start, park);
     }
 }
