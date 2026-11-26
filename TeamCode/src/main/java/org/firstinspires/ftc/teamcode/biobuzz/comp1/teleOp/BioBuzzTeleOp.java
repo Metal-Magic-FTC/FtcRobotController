@@ -139,6 +139,26 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     private static final double SLOW_MODE_SCALE = 0.4;
 
+    // ======================= TURN FEEL =======================
+    /**
+     * Turn output = TURN_MAX * stick^TURN_POWER (after the deadband). Higher TURN_POWER = much gentler for small
+     * stick pushes, while full stick still reaches TURN_MAX. 1 = straight line (old feel).
+     * With 3.0 / 0.9:  25% stick -> 1%,  50% -> 10%,  75% -> 36%,  100% -> 90% turn speed.
+     */
+    private static final double TURN_POWER = 3.0;
+    private static final double TURN_MAX = 0.9;
+    /** Right-stick wobble near center ignored (no jump at its edge). */
+    private static final double TURN_DEADBAND = 0.05;
+
+    // ======================= DRIVE FEEL =======================
+    /**
+     * Drive output = DRIVE_EXPO * t^3 + (1 - DRIVE_EXPO) * t, on how far the left stick is pushed (any direction,
+     * so diagonals keep their direction). 0 = straight line, 1 = pure cubic. Full stick is still full speed.
+     * With 0.4:  25% stick -> 13%,  50% -> 33%,  75% -> 60%,  100% -> 100%.
+     */
+    private static final double DRIVE_EXPO = 0.4;
+    private static final double DRIVE_DEADBAND = 0.05;
+
     // ======================= INTAKE / TRANSFER / LAUNCHER =======================
     /** Signs from FullLaunch: intake + = in; transfer - = up into the launcher (FullLaunch needed X for this). */
     private static final double INTAKE_POWER = 1.0;
@@ -243,8 +263,10 @@ public class BioBuzzTeleOp extends LinearOpMode {
             bulk.update(); // FIRST: one fresh read of every hub's encoders / velocities this loop
 
             double scale = gamepad1.right_bumper ? SLOW_MODE_SCALE : 1.0;
-            follower.manual(-gamepad1.left_stick_y * scale, -gamepad1.left_stick_x * scale,
-                    -gamepad1.right_stick_x * scale);
+            double fwd = -gamepad1.left_stick_y, strafe = -gamepad1.left_stick_x;
+            double gain = driveGain(Math.hypot(fwd, strafe));
+            follower.manual(fwd * gain * scale, strafe * gain * scale,
+                    turnCurve(-gamepad1.right_stick_x) * scale);
 
             Pose pose = updatePose();
             updateVision(pose);
@@ -409,6 +431,27 @@ public class BioBuzzTeleOp extends LinearOpMode {
         forcePending = true;
         forceFrames.clear();
         forceStatus = "waiting for tags...";
+    }
+
+    // ======================= TURN FEEL =======================
+    /** -1..1 stick -> -TURN_MAX..TURN_MAX: deadband removed smoothly, then stick^TURN_POWER (sign kept). */
+    private static double turnCurve(double stick) {
+        double a = Math.abs(stick);
+        if (a < TURN_DEADBAND) return 0;
+        double t = Math.min(1.0, (a - TURN_DEADBAND) / (1.0 - TURN_DEADBAND));
+        return Math.signum(stick) * TURN_MAX * Math.pow(t, TURN_POWER);
+    }
+
+    /**
+     * Multiplier for the left stick: curved speed / raw stick distance, so the stick's direction is kept and only its
+     * size is curved. 0 inside the deadband.
+     */
+    private static double driveGain(double stickMag) {
+        double m = Math.min(1.0, stickMag);
+        if (m < DRIVE_DEADBAND) return 0;
+        double t = (m - DRIVE_DEADBAND) / (1.0 - DRIVE_DEADBAND);
+        double out = DRIVE_EXPO * t * t * t + (1.0 - DRIVE_EXPO) * t;
+        return out / m;
     }
 
     // ======================= KALMAN =======================
@@ -663,6 +706,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         follower.setPose(new Pose(current.x() + dx, current.y() + dy,
                 HiveTagGeometry.normalizeAngle(current.heading() + dHeading)));
         lastPredictPose = follower.pose(); // a correction is not driving: don't grow the Kalman uncertainty for it
+        turret.notePoseShift(dx, dy, dHeading); // ...and not robot velocity / spin for the turret's feedforward
         for (double[] p : poseHistory) { // keep the history in the same frame as the corrected pose
             p[1] += dx;
             p[2] += dy;
@@ -711,6 +755,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
         telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", cur, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
         if (!Double.isNaN(targetDeg)) {
             telemetry.addData("Turret target", "%.1f°  error %+.1f°", targetDeg, targetDeg - cur);
+            telemetry.addData("Turret tracking", "robot %.0f in/s, turn %.0f°/s -> aim moving %+.0f°/s",
+                    turret.robotSpeedInPerSec(), turret.robotOmegaDeg(), turret.targetRateDeg());
         }
     }
 

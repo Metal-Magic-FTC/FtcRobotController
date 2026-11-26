@@ -31,7 +31,23 @@ public class TurretController {
      */
     public static double MAX_POWER_SLEW_PER_SEC = 3.0;
 
+    // ======================= ROBOT MOTION (aimAt) =======================
+    /**
+     * aimAt measures the robot's field velocity from the poses it is given and works out how fast the target's
+     * direction is sweeping around the turret (driving past it AND turning). That rate is fed forward through KV,
+     * and the aim leads by LEAD_SEC to cover loop + motor delay. 0 = no lead.
+     */
+    public static double LEAD_SEC = 0.05;
+    /** Velocity readings above this are pose jumps, not driving (in/s). */
+    public static final double MAX_ROBOT_SPEED_IN_S = 90.0;
+    /** Low-pass on the measured velocity: 1 = raw, smaller = smoother but slower to react. */
+    public static final double VELOCITY_FILTER = 0.35;
+
     private final DcMotorEx motor;
+    private double prevTx, prevTy, prevAimTime;
+    private boolean hasPrevAim = false;
+    private double robotVx = 0, robotVy = 0;   // turret point's field velocity, in/s (filtered)
+    private double targetRateDeg = 0;          // how fast the aim angle is changing, deg/s (robot-relative)
     private final ElapsedTime clock = new ElapsedTime();
     private double prevHeading, prevTime;
     private boolean hasPrevHeading = false;
@@ -70,22 +86,82 @@ public class TurretController {
         hasPrevHeading = true;
     }
 
-    /** Forget the turn rate (call after the odometry pose is jumped / reset). */
+    /** Forget the turn rate and velocity (call after the odometry pose is jumped / reset). */
     public void resetHeadingTracking() {
         hasPrevHeading = false;
         robotOmegaDeg = 0;
+        hasPrevAim = false;
+        robotVx = robotVy = 0;
+        targetRateDeg = 0;
     }
 
     /**
-     * Drives the turret toward the field point (targetX, targetY) given the robot pose (inches, radians).
+     * The pose was CORRECTED (e.g. by vision) by dx, dy, dHeading, not driven: shift the motion references by the
+     * same amount so the correction is not mistaken for the robot moving or spinning.
+     */
+    public void notePoseShift(double dx, double dy, double dHeadingRad) {
+        if (hasPrevAim) {
+            prevTx += dx;
+            prevTy += dy;
+        }
+        if (hasPrevHeading) prevHeading += dHeadingRad;
+    }
+
+    /**
+     * Drives the turret toward the field point (targetX, targetY) given the robot pose (inches, radians), allowing
+     * for the robot's current velocity and turn rate.
      *
      * @return the turret angle it is driving to (continuous degrees)
      */
     public double aimAt(double robotX, double robotY, double headingRad, double targetX, double targetY) {
+        double h = headingRad;
+        double tx = robotX + TurretConstants.TURRET_FORWARD_IN * Math.cos(h) - TurretConstants.TURRET_LEFT_IN * Math.sin(h);
+        double ty = robotY + TurretConstants.TURRET_FORWARD_IN * Math.sin(h) + TurretConstants.TURRET_LEFT_IN * Math.cos(h);
+        updateVelocity(tx, ty);
+
+        // Direction to the target from the turret: phi = atan2(Dy, Dx). Driving changes it by
+        // dphi/dt = (Dy * vx - Dx * vy) / r^2; turning the robot changes the ROBOT-RELATIVE angle by -omega.
+        double dx = targetX - tx, dy = targetY - ty;
+        double r2 = Math.max(dx * dx + dy * dy, 36.0); // closer than 6 in: don't let the rate blow up
+        double bearingRateDeg = Math.toDegrees((dy * robotVx - dx * robotVy) / r2);
+        targetRateDeg = bearingRateDeg - robotOmegaDeg;
+
         double current = angleDeg();
-        double target = chooseTarget(desiredDeg(robotX, robotY, headingRad, targetX, targetY), current);
-        setPowerLimited(pdPower(target, current), current);
+        double desired = desiredDeg(robotX, robotY, headingRad, targetX, targetY) + targetRateDeg * LEAD_SEC;
+        double target = chooseTarget(TurretConstants.wrap180(desired), current);
+        setPowerLimited(pdPower(target, current, targetRateDeg), current);
         return target;
+    }
+
+    /** Turret point's field velocity from successive aimAt poses (filtered, jump-proof). */
+    private void updateVelocity(double tx, double ty) {
+        double now = clock.seconds();
+        if (hasPrevAim) {
+            double dt = now - prevAimTime;
+            if (dt > 1e-3 && dt < 0.25) {
+                double vx = (tx - prevTx) / dt, vy = (ty - prevTy) / dt;
+                if (Math.hypot(vx, vy) <= MAX_ROBOT_SPEED_IN_S) {
+                    robotVx += VELOCITY_FILTER * (vx - robotVx);
+                    robotVy += VELOCITY_FILTER * (vy - robotVy);
+                }
+            } else if (dt >= 0.25) { // long gap (e.g. aim was off): start over
+                robotVx = robotVy = 0;
+            }
+        }
+        prevTx = tx;
+        prevTy = ty;
+        prevAimTime = now;
+        hasPrevAim = true;
+    }
+
+    /** Robot (turret point) speed measured by aimAt, in/s. */
+    public double robotSpeedInPerSec() {
+        return Math.hypot(robotVx, robotVy);
+    }
+
+    /** How fast the aim angle is changing because of robot motion, deg/s (what the feedforward is covering). */
+    public double targetRateDeg() {
+        return targetRateDeg;
     }
 
     /**
@@ -95,7 +171,7 @@ public class TurretController {
     public void driveTo(double targetDeg) {
         double current = angleDeg();
         double target = Range.clip(targetDeg, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
-        setPowerLimited(pdPower(target, current), current);
+        setPowerLimited(pdPower(target, current, -robotOmegaDeg), current);
     }
 
     /** Raw power -1..1 (+ = counter-clockwise). Hard limits and the slew limit still apply. */
@@ -154,13 +230,17 @@ public class TurretController {
         return toMin < toMax ? TurretConstants.MIN_DEG : TurretConstants.MAX_DEG;
     }
 
-    private double pdPower(double targetDeg, double currentDeg) {
+    /**
+     * @param ffRateDeg how fast the turret must turn (robot-relative, deg/s) just to stay on target because the robot
+     *                  is moving / turning. Fed forward through KV, and KD only damps speed BEYOND it (so damping does
+     *                  not fight the tracking motion).
+     */
+    private double pdPower(double targetDeg, double currentDeg, double ffRateDeg) {
         double error = targetDeg - currentDeg;
         double turretVelDeg = TurretConstants.ticksToDeg(motor.getVelocity());
-        // Robot turning CCW at w means the turret must turn CW at w relative to the robot to stay on target.
-        double power = KP * error - KD * turretVelDeg + KV * -robotOmegaDeg;
+        double power = KP * error - KD * (turretVelDeg - ffRateDeg) + KV * ffRateDeg;
         if (Math.abs(error) > TOLERANCE_DEG) power += Math.signum(error) * KS;
-        else if (Math.abs(robotOmegaDeg) < 2.0) power = 0;
+        else if (Math.abs(ffRateDeg) < 2.0) power = 0; // on target and nothing to track: rest
         return Range.clip(power, -MAX_POWER, MAX_POWER);
     }
 
