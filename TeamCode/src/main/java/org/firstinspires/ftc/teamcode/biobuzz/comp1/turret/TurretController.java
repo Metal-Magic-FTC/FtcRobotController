@@ -204,6 +204,17 @@ public class TurretController {
         motor.setPower(0);
     }
 
+    /**
+     * FAILSAFE: "the turret is pointing out the robot FRONT right now" - makes this position 0 deg (resets the
+     * encoder). Use when the angle reading has slipped (belt skip, bumped turret) and the limits / aim are off.
+     */
+    public void rezero() {
+        stop();
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        resetHeadingTracking();
+    }
+
     /** Turret angle (robot-relative, -180..180) that points the turret at the target. */
     public static double desiredDeg(double robotX, double robotY, double h, double targetX, double targetY) {
         double turretX = robotX + TurretConstants.TURRET_FORWARD_IN * Math.cos(h) - TurretConstants.TURRET_LEFT_IN * Math.sin(h);
