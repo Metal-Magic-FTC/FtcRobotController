@@ -59,13 +59,13 @@ public final class HiveTagGeometry {
     /** Limelight pipeline index that is set up for AprilTags (36h11, tag size 82.55 mm, "Full 3D" on). */
     public static final int APRILTAG_PIPELINE = 1;
     /** X: lens distance in front of robot center, inches (behind = negative). */
-    public static final double CAMERA_FORWARD_IN = 3.5;
+    public static final double CAMERA_FORWARD_IN = 3.53;
     /** Y: lens distance to the LEFT of robot center, inches (right = negative). */
     public static final double CAMERA_LEFT_IN = 0.0;
     /** Z: lens height above the tiles, inches. Tilt detection depends directly on this number. */
-    public static final double CAMERA_HEIGHT_IN = 9.0;
+    public static final double CAMERA_HEIGHT_IN = 8.66;
     /** Pitch: 0 = looking level, parallel to the floor. Positive = tilted UP (toward the HIVE tags). */
-    public static final double CAMERA_PITCH_DEG = 20.0;
+    public static final double CAMERA_PITCH_DEG = 30.0;
     /** Yaw: 0 = pointing out the robot front. Positive = turned toward the robot's LEFT (seen from above). */
     public static final double CAMERA_YAW_DEG = 0.0;
     /** Roll: 0 = image level. Positive = camera's RIGHT side lower (looking out through the lens). */

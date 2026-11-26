@@ -6,7 +6,8 @@ import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
 
 /**
- * Auto V5 paths, from the Pedro visualizer file "yeehw.pp (1).json" (5 paths).
+ * Auto V5 paths, from the Pedro visualizer file "yeehw.pp (2).json" (6 paths: path 1, the straight "into FLOWER"
+ * path, then paths 2-5).
  * Headings use the shortest turn between each path's start and end heading.
  */
 public class PathsV5 {
@@ -16,12 +17,16 @@ public class PathsV5 {
     /** Start: far wall, facing the audience (path 1 starts at 270 deg). */
     public static final Pose start = P.of(29.013237173950344, 133.65237908759272, 270);
 
-    // Path 1: start -> far wall FLOWER
-    private final Pose p1Control = P.of(35.58471479286674, 120.107262345086, 0);
-    private final Pose p1End = P.of(46.44228759178749, 127.18567656553711, 89);
+    // Path 1: start -> lined up in front of the far wall FLOWER
+    private final Pose p1Control = P.of(40.517118724559076, 95.93889359814143, 0);
+    private final Pose p1End = P.of(46.28117732777482, 118.34665532118966, 89);
+
+    // Into FLOWER: straight line from path 1's end into the far wall FLOWER, heading 90 the whole way
+    private final Pose flowerStart = P.of(46.28117732777482, 118.34665532118966, 90);
+    private final Pose flowerEnd = P.of(46.25694878055792, 132.02465628887364, 90);
 
     // Path 2: far wall FLOWER -> red wall FLOWER
-    private final Pose p2Start = P.of(46.44228759178749, 127.18567656553711, 90);
+    private final Pose p2Start = P.of(46.25694878055792, 132.02465628887364, 90);
     private final Pose p2Control1 = P.of(21.792584664260925, 104.98035748057424, 0);
     private final Pose p2Control2 = P.of(30.42738765590081, 43.80518360705265, 0);
     private final Pose p2End = P.of(15.41323181299063, 46.64537359200992, 180);
@@ -39,9 +44,14 @@ public class PathsV5 {
     private final Pose p5Control = P.of(42.08944374983573, 69.46583013418234, 0);
     private final Pose p5End = P.of(13.400270105717619, 96.15005452351028, 125);
 
-    /** Start -> far wall FLOWER. */
+    /** Start -> lined up in front of the far wall FLOWER. */
     public Path path1() {
         return Paths.curve(start, p1Control, p1End).linear(start, p1End);
+    }
+
+    /** Straight into the far wall FLOWER (run it slower - see AutoV5.INTO_FLOWER_SPEED). */
+    public Path intoFlower() {
+        return Paths.line(flowerStart, flowerEnd).constant(flowerEnd);
     }
 
     /** Far wall FLOWER -> red wall FLOWER. */

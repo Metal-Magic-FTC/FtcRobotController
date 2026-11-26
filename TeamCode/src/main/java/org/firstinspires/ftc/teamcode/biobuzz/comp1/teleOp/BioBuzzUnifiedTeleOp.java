@@ -105,6 +105,11 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             Pose pose = follower.pose();
             turret.updateHeading(pose.heading());
             turret.stop();
+            telemetry.addData("TURRET ENCODER", "%d ticks  (%.1f°)   limits %d .. %d ticks", turret.ticks(), turret.angleDeg(),
+                    Math.round(TurretConstants.HARD_MIN_DEG / 360.0 * TurretConstants.TICKS_PER_TURRET_REV),
+                    Math.round(TurretConstants.HARD_MAX_DEG / 360.0 * TurretConstants.TICKS_PER_TURRET_REV));
+            telemetry.addData("ODO POSE", "x %.1f  y %.1f  heading %.1f°", pose.x(), pose.y(),
+                    Math.toDegrees(pose.heading()));
             telemetry.addLine("Robot on the start spot (29.0, 133.7) facing the audience? Turret facing FRONT?");
             telemetry.addData("Pose", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
             telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", turret.angleDeg(), TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
@@ -175,7 +180,12 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
                 feed = "idle";
             }
 
-            // ---- telemetry ----
+            // ---- telemetry ---- (VERY TOP: raw turret motor encoder)
+            telemetry.addData("TURRET ENCODER", "%d ticks  (%.1f°)   limits %d .. %d ticks", turret.ticks(), turret.angleDeg(),
+                    Math.round(TurretConstants.HARD_MIN_DEG / 360.0 * TurretConstants.TICKS_PER_TURRET_REV),
+                    Math.round(TurretConstants.HARD_MAX_DEG / 360.0 * TurretConstants.TICKS_PER_TURRET_REV));
+            telemetry.addData("ODO POSE", "x %.1f  y %.1f  heading %.1f°", pose.x(), pose.y(),
+                    Math.toDegrees(pose.heading()));
             telemetry.addData("Transfer speed (dpad up)", fullTransfer ? "FULL" : "slow");
             telemetry.addData("Flower ramp (LB)", gamepad1.left_bumper ? "DOWN" : "up");
             telemetry.addData("Flywheel (Y)", !flywheelOn ? "OFF" : flywheel.isBoosting() ? "BOOST"

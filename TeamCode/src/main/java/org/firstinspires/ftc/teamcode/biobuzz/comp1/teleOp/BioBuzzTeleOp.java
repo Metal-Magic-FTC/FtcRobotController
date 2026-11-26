@@ -777,6 +777,12 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
+        // VERY TOP: raw turret motor encoder
+        telemetry.addData("TURRET ENCODER", "%d ticks  (%.1f°)   limits %d .. %d ticks", turret.ticks(), turret.angleDeg(),
+                Math.round(TurretConstants.HARD_MIN_DEG / 360.0 * TurretConstants.TICKS_PER_TURRET_REV),
+                Math.round(TurretConstants.HARD_MAX_DEG / 360.0 * TurretConstants.TICKS_PER_TURRET_REV));
+        telemetry.addData("ODO POSE", "x %.1f  y %.1f  heading %.1f°", pose.x(), pose.y(),
+                Math.toDegrees(pose.heading()));
         telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1510/1560/1460 | LB ramp | RB slow | dpad up feed speed");
         telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim");
         if (launcherReady && opModeIsActive()) addMechanismTelemetry();

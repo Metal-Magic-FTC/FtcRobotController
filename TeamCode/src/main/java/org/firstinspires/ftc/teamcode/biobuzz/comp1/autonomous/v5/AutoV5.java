@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.v5;
 
+import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
@@ -22,14 +23,14 @@ import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.Hive;
 import org.firstinspires.ftc.teamcode.biobuzz.comp1.vision.HiveTagGeometry.TagObservation;
 
 /**
- * Auto V5 (RED), the full auto: paths from "yeehw.pp (1).json" (PathsV5) with intake, transfer, launcher and turret.
+ * Auto V5 (RED), the full auto: paths from "yeehw.pp (2).json" (PathsV5) with intake, transfer, launcher and turret.
  *
  * The whole time: intake ON, flower ramp DOWN, launcher spinning at the speed for the current distance (same table as
  * the TeleOp), turret aiming at the red HIVE cell on the robot's half of the field (odometry).
  *
  *   1. Ramp down, wait for the red HIVE to tip (Limelight sees a red tag)
  *   2. Shoot the 4 preloads
- *   3. Path 1 -> far wall FLOWER
+ *   3. Path 1 -> lined up in front of the far wall FLOWER, then straight INTO the FLOWER (slower)
  *   4. Intake from the FLOWER
  *   5. Shoot those 4
  *   6. Path 2 -> red wall FLOWER
@@ -60,6 +61,8 @@ public class AutoV5 extends LinearOpMode {
     private static final double FLOWER_INTAKE_SEC = 1.5;
     /** Extra time sitting in the corner after path 4 to finish grabbing balls. */
     private static final double CORNER_INTAKE_SEC = 0.5;
+    /** Speed for the straight drive into the far wall FLOWER, fraction of top speed (1.0 = full). */
+    private static final double INTO_FLOWER_SPEED = 0.4;
     /** Give up on a path after this long so a stuck robot still runs the rest of the auto. */
     private static final double PATH_TIMEOUT_SEC = 6.0;
 
@@ -110,7 +113,7 @@ public class AutoV5 extends LinearOpMode {
 
         // Build the paths during INIT so START is instant
         PathsV5 paths = new PathsV5();
-        Path path1 = paths.path1(), path2 = paths.path2(), path3 = paths.path3(),
+        Path path1 = paths.path1(), intoFlower = paths.intoFlower(), path2 = paths.path2(), path3 = paths.path3(),
                 path4 = paths.path4(), path5 = paths.path5();
 
         // INIT: odometry only (nothing moves). Check the start pose on telemetry.
@@ -136,7 +139,8 @@ public class AutoV5 extends LinearOpMode {
         limelight.stop();
         shoot("2. Shooting preloads");                                   // 2.
 
-        runPath(path1, "3. Path 1 -> far wall FLOWER");                  // 3.
+        runPath(path1, "3. Path 1 -> in front of far wall FLOWER");       // 3.
+        runPath(intoFlower, "3. Into the FLOWER (slow)", INTO_FLOWER_SPEED);
         holdFor(FLOWER_INTAKE_SEC, "4. Intaking from FLOWER");           // 4.
         shoot("5. Shooting FLOWER balls");                               // 5.
 
@@ -209,12 +213,22 @@ public class AutoV5 extends LinearOpMode {
     }
 
     private void runPath(Path path, String status) {
+        runPath(path, status, 1.0);
+    }
+
+    /** speedFraction: 0..1 of top speed for just this path (Foresight's maxPathSpeed), restored afterwards. */
+    private void runPath(Path path, String status, double speedFraction) {
         step = status;
-        follower.follow(path);
-        ElapsedTime timer = new ElapsedTime();
-        while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {
-            updateRobot();
-            telemetry.update();
+        Constants.foresightConfig.maxPathSpeed.set(speedFraction >= 1.0 ? ForesightConfig.Constraint.NONE : speedFraction);
+        try {
+            follower.follow(path);
+            ElapsedTime timer = new ElapsedTime();
+            while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {
+                updateRobot();
+                telemetry.update();
+            }
+        } finally {
+            Constants.foresightConfig.maxPathSpeed.set(ForesightConfig.Constraint.NONE);
         }
     }
 
