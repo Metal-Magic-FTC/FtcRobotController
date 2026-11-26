@@ -31,14 +31,16 @@ public final class TurretConstants {
 
     /** Soft limits in continuous degrees (fill these in from TurretEncoderTest; keep a few degrees of margin). */
     /**
-     * HARD limits: +-200 ticks = +-180 deg. The turret is never powered further out than this (TurretController
-     * cuts power at these and slows down within LIMIT_SLOWDOWN_DEG of them, so it can't coast past).
+     * HARD limits (measured): right -150 ticks = -135 deg, left +250 ticks = +225 deg (0.9 deg per tick).
+     * The turret is never powered further out than this (TurretController cuts power at these and slows down within
+     * LIMIT_SLOWDOWN_DEG of them, so it can't coast past). -135 and +225 are the same direction (back-right), so
+     * every direction except a ~10 deg sliver there (the margins below) is reachable.
      */
-    public static final double HARD_MIN_DEG = -180.0; // -200 ticks (right)
-    public static final double HARD_MAX_DEG = 180.0;  // +200 ticks (left)
+    public static final double HARD_MIN_DEG = -135.0; // -150 ticks (right)
+    public static final double HARD_MAX_DEG = 225.0;  // +250 ticks (left)
     /** Furthest the auto aim will ASK for (5 deg inside the hard limits). */
-    public static final double MIN_DEG = -175.0;
-    public static final double MAX_DEG = 175.0;
+    public static final double MIN_DEG = -130.0;
+    public static final double MAX_DEG = 220.0;
     /** Within this many degrees of a hard limit, power toward that limit is scaled down to 0 at the limit. */
     public static final double LIMIT_SLOWDOWN_DEG = 30.0;
 

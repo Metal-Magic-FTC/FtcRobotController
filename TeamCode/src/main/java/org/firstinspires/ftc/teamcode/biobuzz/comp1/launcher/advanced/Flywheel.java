@@ -34,44 +34,14 @@ public class Flywheel {
     /** Power per flywheel RPM that holds a target without P. FlywheelKvTuner. ~1 / free RPM to start. */
     public static double KV = 0.000168; // measured with FlywheelKvTuner
     /** Extra power per RPM of error. FlywheelKpTuner. */
-    public static double KP = 0.004; // was 0.0015 (tuned 0.00092) - raised hard so a small sag gets a big push.
-                                     // If the wheel hums / wobbles while holding speed, lower toward 0.0025.
+    public static double KP = 0.0012; // was 0.00092 (FlywheelKpTuner) - raised slightly
 
     // ======================= DIP BOOST =======================
     public static boolean BOOST_ENABLED = true;
     /** Go to full power when the wheel falls this far under the target (a ball just went through)... */
-    public static double BOOST_BELOW_FRACTION = 0.015; // was 0.025 - full power on even a small drop
+    public static double BOOST_BELOW_FRACTION = 0.05;
     /** ...and hand back to kS/kV/kP once it is back within this. */
-    public static double BOOST_EXIT_FRACTION = 0.005; // was 0.008 - stays at full power until basically recovered
-
-    // ======================= VOLLEY BOOST =======================
-    /**
-     * Back-to-back balls: the wheel can't get back to target between balls, so balls 2+ leave slower than ball 1.
-     * While shooting, once the first ball has gone (the wheel dipped VOLLEY_DETECT_FRACTION), the target is raised by
-     * VOLLEY_FACTOR so the motor keeps pushing hard between balls. Ball 1 still uses the exact normal speed.
-     * Balls 2+ too SLOW -> raise VOLLEY_FACTOR. Too FAST -> lower it. (Live: gamepad2 dpad right / left in the TeleOps.)
-     */
-    public static double VOLLEY_FACTOR = 1.2;
-    public static double VOLLEY_DETECT_FRACTION = 0.05;
-    private boolean volley = false;
-
-    /**
-     * The target to actually run this loop. feeding = the shoot button is held.
-     * Pass the result to setMotorRPM().
-     */
-    public double volleyTarget(double targetRpm, boolean feeding) {
-        if (!feeding) {
-            volley = false;
-            return targetRpm;
-        }
-        if (!volley && targetRpm > 0 && getRPM() < targetRpm * (1 - VOLLEY_DETECT_FRACTION)) volley = true;
-        return volley ? targetRpm * VOLLEY_FACTOR : targetRpm;
-    }
-
-    /** True once the first ball of this burst has gone (target raised). */
-    public boolean inVolley() {
-        return volley;
-    }
+    public static double BOOST_EXIT_FRACTION = 0.015;
 
     // ======================= HARDWARE =======================
     public static final double ENCODER_CPR = 28.0; // goBILDA / REV bare motor encoder, counts per motor rev

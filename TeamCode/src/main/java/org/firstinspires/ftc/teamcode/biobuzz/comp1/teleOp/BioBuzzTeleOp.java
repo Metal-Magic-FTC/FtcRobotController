@@ -57,7 +57,7 @@ import java.util.List;
  *   LEFT BUMPER     - hold: flower ramp DOWN (otherwise UP the whole match)
  *   DPAD UP         - transfer feed speed: slow (default) <-> full
  *   DPAD DOWN       - FORCE pose update from the Limelight (point it at the HIVE)
- *   B / A / X       - launcher FIXED speed 1450 / 1500 / 1400 (press the same one again = back to auto distance)
+ *   B / A / X       - launcher FIXED speed 1510 / 1560 / 1460 (press the same one again = back to auto distance)
  *   dpad left/right - manual turret while auto aim is off (left = counter-clockwise)
  *
  * gamepad2:
@@ -65,8 +65,14 @@ import java.util.List;
  *   B               - forget the pose and re-localize from the tags
  *   X               - toggle continuous vision correction (on at start)
  *   dpad up / down  - launcher speed trim +/- 2% (all speeds)
- *   dpad right/left - volley boost +/- 0.05 (speed-up for balls 2+ of a burst)
  *   right bumper    - FORCE pose update from the Limelight (same as gamepad1 dpad down)
+ *   dpad left/right - turret aim trim +/- 0.5 deg (left = aim more left, right = aim more right)
+ *   TURRET FAILSAFE:
+ *   left stick X    - MANUAL OVERRIDE while held: turns the turret (left = counter-clockwise), beats auto aim.
+ *                     Limits still apply.
+ *   Y               - turret to 0 (straight out the FRONT) and hold. A = back to auto aim.
+ *   BACK            - "the turret points at the FRONT right now": makes this 0 deg (fixes a slipped encoder),
+ *                     then holds there. Point it at the front first (left stick), then press BACK.
  */
 @TeleOp(name = "BioBuzz TeleOp (Red)", group = "BioBuzz")
 public class BioBuzzTeleOp extends LinearOpMode {
@@ -112,15 +118,17 @@ public class BioBuzzTeleOp extends LinearOpMode {
     // is noisy. Frames further than KALMAN_GATE_SIGMA standard deviations away are rejected as outliers (the SNAP
     // logic above then takes over if they keep agreeing).
     /** Odometry drift: variance added per inch driven (in^2/in) and per radian turned (rad^2/rad), plus per second. */
-    private static final double Q_XY_PER_IN = 0.01;
-    private static final double Q_XY_PER_SEC = 0.002;
-    private static final double Q_H_PER_RAD = Math.pow(Math.toRadians(0.5), 2);
-    private static final double Q_H_PER_SEC = Math.pow(Math.toRadians(0.1), 2);
+    // Raised (was 0.01 / 0.002 / 0.5 deg / 0.1 deg): odometry drifted during the match faster than the filter assumed,
+    // so it barely listened to the Limelight. Now a few seconds of driving makes vision corrections count a lot.
+    private static final double Q_XY_PER_IN = 0.04;
+    private static final double Q_XY_PER_SEC = 0.02;
+    private static final double Q_H_PER_RAD = Math.pow(Math.toRadians(2.0), 2);
+    private static final double Q_H_PER_SEC = Math.pow(Math.toRadians(0.5), 2);
     /** Vision noise: standard deviation of a position fix = base + this much per inch of tag distance. */
     private static final double R_XY_BASE_IN = 1.0;
     private static final double R_XY_PER_IN = 0.02;
     private static final double R_HEADING_RAD = Math.toRadians(2.0);
-    private static final double KALMAN_GATE_SIGMA = 3.0;
+    private static final double KALMAN_GATE_SIGMA = 4.0; // was 3: was throwing away real corrections as outliers
     /** Variances (uncertainty) of the current pose. */
     private double varX = 4, varY = 4, varH = Math.pow(Math.toRadians(3), 2);
     private Pose lastPredictPose = null;
@@ -138,6 +146,13 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private static final double POSE_HISTORY_SEC = 1.0;
 
     private static final double SLOW_MODE_SCALE = 0.4;
+
+    // ======================= TURRET FAILSAFE (gamepad2) =======================
+    /** gamepad2 left stick X beyond this = manual turret override. */
+    private static final double TURRET_OVERRIDE_DEADBAND = 0.15;
+    /** gamepad2 Y / BACK: hold the turret at 0 deg until A turns auto aim back on. */
+    private boolean turretHome = false;
+    private int rezeroCount = 0;
 
     // ======================= TURN FEEL =======================
     /**
@@ -163,9 +178,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
     /** Signs from FullLaunch: intake + = in; transfer - = up into the launcher (FullLaunch needed X for this). */
     private static final double INTAKE_POWER = 1.0;
     /** Feed up into the launcher while shooting. gamepad1 dpad up toggles SLOW (default) / FULL. */
-    private static final double TRANSFER_FEED_SLOW = -0.5;  // default. Slower = more time for the wheel to recover per ball
+    private static final double TRANSFER_FEED_SLOW = -0.7;  // the slower option (gamepad1 dpad up)
     private static final double TRANSFER_FEED_FULL = -1.0;
-    private boolean fullTransfer = false;
+    private boolean fullTransfer = true; // starts at FULL (1.0); gamepad1 dpad up toggles to 0.7
     private double lowestWhileShootingTps = Double.NaN;
     private boolean wasShooting = false;
     private static final double TRANSFER_DOWN_POWER = 0.5;  // down / away from the launcher (the rest of the time)
@@ -185,7 +200,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private boolean rightTriggerWasDown = false;
     /** Fixed launcher speeds on gamepad1 B / A / X (ticks/s). NaN = auto speed from distance. */
     // was 1650 / 1700 / 1600 - shots went too far with the new Flywheel controller
-    private static final double FIXED_B_TPS = 1450, FIXED_A_TPS = 1500, FIXED_X_TPS = 1400;
+    private static final double FIXED_B_TPS = 1510, FIXED_A_TPS = 1560, FIXED_X_TPS = 1460; // +4% (was 1450/1500/1400)
     /** Live speed trim on gamepad2 dpad up/down, applied to EVERY launcher speed (auto and presets). */
     private static final double TRIM_STEP = 0.02;
     private double speedTrim = 1.0;
@@ -231,6 +246,10 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private List<TagObservation> lastTags;
     private HiveTilt lastRedTilt, lastBlueTilt;
     private double lastVisionError = Double.NaN;
+    /** Diagnostics: is the Limelight actually correcting the pose? */
+    private double lastHeadingErrDeg = Double.NaN;
+    private int visionAccepted = 0, visionRejected = 0;
+    private double lastAcceptedTime = Double.NaN;
 
     @Override
     public void runOpMode() {
@@ -276,9 +295,39 @@ public class BioBuzzTeleOp extends LinearOpMode {
             if (gamepad2.xWasPressed()) visionCorrection = !visionCorrection;
             if (gamepad2.bWasPressed()) relocalize();
             if (gamepad1.dpadDownWasPressed() || gamepad2.rightBumperWasPressed()) requestForceUpdate();
+            // Aim trim for a constant left/right miss: dpad LEFT = aim more left, dpad RIGHT = aim more right
+            if (gamepad2.dpadLeftWasPressed()) TurretController.AIM_TRIM_DEG += 0.5;
+            if (gamepad2.dpadRightWasPressed()) TurretController.AIM_TRIM_DEG -= 0.5;
+
+            // ---- TURRET FAILSAFE (gamepad2) ----
+            if (gamepad2.yWasPressed()) {        // go to 0 (front) and hold; A resumes auto aim
+                autoAim = false;
+                turretHome = true;
+            }
+            boolean justRezeroed = false;
+            if (gamepad2.backWasPressed()) {     // "it's pointing at the front NOW": this becomes 0 deg
+                turret.rezero();
+                justRezeroed = true;
+                autoAim = false;
+                turretHome = true;               // hold here (= the new 0) until A
+                rezeroCount++;
+            }
+            if (autoAim || gamepad1.dpad_left || gamepad1.dpad_right) turretHome = false;
+            double gp2Stick = -gamepad2.left_stick_x; // stick left = counter-clockwise (+)
+            boolean override = Math.abs(gp2Stick) > TURRET_OVERRIDE_DEADBAND;
 
             double targetDeg = Double.NaN;
-            if (!autoAim) {
+            if (justRezeroed) {
+                // This loop's bulk-read angle is from BEFORE the reset: don't act on it. Fresh reading next loop.
+                turret.stop();
+            } else if (override) {
+                // Manual override beats everything (auto aim, homing) while the stick is held. Limits still apply.
+                turret.manual(gp2Stick);
+                turretHome = false;
+            } else if (turretHome) {
+                turret.driveTo(0);
+                targetDeg = 0;
+            } else if (!autoAim) {
                 turret.manual((gamepad1.dpad_left ? 1 : 0) - (gamepad1.dpad_right ? 1 : 0));
             } else if (localized) {
                 goal.update(pose.y());
@@ -359,12 +408,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         if (gamepad2.dpadUpWasPressed()) speedTrim += TRIM_STEP;
         if (gamepad2.dpadDownWasPressed()) speedTrim = Math.max(0.5, speedTrim - TRIM_STEP);
         launchTargetTps = speedTrim * (Double.isNaN(fixedTps) ? FlywheelSpeedTable.velocityFor(shotDistanceIn) : fixedTps);
-        if (gamepad2.dpadRightWasPressed()) Flywheel.VOLLEY_FACTOR += 0.05;
-        if (gamepad2.dpadLeftWasPressed()) Flywheel.VOLLEY_FACTOR = Math.max(1.0, Flywheel.VOLLEY_FACTOR - 0.05);
-        // balls 2+ of a burst: target raised by VOLLEY_FACTOR so the wheel keeps up (see Flywheel)
-        double runRpm = launcher.volleyTarget(Flywheel.ticksPerSecToRpm(launchTargetTps),
-                gamepad1.left_trigger > TRIGGER_DOWN);
-        launcher.setMotorRPM(runRpm); // must run every loop
+        launcher.setMotorRPM(Flywheel.ticksPerSecToRpm(launchTargetTps)); // must run every loop
     }
 
     private void addMechanismTelemetry() {
@@ -375,8 +419,6 @@ public class BioBuzzTeleOp extends LinearOpMode {
                 launcher.isBoosting() ? "BOOST" : atSpeed ? "READY" : "spinning up",
                 launchTargetTps, v, Double.isNaN(fixedTps) ? "AUTO from distance" : "FIXED - press again for auto");
         telemetry.addData("Speed trim (gp2 dpad U/D)", "x%.2f", speedTrim);
-        telemetry.addData("Volley boost (gp2 dpad L/R)", "x%.2f%s", Flywheel.VOLLEY_FACTOR,
-                launcher.inVolley() ? "  <<< ACTIVE" : "");
         telemetry.addData("Launcher RPM", "%.0f / %.0f   power %.2f   battery %.1f V", launcher.getRPM(),
                 Flywheel.ticksPerSecToRpm(launchTargetTps), launcher.lastPower(), launcher.batteryVoltage());
         telemetry.addData("Shot distance", Double.isNaN(shotDistanceIn) ? "not localized - using wall speed"
@@ -639,6 +681,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         lastVisionError = Math.hypot(errX, errY);
         double errH = Double.isNaN(visionHeading) ? Double.NaN
                 : HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
+        if (!Double.isNaN(errH)) lastHeadingErrDeg = Math.toDegrees(errH);
 
         // ---- Kalman measurement noise for this frame ----
         double sdXY = R_XY_BASE_IN + R_XY_PER_IN * range;
@@ -651,6 +694,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         boolean hOutlier = !Double.isNaN(errH) && errH * errH > KALMAN_GATE_SIGMA * KALMAN_GATE_SIGMA * (varH + rH);
         boolean big = lastVisionError > SNAP_IN || (!Double.isNaN(errH) && Math.abs(errH) > Math.toRadians(SNAP_DEG));
         if (xyOutlier || hOutlier) {
+            visionRejected++;
             // ...but if several frames in a row agree on the big difference, odometry is the one that's wrong: SNAP
             if (big) {
                 snapFrames.addLast(new double[]{errX, errY, errH});
@@ -688,6 +732,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
         }
         lastKx = kx;
         applyShift(current, kx * errX, ky * errY, dHeading);
+        visionAccepted++;
+        lastAcceptedTime = clock.seconds();
     }
 
     /** True if the stored big-disagreement frames all say roughly the same thing (not random bad frames). */
@@ -731,8 +777,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
-        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1450/1500/1400 | LB ramp | RB slow | dpad up feed speed");
-        telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim | dpad L/R volley");
+        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1510/1560/1460 | LB ramp | RB slow | dpad up feed speed");
+        telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim");
         if (launcherReady && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));
@@ -742,6 +788,11 @@ public class BioBuzzTeleOp extends LinearOpMode {
                 Math.sqrt((varX + varY) / 2), Math.toDegrees(Math.sqrt(varH)),
                 Double.isNaN(lastKx) ? "-" : String.format("xy %.2f / h %s", lastKx,
                         Double.isNaN(lastKh) ? "-" : String.format("%.2f", lastKh)));
+        telemetry.addData("Vision fixes", "%d used, %d rejected, last %s ago, heading err %s",
+                visionAccepted, visionRejected,
+                Double.isNaN(lastAcceptedTime) ? "never" : String.format("%.1f s", clock.seconds() - lastAcceptedTime),
+                Double.isNaN(lastHeadingErrDeg) ? "- (need 2+ tags on a cell)" : String.format("%+.1f°", lastHeadingErrDeg));
+        telemetry.addData("Aim trim (gp2 dpad L/R)", "%+.1f°  (+ = left)", TurretController.AIM_TRIM_DEG);
         telemetry.addData("Vision snaps", "%d  (pose jumped to the Limelight)", snapCount);
         telemetry.addData("Vision correction", visionCorrection
                 ? (Double.isNaN(lastVisionError) ? "on" : String.format("on, last error %.1f in", lastVisionError))
@@ -749,7 +800,11 @@ public class BioBuzzTeleOp extends LinearOpMode {
         addTiltTelemetry(lastRedTilt);
         addTiltTelemetry(lastBlueTilt);
         telemetry.addLine();
-        telemetry.addData("Turret auto aim", autoAim);
+        boolean override = Math.abs(gamepad2.left_stick_x) > TURRET_OVERRIDE_DEADBAND;
+        telemetry.addData("Turret mode", override ? "MANUAL OVERRIDE (gp2 stick)"
+                : turretHome ? "HOLD AT 0 (gp2 A = back to auto aim)"
+                : autoAim ? "auto aim" : "manual (gp1 dpad L/R)");
+        if (rezeroCount > 0) telemetry.addData("Turret re-zeroed (gp2 BACK)", "%d time(s)", rezeroCount);
         telemetry.addData("Aiming at", "%s cell", goal.aimingTop() ? "TOP" : "BOTTOM");
         double cur = turret.angleDeg();
         telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", cur, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
