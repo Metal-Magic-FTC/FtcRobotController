@@ -66,6 +66,7 @@ import java.util.List;
  *   X               - toggle continuous vision correction (on at start)
  *   dpad up / down  - launcher speed trim +/- 2% (all speeds)
  *   right bumper    - FORCE pose update from the Limelight (same as gamepad1 dpad down)
+ *   dpad left/right - turret aim trim +/- 0.5 deg (left = aim more left, right = aim more right)
  *   TURRET FAILSAFE:
  *   left stick X    - MANUAL OVERRIDE while held: turns the turret (left = counter-clockwise), beats auto aim.
  *                     Limits still apply.
@@ -117,15 +118,17 @@ public class BioBuzzTeleOp extends LinearOpMode {
     // is noisy. Frames further than KALMAN_GATE_SIGMA standard deviations away are rejected as outliers (the SNAP
     // logic above then takes over if they keep agreeing).
     /** Odometry drift: variance added per inch driven (in^2/in) and per radian turned (rad^2/rad), plus per second. */
-    private static final double Q_XY_PER_IN = 0.01;
-    private static final double Q_XY_PER_SEC = 0.002;
-    private static final double Q_H_PER_RAD = Math.pow(Math.toRadians(0.5), 2);
-    private static final double Q_H_PER_SEC = Math.pow(Math.toRadians(0.1), 2);
+    // Raised (was 0.01 / 0.002 / 0.5 deg / 0.1 deg): odometry drifted during the match faster than the filter assumed,
+    // so it barely listened to the Limelight. Now a few seconds of driving makes vision corrections count a lot.
+    private static final double Q_XY_PER_IN = 0.04;
+    private static final double Q_XY_PER_SEC = 0.02;
+    private static final double Q_H_PER_RAD = Math.pow(Math.toRadians(2.0), 2);
+    private static final double Q_H_PER_SEC = Math.pow(Math.toRadians(0.5), 2);
     /** Vision noise: standard deviation of a position fix = base + this much per inch of tag distance. */
     private static final double R_XY_BASE_IN = 1.0;
     private static final double R_XY_PER_IN = 0.02;
     private static final double R_HEADING_RAD = Math.toRadians(2.0);
-    private static final double KALMAN_GATE_SIGMA = 3.0;
+    private static final double KALMAN_GATE_SIGMA = 4.0; // was 3: was throwing away real corrections as outliers
     /** Variances (uncertainty) of the current pose. */
     private double varX = 4, varY = 4, varH = Math.pow(Math.toRadians(3), 2);
     private Pose lastPredictPose = null;
@@ -243,6 +246,10 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private List<TagObservation> lastTags;
     private HiveTilt lastRedTilt, lastBlueTilt;
     private double lastVisionError = Double.NaN;
+    /** Diagnostics: is the Limelight actually correcting the pose? */
+    private double lastHeadingErrDeg = Double.NaN;
+    private int visionAccepted = 0, visionRejected = 0;
+    private double lastAcceptedTime = Double.NaN;
 
     @Override
     public void runOpMode() {
@@ -288,6 +295,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
             if (gamepad2.xWasPressed()) visionCorrection = !visionCorrection;
             if (gamepad2.bWasPressed()) relocalize();
             if (gamepad1.dpadDownWasPressed() || gamepad2.rightBumperWasPressed()) requestForceUpdate();
+            // Aim trim for a constant left/right miss: dpad LEFT = aim more left, dpad RIGHT = aim more right
+            if (gamepad2.dpadLeftWasPressed()) TurretController.AIM_TRIM_DEG += 0.5;
+            if (gamepad2.dpadRightWasPressed()) TurretController.AIM_TRIM_DEG -= 0.5;
 
             // ---- TURRET FAILSAFE (gamepad2) ----
             if (gamepad2.yWasPressed()) {        // go to 0 (front) and hold; A resumes auto aim
@@ -671,6 +681,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         lastVisionError = Math.hypot(errX, errY);
         double errH = Double.isNaN(visionHeading) ? Double.NaN
                 : HiveTagGeometry.normalizeAngle(visionHeading - then[3]);
+        if (!Double.isNaN(errH)) lastHeadingErrDeg = Math.toDegrees(errH);
 
         // ---- Kalman measurement noise for this frame ----
         double sdXY = R_XY_BASE_IN + R_XY_PER_IN * range;
@@ -683,6 +694,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         boolean hOutlier = !Double.isNaN(errH) && errH * errH > KALMAN_GATE_SIGMA * KALMAN_GATE_SIGMA * (varH + rH);
         boolean big = lastVisionError > SNAP_IN || (!Double.isNaN(errH) && Math.abs(errH) > Math.toRadians(SNAP_DEG));
         if (xyOutlier || hOutlier) {
+            visionRejected++;
             // ...but if several frames in a row agree on the big difference, odometry is the one that's wrong: SNAP
             if (big) {
                 snapFrames.addLast(new double[]{errX, errY, errH});
@@ -720,6 +732,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
         }
         lastKx = kx;
         applyShift(current, kx * errX, ky * errY, dHeading);
+        visionAccepted++;
+        lastAcceptedTime = clock.seconds();
     }
 
     /** True if the stored big-disagreement frames all say roughly the same thing (not random bad frames). */
@@ -774,6 +788,11 @@ public class BioBuzzTeleOp extends LinearOpMode {
                 Math.sqrt((varX + varY) / 2), Math.toDegrees(Math.sqrt(varH)),
                 Double.isNaN(lastKx) ? "-" : String.format("xy %.2f / h %s", lastKx,
                         Double.isNaN(lastKh) ? "-" : String.format("%.2f", lastKh)));
+        telemetry.addData("Vision fixes", "%d used, %d rejected, last %s ago, heading err %s",
+                visionAccepted, visionRejected,
+                Double.isNaN(lastAcceptedTime) ? "never" : String.format("%.1f s", clock.seconds() - lastAcceptedTime),
+                Double.isNaN(lastHeadingErrDeg) ? "- (need 2+ tags on a cell)" : String.format("%+.1f°", lastHeadingErrDeg));
+        telemetry.addData("Aim trim (gp2 dpad L/R)", "%+.1f°  (+ = left)", TurretController.AIM_TRIM_DEG);
         telemetry.addData("Vision snaps", "%d  (pose jumped to the Limelight)", snapCount);
         telemetry.addData("Vision correction", visionCorrection
                 ? (Double.isNaN(lastVisionError) ? "on" : String.format("on, last error %.1f in", lastVisionError))

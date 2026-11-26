@@ -38,6 +38,11 @@ public class TurretController {
      * and the aim leads by LEAD_SEC to cover loop + motor delay. 0 = no lead.
      */
     public static double LEAD_SEC = 0.05;
+    /**
+     * Aim trim, degrees, added to every auto-aim angle (+ = more to the LEFT / counter-clockwise, - = more RIGHT).
+     * For a constant left/right miss. Live in the TeleOp: gamepad2 dpad right (-0.5) / left (+0.5).
+     */
+    public static double AIM_TRIM_DEG = 0.0;
     /** Velocity readings above this are pose jumps, not driving (in/s). */
     public static final double MAX_ROBOT_SPEED_IN_S = 90.0;
     /** Low-pass on the measured velocity: 1 = raw, smaller = smoother but slower to react. */
@@ -127,7 +132,8 @@ public class TurretController {
         targetRateDeg = bearingRateDeg - robotOmegaDeg;
 
         double current = angleDeg();
-        double desired = desiredDeg(robotX, robotY, headingRad, targetX, targetY) + targetRateDeg * LEAD_SEC;
+        double desired = desiredDeg(robotX, robotY, headingRad, targetX, targetY) + targetRateDeg * LEAD_SEC
+                + AIM_TRIM_DEG;
         double target = chooseTarget(TurretConstants.wrap180(desired), current);
         setPowerLimited(pdPower(target, current, targetRateDeg), current);
         return target;

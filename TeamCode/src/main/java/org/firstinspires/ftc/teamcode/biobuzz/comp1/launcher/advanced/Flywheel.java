@@ -34,7 +34,7 @@ public class Flywheel {
     /** Power per flywheel RPM that holds a target without P. FlywheelKvTuner. ~1 / free RPM to start. */
     public static double KV = 0.000168; // measured with FlywheelKvTuner
     /** Extra power per RPM of error. FlywheelKpTuner. */
-    public static double KP = 0.00092; // measured with FlywheelKpTuner
+    public static double KP = 0.0012; // was 0.00092 (FlywheelKpTuner) - raised slightly
 
     // ======================= DIP BOOST =======================
     public static boolean BOOST_ENABLED = true;
