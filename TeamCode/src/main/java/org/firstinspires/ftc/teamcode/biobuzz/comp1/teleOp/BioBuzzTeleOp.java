@@ -57,7 +57,7 @@ import java.util.List;
  *   LEFT BUMPER     - hold: flower ramp DOWN (otherwise UP the whole match)
  *   DPAD UP         - transfer feed speed: slow (default) <-> full
  *   DPAD DOWN       - FORCE pose update from the Limelight (point it at the HIVE)
- *   B / A / X       - launcher FIXED speed 1450 / 1500 / 1400 (press the same one again = back to auto distance)
+ *   B / A / X       - launcher FIXED speed 1510 / 1560 / 1460 (press the same one again = back to auto distance)
  *   dpad left/right - manual turret while auto aim is off (left = counter-clockwise)
  *
  * gamepad2:
@@ -65,7 +65,6 @@ import java.util.List;
  *   B               - forget the pose and re-localize from the tags
  *   X               - toggle continuous vision correction (on at start)
  *   dpad up / down  - launcher speed trim +/- 2% (all speeds)
- *   dpad right/left - volley boost +/- 0.05 (speed-up for balls 2+ of a burst)
  *   right bumper    - FORCE pose update from the Limelight (same as gamepad1 dpad down)
  */
 @TeleOp(name = "BioBuzz TeleOp (Red)", group = "BioBuzz")
@@ -163,9 +162,9 @@ public class BioBuzzTeleOp extends LinearOpMode {
     /** Signs from FullLaunch: intake + = in; transfer - = up into the launcher (FullLaunch needed X for this). */
     private static final double INTAKE_POWER = 1.0;
     /** Feed up into the launcher while shooting. gamepad1 dpad up toggles SLOW (default) / FULL. */
-    private static final double TRANSFER_FEED_SLOW = -0.5;  // default. Slower = more time for the wheel to recover per ball
+    private static final double TRANSFER_FEED_SLOW = -0.7;  // the slower option (gamepad1 dpad up)
     private static final double TRANSFER_FEED_FULL = -1.0;
-    private boolean fullTransfer = false;
+    private boolean fullTransfer = true; // starts at FULL (1.0); gamepad1 dpad up toggles to 0.7
     private double lowestWhileShootingTps = Double.NaN;
     private boolean wasShooting = false;
     private static final double TRANSFER_DOWN_POWER = 0.5;  // down / away from the launcher (the rest of the time)
@@ -185,7 +184,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private boolean rightTriggerWasDown = false;
     /** Fixed launcher speeds on gamepad1 B / A / X (ticks/s). NaN = auto speed from distance. */
     // was 1650 / 1700 / 1600 - shots went too far with the new Flywheel controller
-    private static final double FIXED_B_TPS = 1450, FIXED_A_TPS = 1500, FIXED_X_TPS = 1400;
+    private static final double FIXED_B_TPS = 1510, FIXED_A_TPS = 1560, FIXED_X_TPS = 1460; // +4% (was 1450/1500/1400)
     /** Live speed trim on gamepad2 dpad up/down, applied to EVERY launcher speed (auto and presets). */
     private static final double TRIM_STEP = 0.02;
     private double speedTrim = 1.0;
@@ -359,12 +358,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
         if (gamepad2.dpadUpWasPressed()) speedTrim += TRIM_STEP;
         if (gamepad2.dpadDownWasPressed()) speedTrim = Math.max(0.5, speedTrim - TRIM_STEP);
         launchTargetTps = speedTrim * (Double.isNaN(fixedTps) ? FlywheelSpeedTable.velocityFor(shotDistanceIn) : fixedTps);
-        if (gamepad2.dpadRightWasPressed()) Flywheel.VOLLEY_FACTOR += 0.05;
-        if (gamepad2.dpadLeftWasPressed()) Flywheel.VOLLEY_FACTOR = Math.max(1.0, Flywheel.VOLLEY_FACTOR - 0.05);
-        // balls 2+ of a burst: target raised by VOLLEY_FACTOR so the wheel keeps up (see Flywheel)
-        double runRpm = launcher.volleyTarget(Flywheel.ticksPerSecToRpm(launchTargetTps),
-                gamepad1.left_trigger > TRIGGER_DOWN);
-        launcher.setMotorRPM(runRpm); // must run every loop
+        launcher.setMotorRPM(Flywheel.ticksPerSecToRpm(launchTargetTps)); // must run every loop
     }
 
     private void addMechanismTelemetry() {
@@ -375,8 +369,6 @@ public class BioBuzzTeleOp extends LinearOpMode {
                 launcher.isBoosting() ? "BOOST" : atSpeed ? "READY" : "spinning up",
                 launchTargetTps, v, Double.isNaN(fixedTps) ? "AUTO from distance" : "FIXED - press again for auto");
         telemetry.addData("Speed trim (gp2 dpad U/D)", "x%.2f", speedTrim);
-        telemetry.addData("Volley boost (gp2 dpad L/R)", "x%.2f%s", Flywheel.VOLLEY_FACTOR,
-                launcher.inVolley() ? "  <<< ACTIVE" : "");
         telemetry.addData("Launcher RPM", "%.0f / %.0f   power %.2f   battery %.1f V", launcher.getRPM(),
                 Flywheel.ticksPerSecToRpm(launchTargetTps), launcher.lastPower(), launcher.batteryVoltage());
         telemetry.addData("Shot distance", Double.isNaN(shotDistanceIn) ? "not localized - using wall speed"
@@ -731,8 +723,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
 
     // ======================= TELEMETRY =======================
     private void addTelemetry(Pose pose, double targetDeg, boolean autoAim) {
-        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1450/1500/1400 | LB ramp | RB slow | dpad up feed speed");
-        telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim | dpad L/R volley");
+        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1510/1560/1460 | LB ramp | RB slow | dpad up feed speed");
+        telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim");
         if (launcherReady && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
         telemetry.addData("Robot", "(%.1f, %.1f) %.1f°", pose.x(), pose.y(), Math.toDegrees(pose.heading()));

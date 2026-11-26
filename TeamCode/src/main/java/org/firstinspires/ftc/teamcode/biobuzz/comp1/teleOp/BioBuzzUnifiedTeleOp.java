@@ -57,13 +57,13 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
     private static final double INTAKE_POWER = 1.0;
     private static final double INTAKE_TRANSFER_POWER = -0.25; // while intaking: hold balls back
     /** Transfer while shooting. gamepad1 dpad up toggles SLOW (default) / FULL. */
-    private static final double SHOOT_TRANSFER_SLOW = 0.5;  // default. Slower = more time for the wheel to recover per ball
+    private static final double SHOOT_TRANSFER_SLOW = 0.7;  // the slower option (gamepad1 dpad up)
     private static final double SHOOT_TRANSFER_FULL = 1.0;
-    private boolean fullTransfer = false;
+    private boolean fullTransfer = true; // starts at FULL (1.0); gamepad1 dpad up toggles to 0.7
     private static final double TRIGGER_PRESSED = 0.3;
 
     // ======================= FLYWHEEL (ticks/s) =======================
-    private static final double DEFAULT_VELOCITY = 1450; // was 1650 - too far with the new Flywheel controller
+    private static final double DEFAULT_VELOCITY = 1510; // +4% (was 1450)
     private static final double VELOCITY_STEP = 50;
     private static final double MAX_VELOCITY = 2600; // 6000 rpm motor, 28 ticks/rev -> ~2800 free speed
 
@@ -151,11 +151,7 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
             if (gamepad2.dpadDownWasPressed()) targetVelocity -= VELOCITY_STEP;
             targetVelocity = Range.clip(targetVelocity, 0, MAX_VELOCITY);
             // target stays in ticks/s (same numbers as before), converted to RPM for Flywheel; runs every loop
-            if (gamepad2.dpadRightWasPressed()) Flywheel.VOLLEY_FACTOR += 0.05;
-            if (gamepad2.dpadLeftWasPressed()) Flywheel.VOLLEY_FACTOR = Math.max(1.0, Flywheel.VOLLEY_FACTOR - 0.05);
-            // balls 2+ of a burst (right trigger held): target raised by VOLLEY_FACTOR so the wheel keeps up
-            if (flywheelOn) flywheel.setMotorRPM(flywheel.volleyTarget(Flywheel.ticksPerSecToRpm(targetVelocity),
-                    gamepad1.right_trigger >= TRIGGER_PRESSED));
+            if (flywheelOn) flywheel.setMotorRPM(Flywheel.ticksPerSecToRpm(targetVelocity));
             else flywheel.stopMotors();
             double velocity = flywheel.getTicksPerSec();
             boolean atSpeed = flywheelOn
@@ -181,8 +177,6 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
 
             // ---- telemetry ----
             telemetry.addData("Transfer speed (dpad up)", fullTransfer ? "FULL" : "slow");
-            telemetry.addData("Volley boost (gp2 dpad L/R)", "x%.2f%s", Flywheel.VOLLEY_FACTOR,
-                    flywheel.inVolley() ? "  <<< ACTIVE" : "");
             telemetry.addData("Flower ramp (LB)", gamepad1.left_bumper ? "DOWN" : "up");
             telemetry.addData("Flywheel (Y)", !flywheelOn ? "OFF" : flywheel.isBoosting() ? "BOOST"
                     : atSpeed ? "READY" : "spinning up");

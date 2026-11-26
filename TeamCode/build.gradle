@@ -62,6 +62,7 @@ android {
                 exclude 'org/firstinspires/ftc/teamcode/messages/**'         // Road Runner log messages
                 exclude 'org/firstinspires/ftc/teamcode/summer26/aarushTests/tests/GuthaAuto*.java' // Pedro 2
                 exclude 'org/firstinspires/ftc/teamcode/biobuzz/comp1/pedroPathing_old/**' // Pedro 2 constants/tuning, replaced by biobuzz/comp1/pedro
+                exclude 'org/firstinspires/ftc/teamcode/biobuzz/comp1/Red2Tip/**' // Nihal's auto: Pedro 2 API + missing imports, doesn't compile yet. Remove this line once fixed.
             }
         }
     }
