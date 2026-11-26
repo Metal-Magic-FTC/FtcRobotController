@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.biobuzz.comp1.Red2Tip;
+package org.firstinspires.ftc.teamcode.biobuzz.comp1.autonomous.aud2tip;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.api.Paths;
@@ -7,7 +7,7 @@ import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
 
 
-public class Red2TipPaths {
+public class RedAud2TipPaths {
 
     private static final PoseFactory poseFactory = PoseFactory.degrees();
 

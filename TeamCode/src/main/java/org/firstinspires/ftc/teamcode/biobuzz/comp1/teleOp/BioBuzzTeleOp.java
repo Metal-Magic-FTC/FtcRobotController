@@ -66,6 +66,12 @@ import java.util.List;
  *   X               - toggle continuous vision correction (on at start)
  *   dpad up / down  - launcher speed trim +/- 2% (all speeds)
  *   right bumper    - FORCE pose update from the Limelight (same as gamepad1 dpad down)
+ *   TURRET FAILSAFE:
+ *   left stick X    - MANUAL OVERRIDE while held: turns the turret (left = counter-clockwise), beats auto aim.
+ *                     Limits still apply.
+ *   Y               - turret to 0 (straight out the FRONT) and hold. A = back to auto aim.
+ *   BACK            - "the turret points at the FRONT right now": makes this 0 deg (fixes a slipped encoder),
+ *                     then holds there. Point it at the front first (left stick), then press BACK.
  */
 @TeleOp(name = "BioBuzz TeleOp (Red)", group = "BioBuzz")
 public class BioBuzzTeleOp extends LinearOpMode {
@@ -137,6 +143,13 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private static final double POSE_HISTORY_SEC = 1.0;
 
     private static final double SLOW_MODE_SCALE = 0.4;
+
+    // ======================= TURRET FAILSAFE (gamepad2) =======================
+    /** gamepad2 left stick X beyond this = manual turret override. */
+    private static final double TURRET_OVERRIDE_DEADBAND = 0.15;
+    /** gamepad2 Y / BACK: hold the turret at 0 deg until A turns auto aim back on. */
+    private boolean turretHome = false;
+    private int rezeroCount = 0;
 
     // ======================= TURN FEEL =======================
     /**
@@ -276,8 +289,35 @@ public class BioBuzzTeleOp extends LinearOpMode {
             if (gamepad2.bWasPressed()) relocalize();
             if (gamepad1.dpadDownWasPressed() || gamepad2.rightBumperWasPressed()) requestForceUpdate();
 
+            // ---- TURRET FAILSAFE (gamepad2) ----
+            if (gamepad2.yWasPressed()) {        // go to 0 (front) and hold; A resumes auto aim
+                autoAim = false;
+                turretHome = true;
+            }
+            boolean justRezeroed = false;
+            if (gamepad2.backWasPressed()) {     // "it's pointing at the front NOW": this becomes 0 deg
+                turret.rezero();
+                justRezeroed = true;
+                autoAim = false;
+                turretHome = true;               // hold here (= the new 0) until A
+                rezeroCount++;
+            }
+            if (autoAim || gamepad1.dpad_left || gamepad1.dpad_right) turretHome = false;
+            double gp2Stick = -gamepad2.left_stick_x; // stick left = counter-clockwise (+)
+            boolean override = Math.abs(gp2Stick) > TURRET_OVERRIDE_DEADBAND;
+
             double targetDeg = Double.NaN;
-            if (!autoAim) {
+            if (justRezeroed) {
+                // This loop's bulk-read angle is from BEFORE the reset: don't act on it. Fresh reading next loop.
+                turret.stop();
+            } else if (override) {
+                // Manual override beats everything (auto aim, homing) while the stick is held. Limits still apply.
+                turret.manual(gp2Stick);
+                turretHome = false;
+            } else if (turretHome) {
+                turret.driveTo(0);
+                targetDeg = 0;
+            } else if (!autoAim) {
                 turret.manual((gamepad1.dpad_left ? 1 : 0) - (gamepad1.dpad_right ? 1 : 0));
             } else if (localized) {
                 goal.update(pose.y());
@@ -741,7 +781,11 @@ public class BioBuzzTeleOp extends LinearOpMode {
         addTiltTelemetry(lastRedTilt);
         addTiltTelemetry(lastBlueTilt);
         telemetry.addLine();
-        telemetry.addData("Turret auto aim", autoAim);
+        boolean override = Math.abs(gamepad2.left_stick_x) > TURRET_OVERRIDE_DEADBAND;
+        telemetry.addData("Turret mode", override ? "MANUAL OVERRIDE (gp2 stick)"
+                : turretHome ? "HOLD AT 0 (gp2 A = back to auto aim)"
+                : autoAim ? "auto aim" : "manual (gp1 dpad L/R)");
+        if (rezeroCount > 0) telemetry.addData("Turret re-zeroed (gp2 BACK)", "%d time(s)", rezeroCount);
         telemetry.addData("Aiming at", "%s cell", goal.aimingTop() ? "TOP" : "BOTTOM");
         double cur = turret.angleDeg();
         telemetry.addData("Turret", "%.1f°  (limits %.0f .. %.0f)", cur, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
