@@ -92,13 +92,39 @@ public class TurretController {
     private double errorSum = 0, lastError = 0;
     private double heldTarget = Double.NaN;
 
+    /**
+     * Set by an Auto (markAutoZero) once it has zeroed the turret. Static, so it survives from the Auto into the
+     * TeleOp (same app, no restart). keepingZero() uses it once, then clears it.
+     */
+    private static boolean autoZeroValid = false;
+
+    /** Zeroes the encoder: the turret must be facing the robot FRONT. */
     public TurretController(HardwareMap hardwareMap) {
+        this(hardwareMap, true);
+    }
+
+    private TurretController(HardwareMap hardwareMap, boolean resetEncoder) {
         motor = hardwareMap.get(DcMotorEx.class, TurretConstants.TURRET_MOTOR_NAME);
         motor.setDirection(TurretConstants.TURRET_REVERSED
                 ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        if (resetEncoder) motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    /**
+     * For a TeleOp: if an Auto just ran (and zeroed the turret facing front), keep ITS zero, so the turret can be
+     * anywhere when the TeleOp is INIT'd. Otherwise zero here like the normal constructor (turret must face FRONT).
+     */
+    public static TurretController keepingZero(HardwareMap hardwareMap) {
+        boolean keep = autoZeroValid;
+        autoZeroValid = false; // one use: a second TeleOp run zeroes normally again
+        return new TurretController(hardwareMap, !keep);
+    }
+
+    /** Call from an Auto right after creating its TurretController. */
+    public static void markAutoZero() {
+        autoZeroValid = true;
     }
 
     /** Continuous turret angle, degrees (0 = robot front, + = counter-clockwise from above). */

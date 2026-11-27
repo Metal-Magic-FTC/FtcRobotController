@@ -98,6 +98,7 @@ public class AutoV5 extends LinearOpMode {
     @Override
     public void runOpMode() {
         turret = new TurretController(hardwareMap); // zeroes the turret encoder: must face FRONT
+        TurretController.markAutoZero();             // TeleOp (keepingZero) keeps this zero
         follower = Constants.create(hardwareMap);
         follower.setPose(PathsV5.start);
         goal = new RedHiveGoal(PathsV5.start.y());
