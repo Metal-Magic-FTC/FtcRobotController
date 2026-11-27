@@ -62,13 +62,17 @@ public class AutoV5 extends LinearOpMode {
     /** Extra time sitting in the corner after path 4 to finish grabbing balls. */
     private static final double CORNER_INTAKE_SEC = 0.5;
     /** Speed for the straight drive into the far wall FLOWER, fraction of top speed (1.0 = full). */
+    /** runPathUntilStalled: "stopped" = moved less than STALL_MOVE_IN for STALL_SEC (checked after STALL_MIN_SEC). */
+    private static final double STALL_MOVE_IN = 0.3;
+    private static final double STALL_SEC = 0.25;
+    private static final double STALL_MIN_SEC = 0.5;
     private static final double INTO_FLOWER_SPEED = 0.4;
     /** Give up on a path after this long so a stuck robot still runs the rest of the auto. */
     private static final double PATH_TIMEOUT_SEC = 6.0;
 
     // ======================= MECHANISMS (same as the TeleOp) =======================
     private static final double INTAKE_POWER = 1.0;          // + = in
-    private static final double TRANSFER_FEED_POWER = -0.7;  // - = up into the launcher
+    private static final double TRANSFER_FEED_POWER = -0.8;  // - = up into the launcher
     private static final double TRANSFER_DOWN_POWER = 0.5;   // down, away from the launcher, when not shooting
     private static final double RAMP_DOWN = 0.140;
     private static final double RAMP_UP = 0.730;   // same as the TeleOp
@@ -141,7 +145,10 @@ public class AutoV5 extends LinearOpMode {
         shoot("2. Shooting preloads");                                   // 2.
 
         runPath(path1, "3. Path 1 -> in front of far wall FLOWER");       // 3.
-        runPath(intoFlower, "3. Into the FLOWER (slow)", INTO_FLOWER_SPEED);
+        // The end of this path is ~2 in INSIDE the FLOWER, so the robot can never reach it. Stop as soon as the robot
+        // stops moving (it's touching the FLOWER) and hold THAT spot - otherwise the follower keeps ramming forward
+        // the whole time it intakes and shoots (the "pow pow pow"), which also drags the battery and launcher down.
+        runPathUntilStalled(intoFlower, "3. Into the FLOWER (slow)", INTO_FLOWER_SPEED);
         holdFor(FLOWER_INTAKE_SEC, "4. Intaking from FLOWER");           // 4.
         shoot("5. Shooting FLOWER balls");                               // 5.
 
@@ -232,6 +239,35 @@ public class AutoV5 extends LinearOpMode {
         } finally {
             Constants.foresightConfig.maxPathSpeed.set(ForesightConfig.Constraint.NONE);
         }
+    }
+
+    /**
+     * Like runPath, but for driving INTO something: ends once the robot has barely moved for STALL_SEC (it's up
+     * against it), then holds where it actually is instead of where the path said, so it stops pushing.
+     */
+    private void runPathUntilStalled(Path path, String status, double speedFraction) {
+        step = status;
+        Constants.foresightConfig.maxPathSpeed.set(speedFraction >= 1.0 ? ForesightConfig.Constraint.NONE : speedFraction);
+        try {
+            follower.follow(path);
+            ElapsedTime timer = new ElapsedTime();
+            ElapsedTime stillTimer = new ElapsedTime();
+            Pose last = follower.pose();
+            while (opModeIsActive() && follower.isBusy() && timer.seconds() < PATH_TIMEOUT_SEC) {
+                updateRobot();
+                telemetry.update();
+                Pose now = follower.pose();
+                if (Math.hypot(now.x() - last.x(), now.y() - last.y()) > STALL_MOVE_IN) {
+                    last = now;
+                    stillTimer.reset();
+                } else if (timer.seconds() > STALL_MIN_SEC && stillTimer.seconds() > STALL_SEC) {
+                    break; // up against the FLOWER
+                }
+            }
+        } finally {
+            Constants.foresightConfig.maxPathSpeed.set(ForesightConfig.Constraint.NONE);
+        }
+        follower.hold(follower.pose()); // hold where it stopped - no pushing
     }
 
     /** Holds the end of the last path (the follower keeps holding) while everything keeps running. */

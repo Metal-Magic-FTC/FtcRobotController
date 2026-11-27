@@ -56,7 +56,7 @@ public class LaunchSpeedPicker extends LinearOpMode {
     private static final double MAX_TPS = 2600;
 
     private static final double INTAKE_POWER = 1.0;
-    private static final double TRANSFER_FEED_POWER = -0.7; // same as the TeleOp default
+    private static final double TRANSFER_FEED_POWER = -0.8; // same as the TeleOp default
     private static final double TRANSFER_DOWN_POWER = 0.5;
     private static final double RAMP_UP = 0.730, RAMP_DOWN = 0.140;
     private static final double TRIGGER_DOWN = 0.5;

@@ -26,7 +26,7 @@ public final class FlywheelSpeedTable {
     public static final double DEFAULT_TPS = 1520;
 
     /** Overall trim on every speed above. 1.0 = table as written; 0.95 = 5% slower. */
-    public static final double SPEED_SCALE = 1.0; // table is now anchored on the measured 1520 wall shot (was 0.95)
+    public static final double SPEED_SCALE = 1.03; // +3% on the table (was 1.0; table anchored on the 1520 wall shot)
 
     /** Speed for this distance, with SPEED_SCALE applied. */
     public static double velocityFor(double distanceIn) {

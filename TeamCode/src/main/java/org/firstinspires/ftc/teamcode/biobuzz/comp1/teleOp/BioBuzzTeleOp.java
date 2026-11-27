@@ -56,8 +56,8 @@ import java.util.List;
  *   Y               - flip intake direction
  *   LEFT BUMPER     - hold: flower ramp DOWN (otherwise UP the whole match)
  *   DPAD UP         - transfer feed speed: slow (default) <-> full
- *   DPAD DOWN       - launcher kP: 0.001 -> 0.0012 -> 0.0015 -> 0.0018 -> back to 0.001
- *   B / A / X       - launcher FIXED speed 1510 / 1560 / 1460 (press the same one again = back to auto distance)
+ *   DPAD DOWN       - launcher kP: 0.001 -> 0.0012 -> 0.0015 -> 0.00162 -> 0.0018 -> back to 0.001
+ *   B / A / X       - launcher FIXED speed 1555 / 1605 / 1505 (press the same one again = back to auto distance)
  *   dpad left/right - manual turret while auto aim is off (left = counter-clockwise)
  *
  * gamepad2:
@@ -132,8 +132,8 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private static final double INTAKE_POWER = 1.0;
     /** Feed up into the launcher while shooting. gamepad1 dpad up toggles SLOW (default) / FULL. */
     private static final double TRANSFER_FEED_SLOW = -0.6;  // the slower option (gamepad1 dpad up), was 0.7
-    private static final double TRANSFER_FEED_FULL = -0.7;  // default (was 0.8)
-    private boolean fullTransfer = true; // starts at 0.7; gamepad1 dpad up toggles to 0.6
+    private static final double TRANSFER_FEED_FULL = -0.8;  // default (was 0.7)
+    private boolean fullTransfer = true; // starts at 0.8; gamepad1 dpad up toggles to 0.6
     private double lowestWhileShootingTps = Double.NaN;
     private boolean wasShooting = false;
     private static final double TRANSFER_DOWN_POWER = 0.5;  // down / away from the launcher (the rest of the time)
@@ -153,14 +153,14 @@ public class BioBuzzTeleOp extends LinearOpMode {
     private boolean rightTriggerWasDown = false;
     /** Fixed launcher speeds on gamepad1 B / A / X (ticks/s). NaN = auto speed from distance. */
     // was 1650 / 1700 / 1600 - shots went too far with the new Flywheel controller
-    private static final double FIXED_B_TPS = 1510, FIXED_A_TPS = 1560, FIXED_X_TPS = 1460; // +4% (was 1450/1500/1400)
+    private static final double FIXED_B_TPS = 1555, FIXED_A_TPS = 1605, FIXED_X_TPS = 1505; // +3% (was 1510/1560/1460)
     /** Live speed trim on gamepad2 dpad up/down, applied to EVERY launcher speed (auto and presets). */
     private static final double TRIM_STEP = 0.02;
     private double speedTrim = 1.0; // table is calibrated on the 1520 wall shot now (was 1.03)
     private double fixedTps = Double.NaN;
     /** Launcher kP options, cycled with gamepad1 dpad down (starts at the first). */
-    private static final double[] KP_OPTIONS = {0.001, 0.0012, 0.0015, 0.0018};
-    private int kpIndex = 2; // starts at 0.0015
+    private static final double[] KP_OPTIONS = {0.001, 0.0012, 0.0015, 0.00162, 0.0018};
+    private int kpIndex = 3; // starts at 0.00162
 
     private Follower follower;
     private Limelight3A limelight;
@@ -598,7 +598,7 @@ public class BioBuzzTeleOp extends LinearOpMode {
                 Math.round(TurretConstants.HARD_MAX_DEG / 360.0 * TurretConstants.TICKS_PER_TURRET_REV));
         telemetry.addData("ODO POSE", "x %.1f  y %.1f  heading %.1f°", pose.x(), pose.y(),
                 Math.toDegrees(pose.heading()));
-        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1510/1560/1460 | LB ramp | RB slow | dpad up feed speed | dpad down kP");
+        telemetry.addLine("gp1: LT shoot | RT intake | Y intake dir | B/A/X = 1555/1605/1505 | LB ramp | RB slow | dpad up feed speed | dpad down kP");
         telemetry.addLine("gp2: A auto aim | B re-localize | X vision | dpad U/D speed trim");
         if (launcherReady && opModeIsActive()) addMechanismTelemetry();
         telemetry.addData("Localization", localized ? "LOCALIZED" : "SEARCHING: " + lockStatus);
