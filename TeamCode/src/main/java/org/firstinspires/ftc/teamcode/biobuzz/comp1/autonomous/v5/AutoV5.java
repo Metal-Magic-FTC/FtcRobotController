@@ -99,7 +99,7 @@ public class AutoV5 extends LinearOpMode {
 
     // ======================= MECHANISMS (same as the TeleOp) =======================
     private static final double INTAKE_POWER = 1.0;          // + = in
-    private static final double TRANSFER_FEED_POWER = -0.8;  // - = up into the launcher
+    private static final double TRANSFER_FEED_POWER = -0.7;  // - = up into the launcher
     private static final double TRANSFER_DOWN_POWER = 0.5;   // down, away from the launcher, when not shooting
     private static final double RAMP_DOWN = 0.140;
     private static final double RAMP_UP = 0.730;   // same as the TeleOp

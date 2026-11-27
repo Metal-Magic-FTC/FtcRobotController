@@ -22,8 +22,8 @@ public class RedHiveGoal {
      * Bottom (audience) cell, tags 34-37: aim point nudged this far to the RIGHT as seen from the red drivers
      * (toward the audience, -Y). Bigger = further right; negative = left.
      */
-    public static final double BOTTOM_CELL_RIGHT_SHIFT_IN = 2.0;
-    public static final double GOAL_BOTTOM_Y = HALF_LINE_Y - CELL_OFFSET_Y - BOTTOM_CELL_RIGHT_SHIFT_IN; // 54.6
+    public static final double BOTTOM_CELL_RIGHT_SHIFT_IN = 0.0; // was 2.0 - moved back to the cell center
+    public static final double GOAL_BOTTOM_Y = HALF_LINE_Y - CELL_OFFSET_Y - BOTTOM_CELL_RIGHT_SHIFT_IN; // 56.6
     public static final double GOAL_TOP_Y = HALF_LINE_Y + CELL_OFFSET_Y;
     public static final double SWITCH_HYSTERESIS_IN = 3.0;
 

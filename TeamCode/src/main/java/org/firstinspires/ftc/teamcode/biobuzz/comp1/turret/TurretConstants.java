@@ -31,16 +31,23 @@ public final class TurretConstants {
 
     /** Soft limits in continuous degrees (fill these in from TurretEncoderTest; keep a few degrees of margin). */
     /**
-     * HARD limits (measured): right -150 ticks = -135 deg, left +250 ticks = +225 deg (0.9 deg per tick).
-     * The turret is never powered further out than this (TurretController cuts power at these and slows down within
-     * LIMIT_SLOWDOWN_DEG of them, so it can't coast past). -135 and +225 are the same direction (back-right), so
-     * every direction except a ~10 deg sliver there (the margins below) is reachable.
+     * Turret limits the team measured as RAW TICKS in "Turret Encoder Test": right -150 ticks = -135 deg,
+     * left +250 ticks = +225 deg. Raw ticks are exactly what the code reads (angle = ticks / 400 * 360, and left 180 deg
+     * reads 200 ticks), so these are used as-is.
      */
-    public static final double HARD_MIN_DEG = -135.0; // -150 ticks (right)
-    public static final double HARD_MAX_DEG = 225.0;  // +250 ticks (left)
-    /** Furthest the auto aim will ASK for (5 deg inside the hard limits). */
-    public static final double MIN_DEG = -130.0;
-    public static final double MAX_DEG = 220.0;
+    public static final double PHYSICAL_MIN_DEG = -135.0; // -150 ticks (right stop)
+    public static final double PHYSICAL_MAX_DEG = 225.0;  // +250 ticks (left stop)
+    /** Extra margin kept inside those limits (0 = use them exactly). Raise this if it ever touches a stop. */
+    public static final double STOP_MARGIN_DEG = 0.0;
+    /**
+     * Code HARD limits: power is cut here and scaled down within LIMIT_SLOWDOWN_DEG before them, so it can't coast
+     * into the stops.  With no margin: -135 deg = -150 ticks, +225 deg = +250 ticks.
+     */
+    public static final double HARD_MIN_DEG = PHYSICAL_MIN_DEG + STOP_MARGIN_DEG; // -135 (-150 ticks)
+    public static final double HARD_MAX_DEG = PHYSICAL_MAX_DEG - STOP_MARGIN_DEG; // +225 (+250 ticks)
+    /** Furthest the auto aim will ASK for (5 deg inside the code hard limits): -130 .. +220. */
+    public static final double MIN_DEG = HARD_MIN_DEG + 5.0;
+    public static final double MAX_DEG = HARD_MAX_DEG - 5.0;
     /** Within this many degrees of a hard limit, power toward that limit is scaled down to 0 at the limit. */
     public static final double LIMIT_SLOWDOWN_DEG = 30.0;
 

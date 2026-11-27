@@ -32,6 +32,14 @@ public class TurretController {
      * wrap-around swing when it runs out of travel), whose reaction torque jerks the whole drivetrain.
      */
     public static double MAX_POWER_SLEW_PER_SEC = 3.0;
+    /**
+     * Integral: when the turret sits a little off target (friction stops KP + KS from finishing the move), push
+     * harder the longer it stays off, until it gets there. Only within I_ZONE_DEG of the target, reset once on target
+     * or when it crosses over. Power added = KI * (degrees x seconds), capped at I_MAX_POWER. 0 = off.
+     */
+    public static double KI = 0.03;
+    public static double I_ZONE_DEG = 6.0;
+    public static double I_MAX_POWER = 0.12;
 
     // ======================= ROBOT MOTION (aimAt) =======================
     /**
@@ -66,6 +74,8 @@ public class TurretController {
     private double robotOmegaDeg = 0;
     private double lastPower = 0;
     private final ElapsedTime slewClock = new ElapsedTime();
+    private final ElapsedTime iClock = new ElapsedTime();
+    private double errorSum = 0, lastError = 0;
 
     public TurretController(HardwareMap hardwareMap) {
         motor = hardwareMap.get(DcMotorEx.class, TurretConstants.TURRET_MOTOR_NAME);
@@ -263,9 +273,21 @@ public class TurretController {
     private double pdPower(double targetDeg, double currentDeg, double ffRateDeg) {
         double error = targetDeg - currentDeg;
         double turretVelDeg = TurretConstants.ticksToDeg(motor.getVelocity());
-        double power = KP * error - KD * (turretVelDeg - ffRateDeg) + KV * ffRateDeg;
+        double dt = Math.min(iClock.seconds(), 0.1);
+        iClock.reset();
+        // integral: build up only while a little off target; clear once on target or after crossing over
+        if (Math.abs(error) <= TOLERANCE_DEG || Math.abs(error) > I_ZONE_DEG
+                || Math.signum(error) != Math.signum(lastError)) {
+            errorSum = 0;
+        } else {
+            errorSum += error * dt;
+        }
+        lastError = error;
+        double iPower = KI > 0 ? Range.clip(KI * errorSum, -I_MAX_POWER, I_MAX_POWER) : 0;
+
+        double power = KP * error + iPower - KD * (turretVelDeg - ffRateDeg) + KV * ffRateDeg;
         if (Math.abs(error) > TOLERANCE_DEG) power += Math.signum(error) * KS;
-        else if (Math.abs(ffRateDeg) < 2.0) power = 0; // on target and nothing to track: rest
+        else if (Math.abs(ffRateDeg) < 2.0) power = 0; // on target and nothing to track: rest (BRAKE holds it)
         return Range.clip(power, -MAX_POWER, MAX_POWER);
     }
 

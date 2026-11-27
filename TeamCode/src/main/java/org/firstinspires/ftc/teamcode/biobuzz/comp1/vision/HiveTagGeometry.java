@@ -118,7 +118,7 @@ public final class HiveTagGeometry {
             this.label = label;
         }
     }
-
+    
     /** Where a tag ID lives on the field. */
     public static final class TagInfo {
         public final int id;
