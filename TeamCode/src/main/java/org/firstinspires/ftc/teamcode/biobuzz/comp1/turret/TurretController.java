@@ -22,7 +22,9 @@ public class TurretController {
     public static double KD = 0.00090;        // power per deg/s of turret speed (damping)
     public static final double KV = 0.0025;        // power per deg/s of robot rotation (feedforward)
     public static double KS = 0.05567;          // static friction kick
-    public static double TOLERANCE_DEG = 0.75;
+    // 0.5 = always settles on the encoder tick NEAREST the target (1 tick = 0.9 deg, 400 ticks/rev). Going lower
+    // gains nothing (the encoder cannot see it) and makes it hunt between two ticks. Was 0.75.
+    public static double TOLERANCE_DEG = 0.5;
     public static double MAX_POWER = 0.6;
     public static final double MANUAL_POWER = 0.3;
     /**
@@ -38,6 +40,11 @@ public class TurretController {
      * and the aim leads by LEAD_SEC to cover loop + motor delay. 0 = no lead.
      */
     public static double LEAD_SEC = 0.05;
+    /**
+     * false = SIMPLE aiming (how it was on Oct 28): point at the target from the current pose, only the robot's TURN
+     * rate is fed forward, no driving-velocity feedforward and no lead. true = the velocity-tracking version above.
+     */
+    public static boolean TRACK_ROBOT_VELOCITY = false;
     /**
      * Aim trim, degrees, added to every auto-aim angle (+ = more to the LEFT / counter-clockwise, - = more RIGHT).
      * For a constant left/right miss. Live in the TeleOp: gamepad2 dpad right (-0.5) / left (+0.5).
@@ -129,10 +136,11 @@ public class TurretController {
         double dx = targetX - tx, dy = targetY - ty;
         double r2 = Math.max(dx * dx + dy * dy, 36.0); // closer than 6 in: don't let the rate blow up
         double bearingRateDeg = Math.toDegrees((dy * robotVx - dx * robotVy) / r2);
-        targetRateDeg = bearingRateDeg - robotOmegaDeg;
+        targetRateDeg = TRACK_ROBOT_VELOCITY ? bearingRateDeg - robotOmegaDeg : -robotOmegaDeg;
+        double lead = TRACK_ROBOT_VELOCITY ? targetRateDeg * LEAD_SEC : 0;
 
         double current = angleDeg();
-        double desired = desiredDeg(robotX, robotY, headingRad, targetX, targetY) + targetRateDeg * LEAD_SEC
+        double desired = desiredDeg(robotX, robotY, headingRad, targetX, targetY) + lead
                 + AIM_TRIM_DEG;
         double target = chooseTarget(TurretConstants.wrap180(desired), current);
         setPowerLimited(pdPower(target, current, targetRateDeg), current);

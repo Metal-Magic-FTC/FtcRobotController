@@ -68,12 +68,13 @@ public class AutoV5 extends LinearOpMode {
 
     // ======================= MECHANISMS (same as the TeleOp) =======================
     private static final double INTAKE_POWER = 1.0;          // + = in
-    private static final double TRANSFER_FEED_POWER = -1.0;  // - = up into the launcher
+    private static final double TRANSFER_FEED_POWER = -0.8;  // - = up into the launcher (was -1.0)
     private static final double TRANSFER_DOWN_POWER = 0.5;   // down, away from the launcher, when not shooting
     private static final double RAMP_DOWN = 0.140;
+    private static final double RAMP_UP = 0.730;   // same as the TeleOp
     /** Ready to feed when the launcher is within this of its target and the turret within TURRET_READY_DEG. */
     private static final double AT_SPEED_FRACTION = 0.03;
-    private static final double TURRET_READY_DEG = 3.0;
+    private static final double TURRET_READY_DEG = 1.0; // was 3 - wait for a tight aim before feeding
 
     private Follower follower;
     private TurretController turret;
@@ -149,6 +150,7 @@ public class AutoV5 extends LinearOpMode {
         runPath(path3, "8. Path 3 -> shooting spot");                    // 8.
         shoot("9. Shooting");                                            // 9.
 
+        flowerServo.setPosition(RAMP_UP);                                // ramp UP before the corner run
         runPath(path4, "10. Path 4 -> corner (intaking)");               // 10.
         holdFor(CORNER_INTAKE_SEC, "10. Intaking in corner");
         shoot("11. Shooting from corner");                               // 11.

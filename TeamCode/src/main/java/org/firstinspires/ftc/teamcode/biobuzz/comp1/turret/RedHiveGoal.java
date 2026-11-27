@@ -12,10 +12,19 @@ public class RedHiveGoal {
 
     /** Field line that splits "bottom half" from "top half" (the HIVE pivot line). */
     public static final double HALF_LINE_Y = HiveTagGeometry.PIVOT_Y_IN;
-    /** Measured in CAD: bottom cell aim point (57.8, 54.2). The top cell is the same point mirrored over Y = 72. */
-    public static final double GOAL_X = 57.8;
-    public static final double GOAL_BOTTOM_Y = 54.2;
-    public static final double GOAL_TOP_Y = 2 * HALF_LINE_Y - GOAL_BOTTOM_Y; // 89.8
+    /**
+     * Aim at the CENTER of each cell: X = HIVE center line (59.25), Y = 72 -/+ 15.4 (56.6 bottom, 87.4 top).
+     * (Was the CAD point 57.8, 54.2 / 89.8 for a while.)
+     */
+    public static final double GOAL_X = HiveTagGeometry.RED_HIVE_X_IN;
+    public static final double CELL_OFFSET_Y = 15.4;
+    /**
+     * Bottom (audience) cell, tags 34-37: aim point nudged this far to the RIGHT as seen from the red drivers
+     * (toward the audience, -Y). Bigger = further right; negative = left.
+     */
+    public static final double BOTTOM_CELL_RIGHT_SHIFT_IN = 2.0;
+    public static final double GOAL_BOTTOM_Y = HALF_LINE_Y - CELL_OFFSET_Y - BOTTOM_CELL_RIGHT_SHIFT_IN; // 54.6
+    public static final double GOAL_TOP_Y = HALF_LINE_Y + CELL_OFFSET_Y;
     public static final double SWITCH_HYSTERESIS_IN = 3.0;
 
     private boolean aimTop;

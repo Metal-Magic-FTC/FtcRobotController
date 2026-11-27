@@ -14,8 +14,13 @@ public final class FlywheelSpeedTable {
 
     /** Horizontal turret-to-cell distance, inches (must be increasing). */
     public static final double[] DISTANCE_IN = {40, 55, 70, 85, 100, 120};
-    /** Launcher velocity at each distance, ticks/s. 55 in = 1650 is MEASURED, the rest are estimates. */
-    public static final double[] VELOCITY_TPS = {1555, 1650, 1775, 1900, 2020, 2170};
+    /**
+     * Launcher velocity at each distance, ticks/s (BEFORE SPEED_SCALE). Physics: 72 mm hogback wheel, 1:1 belt, ball
+     * leaves at 70 deg, needs to rise ~42 in to the cell, no drag; scaled so 55 in gives the measured wall shot
+     * (1650 * 0.92 = 1518 actually commanded). Ball ends up at ~0.44 x wheel surface speed (single wheel on a hood).
+     * Replace rows with real data points from "Launch Speed Picker (Red)" as they come in.
+     */
+    public static final double[] VELOCITY_TPS = {1521, 1650, 1789, 1925, 2054, 2217};
 
     /** Used before the robot knows where it is (not localized yet): the measured wall shot. */
     public static final double DEFAULT_TPS = 1650;

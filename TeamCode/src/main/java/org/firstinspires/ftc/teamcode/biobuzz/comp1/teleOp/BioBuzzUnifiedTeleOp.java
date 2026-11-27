@@ -57,8 +57,8 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
     private static final double INTAKE_POWER = 1.0;
     private static final double INTAKE_TRANSFER_POWER = -0.25; // while intaking: hold balls back
     /** Transfer while shooting. gamepad1 dpad up toggles SLOW (default) / FULL. */
-    private static final double SHOOT_TRANSFER_SLOW = 0.7;  // the slower option (gamepad1 dpad up)
-    private static final double SHOOT_TRANSFER_FULL = 1.0;
+    private static final double SHOOT_TRANSFER_SLOW = 0.6;  // the slower option (gamepad1 dpad up), was 0.7
+    private static final double SHOOT_TRANSFER_FULL = 0.8;  // default, was 1.0
     private boolean fullTransfer = true; // starts at FULL (1.0); gamepad1 dpad up toggles to 0.7
     private static final double TRIGGER_PRESSED = 0.3;
 
