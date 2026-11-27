@@ -33,6 +33,14 @@ public class TurretController {
      */
     public static double MAX_POWER_SLEW_PER_SEC = 3.0;
     /**
+     * Max DROP in turret power per second (slowing down, stopping, reversing). Before, stops and reversals were
+     * instant, and with BRAKE that slams the turret to a halt from 0.6 power - a shock load that can make the
+     * belt / pinion skip, so the encoder (on the motor) loses track of where the turret really is and gets worse all
+     * match. The encoder test never did this (FLOAT, 0.25 max), which is why it never drifted there.
+     * 5.0 = 0.6 -> 0 in 0.12 s. The hard limits still cut power immediately.
+     */
+    public static double MAX_DECEL_SLEW_PER_SEC = 5.0;
+    /**
      * Integral: when the turret sits a little off target (friction stops KP + KS from finishing the move), push
      * harder the longer it stays off, until it gets there. Only within I_ZONE_DEG of the target, reset once on target
      * or when it crosses over. Power added = KI * (degrees x seconds), capped at I_MAX_POWER. 0 = off.
@@ -40,6 +48,12 @@ public class TurretController {
     public static double KI = 0.03;
     public static double I_ZONE_DEG = 6.0;
     public static double I_MAX_POWER = 0.12;
+    /**
+     * Aim deadband: while the robot is NOT turning, a new aim angle within this of the one the turret is already
+     * holding is ignored. Stops the turret chasing pose noise (each Limelight correction nudges the pose a little,
+     * which made it twitch a tick or two back and forth with the robot sitting still). 1 encoder tick = 0.9 deg.
+     */
+    public static double AIM_DEADBAND_DEG = 1.0;
 
     // ======================= ROBOT MOTION (aimAt) =======================
     /**
@@ -76,6 +90,7 @@ public class TurretController {
     private final ElapsedTime slewClock = new ElapsedTime();
     private final ElapsedTime iClock = new ElapsedTime();
     private double errorSum = 0, lastError = 0;
+    private double heldTarget = Double.NaN;
 
     public TurretController(HardwareMap hardwareMap) {
         motor = hardwareMap.get(DcMotorEx.class, TurretConstants.TURRET_MOTOR_NAME);
@@ -110,6 +125,7 @@ public class TurretController {
 
     /** Forget the turn rate and velocity (call after the odometry pose is jumped / reset). */
     public void resetHeadingTracking() {
+        heldTarget = Double.NaN;
         hasPrevHeading = false;
         robotOmegaDeg = 0;
         hasPrevAim = false;
@@ -153,6 +169,11 @@ public class TurretController {
         double desired = desiredDeg(robotX, robotY, headingRad, targetX, targetY) + lead
                 + AIM_TRIM_DEG;
         double target = chooseTarget(TurretConstants.wrap180(desired), current);
+        if (!Double.isNaN(heldTarget) && Math.abs(targetRateDeg) < 2.0 && Math.abs(target - heldTarget) < AIM_DEADBAND_DEG) {
+            target = heldTarget; // tiny change from pose noise: keep holding
+        } else {
+            heldTarget = target;
+        }
         setPowerLimited(pdPower(target, current, targetRateDeg), current);
         return target;
     }
@@ -193,6 +214,7 @@ public class TurretController {
      * robot-rotation feedforward only acts if updateHeading() is being called.
      */
     public void driveTo(double targetDeg) {
+        heldTarget = Double.NaN;
         double current = angleDeg();
         double target = Range.clip(targetDeg, TurretConstants.MIN_DEG, TurretConstants.MAX_DEG);
         setPowerLimited(pdPower(target, current, -robotOmegaDeg), current);
@@ -220,10 +242,12 @@ public class TurretController {
 
     /** stick: -1..1, positive = counter-clockwise. Soft limits still apply. */
     public void manual(double stick) {
+        heldTarget = Double.NaN;
         setPowerLimited(stick * MANUAL_POWER, angleDeg());
     }
 
     public void stop() {
+        heldTarget = Double.NaN;
         lastPower = 0;
         motor.setPower(0);
     }
@@ -292,21 +316,23 @@ public class TurretController {
     }
 
     private void setPowerLimited(double power, double currentDeg) {
-        // Never push past the HARD limits, and ease off as it gets close so momentum can't carry it over.
+        double dt = Math.min(slewClock.seconds(), 0.1);
+        slewClock.reset();
+        // Speeding up limited by MAX_POWER_SLEW_PER_SEC, slowing down / stopping / reversing by MAX_DECEL_SLEW_PER_SEC
+        // (a reversal ramps down through 0, then up the other way) - no instant slams.
+        boolean speedingUp = Math.abs(power) > Math.abs(lastPower) && Math.signum(power) == Math.signum(lastPower);
+        double maxStep = (speedingUp || lastPower == 0 ? MAX_POWER_SLEW_PER_SEC : MAX_DECEL_SLEW_PER_SEC) * dt;
+        if (lastPower != 0 && power != 0 && Math.signum(power) != Math.signum(lastPower)) {
+            // reversing: first come down to 0 at the decel rate, don't jump straight across
+            power = Math.abs(lastPower) <= maxStep ? 0 : lastPower - Math.signum(lastPower) * maxStep;
+        } else {
+            power = Range.clip(power, lastPower - maxStep, lastPower + maxStep);
+        }
+        // SAFETY LAST: never push past the HARD limits, and ease off as it gets close (this one IS instant).
         double roomLeft = TurretConstants.HARD_MAX_DEG - currentDeg;   // degrees left before the + limit
         double roomRight = currentDeg - TurretConstants.HARD_MIN_DEG;  // degrees left before the - limit
         if (power > 0) power = Math.min(power, MAX_POWER * Range.clip(roomLeft / TurretConstants.LIMIT_SLOWDOWN_DEG, 0, 1));
         if (power < 0) power = Math.max(power, -MAX_POWER * Range.clip(roomRight / TurretConstants.LIMIT_SLOWDOWN_DEG, 0, 1));
-        double dt = Math.min(slewClock.seconds(), 0.1);
-        slewClock.reset();
-        double maxStep = MAX_POWER_SLEW_PER_SEC * dt;
-        // Speeding up is rate-limited; slowing down / stopping takes effect immediately. A reversal drops straight to
-        // 0 and ramps up the other way (never keeps pushing the old way, e.g. into a limit).
-        if (power != 0 && Math.signum(power) != Math.signum(lastPower)) {
-            power = Range.clip(power, -maxStep, maxStep);
-        } else if (Math.abs(power) > Math.abs(lastPower)) {
-            power = Range.clip(power, lastPower - maxStep, lastPower + maxStep);
-        }
         lastPower = power;
         motor.setPower(power);
     }

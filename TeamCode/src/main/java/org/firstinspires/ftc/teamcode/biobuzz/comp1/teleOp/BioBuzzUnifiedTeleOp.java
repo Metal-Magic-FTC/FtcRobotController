@@ -90,7 +90,7 @@ public class BioBuzzUnifiedTeleOp extends LinearOpMode {
         flywheel.init(hardwareMap); // "launchMotor", direction from LauncherConstants
         flywheel.stopMotors();
 
-        TurretController turret = new TurretController(hardwareMap); // zeroes the turret encoder: must face FRONT
+        TurretController turret = TurretController.keepingZero(hardwareMap); // keeps the Auto's zero if the Auto ran
 
         telemetry.addLine("Calibrating Pinpoint - keep the robot STILL");
         telemetry.update();
